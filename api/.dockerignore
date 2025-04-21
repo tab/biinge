@@ -1,0 +1,17 @@
+**/.git
+**/.idea
+/.github
+/api
+/log
+/tmp
+/.dockerignore
+/.editorconfig
+/.gitattributes
+/.gitignore
+.env*
+/Dockerfile
+/codecov.yaml
+/compose.yaml
+/coverage.out
+/README.md
+/LICENSE

@@ -30,7 +30,7 @@ type CreateUserParams struct {
 	EncryptedPassword string
 	FirstName         string
 	LastName          string
-	Appearance        string
+	Appearance        AppearanceType
 }
 
 type CreateUserRow struct {
@@ -39,7 +39,7 @@ type CreateUserRow struct {
 	Email      string
 	FirstName  string
 	LastName   string
-	Appearance string
+	Appearance AppearanceType
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -76,7 +76,7 @@ type FindUserByEmailRow struct {
 	EncryptedPassword string
 	FirstName         string
 	LastName          string
-	Appearance        string
+	Appearance        AppearanceType
 }
 
 func (q *Queries) FindUserByEmail(ctx context.Context, email string) (FindUserByEmailRow, error) {
@@ -106,7 +106,7 @@ type FindUserByIdRow struct {
 	Email      string
 	FirstName  string
 	LastName   string
-	Appearance string
+	Appearance AppearanceType
 }
 
 func (q *Queries) FindUserById(ctx context.Context, id uuid.UUID) (FindUserByIdRow, error) {
@@ -136,7 +136,7 @@ type FindUserByLoginRow struct {
 	EncryptedPassword string
 	FirstName         string
 	LastName          string
-	Appearance        string
+	Appearance        AppearanceType
 }
 
 func (q *Queries) FindUserByLogin(ctx context.Context, login string) (FindUserByLoginRow, error) {
@@ -169,7 +169,7 @@ type UpdateUserParams struct {
 	ID         uuid.UUID
 	FirstName  string
 	LastName   string
-	Appearance string
+	Appearance AppearanceType
 }
 
 type UpdateUserRow struct {
@@ -178,7 +178,7 @@ type UpdateUserRow struct {
 	Email      string
 	FirstName  string
 	LastName   string
-	Appearance string
+	Appearance AppearanceType
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {

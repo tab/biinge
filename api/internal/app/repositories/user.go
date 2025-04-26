@@ -53,7 +53,7 @@ func (u *user) Create(ctx context.Context, params db.CreateUserParams) (*models.
 		Email:      result.Email,
 		FirstName:  result.FirstName,
 		LastName:   result.LastName,
-		Appearance: result.Appearance,
+		Appearance: string(result.Appearance),
 	}, tx.Commit(ctx)
 }
 
@@ -82,7 +82,7 @@ func (u *user) Update(ctx context.Context, params db.UpdateUserParams) (*models.
 		Email:      result.Email,
 		FirstName:  result.FirstName,
 		LastName:   result.LastName,
-		Appearance: result.Appearance,
+		Appearance: string(result.Appearance),
 	}, tx.Commit(ctx)
 }
 
@@ -98,7 +98,7 @@ func (u *user) FindById(ctx context.Context, id uuid.UUID) (*models.User, error)
 		Email:      result.Email,
 		FirstName:  result.FirstName,
 		LastName:   result.LastName,
-		Appearance: result.Appearance,
+		Appearance: string(result.Appearance),
 	}, nil
 }
 
@@ -115,7 +115,7 @@ func (u *user) FindByLogin(ctx context.Context, login string) (*models.User, err
 		EncryptedPassword: result.EncryptedPassword,
 		FirstName:         result.FirstName,
 		LastName:          result.LastName,
-		Appearance:        result.Appearance,
+		Appearance:        string(result.Appearance),
 	}, nil
 }
 
@@ -132,6 +132,6 @@ func (u *user) FindByEmail(ctx context.Context, email string) (*models.User, err
 		EncryptedPassword: result.EncryptedPassword,
 		FirstName:         result.FirstName,
 		LastName:          result.LastName,
-		Appearance:        result.Appearance,
+		Appearance:        string(result.Appearance),
 	}, nil
 }

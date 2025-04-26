@@ -41,7 +41,7 @@ func Test_UserRepository_Create(t *testing.T) {
 				EncryptedPassword: "SECRET",
 				FirstName:         "John",
 				LastName:          "Doe",
-				Appearance:        "dark",
+				Appearance:        models.DarkAppearance,
 			},
 			expected: &models.User{
 				Login:             "john.doe",
@@ -136,7 +136,7 @@ func Test_UserRepository_Update(t *testing.T) {
 		EncryptedPassword: "SECRET",
 		FirstName:         "Jane",
 		LastName:          "Doe",
-		Appearance:        "dark",
+		Appearance:        models.DarkAppearance,
 	})
 	assert.NoError(t, err)
 
@@ -154,7 +154,7 @@ func Test_UserRepository_Update(t *testing.T) {
 				ID:         account.ID,
 				FirstName:  "Jane",
 				LastName:   "Doe",
-				Appearance: "light",
+				Appearance: models.LightAppearance,
 			},
 			expected: &models.User{
 				ID:         account.ID,
@@ -214,10 +214,11 @@ func Test_UserRepository_FindById(t *testing.T) {
 	repository := NewUserRepository(client)
 
 	account, err := repository.Create(ctx, db.CreateUserParams{
-		Login:     "ann.doe",
-		Email:     "ann.doe@local",
-		FirstName: "Ann",
-		LastName:  "Doe",
+		Login:      "ann.doe",
+		Email:      "ann.doe@local",
+		FirstName:  "Ann",
+		LastName:   "Doe",
+		Appearance: models.DarkAppearance,
 	})
 	assert.NoError(t, err)
 
@@ -231,11 +232,12 @@ func Test_UserRepository_FindById(t *testing.T) {
 			name: "Success",
 			id:   account.ID,
 			expected: &models.User{
-				ID:        account.ID,
-				Login:     "ann.doe",
-				Email:     "ann.doe@local",
-				FirstName: "Ann",
-				LastName:  "Doe",
+				ID:         account.ID,
+				Login:      "ann.doe",
+				Email:      "ann.doe@local",
+				FirstName:  "Ann",
+				LastName:   "Doe",
+				Appearance: "dark",
 			},
 			error: false,
 		},
@@ -279,10 +281,11 @@ func Test_UserRepository_FindByLogin(t *testing.T) {
 	repository := NewUserRepository(client)
 
 	account, err := repository.Create(ctx, db.CreateUserParams{
-		Login:     "alice.doe",
-		Email:     "alice.doe@local",
-		FirstName: "Alice",
-		LastName:  "Doe",
+		Login:      "alice.doe",
+		Email:      "alice.doe@local",
+		FirstName:  "Alice",
+		LastName:   "Doe",
+		Appearance: models.LightAppearance,
 	})
 	assert.NoError(t, err)
 
@@ -296,11 +299,12 @@ func Test_UserRepository_FindByLogin(t *testing.T) {
 			name:  "Success",
 			login: account.Login,
 			expected: &models.User{
-				ID:        account.ID,
-				Login:     "alice.doe",
-				Email:     "alice.doe@local",
-				FirstName: "Alice",
-				LastName:  "Doe",
+				ID:         account.ID,
+				Login:      "alice.doe",
+				Email:      "alice.doe@local",
+				FirstName:  "Alice",
+				LastName:   "Doe",
+				Appearance: "light",
 			},
 			error: false,
 		},
@@ -344,10 +348,11 @@ func Test_UserRepository_FindByEmail(t *testing.T) {
 	repository := NewUserRepository(client)
 
 	account, err := repository.Create(ctx, db.CreateUserParams{
-		Login:     "bob.doe",
-		Email:     "bob.doe@local",
-		FirstName: "Bob",
-		LastName:  "Doe",
+		Login:      "bob.doe",
+		Email:      "bob.doe@local",
+		FirstName:  "Bob",
+		LastName:   "Doe",
+		Appearance: models.DefaultAppearance,
 	})
 	assert.NoError(t, err)
 
@@ -361,11 +366,12 @@ func Test_UserRepository_FindByEmail(t *testing.T) {
 			name:  "Success",
 			email: account.Email,
 			expected: &models.User{
-				ID:        account.ID,
-				Login:     "bob.doe",
-				Email:     "bob.doe@local",
-				FirstName: "Bob",
-				LastName:  "Doe",
+				ID:         account.ID,
+				Login:      "bob.doe",
+				Email:      "bob.doe@local",
+				FirstName:  "Bob",
+				LastName:   "Doe",
+				Appearance: "system",
 			},
 			error: false,
 		},

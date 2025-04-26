@@ -26,6 +26,7 @@ func NewAuthenticationController(service services.Authentication, log *logger.Lo
 	}
 }
 
+//nolint:dupl
 func (c *authenticationController) HandleRegistration(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -48,6 +49,7 @@ func (c *authenticationController) HandleRegistration(w http.ResponseWriter, r *
 	_ = json.NewEncoder(w).Encode(response)
 }
 
+//nolint:dupl
 func (c *authenticationController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

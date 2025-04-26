@@ -5,19 +5,128 @@
 package db
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type AppearanceType string
+
+const (
+	AppearanceTypeSystem AppearanceType = "system"
+	AppearanceTypeLight  AppearanceType = "light"
+	AppearanceTypeDark   AppearanceType = "dark"
+)
+
+func (e *AppearanceType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppearanceType(s)
+	case string:
+		*e = AppearanceType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppearanceType: %T", src)
+	}
+	return nil
+}
+
+type NullAppearanceType struct {
+	AppearanceType AppearanceType
+	Valid          bool // Valid is true if AppearanceType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppearanceType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppearanceType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppearanceType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppearanceType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppearanceType), nil
+}
+
+type MovieStatusType string
+
+const (
+	MovieStatusTypeWant    MovieStatusType = "want"
+	MovieStatusTypeWatched MovieStatusType = "watched"
+)
+
+func (e *MovieStatusType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = MovieStatusType(s)
+	case string:
+		*e = MovieStatusType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for MovieStatusType: %T", src)
+	}
+	return nil
+}
+
+type NullMovieStatusType struct {
+	MovieStatusType MovieStatusType
+	Valid           bool // Valid is true if MovieStatusType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullMovieStatusType) Scan(value interface{}) error {
+	if value == nil {
+		ns.MovieStatusType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.MovieStatusType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullMovieStatusType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.MovieStatusType), nil
+}
+
+type Movie struct {
+	TmdbID     int32
+	ImdbID     pgtype.Text
+	Title      string
+	PosterPath pgtype.Text
+	DeletedAt  pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+}
 
 type User struct {
 	ID                uuid.UUID
 	Login             string
 	Email             string
 	EncryptedPassword string
-	Appearance        string
 	FirstName         string
 	LastName          string
+	Appearance        AppearanceType
 	DeletedAt         pgtype.Timestamp
 	CreatedAt         pgtype.Timestamp
 	UpdatedAt         pgtype.Timestamp
+}
+
+type UserMovie struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	TmdbID    int32
+	Status    MovieStatusType
+	Pinned    bool
+	DeletedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
 }

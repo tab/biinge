@@ -38,7 +38,7 @@ func (u *users) Create(ctx context.Context, params *models.User) (*models.User, 
 		EncryptedPassword: params.EncryptedPassword,
 		FirstName:         params.FirstName,
 		LastName:          params.LastName,
-		Appearance:        params.Appearance,
+		Appearance:        db.AppearanceType(params.Appearance),
 	})
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (u *users) Update(ctx context.Context, params *models.User) (*models.User, 
 		ID:         params.ID,
 		FirstName:  params.FirstName,
 		LastName:   params.LastName,
-		Appearance: params.Appearance,
+		Appearance: db.AppearanceType(params.Appearance),
 	})
 	if err != nil {
 		return nil, err

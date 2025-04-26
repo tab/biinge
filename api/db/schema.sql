@@ -24,11 +24,24 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
 --
 
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
 
+
+--
+-- Name: appearance_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.appearance_type AS ENUM (
+    'system',
+    'light',
+    'dark'
+);
+
+
+ALTER TYPE public.appearance_type OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -43,9 +56,9 @@ CREATE TABLE public.users (
     login character varying(20) NOT NULL,
     email character varying(255) NOT NULL,
     encrypted_password character varying(255) NOT NULL,
-    appearance character varying(10) NOT NULL,
     first_name character varying(20) NOT NULL,
     last_name character varying(20) NOT NULL,
+    appearance public.appearance_type DEFAULT 'system'::public.appearance_type NOT NULL,
     deleted_at timestamp without time zone,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL

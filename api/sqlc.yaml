@@ -5,6 +5,7 @@ sql:
     schema: db/schema.sql
     queries:
       - db/sqlc/health.sql
+      - db/sqlc/users.sql
     gen:
       go:
         package: db

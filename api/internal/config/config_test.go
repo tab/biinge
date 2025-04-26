@@ -36,10 +36,12 @@ func Test_LoadConfig(t *testing.T) {
 			args: []string{},
 			env:  map[string]string{},
 			expected: &Config{
-				AppEnv:      "test",
-				AppAddr:     "0.0.0.0:8080",
-				ClientURL:   "http://localhost:3000",
-				DatabaseDSN: "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
+				AppEnv:        "test",
+				AppAddr:       "localhost:8080",
+				ClientURL:     "http://localhost:3000",
+				DatabaseDSN:   "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
+				SecretKeyBase: "SECRET",
+				JWTSecretKey:  "SECRET",
 			},
 		},
 	}
@@ -57,6 +59,8 @@ func Test_LoadConfig(t *testing.T) {
 			assert.Equal(t, tt.expected.AppAddr, result.AppAddr)
 			assert.Equal(t, tt.expected.ClientURL, result.ClientURL)
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
+			assert.Equal(t, tt.expected.SecretKeyBase, result.SecretKeyBase)
+			assert.Equal(t, tt.expected.JWTSecretKey, result.JWTSecretKey)
 
 			t.Cleanup(func() {
 				for key := range tt.env {

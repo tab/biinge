@@ -25,8 +25,17 @@ func Test_NewServer(t *testing.T) {
 	}
 
 	mockLoggerMiddleware := middlewares.NewMockLoggerMiddleware(ctrl)
+	mockAuthenticationMiddleware := middlewares.NewMockAuthenticationMiddleware(ctrl)
 	mockHealthController := controllers.NewMockHealthController(ctrl)
+	mockSessionsController := controllers.NewMockAuthenticationController(ctrl)
+	mockAccountsController := controllers.NewMockAccountsController(ctrl)
 
+	mockAuthenticationMiddleware.EXPECT().
+		Authenticate(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(next http.Handler) http.Handler {
+			return next
+		})
 	mockLoggerMiddleware.EXPECT().
 		Log(gomock.Any()).
 		AnyTimes().
@@ -36,8 +45,11 @@ func Test_NewServer(t *testing.T) {
 
 	appRouter := router.NewRouter(
 		cfg,
+		mockAuthenticationMiddleware,
 		mockLoggerMiddleware,
 		mockHealthController,
+		mockSessionsController,
+		mockAccountsController,
 	)
 
 	srv := NewServer(cfg, appRouter)

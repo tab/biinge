@@ -14,8 +14,11 @@ import (
 
 func NewRouter(
 	cfg *config.Config,
+	authentication middlewares.AuthenticationMiddleware,
 	logger middlewares.LoggerMiddleware,
 	health controllers.HealthController,
+	sessions controllers.AuthenticationController,
+	accounts controllers.AccountsController,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -34,6 +37,22 @@ func NewRouter(
 
 	r.Get("/live", health.HandleLiveness)
 	r.Get("/ready", health.HandleReadiness)
+
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Route("/users", func(r chi.Router) {
+			r.Post("/registrations", sessions.HandleRegistration)
+			r.Post("/sessions", sessions.HandleLogin)
+		})
+
+		r.Group(func(r chi.Router) {
+			r.Use(authentication.Authenticate)
+
+			r.Route("/accounts", func(r chi.Router) {
+				r.Get("/me", accounts.Me)
+				r.Post("/", accounts.HandleUpdate)
+			})
+		})
+	})
 
 	return r
 }

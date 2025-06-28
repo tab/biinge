@@ -281,7 +281,7 @@ func Test_AccountsController_Update(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			req := httptest.NewRequest(http.MethodPost, "/api/accounts", tt.body)
+			req := httptest.NewRequest(http.MethodPatch, "/api/accounts", tt.body)
 			if tt.currentUser != nil {
 				ctx := context.WithValue(req.Context(), middlewares.CurrentUser{}, tt.currentUser)
 				req = req.WithContext(ctx)
@@ -289,7 +289,7 @@ func Test_AccountsController_Update(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			r := chi.NewRouter()
-			r.Post("/api/accounts", controller.HandleUpdate)
+			r.Patch("/api/accounts", controller.HandleUpdate)
 			r.ServeHTTP(w, req)
 
 			resp := w.Result()

@@ -16,6 +16,7 @@ import (
 	"biinge-api/internal/config/router"
 	"biinge-api/internal/config/server"
 	"biinge-api/pkg/jwt"
+	"biinge-api/pkg/tmdb"
 )
 
 var Module = fx.Options(
@@ -30,6 +31,7 @@ var Module = fx.Options(
 	router.Module,
 
 	jwt.Module,
+	tmdb.Module,
 	fx.Invoke(registerHooks),
 )
 

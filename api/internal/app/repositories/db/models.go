@@ -55,54 +55,59 @@ func (ns NullAppearanceType) Value() (driver.Value, error) {
 	return string(ns.AppearanceType), nil
 }
 
-type MovieStatusType string
+type StateTypes string
 
 const (
-	MovieStatusTypeWant    MovieStatusType = "want"
-	MovieStatusTypeWatched MovieStatusType = "watched"
+	StateTypesWant     StateTypes = "want"
+	StateTypesWatching StateTypes = "watching"
+	StateTypesWatched  StateTypes = "watched"
+	StateTypesNone     StateTypes = "none"
 )
 
-func (e *MovieStatusType) Scan(src interface{}) error {
+func (e *StateTypes) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = MovieStatusType(s)
+		*e = StateTypes(s)
 	case string:
-		*e = MovieStatusType(s)
+		*e = StateTypes(s)
 	default:
-		return fmt.Errorf("unsupported scan type for MovieStatusType: %T", src)
+		return fmt.Errorf("unsupported scan type for StateTypes: %T", src)
 	}
 	return nil
 }
 
-type NullMovieStatusType struct {
-	MovieStatusType MovieStatusType
-	Valid           bool // Valid is true if MovieStatusType is not NULL
+type NullStateTypes struct {
+	StateTypes StateTypes
+	Valid      bool // Valid is true if StateTypes is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullMovieStatusType) Scan(value interface{}) error {
+func (ns *NullStateTypes) Scan(value interface{}) error {
 	if value == nil {
-		ns.MovieStatusType, ns.Valid = "", false
+		ns.StateTypes, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.MovieStatusType.Scan(value)
+	return ns.StateTypes.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullMovieStatusType) Value() (driver.Value, error) {
+func (ns NullStateTypes) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.MovieStatusType), nil
+	return string(ns.StateTypes), nil
 }
 
 type Movie struct {
-	TmdbID     int32
-	ImdbID     pgtype.Text
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TmdbID     uint64
 	Title      string
-	PosterPath pgtype.Text
-	DeletedAt  pgtype.Timestamp
+	PosterPath string
+	Runtime    uint64
+	State      StateTypes
+	Pinned     bool
 	CreatedAt  pgtype.Timestamp
 	UpdatedAt  pgtype.Timestamp
 }
@@ -118,15 +123,4 @@ type User struct {
 	DeletedAt         pgtype.Timestamp
 	CreatedAt         pgtype.Timestamp
 	UpdatedAt         pgtype.Timestamp
-}
-
-type UserMovie struct {
-	ID        uuid.UUID
-	UserID    uuid.UUID
-	TmdbID    int32
-	Status    MovieStatusType
-	Pinned    bool
-	DeletedAt pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	UpdatedAt pgtype.Timestamp
 }

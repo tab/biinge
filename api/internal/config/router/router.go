@@ -19,6 +19,8 @@ func NewRouter(
 	health controllers.HealthController,
 	sessions controllers.AuthenticationController,
 	accounts controllers.AccountsController,
+	movies controllers.MoviesController,
+	people controllers.PeopleController,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -49,7 +51,19 @@ func NewRouter(
 
 			r.Route("/accounts", func(r chi.Router) {
 				r.Get("/me", accounts.Me)
-				r.Post("/", accounts.HandleUpdate)
+				r.Patch("/", accounts.HandleUpdate)
+			})
+
+			r.Route("/movies", func(r chi.Router) {
+				r.Get("/", movies.HandleList)
+				r.Get("/{id}", movies.HandleDetails)
+				r.Post("/", movies.HandleCreate)
+				r.Patch("/{id}", movies.HandleUpdate)
+				r.Delete("/{id}", movies.HandleDelete)
+			})
+
+			r.Route("/people", func(r chi.Router) {
+				r.Get("/{id}", people.HandleDetails)
 			})
 		})
 	})

@@ -29,6 +29,8 @@ func Test_NewServer(t *testing.T) {
 	mockHealthController := controllers.NewMockHealthController(ctrl)
 	mockSessionsController := controllers.NewMockAuthenticationController(ctrl)
 	mockAccountsController := controllers.NewMockAccountsController(ctrl)
+	mockMoviesController := controllers.NewMockMoviesController(ctrl)
+	mockPeopleController := controllers.NewMockPeopleController(ctrl)
 
 	mockAuthenticationMiddleware.EXPECT().
 		Authenticate(gomock.Any()).
@@ -50,6 +52,8 @@ func Test_NewServer(t *testing.T) {
 		mockHealthController,
 		mockSessionsController,
 		mockAccountsController,
+		mockMoviesController,
+		mockPeopleController,
 	)
 
 	srv := NewServer(cfg, appRouter)

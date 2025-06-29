@@ -42,6 +42,12 @@ func Test_LoadConfig(t *testing.T) {
 				DatabaseDSN:   "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
 				SecretKeyBase: "SECRET",
 				JWTSecretKey:  "SECRET",
+				TMDBConfig: TMDBConfig{
+					BaseURL:            "https://api.themoviedb.org/3",
+					BaseImageURL:       "https://image.tmdb.org/t/p",
+					APIReadAccessToken: "SECRET",
+					Locale:             "en-US",
+				},
 			},
 		},
 	}
@@ -61,6 +67,11 @@ func Test_LoadConfig(t *testing.T) {
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
 			assert.Equal(t, tt.expected.SecretKeyBase, result.SecretKeyBase)
 			assert.Equal(t, tt.expected.JWTSecretKey, result.JWTSecretKey)
+			assert.Equal(t, tt.expected.TMDBConfig.BaseURL, result.TMDBConfig.BaseURL)
+			assert.Equal(t, tt.expected.TMDBConfig.BaseImageURL, result.TMDBConfig.BaseImageURL)
+			assert.Equal(t, tt.expected.TMDBConfig.APIReadAccessToken, result.TMDBConfig.APIReadAccessToken)
+			assert.Equal(t, tt.expected.TMDBConfig.Locale, result.TMDBConfig.Locale)
+			assert.Equal(t, tt.expected.TMDBConfig.Timeout, result.TMDBConfig.Timeout)
 
 			t.Cleanup(func() {
 				for key := range tt.env {

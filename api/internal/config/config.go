@@ -3,12 +3,22 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
 const DebugLevel = "debug"
 
+type TMDBConfig struct {
+	BaseURL      string
+	BaseImageURL string
+
+	APIReadAccessToken string
+
+	Locale  string
+	Timeout time.Duration
+}
 
 type Config struct {
 	AppEnv        string
@@ -19,6 +29,8 @@ type Config struct {
 	SecretKeyBase string
 	JWTSecretKey  string
 	LogLevel      string
+
+	TMDBConfig
 }
 
 func LoadConfig() *Config {
@@ -45,6 +57,13 @@ func LoadConfig() *Config {
 		SecretKeyBase: getEnvString("SECRET_KEY_BASE"),
 		JWTSecretKey:  getEnvString("JWT_SECRET_KEY"),
 		LogLevel:      getEnvString("LOG_LEVEL"),
+
+		TMDBConfig: TMDBConfig{
+			BaseURL:            getEnvString("TMDB_BASE_URL"),
+			BaseImageURL:       getEnvString("TMDB_BASE_IMAGE_URL"),
+			APIReadAccessToken: getEnvString("TMDB_API_READ_ACCESS_TOKEN"),
+			Locale:             getEnvString("TMDB_LOCALE"),
+		},
 	}
 }
 

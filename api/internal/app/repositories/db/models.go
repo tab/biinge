@@ -3,3 +3,124 @@
 //   sqlc v1.27.0
 
 package db
+
+import (
+	"database/sql/driver"
+	"fmt"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type AppearanceType string
+
+const (
+	AppearanceTypeSystem AppearanceType = "system"
+	AppearanceTypeLight  AppearanceType = "light"
+	AppearanceTypeDark   AppearanceType = "dark"
+)
+
+func (e *AppearanceType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppearanceType(s)
+	case string:
+		*e = AppearanceType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppearanceType: %T", src)
+	}
+	return nil
+}
+
+type NullAppearanceType struct {
+	AppearanceType AppearanceType
+	Valid          bool // Valid is true if AppearanceType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppearanceType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppearanceType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppearanceType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppearanceType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppearanceType), nil
+}
+
+type StateTypes string
+
+const (
+	StateTypesWant     StateTypes = "want"
+	StateTypesWatching StateTypes = "watching"
+	StateTypesWatched  StateTypes = "watched"
+	StateTypesNone     StateTypes = "none"
+)
+
+func (e *StateTypes) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = StateTypes(s)
+	case string:
+		*e = StateTypes(s)
+	default:
+		return fmt.Errorf("unsupported scan type for StateTypes: %T", src)
+	}
+	return nil
+}
+
+type NullStateTypes struct {
+	StateTypes StateTypes
+	Valid      bool // Valid is true if StateTypes is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStateTypes) Scan(value interface{}) error {
+	if value == nil {
+		ns.StateTypes, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.StateTypes.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStateTypes) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.StateTypes), nil
+}
+
+type Movie struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TmdbID     uint64
+	Title      string
+	PosterPath string
+	Runtime    uint64
+	State      StateTypes
+	Pinned     bool
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+}
+
+type User struct {
+	ID                uuid.UUID
+	Login             string
+	Email             string
+	EncryptedPassword string
+	FirstName         string
+	LastName          string
+	Appearance        AppearanceType
+	DeletedAt         pgtype.Timestamp
+	CreatedAt         pgtype.Timestamp
+	UpdatedAt         pgtype.Timestamp
+}

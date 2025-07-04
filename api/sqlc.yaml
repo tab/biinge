@@ -5,6 +5,8 @@ sql:
     schema: db/schema.sql
     queries:
       - db/sqlc/health.sql
+      - db/sqlc/movies.sql
+      - db/sqlc/users.sql
     gen:
       go:
         package: db
@@ -21,3 +23,11 @@ sql:
               type: "UUID"
               pointer: false
             nullable: true
+
+          - column: "movies.tmdb_id"
+            go_type: "uint64"
+          - column: "movies.poster_path"
+            go_type: "string"
+            nullable: true
+          - column: "movies.runtime"
+            go_type: "uint64"

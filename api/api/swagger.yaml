@@ -1,0 +1,864 @@
+openapi: "3.0.0"
+info:
+  title: "Biinge API"
+  version: "1.0.0"
+  description: "Biinge API for movie tracking and user management"
+servers:
+  - url: "http://localhost:8080"
+    description: "Development server"
+
+paths:
+  /live:
+    get:
+      summary: "Liveness check"
+      description: "Checks if the application is alive"
+      tags:
+        - health
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthSerializer"
+
+  /ready:
+    get:
+      summary: "Readiness check"
+      description: "Checks if the application is ready to accept requests"
+      tags:
+        - health
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthSerializer"
+        "503":
+          description: "Service Unavailable"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/users/registrations:
+    post:
+      summary: "Register a new user"
+      description: "Creates a new user account"
+      tags:
+        - users
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationRequest"
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/users/sessions:
+    post:
+      summary: "Login"
+      description: "Authenticates a user and returns access tokens"
+      tags:
+        - users
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/accounts/me:
+    get:
+      summary: "Get current user"
+      description: "Retrieves the current user's information"
+      tags:
+        - accounts
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/accounts:
+    patch:
+      summary: "Update account"
+      description: "Updates the current user's account information"
+      tags:
+        - accounts
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/movies:
+    get:
+      summary: "Movies list"
+      description: "Retrieves a paginated list of movies the user watched or wants to watch"
+      tags:
+        - movies
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+        - name: type
+          in: query
+          schema:
+            type: string
+            default: "want"
+            enum: [want, watched]
+          description: "List type: 'want' for want to watch, 'watched' for watched movies"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: "Page number for pagination"
+        - name: per
+          in: query
+          schema:
+            type: integer
+            default: 24
+          description: "Number of items per page"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieListResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    post:
+      summary: "Create movie"
+      description: "Adds a movie to the user's list"
+      tags:
+        - movies
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMovieRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/movies/{id}:
+    get:
+      summary: "Get movie details"
+      description: "Retrieves details for a specific movie"
+      tags:
+        - movies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Movie ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    patch:
+      summary: "Update movie"
+      description: "Updates a movie status and pinned state"
+      tags:
+        - movies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Movie ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMovieRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    delete:
+      summary: "Delete movie"
+      description: "Deletes a movie from user's lists"
+      tags:
+        - movies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Movie ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: "No Content"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/people/{id}:
+    get:
+      summary: "Get person details"
+      description: "Retrieves details for a specific person"
+      tags:
+        - people
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Person ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                description: "Person details from TMDB"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    HealthSerializer:
+      type: object
+      properties:
+        result:
+          type: string
+          description: "Health check result"
+          example: "alive"
+      required:
+        - result
+
+    ErrorSerializer:
+      type: object
+      properties:
+        error:
+          type: string
+          description: "Error message describing what went wrong"
+      required:
+        - error
+
+    RegistrationRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          description: "User login name"
+          minLength: 3
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          description: "User email address"
+        password:
+          type: string
+          description: "User password"
+          minLength: 8
+        first_name:
+          type: string
+          description: "User's first name"
+          minLength: 2
+          maxLength: 20
+        last_name:
+          type: string
+          description: "User's last name"
+          minLength: 2
+          maxLength: 20
+        appearance:
+          type: string
+          description: "User's preferred appearance theme"
+          enum: [light, dark, system]
+      required:
+        - login
+        - email
+        - password
+        - first_name
+        - last_name
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: "User email address"
+        password:
+          type: string
+          description: "User password"
+          minLength: 8
+      required:
+        - email
+        - password
+
+    UpdateAccountRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: "User's first name"
+          minLength: 2
+          maxLength: 20
+        last_name:
+          type: string
+          description: "User's last name"
+          minLength: 2
+          maxLength: 20
+        appearance:
+          type: string
+          description: "User's preferred appearance theme"
+          enum: [light, dark, system]
+      required:
+        - first_name
+        - last_name
+        - appearance
+
+    CreateMovieRequest:
+      type: object
+      properties:
+        tmdbId:
+          type: integer
+          description: "TMDB ID of the movie"
+          format: int64
+        title:
+          type: string
+          description: "Movie title"
+        posterPath:
+          type: string
+          description: "Path to movie poster image"
+        state:
+          type: string
+          description: "Watch state of the movie"
+          enum: [want, watched]
+      required:
+        - tmdbId
+        - title
+        - posterPath
+        - state
+
+    UpdateMovieRequest:
+      type: object
+      properties:
+        state:
+          type: string
+          description: "Watch state of the movie"
+          enum: [want, watched]
+        pinned:
+          type: boolean
+          description: "Whether the movie is pinned"
+      required:
+        - state
+        - pinned
+
+    UserSerializer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: "User's unique ID"
+        login:
+          type: string
+          description: "User login name"
+        email:
+          type: string
+          format: email
+          description: "User email address"
+        first_name:
+          type: string
+          description: "User's first name"
+        last_name:
+          type: string
+          description: "User's last name"
+        appearance:
+          type: string
+          description: "User's preferred appearance theme"
+          enum: [light, dark, system]
+      required:
+        - id
+        - login
+        - email
+        - appearance
+
+    TokenSerializer:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: "JWT access token"
+        refresh_token:
+          type: string
+          description: "JWT refresh token"
+      required:
+        - access_token
+        - refresh_token
+
+    MovieSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "TMDB ID"
+        movieId:
+          type: string
+          format: uuid
+          description: "Cache ID"
+        tmdbId:
+          type: integer
+          format: int64
+          description: "TMDB ID"
+        imdbId:
+          type: string
+          description: "IMDB ID"
+        title:
+          type: string
+          description: "Movie title"
+        posterPath:
+          type: string
+          description: "Path to movie poster image"
+        pinned:
+          type: boolean
+          description: "Whether the movie is pinned"
+        status:
+          type: string
+          description: "Status of the movie"
+      required:
+        - id
+        - movieId
+        - tmdbId
+        - title
+        - posterPath
+        - pinned
+
+    MovieDetailsSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "TMDB ID"
+        movieId:
+          type: string
+          format: uuid
+          description: "Cache ID"
+        tmdbId:
+          type: integer
+          format: int64
+          description: "TMDB ID"
+        imdbId:
+          type: string
+          description: "IMDB ID"
+        title:
+          type: string
+          description: "Movie title"
+        posterPath:
+          type: string
+          description: "Path to movie poster image"
+        pinned:
+          type: boolean
+          description: "Whether the movie is pinned"
+        state:
+          type: string
+          description: "Watch state (want/watched)"
+          enum: [want, watched]
+        overview:
+          type: string
+          description: "Movie overview/description"
+        status:
+          type: string
+          description: "Movie status (e.g., Released)"
+        releaseDate:
+          type: string
+          format: date
+          description: "Release date of the movie"
+        runtime:
+          type: integer
+          description: "Runtime in minutes"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        credits:
+          type: object
+          description: "Movie credits (cast and crew)"
+        recommendations:
+          type: object
+          description: "Movie recommendations"
+        videos:
+          type: object
+          description: "Movie videos"
+      required:
+        - id
+        - tmdbId
+        - title
+        - pinned
+        - overview
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: "Current page number"
+        per:
+          type: integer
+          description: "Number of items per page"
+        total:
+          type: integer
+          description: "Total number of items"
+      required:
+        - page
+        - per
+        - total
+
+    MovieListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MovieSerializer"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+      required:
+        - data
+        - meta

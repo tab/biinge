@@ -15,16 +15,23 @@ import (
 	"biinge-api/internal/config/middlewares"
 	"biinge-api/internal/config/router"
 	"biinge-api/internal/config/server"
+	"biinge-api/pkg/jwt"
+	"biinge-api/pkg/tmdb"
 )
 
 var Module = fx.Options(
 	logger.Module,
+
 	controllers.Module,
 	repositories.Module,
 	services.Module,
+
 	middlewares.Module,
 	server.Module,
 	router.Module,
+
+	jwt.Module,
+	tmdb.Module,
 	fx.Invoke(registerHooks),
 )
 

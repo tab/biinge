@@ -30,5 +30,6 @@ vendor/
 .vscode
 
 # ENV
+.env.production.local
 .env.development.local
 .env.test.local

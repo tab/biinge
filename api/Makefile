@@ -1,6 +1,7 @@
 DB_USER=postgres
 DB_DEV_NAME=biinge-development
 DB_TEST_NAME=biinge-test
+DB_PROD_NAME=biinge-production
 DB_HOST=localhost
 DB_PORT=5432
 
@@ -17,12 +18,29 @@ ifeq ($(GO_ENV),test)
 	ENV_FILE=.env.test
 	LOCAL_ENV_FILE=.env.test.local
 	DB_NAME=$(DB_TEST_NAME)
-	GOOSE_DBSTRING="host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_USER) dbname=$(DB_TEST_NAME) sslmode=disable"
+	ifeq ($(DATABASE_DSN),)
+		GOOSE_DBSTRING="host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_USER) dbname=$(DB_TEST_NAME) sslmode=disable"
+	else
+		GOOSE_DBSTRING=$(DATABASE_DSN)
+	endif
+else ifeq ($(GO_ENV),production)
+	ENV_FILE=.env.production
+	LOCAL_ENV_FILE=.env.production.local
+	DB_NAME=$(DB_PROD_NAME)
+	ifeq ($(DATABASE_DSN),)
+		GOOSE_DBSTRING="host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_USER) dbname=$(DB_PROD_NAME) sslmode=disable"
+	else
+		GOOSE_DBSTRING=$(DATABASE_DSN)
+	endif
 else
 	ENV_FILE=.env.development
 	LOCAL_ENV_FILE=.env.development.local
 	DB_NAME=$(DB_DEV_NAME)
-	GOOSE_DBSTRING="host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_USER) dbname=$(DB_DEV_NAME) sslmode=disable"
+	ifeq ($(DATABASE_DSN),)
+		GOOSE_DBSTRING="host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_USER) dbname=$(DB_DEV_NAME) sslmode=disable"
+	else
+		GOOSE_DBSTRING=$(DATABASE_DSN)
+	endif
 endif
 
 ifneq (,$(wildcard $(ENV_FILE)))

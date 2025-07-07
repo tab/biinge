@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE EXTENSION "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- +goose Down
 DROP EXTENSION "uuid-ossp";

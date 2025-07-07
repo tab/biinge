@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE movies (
+CREATE TABLE IF NOT EXISTS movies (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   tmdb_id INTEGER NOT NULL,
@@ -12,10 +12,10 @@ CREATE TABLE movies (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX movies_tmdb_id_idx ON movies(tmdb_id);
-CREATE INDEX movies_user_id_state_idx ON movies(user_id, state);
-CREATE INDEX movies_user_id_state_pinned_created_idx ON movies(user_id, state, pinned DESC, created_at DESC);
-CREATE UNIQUE INDEX movies_user_id_tmdb_id_unique ON movies(user_id, tmdb_id);
+CREATE INDEX IF NOT EXISTS movies_tmdb_id_idx ON movies(tmdb_id);
+CREATE INDEX IF NOT EXISTS movies_user_id_state_idx ON movies(user_id, state);
+CREATE INDEX IF NOT EXISTS movies_user_id_state_pinned_created_idx ON movies(user_id, state, pinned DESC, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS movies_user_id_tmdb_id_unique ON movies(user_id, tmdb_id);
 
 -- +goose Down
 DROP INDEX movies_user_id_tmdb_id_unique;

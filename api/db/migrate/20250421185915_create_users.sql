@@ -1,7 +1,5 @@
 -- +goose Up
-CREATE TYPE appearance_type AS ENUM ('system', 'light', 'dark');
-
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   login VARCHAR(20) NOT NULL UNIQUE,
   email VARCHAR(255) NOT NULL UNIQUE,
@@ -15,4 +13,4 @@ CREATE TABLE users (
 );
 
 -- +goose Down
-DROP TABLE users;
+DROP TABLE IF EXISTS users;

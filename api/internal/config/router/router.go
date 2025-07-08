@@ -15,6 +15,7 @@ import (
 func NewRouter(
 	cfg *config.Config,
 	authentication middlewares.AuthenticationMiddleware,
+	tracer middlewares.TraceMiddleware,
 	logger middlewares.LoggerMiddleware,
 	health controllers.HealthController,
 	sessions controllers.AuthenticationController,
@@ -27,6 +28,8 @@ func NewRouter(
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+
+	r.Use(tracer.Trace)
 	r.Use(logger.Log)
 
 	// NOTE: CORS - must be before other middlewares that might write headers

@@ -25,17 +25,23 @@ func NewRouter(
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Recoverer)
 	r.Use(logger.Log)
-	r.Use(middleware.Compress(5))
-	r.Use(middleware.Heartbeat("/health"))
+
+	// NOTE: CORS - must be before other middlewares that might write headers
 	r.Use(
 		cors.Handler(cors.Options{
 			AllowedOrigins: []string{"http://*", cfg.ClientURL},
 			AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 			AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"},
+			ExposedHeaders: []string{"X-Request-ID", "X-Trace-ID"},
 			MaxAge:         300,
 		}),
 	)
+
+	r.Use(middleware.Compress(5))
+	r.Use(middleware.Heartbeat("/health"))
 
 	r.Get("/live", health.HandleLiveness)
 	r.Get("/ready", health.HandleReadiness)

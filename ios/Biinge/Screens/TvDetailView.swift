@@ -17,19 +17,33 @@ struct TvDetailView: View {
         Set(progress?.watchedEpisodes ?? [])
     }
 
+    private var watchedSeasonIds: Set<Int> {
+        Set(progress?.watchedSeasons ?? [])
+    }
+
     var body: some View {
         ZStack(alignment: .topLeading) {
-            ScrollView {
-                if let details {
-                    content(details)
-                } else if isLoading {
-                    ProgressView().tint(Color.biingePrimary)
-                        .frame(maxWidth: .infinity).padding(.top, 160)
-                } else {
-                    DetailLoadError()
+            ScrollViewReader { proxy in
+                ScrollView {
+                    if let details {
+                        content(details)
+                    } else if isLoading {
+                        ProgressView().tint(Color.biingePrimary)
+                            .frame(maxWidth: .infinity).padding(.top, 160)
+                    } else {
+                        DetailLoadError()
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .task(id: details?.id) {
+                    #if DEBUG
+                    guard details != nil,
+                          ProcessInfo.processInfo.environment["DEBUG_SCROLL_SEASONS"] == "1" else { return }
+                    try? await Task.sleep(for: .milliseconds(700))
+                    withAnimation { proxy.scrollTo("seasons", anchor: .top) }
+                    #endif
                 }
             }
-            .scrollIndicators(.hidden)
 
             closeButton
         }
@@ -113,20 +127,18 @@ struct TvDetailView: View {
     }
 
     private func seasonsSection(_ series: SeriesDetails) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Seasons").font(.biingeSubhead).foregroundStyle(Color.biingeGraniteGray).padding(.horizontal, 15)
-            VStack(spacing: 0) {
-                ForEach(series.seasons) { season in
-                    SeasonDisclosureView(
-                        season: season,
-                        showId: seriesId,
-                        watchedEpisodeIds: watchedEpisodeIds,
-                        onToggle: markEpisode
-                    )
-                    Divider().padding(.leading)
-                }
-            }
+            SeasonsView(
+                seasons: series.seasons,
+                showId: seriesId,
+                watchedEpisodeIds: watchedEpisodeIds,
+                watchedSeasonIds: watchedSeasonIds,
+                onMarkEpisode: markEpisode,
+                onMarkSeason: markSeason
+            )
         }
+        .id("seasons")
     }
 
     private func recommendationsSection(_ items: [Recommendation]) -> some View {
@@ -236,6 +248,36 @@ struct TvDetailView: View {
                 updated = try await apiClient.markEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id, body)
             } else {
                 updated = try await apiClient.unmarkEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id)
+            }
+            progress = updated
+            store.invalidate()
+        } catch {
+            // keep the last known progress
+        }
+    }
+
+    private func markSeason(_ season: SeasonSummary, _ episodes: [EpisodeSummary], _ watched: Bool) async {
+        guard let apiClient, let details else { return }
+        let series = ProgressSeries(
+            title: details.title,
+            posterPath: details.posterPath,
+            seasonsCount: details.seasonsCount ?? 0,
+            episodesCount: details.episodesCount ?? 0,
+            status: details.status ?? ""
+        )
+        do {
+            let updated: WatchProgress
+            if watched {
+                let body = MarkSeasonBody(
+                    series: series,
+                    season: ProgressSeasonMeta(title: season.title, number: season.number, episodesCount: season.episodesCount),
+                    episodes: episodes.map {
+                        ProgressEpisode(id: $0.id, title: $0.title, posterPath: $0.posterPath, runtime: $0.runtime, airDate: $0.airDate ?? "")
+                    }
+                )
+                updated = try await apiClient.markSeason(showId: seriesId, seasonId: season.id, body)
+            } else {
+                updated = try await apiClient.unmarkSeason(showId: seriesId, seasonId: season.id)
             }
             progress = updated
             store.invalidate()
@@ -387,53 +429,95 @@ struct TvActionMenu: View {
     }
 }
 
-private struct SeasonDisclosureView: View {
-    let season: SeasonSummary
+/// Horizontal season selector + the selected season's episode list + a
+/// mark-whole-season action, matching the RN app.
+private struct SeasonsView: View {
+    let seasons: [SeasonSummary]
     let showId: Int
     let watchedEpisodeIds: Set<Int>
-    let onToggle: (SeasonSummary, EpisodeSummary, Bool) async -> Void
+    let watchedSeasonIds: Set<Int>
+    let onMarkEpisode: (SeasonSummary, EpisodeSummary, Bool) async -> Void
+    let onMarkSeason: (SeasonSummary, [EpisodeSummary], Bool) async -> Void
 
     @Environment(\.apiClient) private var apiClient
+    @State private var selected: SeasonSummary?
     @State private var episodes: [EpisodeSummary] = []
-    @State private var isExpanded = false
     @State private var isLoading = false
 
     var body: some View {
-        DisclosureGroup(isExpanded: $isExpanded) {
+        VStack(alignment: .leading, spacing: 14) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(seasons) { season in
+                        let isActive = selected?.id == season.id
+                        Button {
+                            select(season)
+                        } label: {
+                            Text(season.title)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(isActive ? .white : Color.biingeGrayDark)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 5)
+                                .background(isActive ? Color(rgb: 0x2B2835) : .clear, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 15)
+            }
+
             if isLoading {
-                ProgressView().tint(Color.biingePrimary).frame(maxWidth: .infinity).padding(.vertical, 8)
+                ProgressView().tint(Color.biingePrimary)
+                    .frame(maxWidth: .infinity).padding(.vertical, 20)
             } else {
                 VStack(spacing: 0) {
-                    ForEach(episodes) { episode in
+                    ForEach(Array(episodes.enumerated()), id: \.element.id) { index, episode in
                         EpisodeRow(
                             showId: showId,
-                            seasonNumber: season.number,
+                            seasonNumber: selected?.number ?? 0,
+                            index: index,
                             episode: episode,
-                            isWatched: watchedEpisodeIds.contains(episode.id)
+                            isWatched: watchedEpisodeIds.contains(episode.id),
+                            showsDivider: index > 0
                         ) { watched in
-                            await onToggle(season, episode, watched)
+                            if let season = selected {
+                                await onMarkEpisode(season, episode, watched)
+                            }
                         }
                     }
                 }
-            }
-        } label: {
-            HStack {
-                Text(season.title).font(.biingeCallout).foregroundStyle(.primary)
-                Spacer()
-                Text("\(season.episodesCount) ep").font(.biingeCaption2).foregroundStyle(.secondary)
+                .padding(.horizontal, 15)
+
+                if let season = selected, !episodes.isEmpty {
+                    let seasonWatched = watchedSeasonIds.contains(season.id)
+                    Button {
+                        Task { await onMarkSeason(season, episodes, !seasonWatched) }
+                    } label: {
+                        Text(seasonWatched ? "Remove Watched" : "Watched")
+                            .font(.biingeCallout).fontWeight(.semibold)
+                            .foregroundStyle(Color.biingeBackground)
+                            .frame(maxWidth: .infinity).padding(.vertical, 15)
+                            .background(Color.biingeText, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 15)
+                    .padding(.top, 4)
+                }
             }
         }
-        .tint(.primary)
-        .padding(.horizontal, 15)
-        .padding(.vertical, 6)
-        .onChange(of: isExpanded) { _, expanded in
-            if expanded && episodes.isEmpty {
-                Task { await loadEpisodes() }
+        .task {
+            if selected == nil, let first = seasons.first {
+                select(first)
             }
         }
     }
 
-    private func loadEpisodes() async {
+    private func select(_ season: SeasonSummary) {
+        selected = season
+        Task { await loadEpisodes(season) }
+    }
+
+    private func loadEpisodes(_ season: SeasonSummary) async {
         guard let apiClient else { return }
         isLoading = true
         episodes = (try? await apiClient.seasonDetails(showId: showId, season: season.number).episodes) ?? []
@@ -444,36 +528,74 @@ private struct SeasonDisclosureView: View {
 private struct EpisodeRow: View {
     let showId: Int
     let seasonNumber: Int
+    let index: Int
     let episode: EpisodeSummary
     let isWatched: Bool
+    let showsDivider: Bool
     let onToggle: (Bool) async -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button {
-                Task { await onToggle(!isWatched) }
-            } label: {
-                Image(systemName: isWatched ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22))
-                    .foregroundStyle(isWatched ? Color.biingePrimary : Color.biingeGrayDark)
+        VStack(spacing: 0) {
+            if showsDivider {
+                Divider()
             }
-            .buttonStyle(.plain)
-
-            NavigationLink(value: DetailRoute.episode(showId: showId, seasonNumber: seasonNumber, episodeNumber: episode.number)) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(episode.number). \(episode.title)")
-                            .font(.biingeFootnote).foregroundStyle(.primary).lineLimit(1)
-                        if let airDate = episode.airDate, !airDate.isEmpty {
-                            Text(airDate).font(.system(size: 11)).foregroundStyle(.secondary)
-                        }
+            HStack(alignment: .top, spacing: 10) {
+                Button {
+                    Task { await onToggle(!isWatched) }
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("\(index + 1)")
+                            .font(.biingeCaption1).foregroundStyle(Color.biingeGraniteGray)
+                        Image(systemName: isWatched ? "checkmark" : "circle.fill")
+                            .font(.system(size: isWatched ? 13 : 8))
+                            .foregroundStyle(isWatched ? Color.biingeGraniteGray : Color.biingePrimary)
+                            .frame(width: 16)
                     }
-                    Spacer()
-                    Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink(value: DetailRoute.episode(showId: showId, seasonNumber: seasonNumber, episodeNumber: episode.number)) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(episode.title)
+                            .font(.biingeSubhead).foregroundStyle(.primary)
+                            .lineLimit(2).multilineTextAlignment(.leading)
+                        Text(episodeMeta)
+                            .font(.biingeCaption2).foregroundStyle(Color.biingeSpanishGray)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+
+                if let rating = episode.rating, rating > 0 {
+                    HStack(spacing: 3) {
+                        Image(systemName: "star.fill").font(.system(size: 11)).foregroundStyle(Color.biingePrimary)
+                        Text(String(format: "%.1f", rating)).font(.system(size: 15, weight: .semibold)).foregroundStyle(.secondary)
+                    }
                 }
             }
-            .buttonStyle(.plain)
+            .padding(.vertical, 8)
         }
-        .padding(.vertical, 5)
+    }
+
+    private var episodeMeta: String {
+        var parts: [String] = []
+        if let airDate = episode.airDate, !airDate.isEmpty {
+            parts.append(formatDate(airDate))
+        }
+        if episode.runtime > 0 {
+            parts.append(formatRuntime(episode.runtime))
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    private func formatDate(_ raw: String) -> String {
+        guard raw.count >= 10 else { return raw }
+        let parts = raw.prefix(10).split(separator: "-")
+        guard parts.count == 3 else { return raw }
+        return "\(parts[2]).\(parts[1]).\(parts[0])"
+    }
+
+    private func formatRuntime(_ minutes: Int) -> String {
+        minutes >= 60 ? "\(minutes / 60)h\(minutes % 60)m" : "\(minutes)m"
     }
 }

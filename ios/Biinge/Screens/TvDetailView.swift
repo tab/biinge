@@ -558,8 +558,8 @@ private struct EpisodeRow: View {
         }
     }
 
-    // Leading strip revealed while swiping right — its color and icon preview the
-    // pending toggle (mark watched vs. remove), matching the RN swipe-to-toggle.
+    // Leading strip revealed while swiping right. Same gray background for both
+    // actions; only the icon differs — checkmark to mark watched, return to remove.
     private var swipeActionStrip: some View {
         HStack(spacing: 0) {
             Image(systemName: isWatched ? "arrow.uturn.backward" : "checkmark")
@@ -570,7 +570,7 @@ private struct EpisodeRow: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(isWatched ? Color.biingeGraniteGray : Color.biingePrimary)
+        .background(Color.biingeGraniteGray)
     }
 
     private var rowContent: some View {

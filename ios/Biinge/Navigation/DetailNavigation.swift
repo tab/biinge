@@ -8,6 +8,24 @@ enum DetailRoute: Hashable {
     case episode(showId: Int, seasonNumber: Int, episodeNumber: Int)
 }
 
+/// A movie presented as a modal sheet (from a library grid or search).
+struct MoviePresentation: Identifiable {
+    let id: Int
+}
+
+extension View {
+    /// Presents a movie detail as a modal sheet, matching the RN app.
+    func movieSheet(_ item: Binding<MoviePresentation?>) -> some View {
+        sheet(item: item) { presentation in
+            NavigationStack {
+                MovieDetailView(movieId: presentation.id)
+                    .detailDestinations()
+            }
+            .presentationDragIndicator(.hidden)
+        }
+    }
+}
+
 private struct APIClientKey: EnvironmentKey {
     static let defaultValue: APIClient? = nil
 }

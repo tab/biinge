@@ -40,4 +40,5 @@ extension Color {
     static let biingeGray = Color(rgb: 0xB5B5B5)
     static let biingeGrayDark = Color(rgb: 0x6E6969)
     static let biingeSpanishGray = Color(rgb: 0x999999)
+    static let biingeGraniteGray = Color(rgb: 0x666666)
 }

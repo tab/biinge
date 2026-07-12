@@ -3,7 +3,7 @@ import SwiftUI
 struct MoviesView: View {
     let store: MovieStore
     @State private var selection: Segment = .want
-    @State private var path: [DetailRoute] = []
+    @State private var presentedMovie: MoviePresentation?
 
     enum Segment: String, CaseIterable {
         case want = "Want"
@@ -15,7 +15,7 @@ struct MoviesView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             VStack(spacing: 0) {
                 Picker("", selection: $selection) {
                     ForEach(Segment.allCases, id: \.self) { Text($0.rawValue).tag($0) }
@@ -27,13 +27,13 @@ struct MoviesView: View {
                 content
             }
             .navigationTitle("Movies")
-            .detailDestinations()
         }
+        .movieSheet($presentedMovie)
         .task {
             await store.loadIfNeeded()
             #if DEBUG
-            if path.isEmpty, let raw = ProcessInfo.processInfo.environment["DEBUG_MOVIE_ID"], let id = Int(raw) {
-                path = [.movie(id: id)]
+            if presentedMovie == nil, let raw = ProcessInfo.processInfo.environment["DEBUG_MOVIE_ID"], let id = Int(raw) {
+                presentedMovie = MoviePresentation(id: id)
             }
             #endif
         }
@@ -53,7 +53,9 @@ struct MoviesView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             PosterGrid(items: movies) { movie in
-                NavigationLink(value: DetailRoute.movie(id: movie.id)) {
+                Button {
+                    presentedMovie = MoviePresentation(id: movie.id)
+                } label: {
                     PosterImage(path: movie.posterPath, title: movie.title)
                         .overlay(alignment: .topTrailing) {
                             if movie.pinned { PinBadge() }

@@ -9,6 +9,7 @@ struct SearchView: View {
     @State private var people: [SearchPerson] = []
     @State private var isLoading = false
     @State private var path: [DetailRoute] = []
+    @State private var presentedMovie: MoviePresentation?
 
     private var isTrending: Bool { query.trimmingCharacters(in: .whitespaces).isEmpty }
     private var isEmpty: Bool { movies.isEmpty && series.isEmpty && people.isEmpty }
@@ -45,6 +46,7 @@ struct SearchView: View {
             .detailDestinations()
         }
         .searchable(text: $query, prompt: "Movies, shows, people")
+        .movieSheet($presentedMovie)
         .task(id: query) { await run() }
     }
 
@@ -52,7 +54,9 @@ struct SearchView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(movies) { movie in
-                    NavigationLink(value: DetailRoute.movie(id: movie.id)) {
+                    Button {
+                        presentedMovie = MoviePresentation(id: movie.id)
+                    } label: {
                         PosterImage(path: movie.posterPath, title: movie.title, size: "w185")
                             .frame(width: 120)
                             .overlay(alignment: .topTrailing) { inLibraryBadge(movie.state) }

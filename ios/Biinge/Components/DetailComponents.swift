@@ -18,6 +18,7 @@ struct RatingView: View {
 struct ProfileCircle: View {
     let path: String
     var size: CGFloat = 64
+    var grayscale: Bool = false
 
     var body: some View {
         Circle()
@@ -26,7 +27,7 @@ struct ProfileCircle: View {
             .overlay {
                 if let url = Config.tmdbImageURL(path: path, size: "w185") {
                     AsyncImage(url: url) { image in
-                        image.resizable().scaledToFill()
+                        image.resizable().scaledToFill().grayscale(grayscale ? 1 : 0)
                     } placeholder: {
                         Image(systemName: "person.fill").foregroundStyle(Color.biingeGrayDark)
                     }

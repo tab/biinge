@@ -41,14 +41,17 @@ struct ProfileCircle: View {
 
 struct CreditsRow: View {
     let credits: [CreditPerson]
+    @Environment(\.presentPerson) private var presentPerson
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 12) {
                 ForEach(credits) { person in
-                    NavigationLink(value: DetailRoute.person(id: person.id)) {
+                    Button {
+                        presentPerson(person.id)
+                    } label: {
                         VStack(spacing: 6) {
-                            ProfileCircle(path: person.profilePath)
+                            ProfileCircle(path: person.profilePath, grayscale: true)
                             Text(person.name)
                                 .font(.biingeCaption2)
                                 .foregroundStyle(.primary)

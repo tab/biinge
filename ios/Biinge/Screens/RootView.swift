@@ -27,13 +27,13 @@ struct RootView: View {
     var body: some View {
         TabView(selection: $selection) {
             Tab("Movies", systemImage: "film", value: 0) {
-                MoviesView(store: movieStore)
+                MoviesView(store: movieStore).presentsDetails()
             }
             Tab("TV", systemImage: "tv", value: 1) {
-                TvView(store: tvStore)
+                TvView(store: tvStore).presentsDetails()
             }
             Tab("Search", systemImage: "magnifyingglass", value: 2) {
-                SearchView()
+                SearchView().presentsDetails()
             }
             Tab("Profile", systemImage: "person.crop.circle", value: 3) {
                 ProfileView(authManager: authManager)

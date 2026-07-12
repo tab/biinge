@@ -1,33 +1,22 @@
 import SwiftUI
 
-/// Value-based routes for pushing detail screens within a tab's NavigationStack.
+/// Series and episodes are pushed within a NavigationStack; movies and people
+/// are presented as modal sheets (see `presentsDetails`).
 enum DetailRoute: Hashable {
-    case movie(id: Int)
     case series(id: Int)
-    case person(id: Int)
     case episode(showId: Int, seasonNumber: Int, episodeNumber: Int)
-}
-
-/// A movie presented as a modal sheet (from a library grid or search).
-struct MoviePresentation: Identifiable {
-    let id: Int
-}
-
-extension View {
-    /// Presents a movie detail as a modal sheet, matching the RN app.
-    func movieSheet(_ item: Binding<MoviePresentation?>) -> some View {
-        sheet(item: item) { presentation in
-            NavigationStack {
-                MovieDetailView(movieId: presentation.id)
-                    .detailDestinations()
-            }
-            .presentationDragIndicator(.hidden)
-        }
-    }
 }
 
 private struct APIClientKey: EnvironmentKey {
     static let defaultValue: APIClient? = nil
+}
+
+private struct PresentMovieKey: EnvironmentKey {
+    static let defaultValue: @MainActor (Int) -> Void = { _ in }
+}
+
+private struct PresentPersonKey: EnvironmentKey {
+    static let defaultValue: @MainActor (Int) -> Void = { _ in }
 }
 
 extension EnvironmentValues {
@@ -35,23 +24,66 @@ extension EnvironmentValues {
         get { self[APIClientKey.self] }
         set { self[APIClientKey.self] = newValue }
     }
+
+    /// Presents a movie detail as a modal sheet.
+    var presentMovie: @MainActor (Int) -> Void {
+        get { self[PresentMovieKey.self] }
+        set { self[PresentMovieKey.self] = newValue }
+    }
+
+    /// Presents a person detail as a modal sheet.
+    var presentPerson: @MainActor (Int) -> Void {
+        get { self[PresentPersonKey.self] }
+        set { self[PresentPersonKey.self] = newValue }
+    }
 }
 
 extension View {
-    /// Registers every detail destination on a NavigationStack so cross-links
-    /// (recommendations, cast, episodes) resolve within the same stack.
+    /// Registers the push destinations (series, episode) on a NavigationStack.
     func detailDestinations() -> some View {
         navigationDestination(for: DetailRoute.self) { route in
             switch route {
-            case .movie(let id):
-                MovieDetailView(movieId: id)
             case .series(let id):
                 TvDetailView(seriesId: id)
-            case .person(let id):
-                PersonDetailView(personId: id)
             case .episode(let showId, let seasonNumber, let episodeNumber):
                 EpisodeDetailView(showId: showId, seasonNumber: seasonNumber, episodeNumber: episodeNumber)
             }
         }
+    }
+
+    /// Enables `presentMovie` / `presentPerson` for the subtree, and presents
+    /// those details as modal sheets. Applied recursively inside each sheet so
+    /// nested navigation (a movie's cast, a person's films) stacks correctly.
+    func presentsDetails() -> some View {
+        modifier(PresentsDetailsModifier())
+    }
+}
+
+private struct DetailSheetItem: Identifiable {
+    let id: Int
+}
+
+private struct PresentsDetailsModifier: ViewModifier {
+    @State private var movie: DetailSheetItem?
+    @State private var person: DetailSheetItem?
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.presentMovie) { movie = DetailSheetItem(id: $0) }
+            .environment(\.presentPerson) { person = DetailSheetItem(id: $0) }
+            .sheet(item: $movie) { item in
+                NavigationStack {
+                    MovieDetailView(movieId: item.id).detailDestinations()
+                }
+                .presentationDragIndicator(.hidden)
+                .presentsDetails()
+            }
+            .sheet(item: $person) { item in
+                NavigationStack {
+                    PersonDetailView(personId: item.id).detailDestinations()
+                }
+                .presentationDragIndicator(.hidden)
+                .presentsDetails()
+            }
     }
 }

@@ -3,7 +3,8 @@ import SwiftUI
 struct MoviesView: View {
     let store: MovieStore
     @State private var selection: Segment = .want
-    @State private var presentedMovie: MoviePresentation?
+    @State private var didDeepLink = false
+    @Environment(\.presentMovie) private var presentMovie
 
     enum Segment: String, CaseIterable {
         case want = "Want"
@@ -28,12 +29,12 @@ struct MoviesView: View {
             }
             .navigationTitle("Movies")
         }
-        .movieSheet($presentedMovie)
         .task {
             await store.loadIfNeeded()
             #if DEBUG
-            if presentedMovie == nil, let raw = ProcessInfo.processInfo.environment["DEBUG_MOVIE_ID"], let id = Int(raw) {
-                presentedMovie = MoviePresentation(id: id)
+            if !didDeepLink, let raw = ProcessInfo.processInfo.environment["DEBUG_MOVIE_ID"], let id = Int(raw) {
+                didDeepLink = true
+                presentMovie(id)
             }
             #endif
         }
@@ -54,7 +55,7 @@ struct MoviesView: View {
         } else {
             PosterGrid(items: movies) { movie in
                 Button {
-                    presentedMovie = MoviePresentation(id: movie.id)
+                    presentMovie(movie.id)
                 } label: {
                     PosterImage(path: movie.posterPath, title: movie.title)
                         .overlay(alignment: .topTrailing) {

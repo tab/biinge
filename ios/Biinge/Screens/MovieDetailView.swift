@@ -6,6 +6,8 @@ struct MovieDetailView: View {
     @Environment(MovieStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @Environment(\.presentMovie) private var presentMovie
+    @Environment(\.presentPerson) private var presentPerson
 
     @State private var details: MovieDetails?
     @State private var isLoading = true
@@ -111,7 +113,9 @@ struct MovieDetailView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach(credits) { person in
-                        NavigationLink(value: DetailRoute.person(id: person.id)) {
+                        Button {
+                            presentPerson(person.id)
+                        } label: {
                             VStack(spacing: 6) {
                                 ProfileCircle(path: person.profilePath, size: 72, grayscale: true)
                                 Text(person.name).font(.biingeCaption2).foregroundStyle(.primary)
@@ -134,7 +138,9 @@ struct MovieDetailView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(items) { item in
-                        NavigationLink(value: DetailRoute.movie(id: item.id)) {
+                        Button {
+                            presentMovie(item.id)
+                        } label: {
                             PosterImage(path: item.posterPath, title: item.title, size: "w185").frame(width: 120)
                         }
                         .buttonStyle(.plain)

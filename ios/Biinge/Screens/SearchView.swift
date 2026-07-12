@@ -9,7 +9,9 @@ struct SearchView: View {
     @State private var people: [SearchPerson] = []
     @State private var isLoading = false
     @State private var path: [DetailRoute] = []
-    @State private var presentedMovie: MoviePresentation?
+    @State private var didDeepLink = false
+    @Environment(\.presentMovie) private var presentMovie
+    @Environment(\.presentPerson) private var presentPerson
 
     private var isTrending: Bool { query.trimmingCharacters(in: .whitespaces).isEmpty }
     private var isEmpty: Bool { movies.isEmpty && series.isEmpty && people.isEmpty }
@@ -46,8 +48,15 @@ struct SearchView: View {
             .detailDestinations()
         }
         .searchable(text: $query, prompt: "Movies, shows, people")
-        .movieSheet($presentedMovie)
         .task(id: query) { await run() }
+        .task {
+            #if DEBUG
+            if !didDeepLink, let raw = ProcessInfo.processInfo.environment["DEBUG_PERSON_ID"], let id = Int(raw) {
+                didDeepLink = true
+                presentPerson(id)
+            }
+            #endif
+        }
     }
 
     private var moviesRow: some View {
@@ -55,7 +64,7 @@ struct SearchView: View {
             HStack(spacing: 10) {
                 ForEach(movies) { movie in
                     Button {
-                        presentedMovie = MoviePresentation(id: movie.id)
+                        presentMovie(movie.id)
                     } label: {
                         PosterImage(path: movie.posterPath, title: movie.title, size: "w185")
                             .frame(width: 120)
@@ -88,7 +97,9 @@ struct SearchView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 12) {
                 ForEach(people) { person in
-                    NavigationLink(value: DetailRoute.person(id: person.id)) {
+                    Button {
+                        presentPerson(person.id)
+                    } label: {
                         VStack(spacing: 6) {
                             ProfileCircle(path: person.profilePath, size: 76)
                             Text(person.name)

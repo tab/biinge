@@ -147,6 +147,31 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 		return nil, errors.ErrFailedToFetchMovie
 	}
 
+	// Read-repair: a title saved in pre-production keeps whatever poster it had at
+	// add-time. When TMDB now serves a different (final) poster, refresh the stored
+	// row so the library list stops showing the stale one — without needing the
+	// user to re-toggle want/watched. State and pinned are left untouched.
+	if details.PosterPath != "" && details.PosterPath != movie.PosterPath {
+		runtime := uint64(details.Runtime)
+		if runtime == 0 {
+			runtime = movie.Runtime
+		}
+
+		title := details.Title
+		if title == "" {
+			title = movie.Title
+		}
+
+		if _, updateErr := p.movies.Update(ctx, &models.Movie{
+			ID:         movie.ID,
+			Title:      title,
+			PosterPath: details.PosterPath,
+			Runtime:    runtime,
+		}); updateErr != nil {
+			p.log.Warn().Err(updateErr).Uint64("Id", id).Msg("Failed to refresh stored movie poster")
+		}
+	}
+
 	return &serializers.MovieDetailsSerializer{
 		Id:              id,
 		Pinned:          movie.Pinned,
@@ -273,6 +298,32 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 			Uint64("Id", id).
 			Msg("Failed to fetch series state")
 		return nil, errors.ErrFailedToFetchSeries
+	}
+
+	// Read-repair the stored poster (see FetchMovieDetails). Episode/season counts
+	// are preserved from the stored row; only poster, title, and status are
+	// refreshed from TMDB. State and pinned are left untouched.
+	if details.PosterPath != "" && details.PosterPath != tvShow.PosterPath {
+		title := details.Title
+		if title == "" {
+			title = tvShow.Title
+		}
+
+		status := details.Status
+		if status == "" {
+			status = tvShow.Status
+		}
+
+		if _, updateErr := p.series.Update(ctx, &models.Series{
+			ID:            tvShow.ID,
+			Title:         title,
+			PosterPath:    details.PosterPath,
+			SeasonsCount:  tvShow.SeasonsCount,
+			EpisodesCount: tvShow.EpisodesCount,
+			Status:        status,
+		}); updateErr != nil {
+			p.log.Warn().Err(updateErr).Uint64("Id", id).Msg("Failed to refresh stored series poster")
+		}
 	}
 
 	return &serializers.SeriesDetailsSerializer{

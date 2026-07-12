@@ -8,7 +8,6 @@ struct SearchView: View {
     @State private var series: [SearchSeries] = []
     @State private var people: [SearchPerson] = []
     @State private var isLoading = false
-    @State private var path: [DetailRoute] = []
     @State private var didDeepLink = false
     @Environment(\.presentMovie) private var presentMovie
     @Environment(\.presentSeries) private var presentSeries
@@ -18,7 +17,7 @@ struct SearchView: View {
     private var isEmpty: Bool { movies.isEmpty && series.isEmpty && people.isEmpty }
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     if !movies.isEmpty {
@@ -46,7 +45,6 @@ struct SearchView: View {
             }
             .background(Color.biingeBackground)
             .navigationTitle(isTrending ? "Trending" : "Search")
-            .detailDestinations()
         }
         .searchable(text: $query, prompt: "Movies, shows, people")
         .task(id: query) { await run() }

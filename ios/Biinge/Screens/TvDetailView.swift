@@ -533,6 +533,7 @@ private struct EpisodeRow: View {
     let isWatched: Bool
     let showsDivider: Bool
     let onToggle: (Bool) async -> Void
+    @Environment(\.presentEpisode) private var presentEpisode
 
     var body: some View {
         VStack(spacing: 0) {
@@ -554,7 +555,9 @@ private struct EpisodeRow: View {
                 }
                 .buttonStyle(.plain)
 
-                NavigationLink(value: DetailRoute.episode(showId: showId, seasonNumber: seasonNumber, episodeNumber: episode.number)) {
+                Button {
+                    presentEpisode(showId, seasonNumber, episode.number)
+                } label: {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(episode.title)
                             .font(.biingeSubhead).foregroundStyle(.primary)

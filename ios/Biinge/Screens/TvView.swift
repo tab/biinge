@@ -5,6 +5,7 @@ struct TvView: View {
     @State private var selection: Segment = .watching
     @State private var didDeepLink = false
     @Environment(\.presentSeries) private var presentSeries
+    @Environment(\.presentEpisode) private var presentEpisode
 
     enum Segment: String, CaseIterable {
         case want = "Want"
@@ -40,6 +41,12 @@ struct TvView: View {
             if !didDeepLink, let raw = ProcessInfo.processInfo.environment["DEBUG_SERIES_ID"], let id = Int(raw) {
                 didDeepLink = true
                 presentSeries(id)
+            } else if !didDeepLink, let raw = ProcessInfo.processInfo.environment["DEBUG_EPISODE"] {
+                let parts = raw.split(separator: ":").compactMap { Int($0) }
+                if parts.count == 3 {
+                    didDeepLink = true
+                    presentEpisode(parts[0], parts[1], parts[2])
+                }
             }
             #endif
         }

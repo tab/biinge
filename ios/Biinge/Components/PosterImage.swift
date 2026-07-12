@@ -13,27 +13,22 @@ struct PosterImage: View {
             .fill(Color.biingeSecondaryCard)
             .aspectRatio(2.0 / 3.0, contentMode: .fit)
             .overlay {
-                if let url = Config.tmdbImageURL(path: path, size: size) {
-                    AsyncImage(url: url, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image.resizable().scaledToFill()
-                        case .empty:
-                            ProgressView().tint(Color.biingeGrayDark)
-                        case .failure:
-                            placeholder
-                        @unknown default:
-                            placeholder
-                        }
-                    }
-                    // Rebuild the loader when the URL changes so a recycled view never
-                    // lingers on a previous poster (AsyncImage won't reload on its own).
-                    .id(url)
-                } else {
+                CachedImage(url: Config.tmdbImageURL(path: path, size: size), maxPixel: Self.maxPixel(for: size)) {
                     placeholder
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+
+    /// Downsample target per TMDB source width, capped so full-size posters don't
+    /// decode a multi-MB bitmap into a small cell.
+    private static func maxPixel(for size: String) -> CGFloat {
+        switch size {
+        case "w185": return 400
+        case "w500": return 1000
+        case "w780": return 1200
+        default: return 700
+        }
     }
 
     private var placeholder: some View {

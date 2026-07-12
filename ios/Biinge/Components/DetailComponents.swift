@@ -10,13 +10,7 @@ struct ProfileCircle: View {
             .fill(Color.biingeSecondaryCard)
             .frame(width: size, height: size)
             .overlay {
-                if let url = Config.tmdbImageURL(path: path, size: "w185") {
-                    AsyncImage(url: url) { image in
-                        image.resizable().scaledToFill().grayscale(grayscale ? 1 : 0)
-                    } placeholder: {
-                        Image(systemName: "person.fill").foregroundStyle(Color.biingeGrayDark)
-                    }
-                } else {
+                CachedImage(url: Config.tmdbImageURL(path: path, size: "w185"), maxPixel: 300, grayscale: grayscale) {
                     Image(systemName: "person.fill").foregroundStyle(Color.biingeGrayDark)
                 }
             }

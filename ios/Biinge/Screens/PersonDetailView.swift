@@ -59,12 +59,8 @@ struct PersonDetailView: View {
                 .fill(Color.biingeSecondaryCard)
                 .aspectRatio(4.0 / 6.0, contentMode: .fit)
                 .overlay {
-                    if let url = Config.tmdbImageURL(path: person.profilePath, size: "w780") {
-                        AsyncImage(url: url) { image in
-                            image.resizable().scaledToFill().grayscale(1)
-                        } placeholder: {
-                            Color.clear
-                        }
+                    CachedImage(url: Config.tmdbImageURL(path: person.profilePath, size: "w780"), maxPixel: 1200, grayscale: true) {
+                        Color.clear
                     }
                 }
                 .clipped()

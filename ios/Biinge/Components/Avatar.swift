@@ -15,9 +15,7 @@ struct Avatar: View {
     }
 
     var body: some View {
-        AsyncImage(url: url) { image in
-            image.resizable().scaledToFill()
-        } placeholder: {
+        CachedImage(url: url, maxPixel: size * 3) {
             Circle().fill(Color.biingeSecondaryCard)
         }
         .frame(width: size, height: size)

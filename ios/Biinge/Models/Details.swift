@@ -23,7 +23,6 @@ struct Video: Decodable, Sendable, Identifiable {
 
 struct MovieDetails: Decodable, Sendable {
     let id: Int
-    let imdbId: String?
     let title: String
     let posterPath: String
     let pinned: Bool
@@ -49,7 +48,6 @@ struct SeasonSummary: Decodable, Sendable, Identifiable {
 
 struct SeriesDetails: Decodable, Sendable {
     let id: Int
-    let imdbId: String?
     let title: String
     let posterPath: String
     let pinned: Bool
@@ -79,7 +77,6 @@ struct EpisodeSummary: Decodable, Sendable, Identifiable {
 
 struct SeasonDetails: Decodable, Sendable {
     let id: Int
-    let tmdbShowId: Int?
     let title: String
     let number: Int
     let posterPath: String

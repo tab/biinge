@@ -26,7 +26,6 @@ extension Color {
 
     // Brand
     static let biingePrimary = Color(rgb: 0xEEC01E)
-    static let biingeError = Color(rgb: 0x9F0909)
 
     // Adaptive semantic (values from the RN app's light/dark themes)
     static let biingeBackground = adaptive(light: 0xFFFFFF, dark: 0x000000)
@@ -34,7 +33,6 @@ extension Color {
     static let biingeSecondaryCard = adaptive(light: 0xEAEAEA, dark: 0x282828)
     static let biingeText = adaptive(light: 0x181818, dark: 0xFAFAFA)
     static let biingeTextSecondary = adaptive(light: 0x2B2835, dark: 0xD4D7CA)
-    static let biingeBorder = adaptive(light: 0xD1CECF, dark: 0x2E3130)
 
     // Grays
     static let biingeGray = Color(rgb: 0xB5B5B5)

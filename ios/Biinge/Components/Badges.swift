@@ -10,6 +10,7 @@ struct PinBadge: View {
             .padding(6)
             .background(.black.opacity(0.6), in: Circle())
             .padding(6)
+            .accessibilityLabel("Pinned")
     }
 }
 
@@ -23,6 +24,7 @@ struct WatchedBadge: View {
             .padding(5)
             .background(.black.opacity(0.6), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
             .padding(6)
+            .accessibilityLabel("In your library")
     }
 }
 
@@ -34,5 +36,7 @@ struct ProgressBadge: View {
         PieChartView(percent: percent, color: .white)
             .frame(width: 18, height: 18)
             .padding(6)
+            .accessibilityLabel("Watch progress")
+            .accessibilityValue("\(Int(percent.rounded())) percent")
     }
 }

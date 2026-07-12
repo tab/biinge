@@ -96,15 +96,6 @@ final class TvStore {
         }
     }
 
-    func remove(id: Int) async {
-        do {
-            try await apiClient.deleteSeries(id: id)
-            removeLocal(id: id)
-        } catch {
-            await load()
-        }
-    }
-
     func setPinned(id: Int, pinned: Bool) async {
         guard let current = currentState(id: id) else { return }
         do {

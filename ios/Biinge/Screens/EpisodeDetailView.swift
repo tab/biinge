@@ -128,6 +128,7 @@ struct EpisodeDetailView: View {
                 .frame(width: 32, height: 32)
                 .background(.black.opacity(0.5), in: Circle())
         }
+        .accessibilityLabel("Close")
         .padding(.leading, 16)
         .padding(.top, 16)
     }

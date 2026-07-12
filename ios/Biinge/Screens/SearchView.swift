@@ -45,8 +45,8 @@ struct SearchView: View {
             }
             .background(Color.biingeBackground)
             .navigationTitle(isTrending ? "Trending" : "Search")
+            .searchable(text: $query, prompt: "Movies, shows, people")
         }
-        .searchable(text: $query, prompt: "Movies, shows, people")
         .task(id: query) { await run() }
         .task {
             #if DEBUG
@@ -106,7 +106,7 @@ struct SearchView: View {
                         presentPerson(person.id)
                     } label: {
                         VStack(spacing: 6) {
-                            ProfileCircle(path: person.profilePath, size: 76)
+                            ProfileCircle(path: person.profilePath, size: 76, grayscale: true)
                             Text(person.name)
                                 .font(.biingeCaption2).foregroundStyle(.primary)
                                 .lineLimit(1).frame(width: 84)

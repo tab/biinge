@@ -145,7 +145,7 @@ struct TvDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Recommendations").font(.biingeSubhead).foregroundStyle(Color.biingeGraniteGray).padding(.horizontal, 15)
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                LazyHStack(spacing: 10) {
                     ForEach(items) { item in
                         Button {
                             presentSeries(item.id)

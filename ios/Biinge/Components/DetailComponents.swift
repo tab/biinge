@@ -24,7 +24,7 @@ struct CreditsRow: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 12) {
+            LazyHStack(alignment: .top, spacing: 12) {
                 ForEach(credits) { person in
                     Button {
                         presentPerson(person.id)

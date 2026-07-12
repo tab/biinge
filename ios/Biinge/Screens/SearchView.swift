@@ -60,7 +60,7 @@ struct SearchView: View {
 
     private var moviesRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+            LazyHStack(spacing: 10) {
                 ForEach(movies) { movie in
                     Button {
                         presentMovie(movie.id)
@@ -80,7 +80,7 @@ struct SearchView: View {
 
     private var seriesRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+            LazyHStack(spacing: 10) {
                 ForEach(series) { show in
                     Button {
                         presentSeries(show.id)
@@ -100,7 +100,7 @@ struct SearchView: View {
 
     private var peopleRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 12) {
+            LazyHStack(alignment: .top, spacing: 12) {
                 ForEach(people) { person in
                     Button {
                         presentPerson(person.id)

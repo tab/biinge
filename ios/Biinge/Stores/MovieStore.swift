@@ -74,12 +74,29 @@ final class MovieStore {
 
     func setPinned(id: Int, pinned: Bool) async {
         guard let current = currentState(id: id) else { return }
+        setPinnedLocal(id: id, pinned: pinned)
         do {
             _ = try await apiClient.updateMovie(id: id, UpdateMovieBody(state: current.rawValue, pinned: pinned))
-            await load() // reload for server-side pinned-first ordering
         } catch {
-            await load()
+            await load() // reconcile exact server ordering only if the write failed
         }
+    }
+
+    private func setPinnedLocal(id: Int, pinned: Bool) {
+        repartition(&wantMovies, id: id, pinned: pinned)
+        repartition(&watchedMovies, id: id, pinned: pinned)
+    }
+
+    /// Flip a movie's pinned flag and float pinned items to the top (stable), matching
+    /// the server's `pinned DESC` ordering without a full reload.
+    private func repartition(_ list: inout [LibraryMovie], id: Int, pinned: Bool) {
+        guard let index = list.firstIndex(where: { $0.id == id }) else { return }
+        let existing = list[index]
+        list[index] = LibraryMovie(
+            id: existing.id, title: existing.title, posterPath: existing.posterPath,
+            pinned: pinned, state: existing.state
+        )
+        list = list.filter { $0.pinned } + list.filter { !$0.pinned }
     }
 
     private func insertLocal(_ movie: LibraryMovie) {

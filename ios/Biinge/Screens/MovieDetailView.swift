@@ -111,7 +111,7 @@ struct MovieDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Cast and crew").font(.biingeSubhead).foregroundStyle(Color.biingeGraniteGray).padding(.horizontal, 15)
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 12) {
+                LazyHStack(alignment: .top, spacing: 12) {
                     ForEach(credits) { person in
                         Button {
                             presentPerson(person.id)
@@ -136,7 +136,7 @@ struct MovieDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Recommendations").font(.biingeSubhead).foregroundStyle(Color.biingeGraniteGray).padding(.horizontal, 15)
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                LazyHStack(spacing: 10) {
                     ForEach(items) { item in
                         Button {
                             presentMovie(item.id)

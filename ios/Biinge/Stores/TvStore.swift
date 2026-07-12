@@ -89,7 +89,7 @@ final class TvStore {
                 ))
             } else {
                 _ = try await apiClient.updateSeries(id: id, UpdateSeriesBody(state: target.rawValue, pinned: isPinned(id: id)))
-                await load()
+                moveLocal(id: id, to: target)
             }
         } catch {
             await load()
@@ -98,11 +98,11 @@ final class TvStore {
 
     func setPinned(id: Int, pinned: Bool) async {
         guard let current = currentState(id: id) else { return }
+        setPinnedLocal(id: id, pinned: pinned)
         do {
             _ = try await apiClient.updateSeries(id: id, UpdateSeriesBody(state: current.rawValue, pinned: pinned))
-            await load()
         } catch {
-            await load()
+            await load() // reconcile exact server ordering only if the write failed
         }
     }
 
@@ -113,6 +113,36 @@ final class TvStore {
         case .watched: watchedShows.insert(show, at: 0)
         case .none: break
         }
+    }
+
+    /// Move an already-tracked show to a new state segment, preserving its counts.
+    private func moveLocal(id: Int, to target: WatchState) {
+        guard let existing = (wantShows + watchingShows + watchedShows).first(where: { $0.id == id }) else { return }
+        removeLocal(id: id)
+        insertLocal(LibrarySeries(
+            id: existing.id, title: existing.title, posterPath: existing.posterPath,
+            pinned: existing.pinned, state: target,
+            episodesCount: existing.episodesCount, watchedEpisodesCount: existing.watchedEpisodesCount
+        ))
+    }
+
+    private func setPinnedLocal(id: Int, pinned: Bool) {
+        repartition(&wantShows, id: id, pinned: pinned)
+        repartition(&watchingShows, id: id, pinned: pinned)
+        repartition(&watchedShows, id: id, pinned: pinned)
+    }
+
+    /// Flip a show's pinned flag and float pinned items to the top (stable), matching
+    /// the server's `pinned DESC` ordering without a full reload.
+    private func repartition(_ list: inout [LibrarySeries], id: Int, pinned: Bool) {
+        guard let index = list.firstIndex(where: { $0.id == id }) else { return }
+        let existing = list[index]
+        list[index] = LibrarySeries(
+            id: existing.id, title: existing.title, posterPath: existing.posterPath,
+            pinned: pinned, state: existing.state,
+            episodesCount: existing.episodesCount, watchedEpisodesCount: existing.watchedEpisodesCount
+        )
+        list = list.filter { $0.pinned } + list.filter { !$0.pinned }
     }
 
     private func removeLocal(id: Int) {

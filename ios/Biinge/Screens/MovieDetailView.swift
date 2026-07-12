@@ -142,6 +142,9 @@ struct MovieDetailView: View {
                             presentMovie(item.id)
                         } label: {
                             PosterImage(path: item.posterPath, title: item.title, size: "w185").frame(width: 120)
+                                .overlay(alignment: .topLeading) {
+                                    if let state = item.state, state != .none { WatchedBadge() }
+                                }
                         }
                         .buttonStyle(.plain)
                     }

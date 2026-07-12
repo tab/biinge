@@ -107,7 +107,7 @@ struct PersonDetailView: View {
                         PosterImage(path: credit.posterPath, title: credit.title, size: "w342", cornerRadius: 6)
                             .overlay(alignment: .topLeading) {
                                 if let state = credit.state, state != .none {
-                                    checkBadge
+                                    WatchedBadge()
                                 }
                             }
                     }
@@ -116,15 +116,6 @@ struct PersonDetailView: View {
             }
             .padding(.horizontal, 5)
         }
-    }
-
-    private var checkBadge: some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 12, weight: .bold))
-            .foregroundStyle(.white)
-            .padding(5)
-            .background(.black.opacity(0.6), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-            .padding(6)
     }
 
     private var closeButton: some View {

@@ -67,7 +67,9 @@ struct SearchView: View {
                     } label: {
                         PosterImage(path: movie.posterPath, title: movie.title, size: "w185")
                             .frame(width: 120)
-                            .overlay(alignment: .topTrailing) { inLibraryBadge(movie.state) }
+                            .overlay(alignment: .topLeading) {
+                                if let state = movie.state, state != .none { WatchedBadge() }
+                            }
                     }
                     .buttonStyle(.plain)
                 }
@@ -85,7 +87,9 @@ struct SearchView: View {
                     } label: {
                         PosterImage(path: show.posterPath, title: show.title, size: "w185")
                             .frame(width: 120)
-                            .overlay(alignment: .topTrailing) { inLibraryBadge(show.state) }
+                            .overlay(alignment: .topLeading) {
+                                if let state = show.state, state != .none { WatchedBadge() }
+                            }
                     }
                     .buttonStyle(.plain)
                 }
@@ -112,18 +116,6 @@ struct SearchView: View {
                 }
             }
             .padding(.horizontal)
-        }
-    }
-
-    @ViewBuilder
-    private func inLibraryBadge(_ state: WatchState?) -> some View {
-        if let state, state != .none {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(Color.biingePrimary)
-                .padding(5)
-                .background(.black.opacity(0.5), in: Circle())
-                .padding(5)
         }
     }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// A small filled pie showing watch progress (0...100), used on watching shows.
+/// A thin ring, a 2px empty border, then the filled wedge — matching the RN app.
 struct PieChartView: View {
     let percent: Double
     var color: Color = .white
@@ -8,10 +9,13 @@ struct PieChartView: View {
     var body: some View {
         Canvas { context, size in
             let rect = CGRect(origin: .zero, size: size)
+            let ringWidth: CGFloat = 1.5
+            let border: CGFloat = 2
+
             context.stroke(
-                Circle().path(in: rect.insetBy(dx: 1, dy: 1)),
-                with: .color(color.opacity(0.5)),
-                lineWidth: 1.5
+                Circle().path(in: rect.insetBy(dx: ringWidth / 2, dy: ringWidth / 2)),
+                with: .color(color),
+                lineWidth: ringWidth
             )
 
             guard percent > 0 else { return }
@@ -20,7 +24,7 @@ struct PieChartView: View {
             wedge.move(to: center)
             wedge.addArc(
                 center: center,
-                radius: rect.width / 2 - 2,
+                radius: rect.width / 2 - ringWidth - border,
                 startAngle: .degrees(-90),
                 endAngle: .degrees(-90 + 360 * min(percent, 100) / 100),
                 clockwise: false

@@ -13,13 +13,26 @@ struct PinBadge: View {
     }
 }
 
+/// Watched / in-library check shown on posters (top-left). Shared across search
+/// results, recommendations, and person credits so the marker is consistent.
+struct WatchedBadge: View {
+    var body: some View {
+        Image(systemName: "checkmark")
+            .font(.system(size: 12, weight: .bold))
+            .foregroundStyle(.white)
+            .padding(5)
+            .background(.black.opacity(0.6), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .padding(6)
+    }
+}
+
 /// Watch-progress pie shown on watching shows (top-left).
 struct ProgressBadge: View {
     let percent: Double
 
     var body: some View {
         PieChartView(percent: percent, color: .white)
-            .frame(width: 22, height: 22)
+            .frame(width: 18, height: 18)
             .padding(6)
     }
 }

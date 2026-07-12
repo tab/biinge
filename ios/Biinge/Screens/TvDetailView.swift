@@ -214,6 +214,9 @@ struct TvDetailView: View {
         details = await detail
         progress = await prog
         isLoading = false
+        if let details {
+            store.refreshMetadata(id: seriesId, title: details.title, posterPath: details.posterPath)
+        }
     }
 
     private func handleMenu(_ action: TvActionMenu.MenuAction, _ series: SeriesDetails) async {

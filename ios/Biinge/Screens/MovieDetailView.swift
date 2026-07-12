@@ -207,6 +207,9 @@ struct MovieDetailView: View {
         isLoading = true
         details = try? await apiClient.movieDetails(id: movieId)
         isLoading = false
+        if let details {
+            store.refreshMetadata(id: movieId, title: details.title, posterPath: details.posterPath)
+        }
     }
 
     private func handleMenu(_ action: MovieActionMenu.MenuAction, _ movie: MovieDetails) async {

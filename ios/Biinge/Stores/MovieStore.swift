@@ -94,4 +94,22 @@ final class MovieStore {
         wantMovies.removeAll { $0.id == id }
         watchedMovies.removeAll { $0.id == id }
     }
+
+    /// Push fresher poster/title from a detail load into the cached grid item so the
+    /// grid reflects the server's read-repair without waiting for a full reload.
+    func refreshMetadata(id: Int, title: String, posterPath: String) {
+        applyMetadata(id: id, title: title, posterPath: posterPath, to: &wantMovies)
+        applyMetadata(id: id, title: title, posterPath: posterPath, to: &watchedMovies)
+    }
+
+    private func applyMetadata(id: Int, title: String, posterPath: String, to list: inout [LibraryMovie]) {
+        guard !posterPath.isEmpty,
+              let index = list.firstIndex(where: { $0.id == id }),
+              list[index].posterPath != posterPath || list[index].title != title else { return }
+        let existing = list[index]
+        list[index] = LibraryMovie(
+            id: existing.id, title: title, posterPath: posterPath,
+            pinned: existing.pinned, state: existing.state
+        )
+    }
 }

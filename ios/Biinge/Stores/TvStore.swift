@@ -129,4 +129,24 @@ final class TvStore {
         watchingShows.removeAll { $0.id == id }
         watchedShows.removeAll { $0.id == id }
     }
+
+    /// Push fresher poster/title from a detail load into the cached grid item so the
+    /// grid reflects the server's read-repair without waiting for a full reload.
+    func refreshMetadata(id: Int, title: String, posterPath: String) {
+        applyMetadata(id: id, title: title, posterPath: posterPath, to: &wantShows)
+        applyMetadata(id: id, title: title, posterPath: posterPath, to: &watchingShows)
+        applyMetadata(id: id, title: title, posterPath: posterPath, to: &watchedShows)
+    }
+
+    private func applyMetadata(id: Int, title: String, posterPath: String, to list: inout [LibrarySeries]) {
+        guard !posterPath.isEmpty,
+              let index = list.firstIndex(where: { $0.id == id }),
+              list[index].posterPath != posterPath || list[index].title != title else { return }
+        let existing = list[index]
+        list[index] = LibrarySeries(
+            id: existing.id, title: title, posterPath: posterPath,
+            pinned: existing.pinned, state: existing.state,
+            episodesCount: existing.episodesCount, watchedEpisodesCount: existing.watchedEpisodesCount
+        )
+    }
 }

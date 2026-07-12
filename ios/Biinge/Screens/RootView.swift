@@ -39,7 +39,7 @@ struct RootView: View {
                 ProfileView(authManager: authManager)
             }
         }
-        .tint(Color.biingePrimary)
+        .tint(Color.biingeText)
         .environment(movieStore)
         .environment(tvStore)
         .environment(\.apiClient, apiClient)

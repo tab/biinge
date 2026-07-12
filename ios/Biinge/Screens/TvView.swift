@@ -3,6 +3,7 @@ import SwiftUI
 struct TvView: View {
     let store: TvStore
     @State private var selection: Segment = .watching
+    @State private var path: [DetailRoute] = []
 
     enum Segment: String, CaseIterable {
         case want = "Want"
@@ -19,7 +20,7 @@ struct TvView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 Picker("", selection: $selection) {
                     ForEach(Segment.allCases, id: \.self) { Text($0.rawValue).tag($0) }
@@ -31,8 +32,16 @@ struct TvView: View {
                 content
             }
             .navigationTitle("TV Shows")
+            .detailDestinations()
         }
-        .task { await store.loadIfNeeded() }
+        .task {
+            await store.loadIfNeeded()
+            #if DEBUG
+            if path.isEmpty, let raw = ProcessInfo.processInfo.environment["DEBUG_SERIES_ID"], let id = Int(raw) {
+                path = [.series(id: id)]
+            }
+            #endif
+        }
     }
 
     @ViewBuilder
@@ -49,15 +58,18 @@ struct TvView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             PosterGrid(items: shows) { show in
-                PosterImage(path: show.posterPath, title: show.title)
-                    .overlay(alignment: .topLeading) {
-                        if show.state == .watching && show.episodesCount > 0 {
-                            ProgressBadge(percent: show.progress * 100)
+                NavigationLink(value: DetailRoute.series(id: show.id)) {
+                    PosterImage(path: show.posterPath, title: show.title)
+                        .overlay(alignment: .topLeading) {
+                            if show.state == .watching && show.episodesCount > 0 {
+                                ProgressBadge(percent: show.progress * 100)
+                            }
                         }
-                    }
-                    .overlay(alignment: .topTrailing) {
-                        if show.pinned { PinBadge() }
-                    }
+                        .overlay(alignment: .topTrailing) {
+                            if show.pinned { PinBadge() }
+                        }
+                }
+                .buttonStyle(.plain)
             }
             .refreshable { await store.load() }
         }

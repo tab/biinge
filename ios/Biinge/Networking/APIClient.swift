@@ -52,6 +52,78 @@ actor APIClient {
         ])
     }
 
+    // MARK: - Details (TMDB-backed)
+
+    func movieDetails(id: Int) async throws -> MovieDetails {
+        try await get("/movies/\(id)")
+    }
+
+    func seriesDetails(id: Int) async throws -> SeriesDetails {
+        try await get("/series/\(id)")
+    }
+
+    func seasonDetails(showId: Int, season: Int) async throws -> SeasonDetails {
+        try await get("/series/\(showId)/season/\(season)")
+    }
+
+    func episodeDetails(showId: Int, season: Int, episode: Int) async throws -> EpisodeDetails {
+        try await get("/series/\(showId)/season/\(season)/episode/\(episode)")
+    }
+
+    func personDetails(id: Int) async throws -> PersonDetails {
+        try await get("/people/\(id)")
+    }
+
+    // MARK: - Movie mutations
+
+    func createMovie(_ body: CreateMovieBody) async throws -> MovieDetails {
+        try await send("POST", "/movies", body: body)
+    }
+
+    func updateMovie(id: Int, _ body: UpdateMovieBody) async throws -> MovieDetails {
+        try await send("PATCH", "/movies/\(id)", body: body)
+    }
+
+    func deleteMovie(id: Int) async throws {
+        try await delete("/movies/\(id)")
+    }
+
+    // MARK: - Series mutations
+
+    func createSeries(_ body: CreateSeriesBody) async throws -> SeriesDetails {
+        try await send("POST", "/series", body: body)
+    }
+
+    func updateSeries(id: Int, _ body: UpdateSeriesBody) async throws -> SeriesDetails {
+        try await send("PATCH", "/series/\(id)", body: body)
+    }
+
+    func deleteSeries(id: Int) async throws {
+        try await delete("/series/\(id)")
+    }
+
+    // MARK: - Progress
+
+    func progress(showId: Int) async throws -> WatchProgress {
+        try await get("/series/\(showId)/progress")
+    }
+
+    func markSeason(showId: Int, seasonId: Int, _ body: MarkSeasonBody) async throws -> WatchProgress {
+        try await send("POST", "/series/\(showId)/seasons/\(seasonId)/watched", body: body)
+    }
+
+    func unmarkSeason(showId: Int, seasonId: Int) async throws -> WatchProgress {
+        try await deleteReturning("/series/\(showId)/seasons/\(seasonId)/watched")
+    }
+
+    func markEpisode(showId: Int, seasonId: Int, episodeId: Int, _ body: MarkEpisodeBody) async throws -> WatchProgress {
+        try await send("POST", "/series/\(showId)/seasons/\(seasonId)/episodes/\(episodeId)/watched", body: body)
+    }
+
+    func unmarkEpisode(showId: Int, seasonId: Int, episodeId: Int) async throws -> WatchProgress {
+        try await deleteReturning("/series/\(showId)/seasons/\(seasonId)/episodes/\(episodeId)/watched")
+    }
+
     // MARK: - Generic verbs
 
     func get<Response: Decodable & Sendable>(_ path: String, query: [URLQueryItem] = []) async throws -> Response {
@@ -74,6 +146,12 @@ actor APIClient {
     func delete(_ path: String) async throws {
         let request = makeRequest("DELETE", path, query: [], body: nil)
         _ = try await perform(request, authenticated: true, retried: false)
+    }
+
+    func deleteReturning<Response: Decodable & Sendable>(_ path: String) async throws -> Response {
+        let request = makeRequest("DELETE", path, query: [], body: nil)
+        let data = try await perform(request, authenticated: true, retried: false)
+        return try decode(data)
     }
 
     // MARK: - Request plumbing

@@ -40,6 +40,9 @@ struct RootView: View {
             }
         }
         .tint(Color.biingePrimary)
+        .environment(movieStore)
+        .environment(tvStore)
+        .environment(\.apiClient, apiClient)
     }
 }
 

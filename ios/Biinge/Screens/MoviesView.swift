@@ -3,6 +3,7 @@ import SwiftUI
 struct MoviesView: View {
     let store: MovieStore
     @State private var selection: Segment = .want
+    @State private var path: [DetailRoute] = []
 
     enum Segment: String, CaseIterable {
         case want = "Want"
@@ -14,7 +15,7 @@ struct MoviesView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 Picker("", selection: $selection) {
                     ForEach(Segment.allCases, id: \.self) { Text($0.rawValue).tag($0) }
@@ -26,8 +27,16 @@ struct MoviesView: View {
                 content
             }
             .navigationTitle("Movies")
+            .detailDestinations()
         }
-        .task { await store.loadIfNeeded() }
+        .task {
+            await store.loadIfNeeded()
+            #if DEBUG
+            if path.isEmpty, let raw = ProcessInfo.processInfo.environment["DEBUG_MOVIE_ID"], let id = Int(raw) {
+                path = [.movie(id: id)]
+            }
+            #endif
+        }
     }
 
     @ViewBuilder
@@ -44,10 +53,13 @@ struct MoviesView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             PosterGrid(items: movies) { movie in
-                PosterImage(path: movie.posterPath, title: movie.title)
-                    .overlay(alignment: .topTrailing) {
-                        if movie.pinned { PinBadge() }
-                    }
+                NavigationLink(value: DetailRoute.movie(id: movie.id)) {
+                    PosterImage(path: movie.posterPath, title: movie.title)
+                        .overlay(alignment: .topTrailing) {
+                            if movie.pinned { PinBadge() }
+                        }
+                }
+                .buttonStyle(.plain)
             }
             .refreshable { await store.load() }
         }

@@ -10,4 +10,10 @@ enum Config {
         }
         return URL(string: "http://localhost:8080/api/v1")!
     }()
+
+    /// Builds a TMDB image URL for a poster/still/profile path (public CDN, no token).
+    static func tmdbImageURL(path: String, size: String = "w342") -> URL? {
+        guard !path.isEmpty else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/\(size)\(path)")
+    }
 }

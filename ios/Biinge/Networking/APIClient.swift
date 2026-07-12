@@ -36,6 +36,22 @@ actor APIClient {
         try await get("/accounts/me")
     }
 
+    // MARK: - Library
+
+    func movies(type: String) async throws -> Paginated<LibraryMovie> {
+        try await get("/movies", query: [
+            URLQueryItem(name: "type", value: type),
+            URLQueryItem(name: "per", value: "10000"),
+        ])
+    }
+
+    func series(type: String) async throws -> Paginated<LibrarySeries> {
+        try await get("/series", query: [
+            URLQueryItem(name: "type", value: type),
+            URLQueryItem(name: "per", value: "10000"),
+        ])
+    }
+
     // MARK: - Generic verbs
 
     func get<Response: Decodable & Sendable>(_ path: String, query: [URLQueryItem] = []) async throws -> Response {

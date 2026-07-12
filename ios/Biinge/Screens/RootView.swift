@@ -33,7 +33,7 @@ struct RootView: View {
                 TvView(store: tvStore)
             }
             Tab("Search", systemImage: "magnifyingglass", value: 2) {
-                ComingSoonView(title: "Search")
+                SearchView()
             }
             Tab("Profile", systemImage: "person.crop.circle", value: 3) {
                 ProfileView(authManager: authManager)
@@ -43,44 +43,5 @@ struct RootView: View {
         .environment(movieStore)
         .environment(tvStore)
         .environment(\.apiClient, apiClient)
-    }
-}
-
-private struct ComingSoonView: View {
-    let title: String
-
-    var body: some View {
-        NavigationStack {
-            ContentUnavailableView(
-                "Coming soon",
-                systemImage: "hourglass",
-                description: Text("\(title) will live here.")
-            )
-            .navigationTitle(title)
-        }
-    }
-}
-
-private struct ProfileView: View {
-    let authManager: AuthManager
-
-    var body: some View {
-        NavigationStack {
-            List {
-                if let user = authManager.user {
-                    Section {
-                        Text(user.email)
-                            .font(.biingeCallout)
-                        LabeledContent("Appearance", value: user.appearance.rawValue.capitalized)
-                    }
-                }
-                Section {
-                    Button("Log Out", role: .destructive) {
-                        authManager.logout()
-                    }
-                }
-            }
-            .navigationTitle("Profile")
-        }
     }
 }

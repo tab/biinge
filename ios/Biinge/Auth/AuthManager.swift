@@ -57,6 +57,19 @@ final class AuthManager {
         clearSession()
     }
 
+    /// Persist a new appearance and update the in-memory user (which re-themes the app).
+    func updateAppearance(_ appearance: Appearance, using apiClient: APIClient) async {
+        guard let user else { return }
+        let body = UpdateAccountBody(
+            firstName: user.firstName ?? "User",
+            lastName: user.lastName ?? "User",
+            appearance: appearance.rawValue
+        )
+        if let updated = try? await apiClient.updateAccount(body) {
+            self.user = updated
+        }
+    }
+
     /// Exchanges the refresh token for a new pair, or clears the session and
     /// surfaces `.unauthorized` if it can't.
     func refreshTokens(using apiClient: APIClient) async throws {

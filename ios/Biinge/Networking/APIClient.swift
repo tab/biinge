@@ -36,6 +36,49 @@ actor APIClient {
         try await get("/accounts/me")
     }
 
+    func stats() async throws -> AccountStats {
+        try await get("/accounts/stats")
+    }
+
+    func updateAccount(_ body: UpdateAccountBody) async throws -> User {
+        try await send("PATCH", "/accounts/", body: body)
+    }
+
+    // MARK: - Search & trending
+
+    func searchMovies(query: String, page: Int = 1) async throws -> Paginated<SearchMovie> {
+        try await get("/search/movies", query: [
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "page", value: String(page)),
+        ])
+    }
+
+    func searchSeries(query: String, page: Int = 1) async throws -> Paginated<SearchSeries> {
+        try await get("/search/series", query: [
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "page", value: String(page)),
+        ])
+    }
+
+    func searchPeople(query: String, page: Int = 1) async throws -> Paginated<SearchPerson> {
+        try await get("/search/people", query: [
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "page", value: String(page)),
+        ])
+    }
+
+    func trendingMovies() async throws -> Paginated<SearchMovie> {
+        try await get("/trending/movies")
+    }
+
+    func trendingSeries() async throws -> Paginated<SearchSeries> {
+        try await get("/trending/series")
+    }
+
+    func trendingPeople() async throws -> Paginated<SearchPerson> {
+        try await get("/trending/people")
+    }
+
     // MARK: - Library
 
     func movies(type: String) async throws -> Paginated<LibraryMovie> {

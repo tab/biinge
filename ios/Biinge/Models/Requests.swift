@@ -30,6 +30,18 @@ struct UpdateSeriesBody: Encodable, Sendable {
     let pinned: Bool
 }
 
+struct UpdateAccountBody: Encodable, Sendable {
+    let firstName: String
+    let lastName: String
+    let appearance: String
+
+    enum CodingKeys: String, CodingKey {
+        case firstName = "first_name"
+        case lastName = "last_name"
+        case appearance
+    }
+}
+
 // Progress payloads carry metadata so the server can materialize the
 // series/season/episode rows it needs when marking items watched.
 

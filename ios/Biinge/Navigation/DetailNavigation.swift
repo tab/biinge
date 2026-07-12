@@ -87,18 +87,19 @@ private struct PresentsDetailsModifier: ViewModifier {
                 episode = EpisodeSheetItem(showId: showId, seasonNumber: seasonNumber, episodeNumber: episodeNumber)
             }
             .sheet(item: $movie) { item in
-                sheet { MovieDetailView(movieId: item.id) }
+                sheet { MovieDetailView(movieId: item.id) }.id(item.id)
             }
             .sheet(item: $series) { item in
-                sheet { TvDetailView(seriesId: item.id) }
+                sheet { TvDetailView(seriesId: item.id) }.id(item.id)
             }
             .sheet(item: $person) { item in
-                sheet { PersonDetailView(personId: item.id) }
+                sheet { PersonDetailView(personId: item.id) }.id(item.id)
             }
             .sheet(item: $episode) { item in
                 sheet {
                     EpisodeDetailView(showId: item.showId, seasonNumber: item.seasonNumber, episodeNumber: item.episodeNumber)
                 }
+                .id(item.id)
             }
     }
 

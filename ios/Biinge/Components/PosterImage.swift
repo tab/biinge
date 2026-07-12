@@ -26,6 +26,9 @@ struct PosterImage: View {
                             placeholder
                         }
                     }
+                    // Rebuild the loader when the URL changes so a recycled view never
+                    // lingers on a previous poster (AsyncImage won't reload on its own).
+                    .id(url)
                 } else {
                     placeholder
                 }

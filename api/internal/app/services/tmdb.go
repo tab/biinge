@@ -490,7 +490,9 @@ func (p *tmdbProvider) SearchPeople(ctx context.Context, query string, page uint
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	return buildPeopleList(response), nil
+	// User-initiated search: only drop poster-less and flagged-adult results so a
+	// deliberate lookup can still surface lesser-known people.
+	return buildPeopleList(response, 0), nil
 }
 
 func (p *tmdbProvider) FetchTrendingPeople(ctx context.Context) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error) {
@@ -500,8 +502,16 @@ func (p *tmdbProvider) FetchTrendingPeople(ctx context.Context) (*serializers.Pa
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	return buildPeopleList(response), nil
+	// Discovery list: also require a notable credit to weed out the unknown and
+	// unflagged-adult performers that clutter TMDB's popular-people feed.
+	return buildPeopleList(response, minNotableVoteCount), nil
 }
+
+// minNotableVoteCount is the vote-count floor a person's best-known title must
+// clear to appear in the discovery list. TMDB rarely flags adult/unknown people,
+// but their only credits are obscure (a handful of votes), so this removes them
+// without needing an adult flag we cannot trust.
+const minNotableVoteCount = 100
 
 // buildMovieList filters out adult and poster-less results, merges the user's
 // tracking state, and wraps the page in a pagination envelope.
@@ -608,10 +618,14 @@ func (p *tmdbProvider) buildSeriesList(ctx context.Context, response *tmdb.TvLis
 
 // buildPeopleList filters out adult and profile-less results; people carry no
 // tracking state, so no database lookup is needed.
-func buildPeopleList(response *tmdb.PersonListResult) *serializers.PaginationResponse[serializers.SearchPersonSerializer] {
+func buildPeopleList(response *tmdb.PersonListResult, minKnownForVotes int) *serializers.PaginationResponse[serializers.SearchPersonSerializer] {
 	data := make([]serializers.SearchPersonSerializer, 0, len(response.Results))
 	for _, item := range response.Results {
 		if item.ProfilePath == "" || item.Adult {
+			continue
+		}
+
+		if minKnownForVotes > 0 && !hasNotableCredit(item.KnownFor, minKnownForVotes) {
 			continue
 		}
 
@@ -630,4 +644,16 @@ func buildPeopleList(response *tmdb.PersonListResult) *serializers.PaginationRes
 			Total: uint64(response.TotalResults),
 		},
 	}
+}
+
+// hasNotableCredit reports whether any of the person's known-for titles clears the
+// vote-count floor, i.e. the person has at least one recognised piece of work.
+func hasNotableCredit(knownFor []tmdb.PersonKnownFor, minVotes int) bool {
+	for _, credit := range knownFor {
+		if credit.VoteCount >= minVotes {
+			return true
+		}
+	}
+
+	return false
 }

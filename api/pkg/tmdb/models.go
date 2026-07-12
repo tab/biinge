@@ -343,11 +343,16 @@ type TvListItem struct {
 	Adult        bool    `json:"adult"`
 }
 
+type PersonKnownFor struct {
+	VoteCount int `json:"vote_count"`
+}
+
 type PersonListItem struct {
-	Id          uint64 `json:"id"`
-	Name        string `json:"name"`
-	ProfilePath string `json:"profile_path"`
-	Adult       bool   `json:"adult"`
+	Id          uint64           `json:"id"`
+	Name        string           `json:"name"`
+	ProfilePath string           `json:"profile_path"`
+	Adult       bool             `json:"adult"`
+	KnownFor    []PersonKnownFor `json:"known_for"`
 }
 
 type MovieListResult struct {

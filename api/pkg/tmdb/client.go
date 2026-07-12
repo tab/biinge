@@ -422,7 +422,10 @@ func (c *client) FetchTrendingTv(ctx context.Context) (*TvListResult, error) {
 }
 
 func (c *client) FetchTrendingPeople(ctx context.Context) (*PersonListResult, error) {
-	endpoint := fmt.Sprintf("%s/trending/person/week", c.cfg.TMDBConfig.BaseURL)
+	// TMDB's trending/person feed is heavily polluted with unflagged adult and
+	// unknown entries and returns no known_for to filter on. person/popular is far
+	// cleaner and includes known_for so callers can drop non-notable people.
+	endpoint := fmt.Sprintf("%s/person/popular", c.cfg.TMDBConfig.BaseURL)
 	return fetchList[PersonListResult](ctx, c, endpoint, nil)
 }
 

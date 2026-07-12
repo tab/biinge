@@ -96,3 +96,19 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           working-directory: api
+
+  ios:
+    name: iOS build
+    # NOTE: requires a runner image with Xcode 26 (iOS 26 SDK).
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          xcodebuild -project Biinge.xcodeproj -scheme Biinge \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO build

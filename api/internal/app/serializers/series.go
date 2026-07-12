@@ -69,7 +69,7 @@ func (params *CreateSeriesRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrInvalidState
 	}
 
-	return nil
+	return validate.Struct(params)
 }
 
 type UpdateSeriesRequestSerializer struct {
@@ -91,5 +91,5 @@ func (params *UpdateSeriesRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrInvalidState
 	}
 
-	return nil
+	return validate.Struct(params)
 }

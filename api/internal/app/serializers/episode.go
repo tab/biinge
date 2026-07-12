@@ -36,7 +36,11 @@ func (params *CreateEpisodeRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrEmptyTitle
 	}
 
-	return validateItemState(&params.State)
+	if err := validateItemState(&params.State); err != nil {
+		return err
+	}
+
+	return validate.Struct(params)
 }
 
 type UpdateEpisodeRequestSerializer struct {
@@ -48,7 +52,11 @@ func (params *UpdateEpisodeRequestSerializer) Validate(body io.Reader) error {
 		return err
 	}
 
-	return validateItemState(&params.State)
+	if err := validateItemState(&params.State); err != nil {
+		return err
+	}
+
+	return validate.Struct(params)
 }
 
 // EpisodeDetailsSerializer is a TMDB-sourced single episode with credits and

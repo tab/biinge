@@ -119,6 +119,13 @@ func (a *authentication) Refresh(_ context.Context, params *serializers.RefreshR
 		return nil, errors.ErrInvalidToken
 	}
 
+	// Reject access tokens presented on the refresh path. Legacy tokens without
+	// a type (empty) are still accepted for backward compatibility.
+	if payload.Type == jwt.TokenTypeAccess {
+		a.log.Error().Msg("Access token used on refresh endpoint")
+		return nil, errors.ErrInvalidToken
+	}
+
 	return a.issueTokens(payload.ID, payload.Email)
 }
 
@@ -127,6 +134,7 @@ func (a *authentication) issueTokens(id, email string) (*serializers.TokenSerial
 	accessToken, err := a.jwt.Generate(jwt.Payload{
 		ID:    id,
 		Email: email,
+		Type:  jwt.TokenTypeAccess,
 	}, AccessTokenDuration)
 	if err != nil {
 		a.log.Error().Err(err).Msg("Failed to generate access token")
@@ -136,6 +144,7 @@ func (a *authentication) issueTokens(id, email string) (*serializers.TokenSerial
 	refreshToken, err := a.jwt.Generate(jwt.Payload{
 		ID:    id,
 		Email: email,
+		Type:  jwt.TokenTypeRefresh,
 	}, RefreshTokenDuration)
 	if err != nil {
 		a.log.Error().Err(err).Msg("Failed to generate refresh token")

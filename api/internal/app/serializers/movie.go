@@ -82,7 +82,7 @@ func (params *CreateMovieRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrInvalidState
 	}
 
-	return nil
+	return validate.Struct(params)
 }
 
 type UpdateMovieRequestSerializer struct {
@@ -104,5 +104,5 @@ func (params *UpdateMovieRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrInvalidState
 	}
 
-	return nil
+	return validate.Struct(params)
 }

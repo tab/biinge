@@ -8,9 +8,16 @@ import (
 	"biinge-api/internal/config"
 )
 
+// Token type claim values. Tokens issued before this claim existed carry an
+// empty Type and are treated as valid on both the access and refresh paths for
+// backward compatibility.
+const (
+	TokenTypeAccess  = "access"
+	TokenTypeRefresh = "refresh"
+)
+
 type Jwt interface {
 	Generate(payload Payload, duration time.Duration) (string, error)
-	Verify(token string) (bool, error)
 	Decode(token string) (*Payload, error)
 }
 
@@ -21,6 +28,7 @@ type jwtService struct {
 type Payload struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
+	Type  string `json:"type,omitempty"`
 }
 
 type Claims struct {
@@ -56,28 +64,6 @@ func (j *jwtService) Generate(payload Payload, duration time.Duration) (string, 
 	return signedToken, nil
 }
 
-func (j *jwtService) Verify(token string) (bool, error) {
-	claims := &Claims{}
-
-	result, err := jwt.ParseWithClaims(token, claims,
-		func(t *jwt.Token) (interface{}, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return false, ErrInvalidSigningMethod
-			}
-			return []byte(j.cfg.JWTSecretKey), nil
-		})
-
-	if err != nil {
-		return false, err
-	}
-
-	if !result.Valid {
-		return false, ErrInvalidToken
-	}
-
-	return true, nil
-}
-
 func (j *jwtService) Decode(token string) (*Payload, error) {
 	claims := &Claims{}
 
@@ -100,5 +86,6 @@ func (j *jwtService) Decode(token string) (*Payload, error) {
 	return &Payload{
 		ID:    claims.ID,
 		Email: claims.Subject,
+		Type:  claims.Payload.Type,
 	}, nil
 }

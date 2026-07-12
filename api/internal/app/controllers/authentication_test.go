@@ -53,7 +53,7 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Registration(gomock.Any(), &serializers.RegistrationRequestSerializer{
 					Login:      "john.doe",
-					Email:      "john.doe@local",
+					Email:      "john.doe@example.com",
 					FirstName:  "John",
 					LastName:   "Doe",
 					Password:   "password",
@@ -63,7 +63,7 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 					RefreshToken: "jwt-refresh-token",
 				}, nil)
 			},
-			body: strings.NewReader(`{ "login": "john.doe", "email": "john.doe@local", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
+			body: strings.NewReader(`{ "login": "john.doe", "email": "john.doe@example.com", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
 			expected: result{
 				response: serializers.TokenSerializer{
 					AccessToken:  "jwt-access-token",
@@ -76,7 +76,7 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 		{
 			name:   "Validation Error – Empty Login",
 			before: func() {},
-			body:   strings.NewReader(`{ "login": "", "email": "john.doe@local", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
+			body:   strings.NewReader(`{ "login": "", "email": "john.doe@example.com", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "empty login"},
 				status: "400 Bad Request",
@@ -98,7 +98,7 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 		{
 			name:   "Validation Error – Empty Password",
 			before: func() {},
-			body:   strings.NewReader(`{ "login": "john.doe", "email": "john.doe@local", "first_name": "John", "last_name": "Doe", "password": "", "appearance": "dark" }`),
+			body:   strings.NewReader(`{ "login": "john.doe", "email": "john.doe@example.com", "first_name": "John", "last_name": "Doe", "password": "", "appearance": "dark" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "empty password"},
 				status: "400 Bad Request",
@@ -111,7 +111,7 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Registration(gomock.Any(), gomock.Any()).Return(nil, errors.ErrLoginAlreadyExists)
 			},
-			body: strings.NewReader(`{ "login": "existing.user", "email": "john.doe@local", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
+			body: strings.NewReader(`{ "login": "existing.user", "email": "john.doe@example.com", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "login already exists"},
 				status: "400 Bad Request",
@@ -124,7 +124,7 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Registration(gomock.Any(), gomock.Any()).Return(nil, errors.ErrEmailAlreadyExists)
 			},
-			body: strings.NewReader(`{ "login": "john.doe", "email": "existing@local", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
+			body: strings.NewReader(`{ "login": "john.doe", "email": "existing@example.com", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "email already exists"},
 				status: "400 Bad Request",
@@ -137,7 +137,7 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Registration(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
 			},
-			body: strings.NewReader(`{ "login": "john.doe", "email": "john.doe@local", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
+			body: strings.NewReader(`{ "login": "john.doe", "email": "john.doe@example.com", "first_name": "John", "last_name": "Doe", "password": "password", "appearance": "dark" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
 				status: "400 Bad Request",
@@ -211,14 +211,14 @@ func Test_AuthenticationController_Login(t *testing.T) {
 			name: "Success",
 			before: func() {
 				authentication.EXPECT().Login(gomock.Any(), &serializers.LoginRequestSerializer{
-					Email:    "john.doe@local",
+					Email:    "john.doe@example.com",
 					Password: "password",
 				}).Return(&serializers.TokenSerializer{
 					AccessToken:  "jwt-access-token",
 					RefreshToken: "jwt-refresh-token",
 				}, nil)
 			},
-			body: strings.NewReader(`{ "email": "john.doe@local", "password": "password" }`),
+			body: strings.NewReader(`{ "email": "john.doe@example.com", "password": "password" }`),
 			expected: result{
 				response: serializers.TokenSerializer{
 					AccessToken:  "jwt-access-token",
@@ -242,7 +242,7 @@ func Test_AuthenticationController_Login(t *testing.T) {
 		{
 			name:   "Validation Error – Empty Password",
 			before: func() {},
-			body:   strings.NewReader(`{ "email": "john.doe@local", "password": "" }`),
+			body:   strings.NewReader(`{ "email": "john.doe@example.com", "password": "" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "empty password"},
 				status: "400 Bad Request",
@@ -255,7 +255,7 @@ func Test_AuthenticationController_Login(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Login(gomock.Any(), gomock.Any()).Return(nil, errors.ErrInvalidCredentials)
 			},
-			body: strings.NewReader(`{ "email": "nonexistent@local", "password": "password" }`),
+			body: strings.NewReader(`{ "email": "nonexistent@example.com", "password": "password" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "invalid credentials"},
 				status: "401 Unauthorized",
@@ -268,7 +268,7 @@ func Test_AuthenticationController_Login(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Login(gomock.Any(), gomock.Any()).Return(nil, errors.ErrInvalidPassword)
 			},
-			body: strings.NewReader(`{ "email": "john.doe@local", "password": "wrongpassword" }`),
+			body: strings.NewReader(`{ "email": "john.doe@example.com", "password": "wrongpassword" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "invalid password"},
 				status: "401 Unauthorized",
@@ -281,7 +281,7 @@ func Test_AuthenticationController_Login(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Login(gomock.Any(), gomock.Any()).Return(nil, jwt.ErrFailedGenerateAccessToken)
 			},
-			body: strings.NewReader(`{ "email": "john.doe@local", "password": "password" }`),
+			body: strings.NewReader(`{ "email": "john.doe@example.com", "password": "password" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "failed to generate access token"},
 				status: "401 Unauthorized",
@@ -294,7 +294,7 @@ func Test_AuthenticationController_Login(t *testing.T) {
 			before: func() {
 				authentication.EXPECT().Login(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
 			},
-			body: strings.NewReader(`{ "email": "john.doe@local", "password": "password" }`),
+			body: strings.NewReader(`{ "email": "john.doe@example.com", "password": "password" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
 				status: "401 Unauthorized",

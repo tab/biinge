@@ -39,7 +39,7 @@ func (params *CreateSeasonRequestSerializer) Validate(body io.Reader) error {
 		return err
 	}
 
-	return nil
+	return validate.Struct(params)
 }
 
 type UpdateSeasonRequestSerializer struct {
@@ -51,7 +51,11 @@ func (params *UpdateSeasonRequestSerializer) Validate(body io.Reader) error {
 		return err
 	}
 
-	return validateItemState(&params.State)
+	if err := validateItemState(&params.State); err != nil {
+		return err
+	}
+
+	return validate.Struct(params)
 }
 
 // validateItemState trims and validates the state of a season or episode

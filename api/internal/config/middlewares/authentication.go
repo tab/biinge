@@ -48,6 +48,15 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 			return
 		}
 
+		// Reject refresh tokens presented as access credentials. Legacy tokens
+		// without a type (empty) are still accepted for backward compatibility.
+		if claims.Type == jwt.TokenTypeRefresh {
+			m.log.Error().Msg("Refresh token used on a protected endpoint")
+			w.WriteHeader(http.StatusUnauthorized)
+			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: jwt.ErrInvalidTokenType.Error()})
+			return
+		}
+
 		id, err := uuid.Parse(claims.ID)
 		if err != nil {
 			m.log.Error().Err(err).Msg("Failed to parse user Id from claims")

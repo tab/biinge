@@ -11,7 +11,7 @@ import (
 type RegistrationRequestSerializer struct {
 	Login      string `json:"login" validate:"required,min=3,max=20"`
 	Email      string `json:"email" validate:"required,email"`
-	Password   string `json:"password" validate:"required,min=8"`
+	Password   string `json:"password" validate:"required,min=8,max=72"`
 	FirstName  string `json:"first_name" validate:"required,min=2,max=20"`
 	LastName   string `json:"last_name" validate:"required,min=2,max=20"`
 	Appearance string `json:"appearance" validate:"omitempty,oneof=light dark system"`
@@ -19,7 +19,7 @@ type RegistrationRequestSerializer struct {
 
 type LoginRequestSerializer struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
+	Password string `json:"password" validate:"required,min=8,max=72"`
 }
 
 type RefreshRequestSerializer struct {
@@ -50,7 +50,7 @@ func (params *RegistrationRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrEmptyPassword
 	}
 
-	return nil
+	return validate.Struct(params)
 }
 
 func (params *LoginRequestSerializer) Validate(body io.Reader) error {
@@ -69,7 +69,7 @@ func (params *LoginRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrEmptyPassword
 	}
 
-	return nil
+	return validate.Struct(params)
 }
 
 func (params *RefreshRequestSerializer) Validate(body io.Reader) error {
@@ -83,5 +83,5 @@ func (params *RefreshRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrInvalidToken
 	}
 
-	return nil
+	return validate.Struct(params)
 }

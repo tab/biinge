@@ -60,10 +60,12 @@ func Test_Authentication_Registration(t *testing.T) {
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeAccess,
 				}, AccessTokenDuration).Return("jwt-access-token", nil)
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeRefresh,
 				}, RefreshTokenDuration).Return("jwt-refresh-token", nil)
 			},
 			params: &serializers.RegistrationRequestSerializer{
@@ -95,10 +97,12 @@ func Test_Authentication_Registration(t *testing.T) {
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeAccess,
 				}, AccessTokenDuration).Return("jwt-access-token", nil)
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeRefresh,
 				}, RefreshTokenDuration).Return("jwt-refresh-token", nil)
 			},
 			params: &serializers.RegistrationRequestSerializer{
@@ -299,10 +303,12 @@ func Test_Authentication_Login(t *testing.T) {
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeAccess,
 				}, AccessTokenDuration).Return("jwt-access-token", nil)
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeRefresh,
 				}, RefreshTokenDuration).Return("jwt-refresh-token", nil)
 			},
 			params: &serializers.LoginRequestSerializer{
@@ -362,6 +368,7 @@ func Test_Authentication_Login(t *testing.T) {
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeAccess,
 				}, AccessTokenDuration).Return("", jwt.ErrFailedGenerateAccessToken)
 			},
 			params: &serializers.LoginRequestSerializer{
@@ -387,10 +394,12 @@ func Test_Authentication_Login(t *testing.T) {
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeAccess,
 				}, AccessTokenDuration).Return("jwt-access-token", nil)
 				jwtService.EXPECT().Generate(jwt.Payload{
 					ID:    id.String(),
 					Email: "john.doe@local",
+					Type:  jwt.TokenTypeRefresh,
 				}, RefreshTokenDuration).Return("", jwt.ErrFailedGenerateRefreshToken)
 			},
 			params: &serializers.LoginRequestSerializer{
@@ -407,6 +416,121 @@ func Test_Authentication_Login(t *testing.T) {
 			tt.before()
 
 			result, err := service.Login(ctx, tt.params)
+
+			if tt.error != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tt.error.Error(), err.Error())
+				assert.Nil(t, result)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
+			}
+		})
+	}
+}
+
+func Test_Authentication_Refresh(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+
+	usersService := NewMockUsers(ctrl)
+	jwtService := jwt.NewMockJwt(ctrl)
+	log := logger.NewLogger(cfg)
+	service := NewAuthentication(jwtService, usersService, log)
+
+	id, err := uuid.NewRandom()
+	assert.NoError(t, err)
+
+	// expectReissue sets up the Generate calls performed by issueTokens.
+	expectReissue := func() {
+		jwtService.EXPECT().Generate(jwt.Payload{
+			ID:    id.String(),
+			Email: "john.doe@local",
+			Type:  jwt.TokenTypeAccess,
+		}, AccessTokenDuration).Return("jwt-access-token", nil)
+		jwtService.EXPECT().Generate(jwt.Payload{
+			ID:    id.String(),
+			Email: "john.doe@local",
+			Type:  jwt.TokenTypeRefresh,
+		}, RefreshTokenDuration).Return("jwt-refresh-token", nil)
+	}
+
+	tests := []struct {
+		name     string
+		before   func()
+		token    string
+		expected *serializers.TokenSerializer
+		error    error
+	}{
+		{
+			name: "Success with refresh token",
+			before: func() {
+				jwtService.EXPECT().Decode("refresh-token").Return(&jwt.Payload{
+					ID:    id.String(),
+					Email: "john.doe@local",
+					Type:  jwt.TokenTypeRefresh,
+				}, nil)
+				expectReissue()
+			},
+			token: "refresh-token",
+			expected: &serializers.TokenSerializer{
+				AccessToken:  "jwt-access-token",
+				RefreshToken: "jwt-refresh-token",
+			},
+		},
+		{
+			name: "Success with legacy (typeless) token",
+			before: func() {
+				jwtService.EXPECT().Decode("legacy-token").Return(&jwt.Payload{
+					ID:    id.String(),
+					Email: "john.doe@local",
+				}, nil)
+				expectReissue()
+			},
+			token: "legacy-token",
+			expected: &serializers.TokenSerializer{
+				AccessToken:  "jwt-access-token",
+				RefreshToken: "jwt-refresh-token",
+			},
+		},
+		{
+			name: "Rejects access token",
+			before: func() {
+				jwtService.EXPECT().Decode("access-token").Return(&jwt.Payload{
+					ID:    id.String(),
+					Email: "john.doe@local",
+					Type:  jwt.TokenTypeAccess,
+				}, nil)
+			},
+			token:    "access-token",
+			expected: nil,
+			error:    errors.ErrInvalidToken,
+		},
+		{
+			name: "Decode error",
+			before: func() {
+				jwtService.EXPECT().Decode("bad-token").Return(nil, jwt.ErrInvalidToken)
+			},
+			token:    "bad-token",
+			expected: nil,
+			error:    errors.ErrInvalidToken,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			result, err := service.Refresh(ctx, &serializers.RefreshRequestSerializer{
+				RefreshToken: tt.token,
+			})
 
 			if tt.error != nil {
 				assert.Error(t, err)

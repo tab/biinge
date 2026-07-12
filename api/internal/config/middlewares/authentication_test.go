@@ -98,6 +98,20 @@ func Test_AuthMiddleware_Authenticate(t *testing.T) {
 			},
 			error: errors.ErrInvalidToken,
 		},
+		{
+			name: "Refresh token rejected",
+			before: func() {
+				jwtService.EXPECT().Decode("refresh-token").Return(&jwt.Payload{
+					ID:   id.String(),
+					Type: jwt.TokenTypeRefresh,
+				}, nil)
+			},
+			header: "Bearer refresh-token",
+			expected: result{
+				status: "401 Unauthorized",
+				code:   http.StatusUnauthorized,
+			},
+		},
 	}
 
 	for _, tt := range tests {

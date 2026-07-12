@@ -69,18 +69,3 @@ func (mr *MockJwtMockRecorder) Generate(payload, duration any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockJwt)(nil).Generate), payload, duration)
 }
-
-// Verify mocks base method.
-func (m *MockJwt) Verify(token string) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Verify", token)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Verify indicates an expected call of Verify.
-func (mr *MockJwtMockRecorder) Verify(token any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockJwt)(nil).Verify), token)
-}

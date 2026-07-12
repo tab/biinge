@@ -46,5 +46,5 @@ func (params *UpdateAccountRequestSerializer) Validate(body io.Reader) error {
 		return errors.ErrEmptyAppearance
 	}
 
-	return nil
+	return validate.Struct(params)
 }

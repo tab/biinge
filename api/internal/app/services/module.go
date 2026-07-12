@@ -8,8 +8,6 @@ var Module = fx.Options(
 	fx.Provide(NewTmdbProvider),
 	fx.Provide(NewMovies),
 	fx.Provide(NewSeries),
-	fx.Provide(NewSeasons),
-	fx.Provide(NewEpisodes),
 	fx.Provide(NewProgress),
 	fx.Provide(NewStats),
 	fx.Provide(NewUsers),

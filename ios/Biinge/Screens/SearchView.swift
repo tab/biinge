@@ -11,6 +11,7 @@ struct SearchView: View {
     @State private var path: [DetailRoute] = []
     @State private var didDeepLink = false
     @Environment(\.presentMovie) private var presentMovie
+    @Environment(\.presentSeries) private var presentSeries
     @Environment(\.presentPerson) private var presentPerson
 
     private var isTrending: Bool { query.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -81,7 +82,9 @@ struct SearchView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(series) { show in
-                    NavigationLink(value: DetailRoute.series(id: show.id)) {
+                    Button {
+                        presentSeries(show.id)
+                    } label: {
                         PosterImage(path: show.posterPath, title: show.title, size: "w185")
                             .frame(width: 120)
                             .overlay(alignment: .topTrailing) { inLibraryBadge(show.state) }

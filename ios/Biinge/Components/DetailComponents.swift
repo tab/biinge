@@ -71,26 +71,6 @@ struct CreditsRow: View {
     }
 }
 
-struct RecommendationsRow: View {
-    let items: [Recommendation]
-    let route: (Int) -> DetailRoute
-
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(items) { item in
-                    NavigationLink(value: route(item.id)) {
-                        PosterImage(path: item.posterPath, title: item.title, size: "w185")
-                            .frame(width: 110)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-}
-
 struct TrailerButton: View {
     let videoKey: String
     @Environment(\.openURL) private var openURL

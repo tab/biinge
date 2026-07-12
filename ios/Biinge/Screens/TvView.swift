@@ -3,7 +3,8 @@ import SwiftUI
 struct TvView: View {
     let store: TvStore
     @State private var selection: Segment = .watching
-    @State private var path: [DetailRoute] = []
+    @State private var didDeepLink = false
+    @Environment(\.presentSeries) private var presentSeries
 
     enum Segment: String, CaseIterable {
         case want = "Want"
@@ -20,7 +21,7 @@ struct TvView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             VStack(spacing: 0) {
                 Picker("", selection: $selection) {
                     ForEach(Segment.allCases, id: \.self) { Text($0.rawValue).tag($0) }
@@ -32,13 +33,13 @@ struct TvView: View {
                 content
             }
             .navigationTitle("TV Shows")
-            .detailDestinations()
         }
         .task {
             await store.loadIfNeeded()
             #if DEBUG
-            if path.isEmpty, let raw = ProcessInfo.processInfo.environment["DEBUG_SERIES_ID"], let id = Int(raw) {
-                path = [.series(id: id)]
+            if !didDeepLink, let raw = ProcessInfo.processInfo.environment["DEBUG_SERIES_ID"], let id = Int(raw) {
+                didDeepLink = true
+                presentSeries(id)
             }
             #endif
         }
@@ -58,7 +59,9 @@ struct TvView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             PosterGrid(items: shows) { show in
-                NavigationLink(value: DetailRoute.series(id: show.id)) {
+                Button {
+                    presentSeries(show.id)
+                } label: {
                     PosterImage(path: show.posterPath, title: show.title)
                         .overlay(alignment: .topLeading) {
                             if show.state == .watching && show.episodesCount > 0 {

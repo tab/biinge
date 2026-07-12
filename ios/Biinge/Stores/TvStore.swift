@@ -59,18 +59,20 @@ final class TvStore {
 
     // MARK: - Mutations
 
-    /// Toggle a show's "want" membership. Shows in watching/watched move to want.
-    func toggleWant(
+    /// Move a show into `target` (want/watching/watched); tapping the current
+    /// state removes it.
+    func toggle(
         id: Int,
         title: String,
         posterPath: String,
         seasonsCount: Int,
         episodesCount: Int,
-        status: String
+        status: String,
+        target: WatchState
     ) async {
         let current = currentState(id: id)
         do {
-            if current == .want {
+            if current == target {
                 try await apiClient.deleteSeries(id: id)
                 removeLocal(id: id)
             } else if current == nil {
@@ -78,15 +80,15 @@ final class TvStore {
                     CreateSeriesBody(
                         id: id, title: title, posterPath: posterPath,
                         seasonsCount: seasonsCount, episodesCount: episodesCount,
-                        status: status, state: WatchState.want.rawValue
+                        status: status, state: target.rawValue
                     )
                 )
                 insertLocal(LibrarySeries(
                     id: id, title: title, posterPath: posterPath, pinned: false,
-                    state: .want, episodesCount: episodesCount, watchedEpisodesCount: 0
+                    state: target, episodesCount: episodesCount, watchedEpisodesCount: 0
                 ))
             } else {
-                _ = try await apiClient.updateSeries(id: id, UpdateSeriesBody(state: WatchState.want.rawValue, pinned: isPinned(id: id)))
+                _ = try await apiClient.updateSeries(id: id, UpdateSeriesBody(state: target.rawValue, pinned: isPinned(id: id)))
                 await load()
             }
         } catch {

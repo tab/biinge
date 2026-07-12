@@ -201,7 +201,8 @@ struct MovieDetailView: View {
     }
 
     private func handleMenu(_ action: MovieActionMenu.MenuAction, _ movie: MovieDetails) async {
-        withAnimation(.easeOut(duration: 0.15)) { showMenu = false }
+        // The menu stays open on actions (only Cancel dismisses it); it just
+        // re-renders with the new state.
         switch action {
         case .toggleWant:
             await store.toggle(id: movieId, title: movie.title, posterPath: movie.posterPath, runtime: movie.runtime ?? 0, target: .want)
@@ -313,19 +314,25 @@ struct MovieActionMenu: View {
     }
 
     private var options: [(title: String, action: () -> Void)] {
-        var result: [(String, () -> Void)] = []
         switch state {
         case .want:
-            result.append(("Remove from Want", { onAction(.toggleWant) }))
-            result.append(("Move to Watched", { onAction(.toggleWatched) }))
+            return [
+                ("Remove from Want", { onAction(.toggleWant) }),
+                ("Move to Watched", { onAction(.toggleWatched) }),
+                (pinned ? "Unpin" : "Pin", { onAction(pinned ? .unpin : .pin) }),
+            ]
         case .watched:
-            result.append(("Remove from Watched", { onAction(.toggleWatched) }))
-            result.append(("Move to Want", { onAction(.toggleWant) }))
+            return [
+                ("Remove from Watched", { onAction(.toggleWatched) }),
+                ("Move to Want", { onAction(.toggleWant) }),
+                (pinned ? "Unpin" : "Pin", { onAction(pinned ? .unpin : .pin) }),
+            ]
         default:
-            break
+            return [
+                ("Want", { onAction(.toggleWant) }),
+                ("Watched", { onAction(.toggleWatched) }),
+            ]
         }
-        result.append((pinned ? "Unpin" : "Pin", { onAction(pinned ? .unpin : .pin) }))
-        return result
     }
 }
 

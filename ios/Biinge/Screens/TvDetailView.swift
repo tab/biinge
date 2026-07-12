@@ -534,50 +534,99 @@ private struct EpisodeRow: View {
     let showsDivider: Bool
     let onToggle: (Bool) async -> Void
     @Environment(\.presentEpisode) private var presentEpisode
+    @State private var dragX: CGFloat = 0
+
+    private let revealWidth: CGFloat = 78
+    private let triggerThreshold: CGFloat = 62
 
     var body: some View {
         VStack(spacing: 0) {
             if showsDivider {
                 Divider()
             }
-            HStack(alignment: .top, spacing: 10) {
-                Button {
-                    Task { await onToggle(!isWatched) }
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("\(index + 1)")
-                            .font(.biingeCaption1).foregroundStyle(Color.biingeGraniteGray)
-                        Image(systemName: isWatched ? "checkmark" : "circle.fill")
-                            .font(.system(size: isWatched ? 13 : 8))
-                            .foregroundStyle(isWatched ? Color.biingeGraniteGray : Color.biingePrimary)
-                            .frame(width: 16)
-                    }
-                }
-                .buttonStyle(.plain)
+            ZStack(alignment: .leading) {
+                swipeActionStrip
+                rowContent
+                    .background(Color.biingeBackground)
+                    .offset(x: max(dragX, 0))
+                    .simultaneousGesture(swipeGesture)
+            }
+            .clipped()
+        }
+    }
 
-                Button {
-                    presentEpisode(showId, seasonNumber, episode.number)
-                } label: {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(episode.title)
-                            .font(.biingeSubhead).foregroundStyle(.primary)
-                            .lineLimit(2).multilineTextAlignment(.leading)
-                        Text(episodeMeta)
-                            .font(.biingeCaption2).foregroundStyle(Color.biingeSpanishGray)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .buttonStyle(.plain)
+    // Leading strip revealed while swiping right — its color and icon preview the
+    // pending toggle (mark watched vs. remove), matching the RN swipe-to-toggle.
+    private var swipeActionStrip: some View {
+        HStack(spacing: 0) {
+            Image(systemName: isWatched ? "arrow.uturn.backward" : "checkmark")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.leading, 24)
+                .opacity(dragX > 10 ? 1 : 0)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(isWatched ? Color.biingeGraniteGray : Color.biingePrimary)
+    }
 
-                if let rating = episode.rating, rating > 0 {
-                    HStack(spacing: 3) {
-                        Image(systemName: "star.fill").font(.system(size: 11)).foregroundStyle(Color.biingePrimary)
-                        Text(String(format: "%.1f", rating)).font(.system(size: 15, weight: .semibold)).foregroundStyle(.secondary)
-                    }
+    private var rowContent: some View {
+        HStack(alignment: .top, spacing: 10) {
+            HStack(spacing: 6) {
+                Text("\(index + 1)")
+                    .font(.biingeCaption1).foregroundStyle(Color.biingeGraniteGray)
+                Image(systemName: isWatched ? "checkmark" : "circle.fill")
+                    .font(.system(size: isWatched ? 13 : 8))
+                    .foregroundStyle(isWatched ? Color.biingeGraniteGray : Color.biingePrimary)
+                    .frame(width: 16)
+            }
+
+            Button {
+                presentEpisode(showId, seasonNumber, episode.number)
+            } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(episode.title)
+                        .font(.biingeSubhead).foregroundStyle(.primary)
+                        .lineLimit(2).multilineTextAlignment(.leading)
+                    Text(episodeMeta)
+                        .font(.biingeCaption2).foregroundStyle(Color.biingeSpanishGray)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+
+            if let rating = episode.rating, rating > 0 {
+                HStack(spacing: 3) {
+                    Image(systemName: "star.fill").font(.system(size: 11)).foregroundStyle(Color.biingePrimary)
+                    Text(String(format: "%.1f", rating)).font(.system(size: 15, weight: .semibold)).foregroundStyle(.secondary)
                 }
             }
-            .padding(.vertical, 8)
         }
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+    }
+
+    // Horizontal, rightward swipe toggles watched. `simultaneousGesture` keeps the
+    // parent ScrollView's vertical scrolling intact; the height check ignores
+    // vertical-dominant drags so scrolling never trips the toggle.
+    private var swipeGesture: some Gesture {
+        DragGesture(minimumDistance: 18)
+            .onChanged { value in
+                let horizontal = value.translation.width
+                if horizontal > 0 && abs(horizontal) > abs(value.translation.height) {
+                    dragX = min(horizontal, revealWidth)
+                }
+            }
+            .onEnded { value in
+                let horizontalIntent = abs(value.translation.width) > abs(value.translation.height)
+                if horizontalIntent && value.translation.width > triggerThreshold {
+                    Task { await onToggle(!isWatched) }
+                }
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
+                    dragX = 0
+                }
+            }
     }
 
     private var episodeMeta: String {

@@ -76,6 +76,18 @@ func (mr *MockSeriesControllerMockRecorder) HandleDetails(w, r any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleDetails", reflect.TypeOf((*MockSeriesController)(nil).HandleDetails), w, r)
 }
 
+// HandleEpisodeDetails mocks base method.
+func (m *MockSeriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.Request) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "HandleEpisodeDetails", w, r)
+}
+
+// HandleEpisodeDetails indicates an expected call of HandleEpisodeDetails.
+func (mr *MockSeriesControllerMockRecorder) HandleEpisodeDetails(w, r any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleEpisodeDetails", reflect.TypeOf((*MockSeriesController)(nil).HandleEpisodeDetails), w, r)
+}
+
 // HandleList mocks base method.
 func (m *MockSeriesController) HandleList(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()
@@ -134,6 +146,18 @@ func (m *MockSeriesController) HandleProgress(w http.ResponseWriter, r *http.Req
 func (mr *MockSeriesControllerMockRecorder) HandleProgress(w, r any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleProgress", reflect.TypeOf((*MockSeriesController)(nil).HandleProgress), w, r)
+}
+
+// HandleSeasonDetails mocks base method.
+func (m *MockSeriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Request) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "HandleSeasonDetails", w, r)
+}
+
+// HandleSeasonDetails indicates an expected call of HandleSeasonDetails.
+func (mr *MockSeriesControllerMockRecorder) HandleSeasonDetails(w, r any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleSeasonDetails", reflect.TypeOf((*MockSeriesController)(nil).HandleSeasonDetails), w, r)
 }
 
 // HandleUnmarkEpisodeWatched mocks base method.

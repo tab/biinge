@@ -9,4 +9,5 @@ var Module = fx.Options(
 	fx.Provide(NewMoviesController),
 	fx.Provide(NewSeriesController),
 	fx.Provide(NewPeopleController),
+	fx.Provide(NewCatalogController),
 )

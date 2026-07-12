@@ -35,6 +35,7 @@ type SeriesDetailsSerializer struct {
 	Credits         []PersonSerializer         `json:"credits"`
 	Recommendations []RecommendationSerializer `json:"recommendations"`
 	Videos          []VideoSerializer          `json:"videos"`
+	Seasons         []SeasonSummarySerializer  `json:"seasons"`
 }
 
 type CreateSeriesRequestSerializer struct {

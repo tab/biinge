@@ -23,6 +23,7 @@ func NewRouter(
 	movies controllers.MoviesController,
 	series controllers.SeriesController,
 	people controllers.PeopleController,
+	catalog controllers.CatalogController,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -81,6 +82,9 @@ func NewRouter(
 				r.Patch("/{id}", series.HandleUpdate)
 				r.Delete("/{id}", series.HandleDelete)
 
+				r.Get("/{id}/season/{seasonNumber}", series.HandleSeasonDetails)
+				r.Get("/{id}/season/{seasonNumber}/episode/{episodeNumber}", series.HandleEpisodeDetails)
+
 				r.Get("/{id}/progress", series.HandleProgress)
 				r.Post("/{id}/watched", series.HandleMarkShowWatched)
 				r.Delete("/{id}/watched", series.HandleUnmarkShowWatched)
@@ -92,6 +96,18 @@ func NewRouter(
 
 			r.Route("/people", func(r chi.Router) {
 				r.Get("/{id}", people.HandleDetails)
+			})
+
+			r.Route("/search", func(r chi.Router) {
+				r.Get("/movies", catalog.HandleSearchMovies)
+				r.Get("/series", catalog.HandleSearchSeries)
+				r.Get("/people", catalog.HandleSearchPeople)
+			})
+
+			r.Route("/trending", func(r chi.Router) {
+				r.Get("/movies", catalog.HandleTrendingMovies)
+				r.Get("/series", catalog.HandleTrendingSeries)
+				r.Get("/people", catalog.HandleTrendingPeople)
 			})
 		})
 	})

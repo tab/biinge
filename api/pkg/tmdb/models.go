@@ -205,6 +205,7 @@ type TvDetails struct {
 	Credits         Credits         `json:"credits"`
 	Recommendations Recommendations `json:"recommendations"`
 	Videos          Videos          `json:"videos"`
+	Seasons         []TvSeason      `json:"seasons"`
 }
 
 type TvResponse struct {
@@ -219,6 +220,7 @@ type TvResponse struct {
 	Credits         []CreditItem         `json:"credits"`
 	Recommendations []RecommendationItem `json:"recommendations"`
 	Videos          []VideoItem          `json:"videos"`
+	Seasons         []SeasonSummaryItem  `json:"seasons"`
 }
 
 type SeasonDetails struct {
@@ -226,6 +228,7 @@ type SeasonDetails struct {
 	AirDate      string    `json:"air_date"`
 	Name         string    `json:"name"`
 	Overview     string    `json:"overview"`
+	PosterPath   string    `json:"poster_path"`
 	SeasonNumber int       `json:"season_number"`
 	Episodes     []Episode `json:"episodes"`
 }
@@ -256,4 +259,114 @@ type EpisodeDetails struct {
 	StillPath      string  `json:"still_path"`
 	VoteAverage    float64 `json:"vote_average"`
 	VoteCount      int     `json:"vote_count"`
+	Credits        Credits `json:"credits"`
+	Videos         Videos  `json:"videos"`
+}
+
+// TvSeason is a season summary as returned within a TMDB /tv/{id} response.
+type TvSeason struct {
+	Id           uint64 `json:"id"`
+	Name         string `json:"name"`
+	SeasonNumber int    `json:"season_number"`
+	EpisodeCount int    `json:"episode_count"`
+	PosterPath   string `json:"poster_path"`
+	AirDate      string `json:"air_date"`
+	Overview     string `json:"overview"`
+}
+
+// SeasonSummaryItem is the transformed (camelCase) season summary embedded in TvResponse.
+type SeasonSummaryItem struct {
+	Id            uint64 `json:"id"`
+	Title         string `json:"title"`
+	Number        uint64 `json:"number"`
+	PosterPath    string `json:"posterPath"`
+	EpisodesCount uint64 `json:"episodesCount"`
+	AirDate       string `json:"airDate,omitempty"`
+}
+
+// SeasonResponse is the transformed season detail (with its episodes).
+type SeasonResponse struct {
+	Id         uint64                `json:"id"`
+	Title      string                `json:"title"`
+	Number     uint64                `json:"number"`
+	PosterPath string                `json:"posterPath"`
+	AirDate    string                `json:"airDate,omitempty"`
+	Overview   string                `json:"overview"`
+	Episodes   []EpisodeResponseItem `json:"episodes"`
+}
+
+// EpisodeResponseItem is a lightweight episode within a season detail.
+type EpisodeResponseItem struct {
+	Id         uint64  `json:"id"`
+	Title      string  `json:"title"`
+	Number     uint64  `json:"number"`
+	PosterPath string  `json:"posterPath"`
+	Runtime    uint64  `json:"runtime"`
+	Overview   string  `json:"overview"`
+	Rating     float64 `json:"rating,omitempty"`
+	AirDate    string  `json:"airDate,omitempty"`
+}
+
+// EpisodeResponse is the transformed single-episode detail (with credits + videos).
+type EpisodeResponse struct {
+	Id         uint64       `json:"id"`
+	Title      string       `json:"title"`
+	Number     uint64       `json:"number"`
+	PosterPath string       `json:"posterPath"`
+	Runtime    uint64       `json:"runtime"`
+	Overview   string       `json:"overview"`
+	Rating     float64      `json:"rating,omitempty"`
+	AirDate    string       `json:"airDate,omitempty"`
+	Credits    []CreditItem `json:"credits"`
+	Videos     []VideoItem  `json:"videos"`
+}
+
+// --- Search / trending list results ---
+
+type MovieListItem struct {
+	Id          uint64  `json:"id"`
+	Title       string  `json:"title"`
+	PosterPath  string  `json:"poster_path"`
+	ReleaseDate string  `json:"release_date"`
+	VoteAverage float64 `json:"vote_average"`
+	Overview    string  `json:"overview"`
+	Adult       bool    `json:"adult"`
+}
+
+type TvListItem struct {
+	Id           uint64  `json:"id"`
+	Name         string  `json:"name"`
+	PosterPath   string  `json:"poster_path"`
+	FirstAirDate string  `json:"first_air_date"`
+	VoteAverage  float64 `json:"vote_average"`
+	Overview     string  `json:"overview"`
+	Adult        bool    `json:"adult"`
+}
+
+type PersonListItem struct {
+	Id          uint64 `json:"id"`
+	Name        string `json:"name"`
+	ProfilePath string `json:"profile_path"`
+	Adult       bool   `json:"adult"`
+}
+
+type MovieListResult struct {
+	Page         int             `json:"page"`
+	Results      []MovieListItem `json:"results"`
+	TotalPages   int             `json:"total_pages"`
+	TotalResults int             `json:"total_results"`
+}
+
+type TvListResult struct {
+	Page         int          `json:"page"`
+	Results      []TvListItem `json:"results"`
+	TotalPages   int          `json:"total_pages"`
+	TotalResults int          `json:"total_results"`
+}
+
+type PersonListResult struct {
+	Page         int              `json:"page"`
+	Results      []PersonListItem `json:"results"`
+	TotalPages   int              `json:"total_pages"`
+	TotalResults int              `json:"total_results"`
 }

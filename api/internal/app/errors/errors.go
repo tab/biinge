@@ -15,6 +15,7 @@ var (
 	ErrEmptyState    = errors.New("empty state")
 	ErrInvalidState  = errors.New("invalid state")
 	ErrInvalidTmdbId = errors.New("invalid tmdb id")
+	ErrEmptyQuery    = errors.New("empty query")
 
 	ErrLoginAlreadyExists = errors.New("login already exists")
 	ErrEmailAlreadyExists = errors.New("email already exists")

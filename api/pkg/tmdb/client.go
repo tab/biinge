@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -28,6 +29,14 @@ type Client interface {
 	FetchTvSeasonDetails(ctx context.Context, id uint64, seasonNumber uint64) (*SeasonDetails, error)
 	FetchTvEpisodeDetails(ctx context.Context, id uint64, seasonNumber uint64, episodeNumber uint64) (*EpisodeDetails, error)
 	FetchPersonDetails(ctx context.Context, id uint64) (*PersonDetails, error)
+
+	SearchMovies(ctx context.Context, query string, page uint64) (*MovieListResult, error)
+	SearchTv(ctx context.Context, query string, page uint64) (*TvListResult, error)
+	SearchPeople(ctx context.Context, query string, page uint64) (*PersonListResult, error)
+
+	FetchTrendingMovies(ctx context.Context) (*MovieListResult, error)
+	FetchTrendingTv(ctx context.Context) (*TvListResult, error)
+	FetchTrendingPeople(ctx context.Context) (*PersonListResult, error)
 
 	WithApiReadAccessToken(apiReadAccessToken string) Client
 	WithLocale(lang string) Client
@@ -248,6 +257,7 @@ func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonN
 	response, err := c.apiClient.R().
 		SetContext(ctx).
 		SetQueryParam("language", c.cfg.TMDBConfig.Locale).
+		SetQueryParam("append_to_response", "credits,videos").
 		Get(endpoint)
 
 	if err != nil {
@@ -372,4 +382,86 @@ func (c *client) WithTimeout(timeout time.Duration) Client {
 	c.cfg.TMDBConfig.Timeout = timeout
 	c.apiClient.SetTimeout(timeout)
 	return c
+}
+
+func (c *client) SearchMovies(ctx context.Context, query string, page uint64) (*MovieListResult, error) {
+	endpoint := fmt.Sprintf("%s/search/movie", c.cfg.TMDBConfig.BaseURL)
+	return fetchList[MovieListResult](ctx, c, endpoint, map[string]string{
+		"query":         query,
+		"page":          strconv.FormatUint(page, 10),
+		"include_adult": "false",
+	})
+}
+
+func (c *client) SearchTv(ctx context.Context, query string, page uint64) (*TvListResult, error) {
+	endpoint := fmt.Sprintf("%s/search/tv", c.cfg.TMDBConfig.BaseURL)
+	return fetchList[TvListResult](ctx, c, endpoint, map[string]string{
+		"query":         query,
+		"page":          strconv.FormatUint(page, 10),
+		"include_adult": "false",
+	})
+}
+
+func (c *client) SearchPeople(ctx context.Context, query string, page uint64) (*PersonListResult, error) {
+	endpoint := fmt.Sprintf("%s/search/person", c.cfg.TMDBConfig.BaseURL)
+	return fetchList[PersonListResult](ctx, c, endpoint, map[string]string{
+		"query":         query,
+		"page":          strconv.FormatUint(page, 10),
+		"include_adult": "false",
+	})
+}
+
+func (c *client) FetchTrendingMovies(ctx context.Context) (*MovieListResult, error) {
+	endpoint := fmt.Sprintf("%s/trending/movie/week", c.cfg.TMDBConfig.BaseURL)
+	return fetchList[MovieListResult](ctx, c, endpoint, nil)
+}
+
+func (c *client) FetchTrendingTv(ctx context.Context) (*TvListResult, error) {
+	endpoint := fmt.Sprintf("%s/trending/tv/week", c.cfg.TMDBConfig.BaseURL)
+	return fetchList[TvListResult](ctx, c, endpoint, nil)
+}
+
+func (c *client) FetchTrendingPeople(ctx context.Context) (*PersonListResult, error) {
+	endpoint := fmt.Sprintf("%s/trending/person/week", c.cfg.TMDBConfig.BaseURL)
+	return fetchList[PersonListResult](ctx, c, endpoint, nil)
+}
+
+// fetchList performs a GET against a TMDB list endpoint and decodes the paged
+// result, mapping TMDB status codes to the package's sentinel errors.
+func fetchList[T any](ctx context.Context, c *client, endpoint string, params map[string]string) (*T, error) {
+	request := c.apiClient.R().
+		SetContext(ctx).
+		SetQueryParam("language", c.cfg.TMDBConfig.Locale)
+
+	for key, value := range params {
+		request = request.SetQueryParam(key, value)
+	}
+
+	c.log.Debug().Str("endpoint", endpoint).Msg("Fetching list from TMDB API")
+
+	response, err := request.Get(endpoint)
+	if err != nil {
+		c.log.Error().Err(err).Str("endpoint", endpoint).Msg("Failed to fetch list from TMDB API")
+		return nil, err
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		var result T
+		if err = json.Unmarshal(response.Body(), &result); err != nil {
+			c.log.Error().Err(err).Str("endpoint", endpoint).Msg("Failed to parse TMDB list response")
+			return nil, err
+		}
+
+		return &result, nil
+	case http.StatusUnauthorized, http.StatusForbidden:
+		c.log.Error().Int("statusCode", response.StatusCode()).Str("endpoint", endpoint).Msg("Access forbidden to TMDB API")
+		return nil, ErrAccessForbidden
+	case http.StatusNotFound:
+		c.log.Error().Int("statusCode", response.StatusCode()).Str("endpoint", endpoint).Msg("Resource not found in TMDB API")
+		return nil, ErrNotFound
+	default:
+		c.log.Error().Int("statusCode", response.StatusCode()).Str("endpoint", endpoint).Msg("Unexpected response from TMDB API")
+		return nil, ErrUnexpectedResponse
+	}
 }

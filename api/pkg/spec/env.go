@@ -41,11 +41,18 @@ func findProjectRoot() (string, error) {
 	}
 
 	for {
-		if _, err = os.Stat(filepath.Join(dir, ".git")); err == nil {
+		// Prefer the Go module root (go.mod) so env files resolve to this
+		// service's directory even when it is nested inside a monorepo whose
+		// .git lives further up the tree.
+		if _, err = os.Stat(filepath.Join(dir, "go.mod")); err == nil {
 			return dir, nil
 		}
 
 		if _, err = os.Stat(filepath.Join(dir, ".env")); err == nil {
+			return dir, nil
+		}
+
+		if _, err = os.Stat(filepath.Join(dir, ".git")); err == nil {
 			return dir, nil
 		}
 

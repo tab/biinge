@@ -15,7 +15,16 @@ import (
 type TmdbProvider interface {
 	FetchMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error)
 	FetchTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error)
+	FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64) (*serializers.SeasonDetailsSerializer, error)
+	FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64) (*serializers.EpisodeDetailsSerializer, error)
 	FetchPersonDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.PersonDetailsSerializer, error)
+
+	SearchMovies(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error)
+	SearchSeries(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error)
+	SearchPeople(ctx context.Context, query string, page uint64) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error)
+	FetchTrendingMovies(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error)
+	FetchTrendingSeries(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error)
+	FetchTrendingPeople(ctx context.Context) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error)
 }
 
 type tmdbProvider struct {
@@ -224,6 +233,18 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		})
 	}
 
+	seasons := make([]serializers.SeasonSummarySerializer, 0, len(details.Seasons))
+	for _, item := range details.Seasons {
+		seasons = append(seasons, serializers.SeasonSummarySerializer{
+			Id:            item.Id,
+			Title:         item.Title,
+			Number:        item.Number,
+			PosterPath:    item.PosterPath,
+			EpisodesCount: item.EpisodesCount,
+			AirDate:       item.AirDate,
+		})
+	}
+
 	tvShow, err := p.series.FindByTmdbId(ctx, id, userId)
 	if err != nil {
 		if errors.Is(err, errors.ErrSeriesNotFound) {
@@ -244,6 +265,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 				Credits:         credits,
 				Recommendations: recommendations,
 				Videos:          videos,
+				Seasons:         seasons,
 			}, nil
 		}
 		p.log.Error().
@@ -266,6 +288,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		Credits:         credits,
 		Recommendations: recommendations,
 		Videos:          videos,
+		Seasons:         seasons,
 	}, nil
 }
 
@@ -329,4 +352,282 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		Gender:       details.Gender,
 		MovieCredits: movieCredits,
 	}, nil
+}
+
+func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64) (*serializers.SeasonDetailsSerializer, error) {
+	p.log.Debug().Uint64("ShowId", showId).Uint64("SeasonNumber", seasonNumber).Msg("Fetching tv season details")
+
+	response, err := p.client.FetchTvSeasonDetails(ctx, showId, seasonNumber)
+	if err != nil {
+		p.log.Error().Err(err).Uint64("ShowId", showId).Uint64("SeasonNumber", seasonNumber).Msg("Failed to fetch tv season details")
+		return nil, tmdb.ErrFailedToFetchSeasonDetails
+	}
+
+	details := tmdb.TransformSeasonDetails(response)
+
+	episodes := make([]serializers.SeasonEpisodeSerializer, 0, len(details.Episodes))
+	for _, item := range details.Episodes {
+		episodes = append(episodes, serializers.SeasonEpisodeSerializer{
+			Id:         item.Id,
+			Title:      item.Title,
+			Number:     item.Number,
+			PosterPath: item.PosterPath,
+			Runtime:    item.Runtime,
+			Overview:   item.Overview,
+			Rating:     item.Rating,
+			AirDate:    item.AirDate,
+		})
+	}
+
+	return &serializers.SeasonDetailsSerializer{
+		Id:         details.Id,
+		TmdbShowId: showId,
+		Title:      details.Title,
+		Number:     details.Number,
+		PosterPath: details.PosterPath,
+		AirDate:    details.AirDate,
+		Overview:   details.Overview,
+		Episodes:   episodes,
+	}, nil
+}
+
+func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64) (*serializers.EpisodeDetailsSerializer, error) {
+	p.log.Debug().
+		Uint64("ShowId", showId).
+		Uint64("SeasonNumber", seasonNumber).
+		Uint64("EpisodeNumber", episodeNumber).
+		Msg("Fetching tv episode details")
+
+	response, err := p.client.FetchTvEpisodeDetails(ctx, showId, seasonNumber, episodeNumber)
+	if err != nil {
+		p.log.Error().
+			Err(err).
+			Uint64("ShowId", showId).
+			Uint64("SeasonNumber", seasonNumber).
+			Uint64("EpisodeNumber", episodeNumber).
+			Msg("Failed to fetch tv episode details")
+		return nil, tmdb.ErrFailedToFetchEpisodeDetails
+	}
+
+	details := tmdb.TransformEpisodeDetails(response)
+
+	credits := make([]serializers.PersonSerializer, 0, len(details.Credits))
+	for _, item := range details.Credits {
+		credits = append(credits, serializers.PersonSerializer{
+			Id:          item.Id,
+			Name:        item.Name,
+			Description: item.Description,
+			ProfilePath: item.ProfilePath,
+		})
+	}
+
+	videos := make([]serializers.VideoSerializer, 0, len(details.Videos))
+	for _, item := range details.Videos {
+		videos = append(videos, serializers.VideoSerializer{
+			Id:  item.Id,
+			Key: item.Key,
+		})
+	}
+
+	return &serializers.EpisodeDetailsSerializer{
+		Id:         details.Id,
+		Title:      details.Title,
+		Number:     details.Number,
+		PosterPath: details.PosterPath,
+		Runtime:    details.Runtime,
+		Overview:   details.Overview,
+		Rating:     details.Rating,
+		AirDate:    details.AirDate,
+		Credits:    credits,
+		Videos:     videos,
+	}, nil
+}
+
+func (p *tmdbProvider) SearchMovies(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
+	response, err := p.client.SearchMovies(ctx, query, page)
+	if err != nil {
+		p.log.Error().Err(err).Str("query", query).Msg("Failed to search movies")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	return p.buildMovieList(ctx, response, userId)
+}
+
+func (p *tmdbProvider) FetchTrendingMovies(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
+	response, err := p.client.FetchTrendingMovies(ctx)
+	if err != nil {
+		p.log.Error().Err(err).Msg("Failed to fetch trending movies")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	return p.buildMovieList(ctx, response, userId)
+}
+
+func (p *tmdbProvider) SearchSeries(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error) {
+	response, err := p.client.SearchTv(ctx, query, page)
+	if err != nil {
+		p.log.Error().Err(err).Str("query", query).Msg("Failed to search series")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	return p.buildSeriesList(ctx, response, userId)
+}
+
+func (p *tmdbProvider) FetchTrendingSeries(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error) {
+	response, err := p.client.FetchTrendingTv(ctx)
+	if err != nil {
+		p.log.Error().Err(err).Msg("Failed to fetch trending series")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	return p.buildSeriesList(ctx, response, userId)
+}
+
+func (p *tmdbProvider) SearchPeople(ctx context.Context, query string, page uint64) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error) {
+	response, err := p.client.SearchPeople(ctx, query, page)
+	if err != nil {
+		p.log.Error().Err(err).Str("query", query).Msg("Failed to search people")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	return buildPeopleList(response), nil
+}
+
+func (p *tmdbProvider) FetchTrendingPeople(ctx context.Context) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error) {
+	response, err := p.client.FetchTrendingPeople(ctx)
+	if err != nil {
+		p.log.Error().Err(err).Msg("Failed to fetch trending people")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	return buildPeopleList(response), nil
+}
+
+// buildMovieList filters out adult and poster-less results, merges the user's
+// tracking state, and wraps the page in a pagination envelope.
+//
+//nolint:dupl
+func (p *tmdbProvider) buildMovieList(ctx context.Context, response *tmdb.MovieListResult, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
+	ids := make([]uint64, 0, len(response.Results))
+	for _, item := range response.Results {
+		ids = append(ids, item.Id)
+	}
+
+	moviesList, err := p.movies.FindMoviesByTmdbIds(ctx, ids, userId)
+	if err != nil {
+		p.log.Error().Err(err).Msg("Failed to fetch movie states")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	stateMap := make(map[uint64]string)
+	for _, movie := range moviesList {
+		stateMap[movie.TmdbId] = movie.State
+	}
+
+	data := make([]serializers.SearchMovieSerializer, 0, len(response.Results))
+	for _, item := range response.Results {
+		if item.PosterPath == "" || item.Adult {
+			continue
+		}
+
+		state := models.StateTypeNone
+		if value, ok := stateMap[item.Id]; ok {
+			state = value
+		}
+
+		data = append(data, serializers.SearchMovieSerializer{
+			Id:          item.Id,
+			Title:       item.Title,
+			PosterPath:  item.PosterPath,
+			ReleaseDate: item.ReleaseDate,
+			Rating:      item.VoteAverage,
+			State:       state,
+		})
+	}
+
+	return &serializers.PaginationResponse[serializers.SearchMovieSerializer]{
+		Data: data,
+		Meta: serializers.PaginationMeta{
+			Page:  uint64(response.Page),
+			Per:   uint64(len(data)),
+			Total: uint64(response.TotalResults),
+		},
+	}, nil
+}
+
+// buildSeriesList mirrors buildMovieList for TV results (TMDB uses "name").
+//
+//nolint:dupl
+func (p *tmdbProvider) buildSeriesList(ctx context.Context, response *tmdb.TvListResult, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error) {
+	ids := make([]uint64, 0, len(response.Results))
+	for _, item := range response.Results {
+		ids = append(ids, item.Id)
+	}
+
+	seriesList, err := p.series.FindSeriesByTmdbIds(ctx, ids, userId)
+	if err != nil {
+		p.log.Error().Err(err).Msg("Failed to fetch series states")
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	stateMap := make(map[uint64]string)
+	for _, series := range seriesList {
+		stateMap[series.TmdbId] = series.State
+	}
+
+	data := make([]serializers.SearchSeriesSerializer, 0, len(response.Results))
+	for _, item := range response.Results {
+		if item.PosterPath == "" || item.Adult {
+			continue
+		}
+
+		state := models.StateTypeNone
+		if value, ok := stateMap[item.Id]; ok {
+			state = value
+		}
+
+		data = append(data, serializers.SearchSeriesSerializer{
+			Id:          item.Id,
+			Title:       item.Name,
+			PosterPath:  item.PosterPath,
+			ReleaseDate: item.FirstAirDate,
+			Rating:      item.VoteAverage,
+			State:       state,
+		})
+	}
+
+	return &serializers.PaginationResponse[serializers.SearchSeriesSerializer]{
+		Data: data,
+		Meta: serializers.PaginationMeta{
+			Page:  uint64(response.Page),
+			Per:   uint64(len(data)),
+			Total: uint64(response.TotalResults),
+		},
+	}, nil
+}
+
+// buildPeopleList filters out adult and profile-less results; people carry no
+// tracking state, so no database lookup is needed.
+func buildPeopleList(response *tmdb.PersonListResult) *serializers.PaginationResponse[serializers.SearchPersonSerializer] {
+	data := make([]serializers.SearchPersonSerializer, 0, len(response.Results))
+	for _, item := range response.Results {
+		if item.ProfilePath == "" || item.Adult {
+			continue
+		}
+
+		data = append(data, serializers.SearchPersonSerializer{
+			Id:          item.Id,
+			Name:        item.Name,
+			ProfilePath: item.ProfilePath,
+		})
+	}
+
+	return &serializers.PaginationResponse[serializers.SearchPersonSerializer]{
+		Data: data,
+		Meta: serializers.PaginationMeta{
+			Page:  uint64(response.Page),
+			Per:   uint64(len(data)),
+			Total: uint64(response.TotalResults),
+		},
+	}
 }

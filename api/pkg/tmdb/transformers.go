@@ -337,6 +337,18 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 		return c.Id
 	})
 
+	seasons := make([]SeasonSummaryItem, 0, len(tvShow.Seasons))
+	for _, season := range tvShow.Seasons {
+		seasons = append(seasons, SeasonSummaryItem{
+			Id:            season.Id,
+			Title:         season.Name,
+			Number:        uint64(season.SeasonNumber),
+			PosterPath:    season.PosterPath,
+			EpisodesCount: uint64(season.EpisodeCount),
+			AirDate:       season.AirDate,
+		})
+	}
+
 	return &TvResponse{
 		Id:              tvShow.Id,
 		Title:           tvShow.Title,
@@ -349,5 +361,113 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 		Credits:         uniqueCredits,
 		Recommendations: recommendations,
 		Videos:          videos,
+		Seasons:         seasons,
 	}
+}
+
+func TransformSeasonDetails(season *SeasonDetails) *SeasonResponse {
+	if season == nil {
+		return nil
+	}
+
+	episodes := make([]EpisodeResponseItem, 0, len(season.Episodes))
+	for _, episode := range season.Episodes {
+		runtime := episode.Runtime
+		if runtime < 0 {
+			runtime = 0
+		}
+
+		episodes = append(episodes, EpisodeResponseItem{
+			Id:         uint64(episode.ID),
+			Title:      episode.Name,
+			Number:     uint64(episode.EpisodeNumber),
+			PosterPath: episode.StillPath,
+			Runtime:    uint64(runtime),
+			Overview:   episode.Overview,
+			Rating:     episode.VoteAverage,
+			AirDate:    episode.AirDate,
+		})
+	}
+
+	return &SeasonResponse{
+		Id:         uint64(season.ID),
+		Title:      season.Name,
+		Number:     uint64(season.SeasonNumber),
+		PosterPath: season.PosterPath,
+		AirDate:    season.AirDate,
+		Overview:   season.Overview,
+		Episodes:   episodes,
+	}
+}
+
+func TransformEpisodeDetails(episode *EpisodeDetails) *EpisodeResponse {
+	if episode == nil {
+		return nil
+	}
+
+	runtime := episode.Runtime
+	if runtime < 0 {
+		runtime = 0
+	}
+
+	return &EpisodeResponse{
+		Id:         uint64(episode.ID),
+		Title:      episode.Name,
+		Number:     uint64(episode.EpisodeNumber),
+		PosterPath: episode.StillPath,
+		Runtime:    uint64(runtime),
+		Overview:   episode.Overview,
+		Rating:     episode.VoteAverage,
+		AirDate:    episode.AirDate,
+		Credits:    buildCastCredits(episode.Credits),
+		Videos:     buildTrailers(episode.Videos),
+	}
+}
+
+// buildCastCredits selects directors and billed cast that have a profile image,
+// deduplicated by person id — the same shape used for movie and tv credits.
+func buildCastCredits(credits Credits) []CreditItem {
+	directorCredits := make([]CreditItem, 0)
+	for _, crew := range credits.Crew {
+		if crew.Job == TMDBJobDirector && crew.ProfilePath != "" {
+			directorCredits = append(directorCredits, CreditItem{
+				Id:          crew.Id,
+				ProfilePath: crew.ProfilePath,
+				Name:        crew.Name,
+				Description: crew.Job,
+			})
+		}
+	}
+
+	castCredits := make([]CreditItem, 0)
+	for _, cast := range credits.Cast {
+		if cast.ProfilePath != "" {
+			castCredits = append(castCredits, CreditItem{
+				Id:          cast.Id,
+				ProfilePath: cast.ProfilePath,
+				Name:        cast.Name,
+				Description: cast.Character,
+			})
+		}
+	}
+
+	allCredits := append(directorCredits, castCredits...)
+	return UniqById(allCredits, func(c CreditItem) int {
+		return c.Id
+	})
+}
+
+// buildTrailers keeps only official YouTube trailers.
+func buildTrailers(videos Videos) []VideoItem {
+	result := make([]VideoItem, 0)
+	for _, video := range videos.Results {
+		if video.Official && video.Site == TMDBYoutubeType && video.Type == TMDBTrailerType {
+			result = append(result, VideoItem{
+				Id:  video.Id,
+				Key: video.Key,
+			})
+		}
+	}
+
+	return result
 }

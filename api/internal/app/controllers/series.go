@@ -18,6 +18,8 @@ import (
 type SeriesController interface {
 	HandleList(w http.ResponseWriter, r *http.Request)
 	HandleDetails(w http.ResponseWriter, r *http.Request)
+	HandleSeasonDetails(w http.ResponseWriter, r *http.Request)
+	HandleEpisodeDetails(w http.ResponseWriter, r *http.Request)
 	HandleCreate(w http.ResponseWriter, r *http.Request)
 	HandleUpdate(w http.ResponseWriter, r *http.Request)
 	HandleDelete(w http.ResponseWriter, r *http.Request)
@@ -243,4 +245,79 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if _, ok := middlewares.CurrentUserFromContext(r.Context()); !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+		return
+	}
+
+	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		return
+	}
+
+	seasonNumber, err := strconv.ParseUint(chi.URLParam(r, "seasonNumber"), 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid season number"})
+		return
+	}
+
+	response, err := c.provider.FetchTvSeasonDetails(r.Context(), id, seasonNumber)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(response)
+}
+
+func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if _, ok := middlewares.CurrentUserFromContext(r.Context()); !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+		return
+	}
+
+	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		return
+	}
+
+	seasonNumber, err := strconv.ParseUint(chi.URLParam(r, "seasonNumber"), 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid season number"})
+		return
+	}
+
+	episodeNumber, err := strconv.ParseUint(chi.URLParam(r, "episodeNumber"), 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid episode number"})
+		return
+	}
+
+	response, err := c.provider.FetchTvEpisodeDetails(r.Context(), id, seasonNumber, episodeNumber)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(response)
 }

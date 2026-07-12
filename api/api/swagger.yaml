@@ -1230,6 +1230,336 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/series/{id}/season/{seasonNumber}:
+    get:
+      summary: "Get season details"
+      description: "Retrieves a TV season and its episodes from TMDB"
+      tags:
+        - series
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: "Series TMDB ID"
+        - name: seasonNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "Season number (0 for specials)"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeasonDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}:
+    get:
+      summary: "Get episode details"
+      description: "Retrieves a single TV episode with credits and trailers from TMDB"
+      tags:
+        - series
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: "Series TMDB ID"
+        - name: seasonNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "Season number"
+        - name: episodeNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "Episode number"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/search/movies:
+    get:
+      summary: "Search movies"
+      description: "Searches movies on TMDB; results carry the user's tracking state"
+      tags:
+        - search
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Search term"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: "Page number"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchMoviesResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/search/series:
+    get:
+      summary: "Search series"
+      description: "Searches TV series on TMDB; results carry the user's tracking state"
+      tags:
+        - search
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Search term"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: "Page number"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchSeriesResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/search/people:
+    get:
+      summary: "Search people"
+      description: "Searches people on TMDB"
+      tags:
+        - search
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Search term"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: "Page number"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchPeopleResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/trending/movies:
+    get:
+      summary: "Trending movies"
+      description: "This week's trending movies from TMDB; results carry the user's tracking state"
+      tags:
+        - trending
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchMoviesResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/trending/series:
+    get:
+      summary: "Trending series"
+      description: "This week's trending TV series from TMDB; results carry the user's tracking state"
+      tags:
+        - trending
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchSeriesResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/trending/people:
+    get:
+      summary: "Trending people"
+      description: "This week's trending people from TMDB"
+      tags:
+        - trending
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchPeopleResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
 components:
   securitySchemes:
     BearerAuth:
@@ -1700,6 +2030,11 @@ components:
           description: "Series videos"
           items:
             type: object
+        seasons:
+          type: array
+          description: "Season summaries (from TMDB)"
+          items:
+            $ref: "#/components/schemas/SeasonSummarySerializer"
       required:
         - id
         - title
@@ -1925,3 +2260,272 @@ components:
           $ref: "#/components/schemas/ProgressEpisodeMeta"
       required:
         - series
+
+    SeasonSummarySerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Season TMDB ID"
+        title:
+          type: string
+          description: "Season title"
+        number:
+          type: integer
+          format: int64
+          description: "Season number"
+        posterPath:
+          type: string
+          description: "Path to season poster image"
+        episodesCount:
+          type: integer
+          format: int64
+          description: "Number of episodes in the season"
+        airDate:
+          type: string
+          format: date
+          description: "Season air date"
+      required:
+        - id
+        - title
+        - number
+
+    SeasonEpisodeSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Episode TMDB ID"
+        title:
+          type: string
+          description: "Episode title"
+        number:
+          type: integer
+          format: int64
+          description: "Episode number"
+        posterPath:
+          type: string
+          description: "Path to episode still image"
+        runtime:
+          type: integer
+          format: int64
+          description: "Episode runtime in minutes"
+        overview:
+          type: string
+          description: "Episode overview"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        airDate:
+          type: string
+          format: date
+          description: "Episode air date"
+      required:
+        - id
+        - title
+        - number
+
+    SeasonDetailsSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Season TMDB ID"
+        tmdbShowId:
+          type: integer
+          format: int64
+          description: "Parent series TMDB ID"
+        title:
+          type: string
+          description: "Season title"
+        number:
+          type: integer
+          format: int64
+          description: "Season number"
+        posterPath:
+          type: string
+          description: "Path to season poster image"
+        airDate:
+          type: string
+          format: date
+          description: "Season air date"
+        overview:
+          type: string
+          description: "Season overview"
+        episodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SeasonEpisodeSerializer"
+      required:
+        - id
+        - title
+        - number
+        - episodes
+
+    EpisodeDetailsSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Episode TMDB ID"
+        title:
+          type: string
+          description: "Episode title"
+        number:
+          type: integer
+          format: int64
+          description: "Episode number"
+        posterPath:
+          type: string
+          description: "Path to episode still image"
+        runtime:
+          type: integer
+          format: int64
+          description: "Episode runtime in minutes"
+        overview:
+          type: string
+          description: "Episode overview"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        airDate:
+          type: string
+          format: date
+          description: "Episode air date"
+        credits:
+          type: array
+          description: "Episode cast and crew"
+          items:
+            type: object
+        videos:
+          type: array
+          description: "Episode trailers"
+          items:
+            type: object
+      required:
+        - id
+        - title
+        - number
+
+    SearchMovieSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Movie TMDB ID"
+        title:
+          type: string
+          description: "Movie title"
+        posterPath:
+          type: string
+          description: "Path to movie poster image"
+        releaseDate:
+          type: string
+          format: date
+          description: "Release date"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        state:
+          type: string
+          description: "The current user's tracking state"
+          enum: [want, watched, none]
+      required:
+        - id
+        - title
+        - posterPath
+
+    SearchSeriesSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Series TMDB ID"
+        title:
+          type: string
+          description: "Series title"
+        posterPath:
+          type: string
+          description: "Path to series poster image"
+        releaseDate:
+          type: string
+          format: date
+          description: "First air date"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        state:
+          type: string
+          description: "The current user's tracking state"
+          enum: [want, watching, watched, none]
+      required:
+        - id
+        - title
+        - posterPath
+
+    SearchPersonSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Person TMDB ID"
+        name:
+          type: string
+          description: "Person name"
+        profilePath:
+          type: string
+          description: "Path to profile image"
+      required:
+        - id
+        - name
+        - profilePath
+
+    SearchMoviesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchMovieSerializer"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+      required:
+        - data
+        - meta
+
+    SearchSeriesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchSeriesSerializer"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+      required:
+        - data
+        - meta
+
+    SearchPeopleResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchPersonSerializer"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+      required:
+        - data
+        - meta

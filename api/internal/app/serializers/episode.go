@@ -50,3 +50,18 @@ func (params *UpdateEpisodeRequestSerializer) Validate(body io.Reader) error {
 
 	return validateItemState(&params.State)
 }
+
+// EpisodeDetailsSerializer is a TMDB-sourced single episode with credits and
+// trailers, returned by GET /series/{id}/season/{seasonNumber}/episode/{episodeNumber}.
+type EpisodeDetailsSerializer struct {
+	Id         uint64             `json:"id"`
+	Title      string             `json:"title"`
+	Number     uint64             `json:"number"`
+	PosterPath string             `json:"posterPath"`
+	Runtime    uint64             `json:"runtime"`
+	Overview   string             `json:"overview"`
+	Rating     float64            `json:"rating,omitempty"`
+	AirDate    string             `json:"airDate,omitempty"`
+	Credits    []PersonSerializer `json:"credits"`
+	Videos     []VideoSerializer  `json:"videos"`
+}

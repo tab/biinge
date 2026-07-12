@@ -14,34 +14,24 @@ struct LoginView: View {
         case email, password
     }
 
-    private var canSubmit: Bool {
-        !email.trimmingCharacters(in: .whitespaces).isEmpty
-            && password.count >= 8
-            && !isSubmitting
-    }
-
     var body: some View {
         ZStack {
+            Image("LoginBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+
             LinearGradient(
-                colors: [Color(rgb: 0x181818), .black],
+                colors: [.black.opacity(0), .black.opacity(0.55), .black],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 28) {
+            VStack(spacing: 0) {
                 Spacer()
 
-                VStack(spacing: 8) {
-                    Text("biinge")
-                        .font(.system(size: 44, weight: .heavy))
-                        .foregroundStyle(Color.biingePrimary)
-                    Text("Track what you watch")
-                        .font(.biingeBody)
-                        .foregroundStyle(.white.opacity(0.7))
-                }
-
-                VStack(spacing: 14) {
+                VStack(spacing: 15) {
                     inputField("Email", text: $email, field: .email)
                         .keyboardType(.emailAddress)
                         .textContentType(.emailAddress)
@@ -60,23 +50,31 @@ struct LoginView: View {
                             .font(.biingeFootnote)
                             .foregroundStyle(Color(rgb: 0xFF6B6B))
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .transition(.opacity)
                     }
 
-                    Button("Log In") {
+                    Button {
                         Task { await submit() }
+                    } label: {
+                        ZStack {
+                            Text("Login or Register")
+                                .font(.biingeCallout)
+                                .foregroundStyle(.white)
+                                .opacity(isSubmitting ? 0 : 1)
+                            if isSubmitting {
+                                ProgressView().tint(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(Color(rgb: 0x181818), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
                     }
-                    .buttonStyle(PrimaryButtonStyle(isLoading: isSubmitting))
-                    .disabled(!canSubmit)
-                    .padding(.top, 4)
+                    .opacity(isSubmitting ? 0.5 : 1)
+                    .disabled(isSubmitting)
                 }
-
-                Spacer()
-                Spacer()
             }
-            .padding(.horizontal, 28)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 60)
         }
-        .preferredColorScheme(.dark)
     }
 
     private func inputField(_ placeholder: String, text: Binding<String>, field: Field, secure: Bool = false) -> some View {
@@ -88,29 +86,27 @@ struct LoginView: View {
             }
         }
         .focused($focusedField, equals: field)
-        .font(.biingeBody)
-        .foregroundStyle(.white)
-        .padding(.vertical, 14)
-        .padding(.horizontal, 16)
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .font(.system(size: 16))
+        .foregroundStyle(Color.biingeText)
+        .padding(12)
+        .background(Color.biingeCard, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
     }
 
     private func prompt(_ text: String) -> Text {
-        Text(text).foregroundColor(.white.opacity(0.5))
+        Text(text).foregroundColor(Color.biingeGray)
     }
 
     private func submit() async {
-        guard canSubmit else { return }
         focusedField = nil
+        let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+        guard !trimmedEmail.isEmpty, password.count >= 8 else {
+            withAnimation { errorMessage = "Enter a valid email and password (8+ characters)." }
+            return
+        }
         isSubmitting = true
         withAnimation { errorMessage = nil }
         do {
-            try await authManager.login(
-                using: apiClient,
-                email: email.trimmingCharacters(in: .whitespaces),
-                password: password
-            )
+            try await authManager.login(using: apiClient, email: trimmedEmail, password: password)
         } catch {
             let message = (error as? APIError)?.errorDescription ?? "Something went wrong. Please try again."
             withAnimation { errorMessage = message }

@@ -1,0 +1,28 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS series (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  tmdb_id INTEGER NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  poster_path VARCHAR(255),
+  seasons_count INTEGER NOT NULL DEFAULT 0,
+  episodes_count INTEGER NOT NULL DEFAULT 0,
+  status VARCHAR(255) NOT NULL DEFAULT '',
+  state state_types NOT NULL,
+  pinned BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS series_tmdb_id_idx ON series(tmdb_id);
+CREATE INDEX IF NOT EXISTS series_user_id_state_idx ON series(user_id, state);
+CREATE INDEX IF NOT EXISTS series_user_id_state_pinned_created_idx ON series(user_id, state, pinned DESC, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS series_user_id_tmdb_id_unique ON series(user_id, tmdb_id);
+
+-- +goose Down
+DROP INDEX series_user_id_tmdb_id_unique;
+DROP INDEX series_user_id_state_pinned_created_idx;
+DROP INDEX series_user_id_state_idx;
+DROP INDEX series_tmdb_id_idx;
+
+DROP TABLE series;

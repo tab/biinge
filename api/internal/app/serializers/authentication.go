@@ -22,6 +22,10 @@ type LoginRequestSerializer struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
+type RefreshRequestSerializer struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
+}
+
 func (params *RegistrationRequestSerializer) Validate(body io.Reader) error {
 	if err := json.NewDecoder(body).Decode(params); err != nil {
 		return err
@@ -63,6 +67,20 @@ func (params *LoginRequestSerializer) Validate(body io.Reader) error {
 
 	if params.Password == "" {
 		return errors.ErrEmptyPassword
+	}
+
+	return nil
+}
+
+func (params *RefreshRequestSerializer) Validate(body io.Reader) error {
+	if err := json.NewDecoder(body).Decode(params); err != nil {
+		return err
+	}
+
+	params.RefreshToken = strings.TrimSpace(params.RefreshToken)
+
+	if params.RefreshToken == "" {
+		return errors.ErrInvalidToken
 	}
 
 	return nil

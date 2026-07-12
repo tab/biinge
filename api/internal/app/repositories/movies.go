@@ -34,8 +34,8 @@ func (m *movie) List(ctx context.Context, userId uuid.UUID, state string, limit,
 	rows, err := m.client.Queries().FindMoviesByState(ctx, db.FindMoviesByStateParams{
 		UserID: userId,
 		State:  db.StateTypes(state),
-		Limit:  limit,
-		Offset: offset,
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -45,7 +45,7 @@ func (m *movie) List(ctx context.Context, userId uuid.UUID, state string, limit,
 	var total uint64
 
 	if len(rows) > 0 {
-		total = rows[0].Total
+		total = uint64(rows[0].Total)
 	}
 
 	for _, row := range rows {
@@ -198,7 +198,7 @@ func (m *movie) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUI
 
 func (m *movie) FindMoviesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Movie, error) {
 	rows, err := m.client.Queries().FindMoviesByTmdbIds(ctx, db.FindMoviesByTmdbIdsParams{
-		TmdbIds: tmdbIds,
+		TmdbIds: toInt32Slice(tmdbIds),
 		UserID:  userId,
 	})
 	if err != nil {

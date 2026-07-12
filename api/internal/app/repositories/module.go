@@ -10,5 +10,10 @@ var Module = fx.Options(
 	fx.Provide(postgres.NewPostgresClient),
 	fx.Provide(NewHealthRepository),
 	fx.Provide(NewMovieRepository),
+	fx.Provide(NewSeriesRepository),
+	fx.Provide(NewSeasonRepository),
+	fx.Provide(NewEpisodeRepository),
+	fx.Provide(NewSeriesProgressRepository),
+	fx.Provide(NewStatsRepository),
 	fx.Provide(NewUserRepository),
 )

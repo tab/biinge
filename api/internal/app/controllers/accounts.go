@@ -15,16 +15,19 @@ import (
 type AccountsController interface {
 	Me(w http.ResponseWriter, r *http.Request)
 	HandleUpdate(w http.ResponseWriter, r *http.Request)
+	HandleStats(w http.ResponseWriter, r *http.Request)
 }
 
 type accountsController struct {
 	users services.Users
+	stats services.Stats
 	log   *logger.Logger
 }
 
-func NewAccountsController(users services.Users, log *logger.Logger) AccountsController {
+func NewAccountsController(users services.Users, stats services.Stats, log *logger.Logger) AccountsController {
 	return &accountsController{
 		users: users,
+		stats: stats,
 		log:   log.WithComponent("AccountsController"),
 	}
 }
@@ -93,4 +96,25 @@ func (c *accountsController) HandleUpdate(w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(response)
+}
+
+func (c *accountsController) HandleStats(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	user, ok := middlewares.CurrentUserFromContext(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+		return
+	}
+
+	result, err := c.stats.Get(r.Context(), user.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(serializers.NewStatsSerializer(result))
 }

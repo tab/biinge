@@ -1,0 +1,134 @@
+-- name: FindMoviesByState :many
+WITH counter AS (
+  SELECT COUNT(*) AS total
+  FROM movies
+  WHERE user_id = $1 AND state = $2
+)
+SELECT
+  m.id,
+  m.user_id,
+  m.tmdb_id,
+  m.title,
+  m.poster_path,
+  m.runtime,
+  m.pinned,
+  m.state,
+  m.created_at,
+  m.updated_at,
+  counter.total
+FROM movies m CROSS JOIN counter
+WHERE m.user_id = $1 AND m.state = $2
+ORDER BY m.pinned DESC, m.created_at DESC LIMIT $3 OFFSET $4;
+
+-- name: FindMoviesByTmdbIds :many
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime,
+  pinned,
+  state,
+  created_at,
+  updated_at
+FROM movies
+WHERE tmdb_id = ANY(@tmdb_ids::integer[]) AND user_id = @user_id;
+
+-- name: FindMovieById :one
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime,
+  pinned,
+  state,
+  created_at,
+  updated_at
+FROM movies
+WHERE id = $1 LIMIT 1;
+
+-- name: FindMovieByTmdbId :one
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime,
+  pinned,
+  state,
+  created_at,
+  updated_at
+FROM movies
+WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1;
+
+-- name: CreateMovie :one
+INSERT INTO movies (
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime,
+  state
+) VALUES (
+  $1, $2, $3, $4, $5, $6
+)
+RETURNING
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  pinned,
+  runtime,
+  state,
+  created_at,
+  updated_at;
+
+-- name: UpdateMovie :one
+UPDATE movies
+SET
+  title = $2,
+  poster_path = $3,
+  runtime = $4,
+  updated_at = NOW()
+WHERE id = $1
+RETURNING
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime,
+  pinned,
+  state,
+  created_at,
+  updated_at;
+
+-- name: UpdateMovieByTmdbId :one
+UPDATE movies
+SET
+  state = $3,
+  pinned = $4,
+  updated_at = NOW()
+WHERE tmdb_id = $1 AND user_id = $2
+RETURNING
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime,
+  pinned,
+  state,
+  created_at,
+  updated_at;
+
+-- name: DeleteMovie :exec
+DELETE FROM movies WHERE id = $1;
+
+-- name: DeleteMovieByTmdbId :exec
+DELETE FROM movies WHERE tmdb_id = $1 AND user_id = $2;

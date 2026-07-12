@@ -33,8 +33,9 @@ func Test_UsersController_Me(t *testing.T) {
 	}
 
 	users := services.NewMockUsers(ctrl)
+	stats := services.NewMockStats(ctrl)
 	log := logger.NewLogger(cfg)
-	controller := NewAccountsController(users, log)
+	controller := NewAccountsController(users, stats, log)
 
 	id, err := uuid.NewRandom()
 	assert.NoError(t, err)
@@ -130,8 +131,9 @@ func Test_AccountsController_Update(t *testing.T) {
 	}
 
 	users := services.NewMockUsers(ctrl)
+	stats := services.NewMockStats(ctrl)
 	log := logger.NewLogger(cfg)
-	controller := NewAccountsController(users, log)
+	controller := NewAccountsController(users, stats, log)
 
 	id, err := uuid.NewRandom()
 	assert.NoError(t, err)

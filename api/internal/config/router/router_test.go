@@ -29,6 +29,7 @@ func Test_HealthCheck(t *testing.T) {
 	mockSessionsController := controllers.NewMockAuthenticationController(ctrl)
 	mockAccountsController := controllers.NewMockAccountsController(ctrl)
 	mockMoviesController := controllers.NewMockMoviesController(ctrl)
+	mockSeriesController := controllers.NewMockSeriesController(ctrl)
 	mockPeopleController := controllers.NewMockPeopleController(ctrl)
 
 	mockAuthenticationMiddleware.EXPECT().
@@ -59,6 +60,7 @@ func Test_HealthCheck(t *testing.T) {
 		mockSessionsController,
 		mockAccountsController,
 		mockMoviesController,
+		mockSeriesController,
 		mockPeopleController,
 	)
 

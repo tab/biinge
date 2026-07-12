@@ -126,6 +126,79 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/users/tokens:
+    post:
+      summary: "Refresh access token"
+      description: "Exchanges a valid refresh token for a new access + refresh token pair"
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/accounts/stats:
+    get:
+      summary: "Account statistics"
+      description: "Aggregate watch stats for the current user: counts by list plus total watched runtime in minutes"
+      tags:
+        - accounts
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
   /api/v1/accounts/me:
     get:
       summary: "Get current user"
@@ -491,6 +564,612 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/series:
+    get:
+      summary: "Series list"
+      description: "Retrieves a paginated list of TV series the user is tracking"
+      tags:
+        - series
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+        - name: type
+          in: query
+          schema:
+            type: string
+            default: "want"
+            enum: [want, watching, watched]
+          description: "List type: 'want', 'watching', or 'watched'"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: "Page number for pagination"
+        - name: per
+          in: query
+          schema:
+            type: integer
+            default: 24
+          description: "Number of items per page"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeriesListResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    post:
+      summary: "Create series"
+      description: "Adds a TV series to the user's list"
+      tags:
+        - series
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSeriesRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeriesDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/series/{id}:
+    get:
+      summary: "Get series details"
+      description: "Retrieves details for a specific series from TMDB, merged with the user's tracked state"
+      tags:
+        - series
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeriesDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    patch:
+      summary: "Update series"
+      description: "Updates a series watch state and pinned flag"
+      tags:
+        - series
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSeriesRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeriesDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    delete:
+      summary: "Delete series"
+      description: "Removes a series from the user's lists"
+      tags:
+        - series
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: "No Content"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/series/{id}/progress:
+    get:
+      summary: "Get series watched progress"
+      description: "Returns the TMDB ids of the seasons and episodes currently marked watched for a series, plus its derived state"
+      tags:
+        - progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/series/{id}/watched:
+    post:
+      summary: "Mark whole show watched"
+      description: "Marks the series and all provided seasons and episodes as watched in a single transaction; the series state is derived (watched, or watching if still in production)"
+      tags:
+        - progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkShowRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    delete:
+      summary: "Unmark whole show watched"
+      description: "Removes the series and cascades deletion of its seasons and episodes; returns an empty (none) progress snapshot"
+      tags:
+        - progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/series/{id}/seasons/{seasonId}/watched:
+    post:
+      summary: "Mark season watched"
+      description: "Marks a season and all provided episodes as watched, then recomputes the series state"
+      tags:
+        - progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+        - name: seasonId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Season ID from TMDB"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkSeasonRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    delete:
+      summary: "Unmark season watched"
+      description: "Deletes a season (cascading its episodes), then recomputes the series state"
+      tags:
+        - progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+        - name: seasonId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Season ID from TMDB"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched:
+    post:
+      summary: "Mark episode watched"
+      description: "Marks a single episode watched, upserting its parent series and season, then recomputes the season and series state"
+      tags:
+        - progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+        - name: seasonId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Season ID from TMDB"
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Episode ID from TMDB"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkEpisodeRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    delete:
+      summary: "Unmark episode watched"
+      description: "Deletes a single watched episode, then recomputes the season and series state (untracking the show once it has no watched episodes left)"
+      tags:
+        - progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Series ID from TMDB"
+        - name: seasonId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Season ID from TMDB"
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Episode ID from TMDB"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
   /api/v1/people/{id}:
     get:
       summary: "Get person details"
@@ -629,6 +1308,70 @@ components:
         - email
         - password
 
+    RefreshRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          description: "A valid (unexpired) refresh token"
+      required:
+        - refresh_token
+
+    StatsResponse:
+      type: object
+      description: "Aggregate watch statistics for the current user"
+      properties:
+        movies:
+          type: object
+          properties:
+            want:
+              type: integer
+              format: int64
+            watched:
+              type: integer
+              format: int64
+            minutes:
+              type: integer
+              format: int64
+              description: "Total watched movie runtime in minutes"
+          required:
+            - want
+            - watched
+            - minutes
+        series:
+          type: object
+          properties:
+            want:
+              type: integer
+              format: int64
+            watching:
+              type: integer
+              format: int64
+            watched:
+              type: integer
+              format: int64
+          required:
+            - want
+            - watching
+            - watched
+        episodes:
+          type: object
+          properties:
+            watched:
+              type: integer
+              format: int64
+            minutes:
+              type: integer
+              format: int64
+              description: "Total watched episode runtime in minutes"
+          required:
+            - watched
+            - minutes
+      required:
+        - movies
+        - series
+        - episodes
+
     UpdateAccountRequest:
       type: object
       properties:
@@ -671,7 +1414,6 @@ components:
       required:
         - tmdbId
         - title
-        - posterPath
         - state
 
     UpdateMovieRequest:
@@ -862,3 +1604,324 @@ components:
       required:
         - data
         - meta
+
+    SeriesSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "TMDB ID"
+        title:
+          type: string
+          description: "Series title"
+        posterPath:
+          type: string
+          description: "Path to series poster image"
+        pinned:
+          type: boolean
+          description: "Whether the series is pinned"
+        state:
+          type: string
+          description: "Watch state"
+          enum: [want, watching, watched]
+        episodesCount:
+          type: integer
+          format: int64
+          description: "Total number of episodes (from TMDB)"
+        watchedEpisodesCount:
+          type: integer
+          format: int64
+          description: "Number of episodes the user has marked watched"
+      required:
+        - id
+        - title
+        - posterPath
+        - pinned
+        - state
+
+    SeriesDetailsSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "TMDB ID"
+        imdbId:
+          type: string
+          description: "IMDB ID"
+        title:
+          type: string
+          description: "Series title"
+        posterPath:
+          type: string
+          description: "Path to series poster image"
+        pinned:
+          type: boolean
+          description: "Whether the series is pinned"
+        state:
+          type: string
+          description: "Watch state"
+          enum: [want, watching, watched, none]
+        overview:
+          type: string
+          description: "Series overview/description"
+        status:
+          type: string
+          description: "Series status (e.g., Ended, Returning Series)"
+        releaseDate:
+          type: string
+          format: date
+          description: "First air date"
+        seasonsCount:
+          type: integer
+          format: int64
+          description: "Number of seasons"
+        episodesCount:
+          type: integer
+          format: int64
+          description: "Number of episodes"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        credits:
+          type: array
+          description: "Series credits (cast and crew)"
+          items:
+            type: object
+        recommendations:
+          type: array
+          description: "Series recommendations"
+          items:
+            type: object
+        videos:
+          type: array
+          description: "Series videos"
+          items:
+            type: object
+      required:
+        - id
+        - title
+        - pinned
+        - state
+        - overview
+
+    CreateSeriesRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "TMDB ID of the series"
+        title:
+          type: string
+          description: "Series title"
+        posterPath:
+          type: string
+          description: "Path to series poster image"
+        seasonsCount:
+          type: integer
+          format: int64
+          description: "Number of seasons"
+        episodesCount:
+          type: integer
+          format: int64
+          description: "Number of episodes"
+        status:
+          type: string
+          description: "Series status from TMDB"
+        state:
+          type: string
+          description: "Watch state"
+          enum: [want, watching, watched]
+      required:
+        - id
+        - title
+        - state
+
+    UpdateSeriesRequest:
+      type: object
+      properties:
+        state:
+          type: string
+          description: "Watch state"
+          enum: [want, watching, watched]
+        pinned:
+          type: boolean
+          description: "Whether the series is pinned"
+      required:
+        - state
+        - pinned
+
+    SeriesListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SeriesSerializer"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+      required:
+        - data
+        - meta
+
+    ProgressResponse:
+      type: object
+      description: "Watched-progress snapshot for a series"
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Series TMDB ID"
+        state:
+          type: string
+          description: "Derived series state"
+          enum: [want, watching, watched, none]
+        watchedSeasons:
+          type: array
+          description: "TMDB ids of seasons currently marked watched"
+          items:
+            type: integer
+            format: int64
+        watchedEpisodes:
+          type: array
+          description: "TMDB ids of episodes currently marked watched"
+          items:
+            type: integer
+            format: int64
+      required:
+        - id
+        - state
+        - watchedSeasons
+        - watchedEpisodes
+
+    ProgressSeries:
+      type: object
+      description: "Show-level metadata used to persist the series row while recording progress (the series TMDB id comes from the URL)"
+      properties:
+        title:
+          type: string
+        posterPath:
+          type: string
+        seasonsCount:
+          type: integer
+          format: int64
+        episodesCount:
+          type: integer
+          format: int64
+        status:
+          type: string
+      required:
+        - title
+
+    ProgressSeasonMeta:
+      type: object
+      description: "Season metadata without its TMDB id (which comes from the URL)"
+      properties:
+        title:
+          type: string
+        number:
+          type: integer
+          format: int64
+        episodesCount:
+          type: integer
+          format: int64
+
+    ProgressEpisodeMeta:
+      type: object
+      description: "Episode metadata without its TMDB id (which comes from the URL)"
+      properties:
+        title:
+          type: string
+        posterPath:
+          type: string
+        runtime:
+          type: integer
+          format: int64
+        airDate:
+          type: string
+          format: date
+
+    ProgressEpisode:
+      type: object
+      description: "Episode with its own TMDB id, used inside season and show payloads"
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Episode TMDB ID"
+        title:
+          type: string
+        posterPath:
+          type: string
+        runtime:
+          type: integer
+          format: int64
+        airDate:
+          type: string
+          format: date
+      required:
+        - id
+
+    ProgressSeason:
+      type: object
+      description: "Season with its own TMDB id and episodes, used inside a show payload"
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Season TMDB ID"
+        title:
+          type: string
+        number:
+          type: integer
+          format: int64
+        episodesCount:
+          type: integer
+          format: int64
+        episodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressEpisode"
+      required:
+        - id
+
+    MarkShowRequest:
+      type: object
+      properties:
+        series:
+          $ref: "#/components/schemas/ProgressSeries"
+        seasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressSeason"
+      required:
+        - series
+
+    MarkSeasonRequest:
+      type: object
+      properties:
+        series:
+          $ref: "#/components/schemas/ProgressSeries"
+        season:
+          $ref: "#/components/schemas/ProgressSeasonMeta"
+        episodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressEpisode"
+      required:
+        - series
+
+    MarkEpisodeRequest:
+      type: object
+      properties:
+        series:
+          $ref: "#/components/schemas/ProgressSeries"
+        season:
+          $ref: "#/components/schemas/ProgressSeasonMeta"
+        episode:
+          $ref: "#/components/schemas/ProgressEpisodeMeta"
+      required:
+        - series

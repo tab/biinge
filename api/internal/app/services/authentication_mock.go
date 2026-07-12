@@ -56,6 +56,21 @@ func (mr *MockAuthenticationMockRecorder) Login(ctx, request any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockAuthentication)(nil).Login), ctx, request)
 }
 
+// Refresh mocks base method.
+func (m *MockAuthentication) Refresh(ctx context.Context, request *serializers.RefreshRequestSerializer) (*serializers.TokenSerializer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Refresh", ctx, request)
+	ret0, _ := ret[0].(*serializers.TokenSerializer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Refresh indicates an expected call of Refresh.
+func (mr *MockAuthenticationMockRecorder) Refresh(ctx, request any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Refresh", reflect.TypeOf((*MockAuthentication)(nil).Refresh), ctx, request)
+}
+
 // Registration mocks base method.
 func (m *MockAuthentication) Registration(ctx context.Context, request *serializers.RegistrationRequestSerializer) (*serializers.TokenSerializer, error) {
 	m.ctrl.T.Helper()

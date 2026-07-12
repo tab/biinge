@@ -7,5 +7,6 @@ var Module = fx.Options(
 	fx.Provide(NewHealthController),
 	fx.Provide(NewAccountsController),
 	fx.Provide(NewMoviesController),
+	fx.Provide(NewSeriesController),
 	fx.Provide(NewPeopleController),
 )

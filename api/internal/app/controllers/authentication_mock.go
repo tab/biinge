@@ -52,6 +52,18 @@ func (mr *MockAuthenticationControllerMockRecorder) HandleLogin(w, r any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleLogin", reflect.TypeOf((*MockAuthenticationController)(nil).HandleLogin), w, r)
 }
 
+// HandleRefresh mocks base method.
+func (m *MockAuthenticationController) HandleRefresh(w http.ResponseWriter, r *http.Request) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "HandleRefresh", w, r)
+}
+
+// HandleRefresh indicates an expected call of HandleRefresh.
+func (mr *MockAuthenticationControllerMockRecorder) HandleRefresh(w, r any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleRefresh", reflect.TypeOf((*MockAuthenticationController)(nil).HandleRefresh), w, r)
+}
+
 // HandleRegistration mocks base method.
 func (m *MockAuthenticationController) HandleRegistration(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()

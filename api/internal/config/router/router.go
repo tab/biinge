@@ -21,6 +21,7 @@ func NewRouter(
 	sessions controllers.AuthenticationController,
 	accounts controllers.AccountsController,
 	movies controllers.MoviesController,
+	series controllers.SeriesController,
 	people controllers.PeopleController,
 ) http.Handler {
 	r := chi.NewRouter()
@@ -53,6 +54,7 @@ func NewRouter(
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/registrations", sessions.HandleRegistration)
 			r.Post("/sessions", sessions.HandleLogin)
+			r.Post("/tokens", sessions.HandleRefresh)
 		})
 
 		r.Group(func(r chi.Router) {
@@ -60,6 +62,7 @@ func NewRouter(
 
 			r.Route("/accounts", func(r chi.Router) {
 				r.Get("/me", accounts.Me)
+				r.Get("/stats", accounts.HandleStats)
 				r.Patch("/", accounts.HandleUpdate)
 			})
 
@@ -69,6 +72,22 @@ func NewRouter(
 				r.Post("/", movies.HandleCreate)
 				r.Patch("/{id}", movies.HandleUpdate)
 				r.Delete("/{id}", movies.HandleDelete)
+			})
+
+			r.Route("/series", func(r chi.Router) {
+				r.Get("/", series.HandleList)
+				r.Get("/{id}", series.HandleDetails)
+				r.Post("/", series.HandleCreate)
+				r.Patch("/{id}", series.HandleUpdate)
+				r.Delete("/{id}", series.HandleDelete)
+
+				r.Get("/{id}/progress", series.HandleProgress)
+				r.Post("/{id}/watched", series.HandleMarkShowWatched)
+				r.Delete("/{id}/watched", series.HandleUnmarkShowWatched)
+				r.Post("/{id}/seasons/{seasonId}/watched", series.HandleMarkSeasonWatched)
+				r.Delete("/{id}/seasons/{seasonId}/watched", series.HandleUnmarkSeasonWatched)
+				r.Post("/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", series.HandleMarkEpisodeWatched)
+				r.Delete("/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", series.HandleUnmarkEpisodeWatched)
 			})
 
 			r.Route("/people", func(r chi.Router) {

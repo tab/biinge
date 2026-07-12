@@ -40,6 +40,18 @@ func (m *MockAccountsController) EXPECT() *MockAccountsControllerMockRecorder {
 	return m.recorder
 }
 
+// HandleStats mocks base method.
+func (m *MockAccountsController) HandleStats(w http.ResponseWriter, r *http.Request) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "HandleStats", w, r)
+}
+
+// HandleStats indicates an expected call of HandleStats.
+func (mr *MockAccountsControllerMockRecorder) HandleStats(w, r any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleStats", reflect.TypeOf((*MockAccountsController)(nil).HandleStats), w, r)
+}
+
 // HandleUpdate mocks base method.
 func (m *MockAccountsController) HandleUpdate(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()

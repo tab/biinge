@@ -23,6 +23,7 @@ const (
 type Authentication interface {
 	Registration(ctx context.Context, request *serializers.RegistrationRequestSerializer) (*serializers.TokenSerializer, error)
 	Login(ctx context.Context, request *serializers.LoginRequestSerializer) (*serializers.TokenSerializer, error)
+	Refresh(ctx context.Context, request *serializers.RefreshRequestSerializer) (*serializers.TokenSerializer, error)
 }
 
 type authentication struct {
@@ -86,28 +87,7 @@ func (a *authentication) Registration(ctx context.Context, params *serializers.R
 		return nil, err
 	}
 
-	accessToken, err := a.jwt.Generate(jwt.Payload{
-		ID:    user.ID.String(),
-		Email: user.Email,
-	}, AccessTokenDuration)
-	if err != nil {
-		a.log.Error().Err(err).Msg("Failed to generate access token")
-		return nil, jwt.ErrFailedGenerateAccessToken
-	}
-
-	refreshToken, err := a.jwt.Generate(jwt.Payload{
-		ID:    user.ID.String(),
-		Email: user.Email,
-	}, RefreshTokenDuration)
-	if err != nil {
-		a.log.Error().Err(err).Msg("Failed to generate refresh token")
-		return nil, jwt.ErrFailedGenerateRefreshToken
-	}
-
-	return &serializers.TokenSerializer{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+	return a.issueTokens(user.ID.String(), user.Email)
 }
 
 func (a *authentication) Login(ctx context.Context, params *serializers.LoginRequestSerializer) (*serializers.TokenSerializer, error) {
@@ -129,9 +109,24 @@ func (a *authentication) Login(ctx context.Context, params *serializers.LoginReq
 		return nil, errors.ErrInvalidPassword
 	}
 
+	return a.issueTokens(user.ID.String(), user.Email)
+}
+
+func (a *authentication) Refresh(_ context.Context, params *serializers.RefreshRequestSerializer) (*serializers.TokenSerializer, error) {
+	payload, err := a.jwt.Decode(params.RefreshToken)
+	if err != nil {
+		a.log.Error().Err(err).Msg("Failed to decode refresh token")
+		return nil, errors.ErrInvalidToken
+	}
+
+	return a.issueTokens(payload.ID, payload.Email)
+}
+
+// issueTokens generates a fresh access + refresh token pair for a user.
+func (a *authentication) issueTokens(id, email string) (*serializers.TokenSerializer, error) {
 	accessToken, err := a.jwt.Generate(jwt.Payload{
-		ID:    user.ID.String(),
-		Email: user.Email,
+		ID:    id,
+		Email: email,
 	}, AccessTokenDuration)
 	if err != nil {
 		a.log.Error().Err(err).Msg("Failed to generate access token")
@@ -139,8 +134,8 @@ func (a *authentication) Login(ctx context.Context, params *serializers.LoginReq
 	}
 
 	refreshToken, err := a.jwt.Generate(jwt.Payload{
-		ID:    user.ID.String(),
-		Email: user.Email,
+		ID:    id,
+		Email: email,
 	}, RefreshTokenDuration)
 	if err != nil {
 		a.log.Error().Err(err).Msg("Failed to generate refresh token")

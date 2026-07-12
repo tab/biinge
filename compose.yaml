@@ -1,0 +1,41 @@
+name: biinge
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./api/.env.development
+    environment:
+      - DATABASE_DSN=postgres://postgres:postgres@database:5432/biinge-development?sslmode=disable
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - biinge-network
+
+  database:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: biinge-development
+    ports:
+      - "5432:5432"
+    volumes:
+      - biinge-database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "biinge-development"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - biinge-network
+
+volumes:
+  biinge-database:
+
+networks:
+  biinge-network:

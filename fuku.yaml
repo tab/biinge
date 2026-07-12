@@ -1,0 +1,23 @@
+version: 1
+
+x-logs: &logs
+  output: [stdout, stderr]
+
+services:
+  biinge-api:
+    dir: api
+    tier: backend
+    command: go run ./cmd/biinge
+    readiness:
+      type: http
+      url: http://localhost:8080/ready
+      timeout: 30s
+      interval: 500ms
+    logs: *logs
+
+profiles:
+  default: "*"
+
+logging:
+  format: console
+  level: info

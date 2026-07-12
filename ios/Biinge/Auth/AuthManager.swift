@@ -12,6 +12,7 @@ final class AuthManager {
     private(set) var isRestoring = true
 
     private var refreshToken: String?
+    private var refreshTask: Task<Void, Error>?
     private let keychain = Keychain()
 
     var isAuthenticated: Bool { user != nil }
@@ -71,19 +72,30 @@ final class AuthManager {
     }
 
     /// Exchanges the refresh token for a new pair, or clears the session and
-    /// surfaces `.unauthorized` if it can't.
+    /// surfaces `.unauthorized` if it can't. Concurrent callers (e.g. the several
+    /// requests that 401 together on launch) coalesce onto a single in-flight
+    /// refresh, so the refresh token is only spent once per cycle.
     func refreshTokens(using apiClient: APIClient) async throws {
-        guard let refreshToken else {
-            clearSession()
-            throw APIError.unauthorized
+        if let inFlight = refreshTask {
+            try await inFlight.value
+            return
         }
-        do {
-            let tokens = try await apiClient.refresh(refreshToken: refreshToken)
-            store(tokens)
-        } catch {
-            clearSession()
-            throw APIError.unauthorized
+        let task = Task { @MainActor [self] in
+            defer { refreshTask = nil }
+            guard let refreshToken else {
+                clearSession()
+                throw APIError.unauthorized
+            }
+            do {
+                let tokens = try await apiClient.refresh(refreshToken: refreshToken)
+                store(tokens)
+            } catch {
+                clearSession()
+                throw APIError.unauthorized
+            }
         }
+        refreshTask = task
+        try await task.value
     }
 
     private func store(_ tokens: TokenPair) {

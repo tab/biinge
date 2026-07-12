@@ -256,7 +256,7 @@ struct TvDetailView: View {
                 updated = try await apiClient.unmarkEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id)
             }
             progress = updated
-            store.invalidate()
+            store.applyProgress(id: seriesId, state: updated.state, watchedEpisodesCount: updated.watchedEpisodes.count)
         } catch {
             // keep the last known progress
         }
@@ -286,7 +286,7 @@ struct TvDetailView: View {
                 updated = try await apiClient.unmarkSeason(showId: seriesId, seasonId: season.id)
             }
             progress = updated
-            store.invalidate()
+            store.applyProgress(id: seriesId, state: updated.state, watchedEpisodesCount: updated.watchedEpisodes.count)
         } catch {
             // keep the last known progress
         }
@@ -449,6 +449,7 @@ private struct SeasonsView: View {
     @State private var selected: SeasonSummary?
     @State private var episodes: [EpisodeSummary] = []
     @State private var isLoading = false
+    @State private var loadTask: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -481,7 +482,6 @@ private struct SeasonsView: View {
                         EpisodeRow(
                             showId: showId,
                             seasonNumber: selected?.number ?? 0,
-                            index: index,
                             episode: episode,
                             isWatched: watchedEpisodeIds.contains(episode.id),
                             showsDivider: index > 0
@@ -520,13 +520,17 @@ private struct SeasonsView: View {
 
     private func select(_ season: SeasonSummary) {
         selected = season
-        Task { await loadEpisodes(season) }
+        loadTask?.cancel()
+        loadTask = Task { await loadEpisodes(season) }
     }
 
     private func loadEpisodes(_ season: SeasonSummary) async {
         guard let apiClient else { return }
         isLoading = true
-        episodes = (try? await apiClient.seasonDetails(showId: showId, season: season.number).episodes) ?? []
+        let loaded = (try? await apiClient.seasonDetails(showId: showId, season: season.number).episodes) ?? []
+        // A newer selection may have superseded this load; only the current one wins.
+        guard !Task.isCancelled, selected?.id == season.id else { return }
+        episodes = loaded
         isLoading = false
     }
 }
@@ -534,7 +538,6 @@ private struct SeasonsView: View {
 private struct EpisodeRow: View {
     let showId: Int
     let seasonNumber: Int
-    let index: Int
     let episode: EpisodeSummary
     let isWatched: Bool
     let showsDivider: Bool
@@ -582,7 +585,7 @@ private struct EpisodeRow: View {
     private var rowContent: some View {
         HStack(alignment: .top, spacing: 10) {
             HStack(spacing: 6) {
-                Text("\(index + 1)")
+                Text("\(episode.number)")
                     .font(.biingeCaption1).foregroundStyle(Color.biingeGraniteGray)
                 Image(systemName: isWatched ? "checkmark" : "circle.fill")
                     .font(.system(size: isWatched ? 13 : 8))

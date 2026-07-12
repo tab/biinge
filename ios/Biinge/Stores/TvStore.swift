@@ -130,6 +130,34 @@ final class TvStore {
         watchedShows.removeAll { $0.id == id }
     }
 
+    /// Reflect a mark/unmark from a detail screen in the cached grid: update the
+    /// show's watched-episode count (drives the progress badge) and move it to the
+    /// segment matching its new derived state — no full library reload. Falls back
+    /// to invalidation if the show isn't cached yet (e.g. it was just tracked).
+    func applyProgress(id: Int, state: WatchState, watchedEpisodesCount: Int) {
+        guard let current = (wantShows + watchingShows + watchedShows).first(where: { $0.id == id }) else {
+            invalidate()
+            return
+        }
+        let updated = LibrarySeries(
+            id: current.id, title: current.title, posterPath: current.posterPath,
+            pinned: current.pinned, state: state,
+            episodesCount: current.episodesCount, watchedEpisodesCount: watchedEpisodesCount
+        )
+        if current.state == state {
+            replaceInPlace(updated)
+        } else {
+            removeLocal(id: id)
+            insertLocal(updated)
+        }
+    }
+
+    private func replaceInPlace(_ show: LibrarySeries) {
+        if let i = wantShows.firstIndex(where: { $0.id == show.id }) { wantShows[i] = show }
+        if let i = watchingShows.firstIndex(where: { $0.id == show.id }) { watchingShows[i] = show }
+        if let i = watchedShows.firstIndex(where: { $0.id == show.id }) { watchedShows[i] = show }
+    }
+
     /// Push fresher poster/title from a detail load into the cached grid item so the
     /// grid reflects the server's read-repair without waiting for a full reload.
     func refreshMetadata(id: Int, title: String, posterPath: String) {

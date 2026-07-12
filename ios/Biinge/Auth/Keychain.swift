@@ -15,6 +15,8 @@ struct Keychain: Sendable {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key.rawValue,
             kSecValueData as String: Data(value.utf8),
+            // Keep tokens on this device only — never migrated to a restored backup.
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         ]
         SecItemAdd(query as CFDictionary, nil)
     }

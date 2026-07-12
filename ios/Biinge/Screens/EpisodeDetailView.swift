@@ -5,6 +5,7 @@ struct EpisodeDetailView: View {
     let seasonNumber: Int
     let episodeNumber: Int
     @Environment(\.apiClient) private var apiClient
+    @Environment(TvStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
@@ -165,6 +166,7 @@ struct EpisodeDetailView: View {
                 updated = try await apiClient.markEpisode(showId: showId, seasonId: season.id, episodeId: ep.id, body)
             }
             progress = updated
+            store.applyProgress(id: showId, state: updated.state, watchedEpisodesCount: updated.watchedEpisodes.count)
         } catch {
             // keep the last known state
         }

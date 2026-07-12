@@ -547,8 +547,11 @@ private struct EpisodeRow: View {
             ZStack(alignment: .leading) {
                 swipeActionStrip
                 rowContent
-                    .background(Color.biingeBackground)
+                    .background(Color.biingeCard)
                     .offset(x: max(dragX, 0))
+                    .onTapGesture {
+                        presentEpisode(showId, seasonNumber, episode.number)
+                    }
                     .simultaneousGesture(swipeGesture)
             }
             .clipped()
@@ -581,19 +584,14 @@ private struct EpisodeRow: View {
                     .frame(width: 16)
             }
 
-            Button {
-                presentEpisode(showId, seasonNumber, episode.number)
-            } label: {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(episode.title)
-                        .font(.biingeSubhead).foregroundStyle(.primary)
-                        .lineLimit(2).multilineTextAlignment(.leading)
-                    Text(episodeMeta)
-                        .font(.biingeCaption2).foregroundStyle(Color.biingeSpanishGray)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(episode.title)
+                    .font(.biingeSubhead).foregroundStyle(.primary)
+                    .lineLimit(2).multilineTextAlignment(.leading)
+                Text(episodeMeta)
+                    .font(.biingeCaption2).foregroundStyle(Color.biingeSpanishGray)
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             if let rating = episode.rating, rating > 0 {
                 HStack(spacing: 3) {

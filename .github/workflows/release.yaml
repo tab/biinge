@@ -4,9 +4,6 @@ on:
     types: [ released ]
 env:
   IMAGE_NAME: biinge-api
-defaults:
-  run:
-    working-directory: api
 jobs:
   linter:
     name: Linter
@@ -34,6 +31,9 @@ jobs:
     env:
       GO_ENV: test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
     services:
       postgres:
         image: postgres:16.4-alpine
@@ -110,6 +110,9 @@ jobs:
     name: Run Database Migrations
     needs: build
     runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: api
     env:
       GO_ENV: production
       DATABASE_DSN: ${{ secrets.DATABASE_DSN }}
@@ -138,3 +141,15 @@ jobs:
           echo "Checking migration status..."
           export DATABASE_DSN="$DATABASE_DSN"
           GO_ENV=production make db:migrate:status
+
+  deploy:
+    name: Deploy
+    needs: migrate
+    runs-on: self-hosted
+    steps:
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.DEPLOY_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Pull the released image
+        run: docker pull ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+      - name: Restart the service
+        run: docker compose -f "${{ secrets.COMPOSE_PATH }}" up -d biinge-api

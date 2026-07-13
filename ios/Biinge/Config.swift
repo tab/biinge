@@ -8,6 +8,7 @@ enum Config {
            let url = URL(string: override) {
             return url
         }
+        // swiftlint:disable:next force_unwrapping
         return URL(string: "http://localhost:8080/api/v1")!
     }()
 

@@ -1,21 +1,76 @@
-disabled_rules:
-  - trailing_comma
-  - todo
-
-line_length:
-  warning: 140
-  error: 200
-
-function_body_length:
-  warning: 80
-  error: 120
-
-type_body_length:
-  warning: 300
-  error: 400
-
-identifier_name:
-  min_length: 2
+# SwiftLint — tuned low-noise, following umputun/agterm's philosophy: keep every
+# rule that surfaces a real, fixable finding; relax only the thresholds that fight
+# deliberate SwiftUI conventions (long modifier chains, short loop/async-let names).
 
 excluded:
-  - build
+  - build            # xcodebuild DerivedData
+  - Biinge.xcodeproj
+
+disabled_rules:
+  - identifier_name  # short local names (i, m, s, p, id) are deliberate
+  - trailing_comma   # style preference, not a defect
+  - todo             # TODO/FIXME are tracked elsewhere
+
+# Opt-in rules — the real value-add. These are off by default; each surfaces a
+# concrete, fixable issue (correctness, clarity, or perf).
+opt_in_rules:
+  - force_unwrapping
+  - empty_count
+  - empty_string
+  - first_where
+  - last_where
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - reduce_into
+  - sorted_first_last
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - explicit_init
+  - toggle_bool
+  - yoda_condition
+  - unneeded_parentheses_in_closure_argument
+  - closure_spacing
+  - operator_usage_whitespace
+  - vertical_whitespace_closing_braces
+  - fatal_error_message
+  - discouraged_optional_boolean
+  - overridden_super_call
+  - prohibited_super_call
+  - private_action
+  - private_outlet
+  - weak_delegate
+
+line_length:
+  warning: 200
+  error: 400
+  ignores_comments: true
+  ignores_urls: true
+
+file_length:
+  warning: 1000
+  error: 1100
+
+type_body_length:
+  warning: 400
+  error: 600
+
+function_body_length:
+  warning: 120
+  error: 250
+
+cyclomatic_complexity:
+  warning: 25
+  error: 50
+  ignores_case_statements: true
+
+nesting:
+  type_level: 2
+
+large_tuple:
+  warning: 3
+  error: 5
+
+function_parameter_count:
+  warning: 7        # TvStore.toggle carries a cohesive series-to-track payload
+  error: 10

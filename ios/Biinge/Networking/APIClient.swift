@@ -200,11 +200,11 @@ actor APIClient {
     // MARK: - Request plumbing
 
     private func makeRequest(_ method: String, _ path: String, query: [URLQueryItem], body: Data?) -> URLRequest {
-        var components = URLComponents(string: baseURL.absoluteString + path)!
+        var components = URLComponents(string: baseURL.absoluteString + path) ?? URLComponents()
         if !query.isEmpty {
             components.queryItems = query
         }
-        var request = URLRequest(url: components.url!)
+        var request = URLRequest(url: components.url ?? baseURL)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if let body {

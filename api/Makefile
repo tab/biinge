@@ -103,6 +103,11 @@ logs:
 	@echo "Showing logs..."
 	$(DOCKER_COMPOSE_CMD) logs -f
 
+.PHONY: fmt
+fmt:
+	@echo "Formatting code..."
+	go fmt ./...
+
 .PHONY: lint
 lint:
 	@echo "Running golangci-lint..."
@@ -121,17 +126,35 @@ vet:
 .PHONY: staticcheck
 staticcheck:
 	@echo "Running staticcheck..."
-	staticcheck ./...
+	go run honnef.co/go/tools/cmd/staticcheck@latest ./...
 
 .PHONY: test
 test:
 	@echo "Running tests..."
 	GO_ENV=test go test -cover ./...
 
+.PHONY: test\:race
+test\:race:
+	@echo "Running tests with race detector..."
+	GO_ENV=test go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
+
 .PHONY: coverage
 coverage:
 	@echo "Generating test coverage report..."
 	GO_ENV=test go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
+# Full verification loop — run before committing to catch everything CI checks.
+# Steps are invoked via recursive $(MAKE) so the colon-named test:race target
+# resolves reliably; escaped-colon names silently no-op as prerequisites.
+.PHONY: check
+check:
+	@$(MAKE) fmt
+	@$(MAKE) vet
+	@$(MAKE) lint
+	@$(MAKE) staticcheck
+	@$(MAKE) test
+	@$(MAKE) test:race
+	@echo "✓ All checks passed"
+
 .PHONY: all
-all: lint vet staticcheck test
+all: check

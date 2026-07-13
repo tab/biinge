@@ -126,12 +126,12 @@ staticcheck:
 .PHONY: test
 test:
 	@echo "Running tests..."
-	go test -cover ./...
+	GO_ENV=test go test -cover ./...
 
 .PHONY: coverage
 coverage:
 	@echo "Generating test coverage report..."
-	go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+	GO_ENV=test go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 .PHONY: all
 all: lint vet staticcheck test

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -65,7 +66,7 @@ func Test_NewPagination(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest("GET", tt.path, nil)
+			request := httptest.NewRequest(http.MethodGet, tt.path, nil)
 			paginator := NewPagination(request)
 			assert.Equal(t, tt.expected.Page, paginator.Page)
 			assert.Equal(t, tt.expected.PerPage, paginator.PerPage)
@@ -113,7 +114,7 @@ func Test_Pagination_Offset(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest("GET", tt.path, nil)
+			request := httptest.NewRequest(http.MethodGet, tt.path, nil)
 			paginator := NewPagination(request)
 			assert.Equal(t, tt.expected, paginator.Offset())
 		})

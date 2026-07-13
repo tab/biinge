@@ -121,9 +121,11 @@ func (params *MarkShowRequestSerializer) Validate(body io.Reader) error {
 	if err := json.NewDecoder(body).Decode(params); err != nil {
 		return err
 	}
+
 	if strings.TrimSpace(params.Series.Title) == "" {
 		return errors.ErrEmptyTitle
 	}
+
 	return nil
 }
 
@@ -132,6 +134,7 @@ func (params *MarkShowRequestSerializer) ToInput(seriesTmdbId uint64) models.Sho
 	for _, season := range params.Seasons {
 		seasons = append(seasons, season.toInput())
 	}
+
 	return models.ShowInput{
 		Series:  params.Series.toInput(seriesTmdbId),
 		Seasons: seasons,
@@ -149,9 +152,11 @@ func (params *MarkSeasonRequestSerializer) Validate(body io.Reader) error {
 	if err := json.NewDecoder(body).Decode(params); err != nil {
 		return err
 	}
+
 	if strings.TrimSpace(params.Series.Title) == "" {
 		return errors.ErrEmptyTitle
 	}
+
 	return nil
 }
 
@@ -170,9 +175,11 @@ func (params *MarkEpisodeRequestSerializer) Validate(body io.Reader) error {
 	if err := json.NewDecoder(body).Decode(params); err != nil {
 		return err
 	}
+
 	if strings.TrimSpace(params.Series.Title) == "" {
 		return errors.ErrEmptyTitle
 	}
+
 	return nil
 }
 
@@ -196,10 +203,12 @@ func NewProgressResponse(progress *models.SeriesProgress) ProgressResponseSerial
 	if seasons == nil {
 		seasons = []uint64{}
 	}
+
 	episodes := progress.WatchedEpisodes
 	if episodes == nil {
 		episodes = []uint64{}
 	}
+
 	return ProgressResponseSerializer{
 		Id:              progress.SeriesTmdbId,
 		State:           progress.State,
@@ -213,6 +222,7 @@ func episodeInputs(episodes []ProgressEpisodeSerializer) []models.EpisodeInput {
 	for _, episode := range episodes {
 		result = append(result, episode.toInput())
 	}
+
 	return result
 }
 
@@ -223,9 +233,11 @@ func parseAirDate(value string) time.Time {
 	if value == "" {
 		return time.Time{}
 	}
+
 	parsed, err := time.Parse(tmdbDateLayout, value)
 	if err != nil {
 		return time.Time{}
 	}
+
 	return parsed
 }

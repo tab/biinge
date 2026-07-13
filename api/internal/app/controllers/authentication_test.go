@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"biinge-api/internal/app/errors"
@@ -163,13 +164,15 @@ func Test_AuthenticationController_Registration(t *testing.T) {
 
 			if tt.error {
 				var response serializers.ErrorSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.error, response)
 			} else {
 				var response serializers.TokenSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.response, response)
 			}
 
@@ -320,13 +323,15 @@ func Test_AuthenticationController_Login(t *testing.T) {
 
 			if tt.error {
 				var response serializers.ErrorSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.error, response)
 			} else {
 				var response serializers.TokenSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.response, response)
 			}
 

@@ -119,6 +119,7 @@ func (c *seriesController) HandleMarkSeasonWatched(w http.ResponseWriter, r *htt
 	}
 
 	series, season := params.ToInputs(seriesTmdbId, seasonTmdbId)
+
 	progress, err := c.progress.MarkSeason(r.Context(), user.ID, series, season)
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, err)
@@ -192,6 +193,7 @@ func (c *seriesController) HandleMarkEpisodeWatched(w http.ResponseWriter, r *ht
 	}
 
 	series, season, episode := params.ToInputs(seriesTmdbId, seasonTmdbId, episodeTmdbId)
+
 	progress, err := c.progress.MarkEpisode(r.Context(), user.ID, series, season, episode)
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, err)
@@ -243,6 +245,7 @@ func parseTmdbParam(r *http.Request, name string) (uint64, error) {
 	if err != nil {
 		return 0, errors.ErrInvalidTmdbId
 	}
+
 	return id, nil
 }
 

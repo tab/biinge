@@ -1,6 +1,7 @@
 package spec
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -22,7 +23,7 @@ func LoadEnv() error {
 
 	envFiles := []string{
 		filepath.Join(rootDir, ".env"),
-		filepath.Join(rootDir, fmt.Sprintf(".env.%s", env)),
+		filepath.Join(rootDir, ".env."+env),
 		filepath.Join(rootDir, fmt.Sprintf(".env.%s.local", env)),
 	}
 	for _, file := range envFiles {
@@ -58,7 +59,7 @@ func findProjectRoot() (string, error) {
 
 		parentDir := filepath.Dir(dir)
 		if parentDir == dir {
-			return "", fmt.Errorf("could not find project root")
+			return "", errors.New("could not find project root")
 		}
 
 		dir = parentDir

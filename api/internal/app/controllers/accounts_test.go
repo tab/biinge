@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"biinge-api/internal/app/models"
@@ -38,7 +39,7 @@ func Test_UsersController_Me(t *testing.T) {
 	controller := NewAccountsController(users, stats, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	type result struct {
 		response serializers.UserSerializer
@@ -93,6 +94,7 @@ func Test_UsersController_Me(t *testing.T) {
 				ctx := context.WithValue(req.Context(), middlewares.CurrentUser{}, tt.currentUser)
 				req = req.WithContext(ctx)
 			}
+
 			w := httptest.NewRecorder()
 
 			r := chi.NewRouter()
@@ -104,13 +106,15 @@ func Test_UsersController_Me(t *testing.T) {
 
 			if tt.currentUser != nil {
 				var response serializers.UserSerializer
+
 				err = json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.response, response)
 			} else {
 				var response serializers.ErrorSerializer
+
 				err = json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.error, response)
 			}
 
@@ -136,7 +140,7 @@ func Test_AccountsController_Update(t *testing.T) {
 	controller := NewAccountsController(users, stats, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	type result struct {
 		response serializers.UserSerializer
@@ -288,6 +292,7 @@ func Test_AccountsController_Update(t *testing.T) {
 				ctx := context.WithValue(req.Context(), middlewares.CurrentUser{}, tt.currentUser)
 				req = req.WithContext(ctx)
 			}
+
 			w := httptest.NewRecorder()
 
 			r := chi.NewRouter()
@@ -299,13 +304,15 @@ func Test_AccountsController_Update(t *testing.T) {
 
 			if tt.error {
 				var response serializers.ErrorSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.error, response)
 			} else {
 				var response serializers.UserSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.response, response)
 			}
 

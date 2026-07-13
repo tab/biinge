@@ -68,13 +68,13 @@ func (j *jwtService) Decode(token string) (*Payload, error) {
 	claims := &Claims{}
 
 	result, err := jwt.ParseWithClaims(token, claims,
-		func(t *jwt.Token) (interface{}, error) {
+		func(t *jwt.Token) (any, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return false, ErrInvalidSigningMethod
 			}
+
 			return []byte(j.cfg.JWTSecretKey), nil
 		})
-
 	if err != nil {
 		return nil, err
 	}

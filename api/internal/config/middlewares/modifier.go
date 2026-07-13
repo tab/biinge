@@ -17,6 +17,7 @@ type Modifier interface {
 	Context() context.Context
 }
 
+//nolint:containedctx // the modifier deliberately carries the context it injects downstream
 type modifier struct {
 	ctx context.Context
 }

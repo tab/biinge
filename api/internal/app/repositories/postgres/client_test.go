@@ -5,6 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"biinge-api/internal/app/repositories/db"
 	"biinge-api/internal/config"
@@ -32,7 +33,7 @@ func Test_NewPostgresClient(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := NewPostgresClient(tt.args.cfg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, result)
 		})
 	}
@@ -60,7 +61,7 @@ func Test_Postgres_Db(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client, err := NewPostgresClient(tt.args.cfg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			pool := client.Db()
 
@@ -92,7 +93,7 @@ func Test_Postgres_Queries(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client, err := NewPostgresClient(tt.args.cfg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			queries := client.Queries()
 

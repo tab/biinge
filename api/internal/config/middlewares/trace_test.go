@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_NewTraceMiddleware(t *testing.T) {
@@ -43,8 +44,8 @@ func Test_TraceMiddleware_Trace(t *testing.T) {
 				_, _ = w.Write([]byte("Success"))
 			})
 
-			req, err := http.NewRequest("GET", "/test", nil)
-			assert.NoError(t, err)
+			req, err := http.NewRequest(http.MethodGet, "/test", nil)
+			require.NoError(t, err)
 
 			ctx := NewContextModifier(req.Context()).
 				WithTraceId(tt.traceId).

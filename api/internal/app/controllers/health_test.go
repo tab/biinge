@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"biinge-api/internal/app/serializers"
@@ -42,7 +43,7 @@ func Test_HealthController_HandleLiveness(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest("GET", "/live", nil)
+			req := httptest.NewRequest(http.MethodGet, "/live", nil)
 			w := httptest.NewRecorder()
 
 			handler.HandleLiveness(w, req)
@@ -51,8 +52,9 @@ func Test_HealthController_HandleLiveness(t *testing.T) {
 			defer resp.Body.Close()
 
 			var actual serializers.HealthSerializer
+
 			err := json.NewDecoder(resp.Body).Decode(&actual)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expected.response.Result, actual.Result)
 			assert.Equal(t, tt.expected.status, resp.Status)
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
@@ -107,7 +109,7 @@ func Test_HealthController_HandleReadiness(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			req := httptest.NewRequest("GET", "/ready", nil)
+			req := httptest.NewRequest(http.MethodGet, "/ready", nil)
 			w := httptest.NewRecorder()
 
 			handler.HandleReadiness(w, req)
@@ -117,13 +119,15 @@ func Test_HealthController_HandleReadiness(t *testing.T) {
 
 			if tt.expected.error.Error != "" {
 				var response serializers.ErrorSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&response)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.error.Error, response.Error)
 			} else {
 				var actual serializers.HealthSerializer
+
 				err := json.NewDecoder(resp.Body).Decode(&actual)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected.response.Result, actual.Result)
 			}
 

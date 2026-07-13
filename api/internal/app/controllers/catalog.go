@@ -34,7 +34,6 @@ func NewCatalogController(provider services.TmdbProvider, log *logger.Logger) Ca
 	}
 }
 
-//nolint:dupl
 func (c *catalogController) HandleSearchMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -42,6 +41,7 @@ func (c *catalogController) HandleSearchMovies(w http.ResponseWriter, r *http.Re
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -54,6 +54,7 @@ func (c *catalogController) HandleSearchMovies(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -61,7 +62,6 @@ func (c *catalogController) HandleSearchMovies(w http.ResponseWriter, r *http.Re
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-//nolint:dupl
 func (c *catalogController) HandleSearchSeries(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -69,6 +69,7 @@ func (c *catalogController) HandleSearchSeries(w http.ResponseWriter, r *http.Re
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -81,6 +82,7 @@ func (c *catalogController) HandleSearchSeries(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -100,6 +102,7 @@ func (c *catalogController) HandleSearchPeople(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -107,7 +110,6 @@ func (c *catalogController) HandleSearchPeople(w http.ResponseWriter, r *http.Re
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-//nolint:dupl
 func (c *catalogController) HandleTrendingMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -115,6 +117,7 @@ func (c *catalogController) HandleTrendingMovies(w http.ResponseWriter, r *http.
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -122,6 +125,7 @@ func (c *catalogController) HandleTrendingMovies(w http.ResponseWriter, r *http.
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -129,7 +133,6 @@ func (c *catalogController) HandleTrendingMovies(w http.ResponseWriter, r *http.
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-//nolint:dupl
 func (c *catalogController) HandleTrendingSeries(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -137,6 +140,7 @@ func (c *catalogController) HandleTrendingSeries(w http.ResponseWriter, r *http.
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -144,6 +148,7 @@ func (c *catalogController) HandleTrendingSeries(w http.ResponseWriter, r *http.
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -158,6 +163,7 @@ func (c *catalogController) HandleTrendingPeople(w http.ResponseWriter, r *http.
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -172,6 +178,7 @@ func searchQuery(w http.ResponseWriter, r *http.Request) (string, bool) {
 	if query == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrEmptyQuery.Error()})
+
 		return "", false
 	}
 

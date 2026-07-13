@@ -27,7 +27,6 @@ func NewAuthenticationController(service services.Authentication, log *logger.Lo
 	}
 }
 
-//nolint:dupl
 func (c *authenticationController) HandleRegistration(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -35,6 +34,7 @@ func (c *authenticationController) HandleRegistration(w http.ResponseWriter, r *
 	if err := params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -43,6 +43,7 @@ func (c *authenticationController) HandleRegistration(w http.ResponseWriter, r *
 		c.log.Error().Err(err).Msg("Registration failed")
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -50,7 +51,6 @@ func (c *authenticationController) HandleRegistration(w http.ResponseWriter, r *
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-//nolint:dupl
 func (c *authenticationController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -58,6 +58,7 @@ func (c *authenticationController) HandleLogin(w http.ResponseWriter, r *http.Re
 	if err := params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -66,6 +67,7 @@ func (c *authenticationController) HandleLogin(w http.ResponseWriter, r *http.Re
 		c.log.Error().Err(err).Msg("Login failed")
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -73,7 +75,6 @@ func (c *authenticationController) HandleLogin(w http.ResponseWriter, r *http.Re
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-//nolint:dupl
 func (c *authenticationController) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -81,6 +82,7 @@ func (c *authenticationController) HandleRefresh(w http.ResponseWriter, r *http.
 	if err := params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -89,6 +91,7 @@ func (c *authenticationController) HandleRefresh(w http.ResponseWriter, r *http.
 		c.log.Error().Err(err).Msg("Refresh failed")
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 

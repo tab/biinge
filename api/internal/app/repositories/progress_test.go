@@ -72,6 +72,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 
 	t.Run("mark single episode marks show watching, season not yet watched", func(t *testing.T) {
 		const seriesID uint64 = 100
+
 		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
 
 		progress, err := repository.MarkEpisodeWatched(
@@ -89,6 +90,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 
 	t.Run("marking every episode of a finished show marks it watched", func(t *testing.T) {
 		const seriesID uint64 = 101
+
 		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
 
 		for _, ep := range []uint64{1, 2, 3} {
@@ -111,6 +113,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 
 	t.Run("in-production show with all episodes watched stays watching", func(t *testing.T) {
 		const seriesID uint64 = 102
+
 		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
 
 		progress, err := repository.MarkSeasonWatched(
@@ -127,6 +130,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 
 	t.Run("mark whole show watched cascades to seasons and episodes", func(t *testing.T) {
 		const seriesID uint64 = 103
+
 		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
 
 		progress, err := repository.MarkShowWatched(ctx, userID, models.ShowInput{
@@ -164,6 +168,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 
 	t.Run("unmarking one episode downgrades a watched show to watching", func(t *testing.T) {
 		const seriesID uint64 = 105
+
 		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
 
 		_, err := repository.MarkShowWatched(ctx, userID, models.ShowInput{

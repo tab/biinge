@@ -1,6 +1,7 @@
 package tmdb
 
 import (
+	"slices"
 	"sort"
 	"time"
 )
@@ -26,6 +27,7 @@ func UniqById[T any](items []T, idFunc func(T) int) []T {
 		id := idFunc(item)
 		if _, exists := seen[id]; !exists {
 			seen[id] = struct{}{}
+
 			result = append(result, item)
 		}
 	}
@@ -39,6 +41,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 	}
 
 	directorCredits := make([]CreditItem, 0)
+
 	for _, crew := range movie.Credits.Crew {
 		if crew.Job == TMDBJobDirector && crew.ProfilePath != "" {
 			directorCredits = append(directorCredits, CreditItem{
@@ -51,6 +54,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 	}
 
 	castCredits := make([]CreditItem, 0)
+
 	for _, cast := range movie.Credits.Cast {
 		if cast.ProfilePath != "" {
 			castCredits = append(castCredits, CreditItem{
@@ -63,6 +67,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 	}
 
 	crewCredits := make([]CreditItem, 0)
+
 	for _, crew := range movie.Credits.Crew {
 		if crew.ProfilePath != "" && (crew.Job == TMDBJobDirectorOfPhotography ||
 			crew.Job == TMDBJobScreenplay ||
@@ -77,6 +82,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 	}
 
 	recommendations := make([]RecommendationItem, 0)
+
 	for _, rec := range movie.Recommendations.Results {
 		if rec.PosterPath != "" {
 			title := rec.Title
@@ -93,6 +99,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 	}
 
 	videos := make([]VideoItem, 0)
+
 	for _, video := range movie.Videos.Results {
 		if video.Official && video.Site == TMDBYoutubeType && video.Type == TMDBTrailerType {
 			videos = append(videos, VideoItem{
@@ -127,11 +134,13 @@ func ParseDate(dateStr string) (time.Time, error) {
 	if dateStr == "" {
 		return time.Time{}, nil
 	}
+
 	return time.Parse("2006-01-02", dateStr)
 }
 
 func FilterMovieCredits(credits []MovieCredit) []MovieCreditItem {
 	filtered := make([]MovieCredit, 0)
+
 	for _, credit := range credits {
 		if !credit.Adult && credit.PosterPath != "" && credit.ReleaseDate != "" {
 			filtered = append(filtered, credit)
@@ -169,16 +178,16 @@ func FilterMovieCredits(credits []MovieCredit) []MovieCreditItem {
 
 func FilterTvCredits(credits []TvCredit, excludedGenreIds []int) []TvCreditItem {
 	filtered := make([]TvCredit, 0)
+
 	for _, credit := range credits {
 		if !credit.Adult && credit.PosterPath != "" && credit.FirstAirDate != "" && len(credit.GenreIds) > 0 {
 			hasExcludedGenre := false
+
 			for _, excludedId := range excludedGenreIds {
-				for _, genreId := range credit.GenreIds {
-					if genreId == excludedId {
-						hasExcludedGenre = true
-						break
-					}
+				if slices.Contains(credit.GenreIds, excludedId) {
+					hasExcludedGenre = true
 				}
+
 				if hasExcludedGenre {
 					break
 				}
@@ -219,32 +228,32 @@ func TransformPersonDetails(person *PersonDetails) *PersonResponse {
 		return nil
 	}
 
-	castCredits := make([]MovieCredit, 0)
-	castCredits = append(castCredits, person.Credits.Cast...)
-
 	directorCredits := make([]MovieCredit, 0)
+
 	for _, crew := range person.Credits.Crew {
 		if crew.Job == TMDBJobDirector {
 			directorCredits = append(directorCredits, crew)
 		}
 	}
 
+	castCredits := make([]MovieCredit, 0, len(person.Credits.Cast)+len(directorCredits))
+	castCredits = append(castCredits, person.Credits.Cast...)
 	castCredits = append(castCredits, directorCredits...)
 	movieCredits := FilterMovieCredits(castCredits)
 
-	tvCastCredits := make([]TvCredit, 0)
-	tvCastCredits = append(tvCastCredits, person.TvCredits.Cast...)
-
 	tvDirectorCredits := make([]TvCredit, 0)
+
 	for _, crew := range person.TvCredits.Crew {
 		if crew.Job == TMDBJobDirector {
 			tvDirectorCredits = append(tvDirectorCredits, crew)
 		}
 	}
 
-	excludedGenreIds := []int{10767, 10763, 10764, 99} // Talk, News, Reality, Documentary
-
+	tvCastCredits := make([]TvCredit, 0, len(person.TvCredits.Cast)+len(tvDirectorCredits))
+	tvCastCredits = append(tvCastCredits, person.TvCredits.Cast...)
 	tvCastCredits = append(tvCastCredits, tvDirectorCredits...)
+
+	excludedGenreIds := []int{10767, 10763, 10764, 99} // Talk, News, Reality, Documentary
 	tvCredits := FilterTvCredits(tvCastCredits, excludedGenreIds)
 
 	uniqueTvCredits := UniqById(tvCredits, func(c TvCreditItem) int {
@@ -269,6 +278,7 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 	}
 
 	directorCredits := make([]CreditItem, 0)
+
 	for _, crew := range tvShow.Credits.Crew {
 		if crew.Job == TMDBJobDirector && crew.ProfilePath != "" {
 			directorCredits = append(directorCredits, CreditItem{
@@ -281,6 +291,7 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 	}
 
 	castCredits := make([]CreditItem, 0)
+
 	for _, cast := range tvShow.Credits.Cast {
 		if cast.ProfilePath != "" {
 			castCredits = append(castCredits, CreditItem{
@@ -293,6 +304,7 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 	}
 
 	crewCredits := make([]CreditItem, 0)
+
 	for _, crew := range tvShow.Credits.Crew {
 		if crew.ProfilePath != "" && (crew.Job == TMDBJobDirectorOfPhotography ||
 			crew.Job == TMDBJobScreenplay ||
@@ -307,6 +319,7 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 	}
 
 	recommendations := make([]RecommendationItem, 0)
+
 	for _, rec := range tvShow.Recommendations.Results {
 		if rec.PosterPath != "" {
 			title := rec.Title
@@ -323,6 +336,7 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 	}
 
 	videos := make([]VideoItem, 0)
+
 	for _, video := range tvShow.Videos.Results {
 		if video.Official && video.Site == TMDBYoutubeType && video.Type == TMDBTrailerType {
 			videos = append(videos, VideoItem{
@@ -372,10 +386,7 @@ func TransformSeasonDetails(season *SeasonDetails) *SeasonResponse {
 
 	episodes := make([]EpisodeResponseItem, 0, len(season.Episodes))
 	for _, episode := range season.Episodes {
-		runtime := episode.Runtime
-		if runtime < 0 {
-			runtime = 0
-		}
+		runtime := max(episode.Runtime, 0)
 
 		episodes = append(episodes, EpisodeResponseItem{
 			Id:         uint64(episode.ID),
@@ -405,10 +416,7 @@ func TransformEpisodeDetails(episode *EpisodeDetails) *EpisodeResponse {
 		return nil
 	}
 
-	runtime := episode.Runtime
-	if runtime < 0 {
-		runtime = 0
-	}
+	runtime := max(episode.Runtime, 0)
 
 	return &EpisodeResponse{
 		Id:         uint64(episode.ID),
@@ -428,6 +436,7 @@ func TransformEpisodeDetails(episode *EpisodeDetails) *EpisodeResponse {
 // deduplicated by person id — the same shape used for movie and tv credits.
 func buildCastCredits(credits Credits) []CreditItem {
 	directorCredits := make([]CreditItem, 0)
+
 	for _, crew := range credits.Crew {
 		if crew.Job == TMDBJobDirector && crew.ProfilePath != "" {
 			directorCredits = append(directorCredits, CreditItem{
@@ -440,6 +449,7 @@ func buildCastCredits(credits Credits) []CreditItem {
 	}
 
 	castCredits := make([]CreditItem, 0)
+
 	for _, cast := range credits.Cast {
 		if cast.ProfilePath != "" {
 			castCredits = append(castCredits, CreditItem{
@@ -451,7 +461,10 @@ func buildCastCredits(credits Credits) []CreditItem {
 		}
 	}
 
-	allCredits := append(directorCredits, castCredits...)
+	allCredits := make([]CreditItem, 0, len(directorCredits)+len(castCredits))
+	allCredits = append(allCredits, directorCredits...)
+	allCredits = append(allCredits, castCredits...)
+
 	return UniqById(allCredits, func(c CreditItem) int {
 		return c.Id
 	})
@@ -460,6 +473,7 @@ func buildCastCredits(credits Credits) []CreditItem {
 // buildTrailers keeps only official YouTube trailers.
 func buildTrailers(videos Videos) []VideoItem {
 	result := make([]VideoItem, 0)
+
 	for _, video := range videos.Results {
 		if video.Official && video.Site == TMDBYoutubeType && video.Type == TMDBTrailerType {
 			result = append(result, VideoItem{

@@ -10,6 +10,7 @@ import (
 func TruncateTables(ctx context.Context, dsn string, tables []string) error {
 	for _, table := range tables {
 		query := fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY CASCADE;", table)
+
 		err := run(ctx, dsn, query)
 		if err != nil {
 			return err

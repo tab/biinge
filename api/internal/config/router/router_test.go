@@ -70,6 +70,7 @@ func Test_HealthCheck(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	router.ServeHTTP(w, req)
+
 	resp := w.Result()
 	defer resp.Body.Close()
 

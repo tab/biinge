@@ -37,7 +37,6 @@ func NewMovies(repository repositories.MovieRepository, log *logger.Logger) Movi
 
 func (m *movies) List(ctx context.Context, userId uuid.UUID, status string, pagination *Pagination) ([]models.Movie, uint64, error) {
 	collection, total, err := m.repository.List(ctx, userId, status, pagination.Limit(), pagination.Offset())
-
 	if err != nil {
 		m.log.Error().Err(err).Msg("Failed to fetch movies")
 		return nil, 0, errors.ErrFailedToFetchMovies

@@ -44,6 +44,7 @@ func (r *seriesProgress) withTx(ctx context.Context, fn func(q *db.Queries) erro
 	if err != nil {
 		return err
 	}
+
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	if err = fn(r.client.Queries().WithTx(tx)); err != nil {
@@ -68,11 +69,12 @@ func (r *seriesProgress) MarkShowWatched(ctx context.Context, userId uuid.UUID, 
 			}
 		}
 
-		if _, err = recomputeSeries(ctx, q, series); err != nil {
+		if err = recomputeSeries(ctx, q, series); err != nil {
 			return err
 		}
 
 		progress, err = buildProgress(ctx, q, userId, show.Series.TmdbId)
+
 		return err
 	})
 
@@ -92,11 +94,12 @@ func (r *seriesProgress) MarkSeasonWatched(ctx context.Context, userId uuid.UUID
 			return err
 		}
 
-		if _, err = recomputeSeries(ctx, q, row); err != nil {
+		if err = recomputeSeries(ctx, q, row); err != nil {
 			return err
 		}
 
 		progress, err = buildProgress(ctx, q, userId, series.TmdbId)
+
 		return err
 	})
 
@@ -125,11 +128,12 @@ func (r *seriesProgress) MarkEpisodeWatched(ctx context.Context, userId uuid.UUI
 			return err
 		}
 
-		if _, err = recomputeSeries(ctx, q, seriesRow); err != nil {
+		if err = recomputeSeries(ctx, q, seriesRow); err != nil {
 			return err
 		}
 
 		progress, err = buildProgress(ctx, q, userId, series.TmdbId)
+
 		return err
 	})
 
@@ -157,6 +161,7 @@ func (r *seriesProgress) UnmarkSeasonWatched(ctx context.Context, userId uuid.UU
 				progress = &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}
 				return nil
 			}
+
 			return err
 		}
 
@@ -164,17 +169,19 @@ func (r *seriesProgress) UnmarkSeasonWatched(ctx context.Context, userId uuid.UU
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			return err
 		}
+
 		if err == nil {
 			if err = q.DeleteSeason(ctx, season.ID); err != nil {
 				return err
 			}
 		}
 
-		if _, err = recomputeSeries(ctx, q, series); err != nil {
+		if err = recomputeSeries(ctx, q, series); err != nil {
 			return err
 		}
 
 		progress, err = buildProgress(ctx, q, userId, seriesTmdbId)
+
 		return err
 	})
 
@@ -191,6 +198,7 @@ func (r *seriesProgress) UnmarkEpisodeWatched(ctx context.Context, userId uuid.U
 				progress = &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}
 				return nil
 			}
+
 			return err
 		}
 
@@ -200,6 +208,7 @@ func (r *seriesProgress) UnmarkEpisodeWatched(ctx context.Context, userId uuid.U
 				progress, err = buildProgress(ctx, q, userId, seriesTmdbId)
 				return err
 			}
+
 			return err
 		}
 
@@ -211,11 +220,12 @@ func (r *seriesProgress) UnmarkEpisodeWatched(ctx context.Context, userId uuid.U
 			return err
 		}
 
-		if _, err = recomputeSeries(ctx, q, series); err != nil {
+		if err = recomputeSeries(ctx, q, series); err != nil {
 			return err
 		}
 
 		progress, err = buildProgress(ctx, q, userId, seriesTmdbId)
+
 		return err
 	})
 
@@ -305,18 +315,18 @@ func recomputeSeason(ctx context.Context, q *db.Queries, seasonID uuid.UUID, epi
 // recomputeSeries derives a series' state from its total watched-episode count
 // and deletes the row entirely once it has no watched episodes left. Returns
 // the derived state (StateTypeNone when the row was deleted).
-func recomputeSeries(ctx context.Context, q *db.Queries, series db.Series) (string, error) {
+func recomputeSeries(ctx context.Context, q *db.Queries, series db.Series) error {
 	count, err := q.CountEpisodesBySeriesId(ctx, series.ID)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	state := deriveSeriesState(uint64(count), series.EpisodesCount, series.Status)
 	if state == models.StateTypeNone {
-		return state, q.DeleteSeries(ctx, series.ID)
+		return q.DeleteSeries(ctx, series.ID)
 	}
 
-	return state, q.SetSeriesState(ctx, db.SetSeriesStateParams{ID: series.ID, State: db.StateTypes(state)})
+	return q.SetSeriesState(ctx, db.SetSeriesStateParams{ID: series.ID, State: db.StateTypes(state)})
 }
 
 // deriveSeriesState mirrors the client's show-state rule: no watched episodes
@@ -342,6 +352,7 @@ func buildProgress(ctx context.Context, q *db.Queries, userId uuid.UUID, seriesT
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}, nil
 		}
+
 		return nil, err
 	}
 

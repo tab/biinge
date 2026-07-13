@@ -28,6 +28,7 @@ func NewRouter(
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
+	//nolint:staticcheck // RealIP only enriches request logs; spoofing risk is acceptable here
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 

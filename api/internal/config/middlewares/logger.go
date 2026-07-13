@@ -42,6 +42,7 @@ func (m *loggerMiddleware) Log(next http.Handler) http.Handler {
 		if r.TLS != nil {
 			scheme = "https"
 		}
+
 		status := ww.Status()
 		size := ww.BytesWritten()
 		duration := time.Since(startTime)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"biinge-api/internal/app/models"
@@ -30,7 +31,7 @@ func Test_Users_Create(t *testing.T) {
 	service := NewUsers(repository, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -97,10 +98,10 @@ func Test_Users_Create(t *testing.T) {
 			})
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})
@@ -122,7 +123,7 @@ func Test_Users_Update(t *testing.T) {
 	service := NewUsers(repository, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -191,10 +192,10 @@ func Test_Users_Update(t *testing.T) {
 			result, err := service.Update(ctx, tt.params)
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})
@@ -216,7 +217,7 @@ func Test_Users_FindById(t *testing.T) {
 	service := NewUsers(repository, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -265,10 +266,10 @@ func Test_Users_FindById(t *testing.T) {
 			result, err := service.FindById(ctx, tt.id)
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})
@@ -290,7 +291,7 @@ func Test_Users_FindByLogin(t *testing.T) {
 	service := NewUsers(repository, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -341,10 +342,10 @@ func Test_Users_FindByLogin(t *testing.T) {
 			result, err := service.FindByLogin(ctx, tt.login)
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})
@@ -366,7 +367,7 @@ func Test_Users_FindByEmail(t *testing.T) {
 	service := NewUsers(repository, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -417,10 +418,10 @@ func Test_Users_FindByEmail(t *testing.T) {
 			result, err := service.FindByEmail(ctx, tt.email)
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})

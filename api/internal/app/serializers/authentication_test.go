@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"biinge-api/internal/app/errors"
 )
@@ -66,10 +67,11 @@ func Test_RegistrationRequest_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var params RegistrationRequestSerializer
+
 			err := params.Validate(tt.body)
 
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
@@ -104,6 +106,7 @@ func Test_LoginRequest_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var params LoginRequestSerializer
+
 			err := params.Validate(tt.body)
 
 			assert.Equal(t, tt.expected, err)

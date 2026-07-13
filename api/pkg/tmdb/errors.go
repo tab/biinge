@@ -1,16 +1,16 @@
 package tmdb
 
-import "fmt"
+import "errors"
 
 var (
-	ErrAccessForbidden = fmt.Errorf("access forbidden")
-	ErrNotFound        = fmt.Errorf("not found")
+	ErrAccessForbidden = errors.New("access forbidden")
+	ErrNotFound        = errors.New("not found")
 
-	ErrUnexpectedResponse = fmt.Errorf("unexpected response from TMDB API")
+	ErrUnexpectedResponse = errors.New("unexpected response from TMDB API")
 
-	ErrFailedToFetchMovieDetails   = fmt.Errorf("failed to fetch movie details")
-	ErrFailedToFetchTvDetails      = fmt.Errorf("failed to fetch tv details")
-	ErrFailedToFetchSeasonDetails  = fmt.Errorf("failed to fetch season details")
-	ErrFailedToFetchEpisodeDetails = fmt.Errorf("failed to fetch episode details")
-	ErrFailedToFetchPersonDetails  = fmt.Errorf("failed to fetch person details")
+	ErrFailedToFetchMovieDetails   = errors.New("failed to fetch movie details")
+	ErrFailedToFetchTvDetails      = errors.New("failed to fetch tv details")
+	ErrFailedToFetchSeasonDetails  = errors.New("failed to fetch season details")
+	ErrFailedToFetchEpisodeDetails = errors.New("failed to fetch episode details")
+	ErrFailedToFetchPersonDetails  = errors.New("failed to fetch person details")
 )

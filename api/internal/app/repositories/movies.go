@@ -42,6 +42,7 @@ func (m *movie) List(ctx context.Context, userId uuid.UUID, state string, limit,
 	}
 
 	movies := make([]models.Movie, 0, len(rows))
+
 	var total uint64
 
 	if len(rows) > 0 {

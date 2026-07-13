@@ -30,7 +30,6 @@ func NewPeopleController(provider services.TmdbProvider, log *logger.Logger) Peo
 	}
 }
 
-//nolint:dupl
 func (t *peopleController) HandleDetails(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -38,6 +37,7 @@ func (t *peopleController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -45,6 +45,7 @@ func (t *peopleController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -52,6 +53,7 @@ func (t *peopleController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 

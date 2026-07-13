@@ -2,11 +2,13 @@ package server
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"biinge-api/internal/app/controllers"
@@ -90,11 +92,13 @@ func Test_Server_RunAndShutdown(t *testing.T) {
 	srv := NewServer(cfg, handler)
 
 	runErrCh := make(chan error, 1)
+
 	go func() {
 		err := srv.Run()
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			runErrCh <- err
 		}
+
 		close(runErrCh)
 	}()
 
@@ -102,9 +106,10 @@ func Test_Server_RunAndShutdown(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
 	err := srv.Shutdown(ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = <-runErrCh
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

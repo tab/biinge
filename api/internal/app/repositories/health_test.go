@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"biinge-api/internal/app/repositories/postgres"
 	"biinge-api/internal/config"
@@ -13,16 +14,18 @@ import (
 
 func Test_HealthRepository_Ping(t *testing.T) {
 	ctx := context.Background()
+
 	dsn := os.Getenv("DATABASE_DSN")
 	if dsn == "" {
 		dsn = "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable"
 	}
+
 	cfg := &config.Config{
 		DatabaseDSN: dsn,
 	}
 
 	client, err := postgres.NewPostgresClient(cfg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	healthRepository := NewHealthRepository(client)
 

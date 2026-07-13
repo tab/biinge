@@ -41,7 +41,7 @@ func LoadConfig() *Config {
 
 	envFiles := []string{
 		".env",
-		fmt.Sprintf(".env.%s", env),
+		".env." + env,
 		fmt.Sprintf(".env.%s.local", env),
 	}
 	for _, file := range envFiles {

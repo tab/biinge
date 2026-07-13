@@ -42,6 +42,7 @@ func (s *series) List(ctx context.Context, userId uuid.UUID, state string, limit
 	}
 
 	collection := make([]models.Series, 0, len(rows))
+
 	var total uint64
 
 	if len(rows) > 0 {

@@ -37,6 +37,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 		if !ok {
 			m.log.Error().Msg("Invalid authorization header")
 			w.WriteHeader(http.StatusUnauthorized)
+
 			return
 		}
 
@@ -45,6 +46,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 			m.log.Error().Err(err).Msg("Failed to decode token")
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 			return
 		}
 
@@ -54,6 +56,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 			m.log.Error().Msg("Refresh token used on a protected endpoint")
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: jwt.ErrInvalidTokenType.Error()})
+
 			return
 		}
 
@@ -62,6 +65,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 			m.log.Error().Err(err).Msg("Failed to parse user Id from claims")
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 			return
 		}
 
@@ -70,6 +74,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 			m.log.Error().Err(err).Msg("Failed to find user by identity number")
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 			return
 		}
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"golang.org/x/crypto/bcrypt"
 
@@ -34,7 +35,7 @@ func Test_Authentication_Registration(t *testing.T) {
 	service := NewAuthentication(jwtService, usersService, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -247,11 +248,11 @@ func Test_Authentication_Registration(t *testing.T) {
 			result, err := service.Registration(ctx, tt.params)
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Equal(t, tt.error.Error(), err.Error())
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})
@@ -275,10 +276,10 @@ func Test_Authentication_Login(t *testing.T) {
 	service := NewAuthentication(jwtService, usersService, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password123"), BcryptHashCost)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -418,11 +419,11 @@ func Test_Authentication_Login(t *testing.T) {
 			result, err := service.Login(ctx, tt.params)
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Equal(t, tt.error.Error(), err.Error())
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})
@@ -446,7 +447,7 @@ func Test_Authentication_Refresh(t *testing.T) {
 	service := NewAuthentication(jwtService, usersService, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// expectReissue sets up the Generate calls performed by issueTokens.
 	expectReissue := func() {
@@ -533,11 +534,11 @@ func Test_Authentication_Refresh(t *testing.T) {
 			})
 
 			if tt.error != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Equal(t, tt.error.Error(), err.Error())
 				assert.Nil(t, result)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
 		})

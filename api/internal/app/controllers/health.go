@@ -36,6 +36,7 @@ func (h *healthController) HandleReadiness(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "unavailable"})
+
 		return
 	}
 

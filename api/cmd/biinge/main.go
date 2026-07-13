@@ -20,6 +20,7 @@ func main() {
 				if cfg.LogLevel == config.DebugLevel {
 					return &fxevent.ConsoleLogger{W: os.Stdout}
 				}
+
 				return fxevent.NopLogger
 			},
 		),

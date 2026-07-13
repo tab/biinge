@@ -56,10 +56,12 @@ func (c *seriesController) HandleList(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
 	listType := models.StateTypeWant
+
 	switch r.URL.Query().Get("type") {
 	case models.StateTypeWatching:
 		listType = models.StateTypeWatching
@@ -73,6 +75,7 @@ func (c *seriesController) HandleList(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -102,7 +105,6 @@ func (c *seriesController) HandleList(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-//nolint:dupl
 func (c *seriesController) HandleDetails(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -110,6 +112,7 @@ func (c *seriesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -117,6 +120,7 @@ func (c *seriesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -124,6 +128,7 @@ func (c *seriesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -138,6 +143,7 @@ func (c *seriesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -145,6 +151,7 @@ func (c *seriesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 	if err := params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -161,6 +168,7 @@ func (c *seriesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -181,6 +189,7 @@ func (c *seriesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -188,6 +197,7 @@ func (c *seriesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -195,6 +205,7 @@ func (c *seriesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if err = params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -207,6 +218,7 @@ func (c *seriesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -227,6 +239,7 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -234,6 +247,7 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -241,6 +255,7 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -253,6 +268,7 @@ func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Re
 	if _, ok := middlewares.CurrentUserFromContext(r.Context()); !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -260,6 +276,7 @@ func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -267,6 +284,7 @@ func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid season number"})
+
 		return
 	}
 
@@ -274,6 +292,7 @@ func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -287,6 +306,7 @@ func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.R
 	if _, ok := middlewares.CurrentUserFromContext(r.Context()); !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -294,6 +314,7 @@ func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.R
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -301,6 +322,7 @@ func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.R
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid season number"})
+
 		return
 	}
 
@@ -308,6 +330,7 @@ func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.R
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid episode number"})
+
 		return
 	}
 
@@ -315,6 +338,7 @@ func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.R
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 

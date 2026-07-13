@@ -57,6 +57,7 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch movie details")
+
 		return nil, tmdb.ErrFailedToFetchMovieDetails
 	}
 
@@ -76,6 +77,7 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 		p.log.Error().
 			Err(err).
 			Msg("Failed to fetch recommendation states")
+
 		return nil, errors.ErrFailedToFetchResults
 	}
 
@@ -124,6 +126,7 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 				Err(err).
 				Uint64("Id", id).
 				Msg("Movie not found in database")
+
 			return &serializers.MovieDetailsSerializer{
 				Id:              id,
 				Pinned:          false,
@@ -140,10 +143,12 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 				Videos:          videos,
 			}, nil
 		}
+
 		p.log.Error().
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch movie state")
+
 		return nil, errors.ErrFailedToFetchMovie
 	}
 
@@ -198,6 +203,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch tv details")
+
 		return nil, tmdb.ErrFailedToFetchTvDetails
 	}
 
@@ -217,6 +223,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		p.log.Error().
 			Err(err).
 			Msg("Failed to fetch recommendation states")
+
 		return nil, errors.ErrFailedToFetchResults
 	}
 
@@ -277,6 +284,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 				Err(err).
 				Uint64("Id", id).
 				Msg("Series not found in database")
+
 			return &serializers.SeriesDetailsSerializer{
 				Id:              id,
 				Pinned:          false,
@@ -293,10 +301,12 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 				Seasons:         seasons,
 			}, nil
 		}
+
 		p.log.Error().
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch series state")
+
 		return nil, errors.ErrFailedToFetchSeries
 	}
 
@@ -352,6 +362,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch person details")
+
 		return nil, tmdb.ErrFailedToFetchPersonDetails
 	}
 
@@ -371,6 +382,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		p.log.Error().
 			Err(err).
 			Msg("Failed to fetch credit states")
+
 		return nil, errors.ErrFailedToFetchResults
 	}
 
@@ -457,6 +469,7 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 			Uint64("SeasonNumber", seasonNumber).
 			Uint64("EpisodeNumber", episodeNumber).
 			Msg("Failed to fetch tv episode details")
+
 		return nil, tmdb.ErrFailedToFetchEpisodeDetails
 	}
 
@@ -566,8 +579,6 @@ const minNotableVoteCount = 100
 
 // buildMovieList filters out adult and poster-less results, merges the user's
 // tracking state, and wraps the page in a pagination envelope.
-//
-//nolint:dupl
 func (p *tmdbProvider) buildMovieList(ctx context.Context, response *tmdb.MovieListResult, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
 	ids := make([]uint64, 0, len(response.Results))
 	for _, item := range response.Results {
@@ -617,8 +628,6 @@ func (p *tmdbProvider) buildMovieList(ctx context.Context, response *tmdb.MovieL
 }
 
 // buildSeriesList mirrors buildMovieList for TV results (TMDB uses "name").
-//
-//nolint:dupl
 func (p *tmdbProvider) buildSeriesList(ctx context.Context, response *tmdb.TvListResult, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error) {
 	ids := make([]uint64, 0, len(response.Results))
 	for _, item := range response.Results {

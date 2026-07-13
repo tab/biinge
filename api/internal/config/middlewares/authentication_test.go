@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"biinge-api/internal/app/errors"
@@ -35,7 +36,7 @@ func Test_AuthMiddleware_Authenticate(t *testing.T) {
 	middleware := NewAuthenticationMiddleware(jwtService, users, log)
 
 	id, err := uuid.NewRandom()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	type result struct {
 		status string
@@ -124,11 +125,13 @@ func Test_AuthMiddleware_Authenticate(t *testing.T) {
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
+
 				_ = json.NewEncoder(w).Encode(serializers.UserSerializer{ID: user.ID})
 			})
 
-			req, _ := http.NewRequest("GET", "/", nil)
+			req, _ := http.NewRequest(http.MethodGet, "/", nil)
 			req.Header.Set("Authorization", tt.header)
+
 			rw := httptest.NewRecorder()
 
 			middleware.Authenticate(handler).ServeHTTP(rw, req)
@@ -137,7 +140,7 @@ func Test_AuthMiddleware_Authenticate(t *testing.T) {
 			defer res.Body.Close()
 
 			if tt.error != nil {
-				assert.Error(t, tt.error)
+				require.Error(t, tt.error)
 			} else {
 				assert.Equal(t, tt.expected.code, res.StatusCode)
 				assert.Equal(t, tt.expected.status, res.Status)

@@ -55,7 +55,7 @@ func Test_LoadConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for key, value := range tt.env {
-				os.Setenv(key, value)
+				t.Setenv(key, value)
 			}
 
 			flag.CommandLine = flag.NewFlagSet(tt.name, flag.ContinueOnError)
@@ -67,11 +67,11 @@ func Test_LoadConfig(t *testing.T) {
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
 			assert.Equal(t, tt.expected.SecretKeyBase, result.SecretKeyBase)
 			assert.Equal(t, tt.expected.JWTSecretKey, result.JWTSecretKey)
-			assert.Equal(t, tt.expected.TMDBConfig.BaseURL, result.TMDBConfig.BaseURL)
-			assert.Equal(t, tt.expected.TMDBConfig.BaseImageURL, result.TMDBConfig.BaseImageURL)
-			assert.Equal(t, tt.expected.TMDBConfig.APIReadAccessToken, result.TMDBConfig.APIReadAccessToken)
-			assert.Equal(t, tt.expected.TMDBConfig.Locale, result.TMDBConfig.Locale)
-			assert.Equal(t, tt.expected.TMDBConfig.Timeout, result.TMDBConfig.Timeout)
+			assert.Equal(t, tt.expected.BaseURL, result.BaseURL)
+			assert.Equal(t, tt.expected.BaseImageURL, result.BaseImageURL)
+			assert.Equal(t, tt.expected.APIReadAccessToken, result.APIReadAccessToken)
+			assert.Equal(t, tt.expected.Locale, result.Locale)
+			assert.Equal(t, tt.expected.Timeout, result.Timeout)
 
 			t.Cleanup(func() {
 				for key := range tt.env {

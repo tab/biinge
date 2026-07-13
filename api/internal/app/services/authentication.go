@@ -46,6 +46,7 @@ func (a *authentication) Registration(ctx context.Context, params *serializers.R
 		a.log.Warn().
 			Str("login", params.Login).
 			Msg("Registration attempted with existing login")
+
 		return nil, errors.ErrLoginAlreadyExists
 	}
 
@@ -54,6 +55,7 @@ func (a *authentication) Registration(ctx context.Context, params *serializers.R
 		a.log.Warn().
 			Str("email", params.Email).
 			Msg("Registration attempted with existing email")
+
 		return nil, errors.ErrEmailAlreadyExists
 	}
 
@@ -67,6 +69,7 @@ func (a *authentication) Registration(ctx context.Context, params *serializers.R
 		a.log.Error().
 			Err(err).
 			Msg("Failed to hash password")
+
 		return nil, err
 	}
 
@@ -84,6 +87,7 @@ func (a *authentication) Registration(ctx context.Context, params *serializers.R
 			Str("login", params.Login).
 			Str("email", params.Email).
 			Msg("Failed to create user")
+
 		return nil, err
 	}
 
@@ -97,6 +101,7 @@ func (a *authentication) Login(ctx context.Context, params *serializers.LoginReq
 			Err(err).
 			Str("email", params.Email).
 			Msg("Failed to find user by email")
+
 		return nil, errors.ErrInvalidCredentials
 	}
 
@@ -106,6 +111,7 @@ func (a *authentication) Login(ctx context.Context, params *serializers.LoginReq
 			Err(err).
 			Str("email", params.Email).
 			Msg("Password mismatch")
+
 		return nil, errors.ErrInvalidPassword
 	}
 

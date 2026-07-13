@@ -29,6 +29,7 @@ type Logger struct {
 }
 
 func NewLogger(cfg *config.Config) *Logger {
+	//nolint:reassign // configure zerolog's global stack marshaler once at startup
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.TimeFieldFormat = "2006-01-02T15:04:05.000Z"
 

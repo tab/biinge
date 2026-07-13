@@ -14,6 +14,7 @@ func toInt32Slice(ids []uint64) []int32 {
 	for i, id := range ids {
 		result[i] = int32(id)
 	}
+
 	return result
 }
 
@@ -23,5 +24,6 @@ func timestampFromTime(t time.Time) pgtype.Timestamp {
 	if t.IsZero() {
 		return pgtype.Timestamp{Valid: false}
 	}
+
 	return pgtype.Timestamp{Time: t, Valid: true}
 }

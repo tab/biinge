@@ -55,7 +55,7 @@ func NewClient(cfg *config.Config, log *logger.Logger) Client {
 	apiClient.
 		SetHeader("Accept", "application/json").
 		SetHeader("Content-Type", "application/json").
-		SetHeader("Authorization", fmt.Sprintf("Bearer %s", cfg.TMDBConfig.APIReadAccessToken)).
+		SetHeader("Authorization", "Bearer "+cfg.TMDBConfig.APIReadAccessToken).
 		SetTimeout(DefaultTimeout)
 
 	apiClient.SetTransport(&http.Transport{
@@ -72,9 +72,8 @@ func NewClient(cfg *config.Config, log *logger.Logger) Client {
 	}
 }
 
-//nolint:dupl
 func (c *client) FetchMovieDetails(ctx context.Context, id uint64) (*MovieDetails, error) {
-	endpoint := fmt.Sprintf("%s/movie/%d", c.cfg.TMDBConfig.BaseURL, id)
+	endpoint := fmt.Sprintf("%s/movie/%d", c.cfg.BaseURL, id)
 
 	c.log.Debug().
 		Str("endpoint", endpoint).
@@ -91,6 +90,7 @@ func (c *client) FetchMovieDetails(ctx context.Context, id uint64) (*MovieDetail
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch movie details")
+
 		return nil, err
 	}
 
@@ -102,6 +102,7 @@ func (c *client) FetchMovieDetails(ctx context.Context, id uint64) (*MovieDetail
 				Err(err).
 				Uint64("Id", id).
 				Msg("Failed to parse movie details response")
+
 			return nil, err
 		}
 
@@ -111,25 +112,27 @@ func (c *client) FetchMovieDetails(ctx context.Context, id uint64) (*MovieDetail
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Access forbidden to TMDB API")
+
 		return nil, ErrAccessForbidden
 	case http.StatusNotFound:
 		c.log.Error().
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Movie not found in TMDB API")
+
 		return nil, ErrNotFound
 	default:
 		c.log.Error().
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Unexpected response from TMDB API")
+
 		return nil, ErrUnexpectedResponse
 	}
 }
 
-//nolint:dupl
 func (c *client) FetchTvDetails(ctx context.Context, id uint64) (*TvDetails, error) {
-	endpoint := fmt.Sprintf("%s/tv/%d", c.cfg.TMDBConfig.BaseURL, id)
+	endpoint := fmt.Sprintf("%s/tv/%d", c.cfg.BaseURL, id)
 
 	c.log.Debug().
 		Str("endpoint", endpoint).
@@ -146,6 +149,7 @@ func (c *client) FetchTvDetails(ctx context.Context, id uint64) (*TvDetails, err
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch tv details")
+
 		return nil, err
 	}
 
@@ -157,6 +161,7 @@ func (c *client) FetchTvDetails(ctx context.Context, id uint64) (*TvDetails, err
 				Err(err).
 				Uint64("Id", id).
 				Msg("Failed to parse tv details response")
+
 			return nil, err
 		}
 
@@ -166,25 +171,27 @@ func (c *client) FetchTvDetails(ctx context.Context, id uint64) (*TvDetails, err
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Access forbidden to TMDB API")
+
 		return nil, ErrAccessForbidden
 	case http.StatusNotFound:
 		c.log.Error().
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Tv show not found in TMDB API")
+
 		return nil, ErrNotFound
 	default:
 		c.log.Error().
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Unexpected response from TMDB API")
+
 		return nil, ErrUnexpectedResponse
 	}
 }
 
-//nolint:dupl
 func (c *client) FetchTvSeasonDetails(ctx context.Context, tvId uint64, seasonNumber uint64) (*SeasonDetails, error) {
-	endpoint := fmt.Sprintf("%s/tv/%d/season/%d", c.cfg.TMDBConfig.BaseURL, tvId, seasonNumber)
+	endpoint := fmt.Sprintf("%s/tv/%d/season/%d", c.cfg.BaseURL, tvId, seasonNumber)
 
 	c.log.Debug().
 		Str("endpoint", endpoint).
@@ -196,13 +203,13 @@ func (c *client) FetchTvSeasonDetails(ctx context.Context, tvId uint64, seasonNu
 		SetContext(ctx).
 		SetQueryParam("language", c.cfg.TMDBConfig.Locale).
 		Get(endpoint)
-
 	if err != nil {
 		c.log.Error().
 			Err(err).
 			Uint64("TvId", tvId).
 			Uint64("SeasonNumber", seasonNumber).
 			Msg("Failed to fetch TV season details")
+
 		return nil, err
 	}
 
@@ -215,6 +222,7 @@ func (c *client) FetchTvSeasonDetails(ctx context.Context, tvId uint64, seasonNu
 				Uint64("TvId", tvId).
 				Uint64("SeasonNumber", seasonNumber).
 				Msg("Failed to parse TV season details response")
+
 			return nil, err
 		}
 
@@ -225,6 +233,7 @@ func (c *client) FetchTvSeasonDetails(ctx context.Context, tvId uint64, seasonNu
 			Uint64("TvId", tvId).
 			Uint64("SeasonNumber", seasonNumber).
 			Msg("Access forbidden to TMDB API")
+
 		return nil, ErrAccessForbidden
 	case http.StatusNotFound:
 		c.log.Error().
@@ -232,6 +241,7 @@ func (c *client) FetchTvSeasonDetails(ctx context.Context, tvId uint64, seasonNu
 			Uint64("TvId", tvId).
 			Uint64("SeasonNumber", seasonNumber).
 			Msg("TV season not found in TMDB API")
+
 		return nil, ErrNotFound
 	default:
 		c.log.Error().
@@ -239,13 +249,13 @@ func (c *client) FetchTvSeasonDetails(ctx context.Context, tvId uint64, seasonNu
 			Uint64("TvId", tvId).
 			Uint64("SeasonNumber", seasonNumber).
 			Msg("Unexpected response from TMDB API")
+
 		return nil, ErrUnexpectedResponse
 	}
 }
 
-// nolint:dupl
 func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonNumber uint64, episodeNumber uint64) (*EpisodeDetails, error) {
-	endpoint := fmt.Sprintf("%s/tv/%d/season/%d/episode/%d", c.cfg.TMDBConfig.BaseURL, tvId, seasonNumber, episodeNumber)
+	endpoint := fmt.Sprintf("%s/tv/%d/season/%d/episode/%d", c.cfg.BaseURL, tvId, seasonNumber, episodeNumber)
 
 	c.log.Debug().
 		Str("endpoint", endpoint).
@@ -259,7 +269,6 @@ func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonN
 		SetQueryParam("language", c.cfg.TMDBConfig.Locale).
 		SetQueryParam("append_to_response", "credits,videos").
 		Get(endpoint)
-
 	if err != nil {
 		c.log.Error().
 			Err(err).
@@ -267,6 +276,7 @@ func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonN
 			Uint64("SeasonNumber", seasonNumber).
 			Uint64("EpisodeNumber", episodeNumber).
 			Msg("Failed to fetch TV episode details")
+
 		return nil, err
 	}
 
@@ -280,6 +290,7 @@ func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonN
 				Uint64("SeasonNumber", seasonNumber).
 				Uint64("EpisodeNumber", episodeNumber).
 				Msg("Failed to parse TV episode details response")
+
 			return nil, err
 		}
 
@@ -291,6 +302,7 @@ func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonN
 			Uint64("SeasonNumber", seasonNumber).
 			Uint64("EpisodeNumber", episodeNumber).
 			Msg("Access forbidden to TMDB API")
+
 		return nil, ErrAccessForbidden
 	case http.StatusNotFound:
 		c.log.Error().
@@ -299,6 +311,7 @@ func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonN
 			Uint64("SeasonNumber", seasonNumber).
 			Uint64("EpisodeNumber", episodeNumber).
 			Msg("TV episode not found in TMDB API")
+
 		return nil, ErrNotFound
 	default:
 		c.log.Error().
@@ -307,13 +320,13 @@ func (c *client) FetchTvEpisodeDetails(ctx context.Context, tvId uint64, seasonN
 			Uint64("SeasonNumber", seasonNumber).
 			Uint64("EpisodeNumber", episodeNumber).
 			Msg("Unexpected response from TMDB API")
+
 		return nil, ErrUnexpectedResponse
 	}
 }
 
-//nolint:dupl
 func (c *client) FetchPersonDetails(ctx context.Context, id uint64) (*PersonDetails, error) {
-	endpoint := fmt.Sprintf("%s/person/%d", c.cfg.TMDBConfig.BaseURL, id)
+	endpoint := fmt.Sprintf("%s/person/%d", c.cfg.BaseURL, id)
 
 	c.log.Debug().
 		Str("endpoint", endpoint).
@@ -330,6 +343,7 @@ func (c *client) FetchPersonDetails(ctx context.Context, id uint64) (*PersonDeta
 			Err(err).
 			Uint64("Id", id).
 			Msg("Failed to fetch person details")
+
 		return nil, err
 	}
 
@@ -341,6 +355,7 @@ func (c *client) FetchPersonDetails(ctx context.Context, id uint64) (*PersonDeta
 				Err(err).
 				Uint64("Id", id).
 				Msg("Failed to parse person details response")
+
 			return nil, err
 		}
 
@@ -350,42 +365,49 @@ func (c *client) FetchPersonDetails(ctx context.Context, id uint64) (*PersonDeta
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Access forbidden to TMDB API")
+
 		return nil, ErrAccessForbidden
 	case http.StatusNotFound:
 		c.log.Error().
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Person not found in TMDB API")
+
 		return nil, ErrNotFound
 	default:
 		c.log.Error().
 			Int("statusCode", response.StatusCode()).
 			Uint64("Id", id).
 			Msg("Unexpected response from TMDB API")
+
 		return nil, ErrUnexpectedResponse
 	}
 }
 
 func (c *client) WithApiReadAccessToken(apiReadAccessToken string) Client {
-	c.cfg.TMDBConfig.APIReadAccessToken = apiReadAccessToken
-	c.apiClient.SetHeader("Authorization", fmt.Sprintf("Bearer %s", apiReadAccessToken))
+	c.cfg.APIReadAccessToken = apiReadAccessToken
+	c.apiClient.SetHeader("Authorization", "Bearer "+apiReadAccessToken)
+
 	return c
 }
 
 func (c *client) WithLocale(lang string) Client {
-	c.cfg.TMDBConfig.Locale = lang
+	c.cfg.Locale = lang
 	c.apiClient.SetQueryParam("language", lang)
+
 	return c
 }
 
 func (c *client) WithTimeout(timeout time.Duration) Client {
-	c.cfg.TMDBConfig.Timeout = timeout
+	c.cfg.Timeout = timeout
 	c.apiClient.SetTimeout(timeout)
+
 	return c
 }
 
 func (c *client) SearchMovies(ctx context.Context, query string, page uint64) (*MovieListResult, error) {
-	endpoint := fmt.Sprintf("%s/search/movie", c.cfg.TMDBConfig.BaseURL)
+	endpoint := c.cfg.BaseURL + "/search/movie"
+
 	return fetchList[MovieListResult](ctx, c, endpoint, map[string]string{
 		"query":         query,
 		"page":          strconv.FormatUint(page, 10),
@@ -394,7 +416,8 @@ func (c *client) SearchMovies(ctx context.Context, query string, page uint64) (*
 }
 
 func (c *client) SearchTv(ctx context.Context, query string, page uint64) (*TvListResult, error) {
-	endpoint := fmt.Sprintf("%s/search/tv", c.cfg.TMDBConfig.BaseURL)
+	endpoint := c.cfg.BaseURL + "/search/tv"
+
 	return fetchList[TvListResult](ctx, c, endpoint, map[string]string{
 		"query":         query,
 		"page":          strconv.FormatUint(page, 10),
@@ -403,7 +426,8 @@ func (c *client) SearchTv(ctx context.Context, query string, page uint64) (*TvLi
 }
 
 func (c *client) SearchPeople(ctx context.Context, query string, page uint64) (*PersonListResult, error) {
-	endpoint := fmt.Sprintf("%s/search/person", c.cfg.TMDBConfig.BaseURL)
+	endpoint := c.cfg.BaseURL + "/search/person"
+
 	return fetchList[PersonListResult](ctx, c, endpoint, map[string]string{
 		"query":         query,
 		"page":          strconv.FormatUint(page, 10),
@@ -412,12 +436,12 @@ func (c *client) SearchPeople(ctx context.Context, query string, page uint64) (*
 }
 
 func (c *client) FetchTrendingMovies(ctx context.Context) (*MovieListResult, error) {
-	endpoint := fmt.Sprintf("%s/trending/movie/week", c.cfg.TMDBConfig.BaseURL)
+	endpoint := c.cfg.BaseURL + "/trending/movie/week"
 	return fetchList[MovieListResult](ctx, c, endpoint, nil)
 }
 
 func (c *client) FetchTrendingTv(ctx context.Context) (*TvListResult, error) {
-	endpoint := fmt.Sprintf("%s/trending/tv/week", c.cfg.TMDBConfig.BaseURL)
+	endpoint := c.cfg.BaseURL + "/trending/tv/week"
 	return fetchList[TvListResult](ctx, c, endpoint, nil)
 }
 
@@ -425,7 +449,7 @@ func (c *client) FetchTrendingPeople(ctx context.Context) (*PersonListResult, er
 	// TMDB's trending/person feed is heavily polluted with unflagged adult and
 	// unknown entries and returns no known_for to filter on. person/popular is far
 	// cleaner and includes known_for so callers can drop non-notable people.
-	endpoint := fmt.Sprintf("%s/person/popular", c.cfg.TMDBConfig.BaseURL)
+	endpoint := c.cfg.BaseURL + "/person/popular"
 	return fetchList[PersonListResult](ctx, c, endpoint, nil)
 }
 
@@ -434,7 +458,7 @@ func (c *client) FetchTrendingPeople(ctx context.Context) (*PersonListResult, er
 func fetchList[T any](ctx context.Context, c *client, endpoint string, params map[string]string) (*T, error) {
 	request := c.apiClient.R().
 		SetContext(ctx).
-		SetQueryParam("language", c.cfg.TMDBConfig.Locale)
+		SetQueryParam("language", c.cfg.Locale)
 
 	for key, value := range params {
 		request = request.SetQueryParam(key, value)

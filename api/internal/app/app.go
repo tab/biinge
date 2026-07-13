@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -46,7 +47,7 @@ func registerHooks(
 			log.Info().Msgf("Starting server in %s environment at %s", cfg.AppEnv, cfg.AppAddr)
 
 			go func() {
-				if err := server.Run(); err != nil && err != http.ErrServerClosed {
+				if err := server.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					log.Error().Err(err).Msg("Server failed")
 				}
 			}()

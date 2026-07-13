@@ -25,7 +25,7 @@ func WaitForServerStart(t *testing.T, url string) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				//nolint:gosec
+				//nolint:gosec // G402: test-only spec server talks to a self-signed local instance
 				InsecureSkipVerify: true,
 			},
 		},
@@ -34,12 +34,12 @@ func WaitForServerStart(t *testing.T, url string) {
 
 	require.Eventually(t, func() bool {
 		resp, err := client.Get(url)
-
 		if err != nil {
 			return false
 		}
 
 		defer resp.Body.Close()
+
 		return resp.StatusCode == http.StatusOK
 	}, ServerStartTimeout, ServerStartPollInterval, "timeout: server did not start")
 }

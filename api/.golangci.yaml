@@ -1,44 +1,142 @@
+version: "2"
 linters:
+  default: none
   enable:
+    - asciicheck
+    - bidichk
     - bodyclose
+    - containedctx
     - copyloopvar
-    - dupl
+    - dupword
+    - durationcheck
+    - errcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
     - gochecknoinits
+    - goconst
     - gocritic
     - gocyclo
     - gosec
-    - gosimple
     - govet
     - ineffassign
+    - intrange
+    - makezero
+    - mirror
     - misspell
+    - modernize
     - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - nolintlint
+    - perfsprint
+    - predeclared
     - prealloc
+    - reassign
+    - recvcheck
     - revive
+    - sqlclosecheck
     - staticcheck
-    - stylecheck
-    - typecheck
+    - testifylint
     - unconvert
     - unparam
     - unused
-  fast: false
-  disable-all: true
-
-issues:
-  exclude-dirs:
-    - docs
-    - vendor
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gosec
-        - dupl
-
-linters-settings:
-  revive:
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+    - whitespace
+    - wsl_v5
+    - zerologlint
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
+    gosec:
+      excludes:
+        # Integer overflow on conversions: TMDB ids and watch counts are bounded
+        # well within range (the schema still uses int32 ids by design).
+        - G115
+        # "Secret" struct field: the auth token response intentionally serializes
+        # the access/refresh tokens to JSON — that is its purpose.
+        - G117
+        # Log injection: the logged value is a resolved config-file path, not input.
+        - G706
+    goconst:
+      min-len: 2
+      min-occurrences: 7
+    forbidigo:
+      forbid:
+        - pattern: ^fmt\.Print$
+          msg: "Use structured logging with zerolog instead of fmt.Print."
+        - pattern: ^fmt\.Printf$
+          msg: "Use structured logging with zerolog instead of fmt.Printf."
+        - pattern: ^fmt\.Println$
+          msg: "Use structured logging with zerolog instead of fmt.Println."
+    revive:
+      rules:
+        - name: early-return
+        - name: indent-error-flow
+        - name: superfluous-else
+        - name: unreachable-code
+        - name: empty-block
+        - name: redefines-builtin-id
+    staticcheck:
+      # The codebase uses Id / TmdbId rather than ID; keep the initialism check off.
+      checks:
+        - all
+        - -ST1003
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    nestif:
+      min-complexity: 4
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      - name: var-naming
-        disabled: true
-  stylecheck:
-    checks: ["^ST.*"]
-    ignored-checks:
-      - ST1003
+      - linters:
+          - containedctx
+          - dupl
+          - errcheck
+          - forcetypeassert
+          - gosec
+          - nilnil
+        path: _test\.go
+      - linters:
+          - errcheck
+        text: "Error return value of .*.Close.*is not checked"
+      - linters:
+          - errcheck
+        text: "Error return value of .*.Rollback.*is not checked"
+      - linters:
+          - revive
+        text: should have a package comment
+      - linters:
+          - revive
+        path: _test\.go$
+        text: unused-parameter
+      - linters:
+          - zerologlint
+        path: ^internal/config/logger/
+    paths:
+      - docs
+      - vendor
+      - third_party$
+      - builtin$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$

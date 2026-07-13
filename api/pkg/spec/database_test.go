@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_TruncateTables(t *testing.T) {
@@ -25,7 +25,7 @@ func Test_TruncateTables(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := TruncateTables(ctx, tt.dsn, []string{"users"})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 }

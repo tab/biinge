@@ -44,6 +44,7 @@ func (c *moviesController) HandleList(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -58,6 +59,7 @@ func (c *moviesController) HandleList(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -85,7 +87,6 @@ func (c *moviesController) HandleList(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-//nolint:dupl
 func (c *moviesController) HandleDetails(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -93,6 +94,7 @@ func (c *moviesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -100,6 +102,7 @@ func (c *moviesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -107,6 +110,7 @@ func (c *moviesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -121,6 +125,7 @@ func (c *moviesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -128,6 +133,7 @@ func (c *moviesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 	if err := params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -142,6 +148,7 @@ func (c *moviesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -162,6 +169,7 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -169,6 +177,7 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -176,6 +185,7 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if err = params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -188,6 +198,7 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -208,6 +219,7 @@ func (c *moviesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -215,6 +227,7 @@ func (c *moviesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+
 		return
 	}
 
@@ -222,6 +235,7 @@ func (c *moviesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 

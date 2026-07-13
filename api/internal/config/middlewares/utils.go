@@ -18,6 +18,7 @@ func CurrentUserFromContext(ctx context.Context) (*models.User, bool) {
 	}
 
 	user, ok := u.(*models.User)
+
 	return user, ok
 }
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/repositories/db"
@@ -21,7 +22,7 @@ func Test_UserRepository_Create(t *testing.T) {
 	}
 
 	client, err := postgres.NewPostgresClient(cfg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repository := NewUserRepository(client)
 
@@ -104,9 +105,9 @@ func Test_UserRepository_Create(t *testing.T) {
 			result, err := repository.Create(ctx, tt.params)
 
 			if tt.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.NotEqual(t, uuid.Nil, result.ID)
 				assert.Equal(t, tt.expected.Login, result.Login)
@@ -126,7 +127,7 @@ func Test_UserRepository_Update(t *testing.T) {
 	}
 
 	client, err := postgres.NewPostgresClient(cfg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repository := NewUserRepository(client)
 
@@ -138,7 +139,7 @@ func Test_UserRepository_Update(t *testing.T) {
 		LastName:          "Doe",
 		Appearance:        models.DarkAppearance,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -187,9 +188,9 @@ func Test_UserRepository_Update(t *testing.T) {
 			result, err := repository.Update(ctx, tt.params)
 
 			if tt.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.Equal(t, tt.expected.ID, result.ID)
 				assert.Equal(t, tt.expected.Login, result.Login)
@@ -209,7 +210,7 @@ func Test_UserRepository_FindById(t *testing.T) {
 	}
 
 	client, err := postgres.NewPostgresClient(cfg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repository := NewUserRepository(client)
 
@@ -220,7 +221,7 @@ func Test_UserRepository_FindById(t *testing.T) {
 		LastName:   "Doe",
 		Appearance: models.DarkAppearance,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -254,9 +255,9 @@ func Test_UserRepository_FindById(t *testing.T) {
 			result, err := repository.FindById(ctx, tt.id)
 
 			if tt.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.Equal(t, tt.expected.ID, result.ID)
 				assert.Equal(t, tt.expected.Login, result.Login)
@@ -276,7 +277,7 @@ func Test_UserRepository_FindByLogin(t *testing.T) {
 	}
 
 	client, err := postgres.NewPostgresClient(cfg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repository := NewUserRepository(client)
 
@@ -287,7 +288,7 @@ func Test_UserRepository_FindByLogin(t *testing.T) {
 		LastName:   "Doe",
 		Appearance: models.LightAppearance,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -321,9 +322,9 @@ func Test_UserRepository_FindByLogin(t *testing.T) {
 			result, err := repository.FindByLogin(ctx, tt.login)
 
 			if tt.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.Equal(t, tt.expected.ID, result.ID)
 				assert.Equal(t, tt.expected.Login, result.Login)
@@ -343,7 +344,7 @@ func Test_UserRepository_FindByEmail(t *testing.T) {
 	}
 
 	client, err := postgres.NewPostgresClient(cfg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repository := NewUserRepository(client)
 
@@ -354,7 +355,7 @@ func Test_UserRepository_FindByEmail(t *testing.T) {
 		LastName:   "Doe",
 		Appearance: models.DefaultAppearance,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -388,9 +389,9 @@ func Test_UserRepository_FindByEmail(t *testing.T) {
 			result, err := repository.FindByEmail(ctx, tt.email)
 
 			if tt.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.Equal(t, tt.expected.ID, result.ID)
 				assert.Equal(t, tt.expected.Login, result.Login)

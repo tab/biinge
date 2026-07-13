@@ -7,6 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"biinge-api/internal/config"
 )
@@ -116,10 +117,11 @@ func Test_Logger_WithComponent(t *testing.T) {
 	componentLogger := logger.WithComponent("test-component")
 	componentLogger.Info().Msg("test message")
 
-	var logData map[string]interface{}
+	var logData map[string]any
+
 	err := json.Unmarshal(buf.Bytes(), &logData)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "test-component", logData["component"])
 	assert.Equal(t, "test message", logData["message"])
 	assert.Equal(t, "test-app", logData["service"])
@@ -141,10 +143,11 @@ func Test_Logger_WithRequestId(t *testing.T) {
 	requestLogger := logger.WithRequestId("req-123")
 	requestLogger.Info().Msg("handling request")
 
-	var logData map[string]interface{}
+	var logData map[string]any
+
 	err := json.Unmarshal(buf.Bytes(), &logData)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "req-123", logData["request_id"])
 }
 
@@ -163,10 +166,11 @@ func Test_Logger_WithTraceId(t *testing.T) {
 	traceLogger := logger.WithTraceId("trace-123")
 	traceLogger.Info().Msg("traced operation")
 
-	var logData map[string]interface{}
+	var logData map[string]any
+
 	err := json.Unmarshal(buf.Bytes(), &logData)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "trace-123", logData["trace_id"])
 }
 
@@ -184,10 +188,11 @@ func Test_Logger_Debug(t *testing.T) {
 
 	logger.Debug().Msg("debug message")
 
-	var logData map[string]interface{}
+	var logData map[string]any
+
 	err := json.Unmarshal(buf.Bytes(), &logData)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "debug message", logData["message"])
 }
 
@@ -205,10 +210,11 @@ func Test_Logger_Info(t *testing.T) {
 
 	logger.Info().Msg("info message")
 
-	var logData map[string]interface{}
+	var logData map[string]any
+
 	err := json.Unmarshal(buf.Bytes(), &logData)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "info message", logData["message"])
 }
 
@@ -226,10 +232,11 @@ func Test_Logger_Warn(t *testing.T) {
 
 	logger.Warn().Msg("warn message")
 
-	var logData map[string]interface{}
+	var logData map[string]any
+
 	err := json.Unmarshal(buf.Bytes(), &logData)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "warn message", logData["message"])
 }
 
@@ -247,9 +254,10 @@ func Test_Logger_Error(t *testing.T) {
 
 	logger.Error().Msg("error message")
 
-	var logData map[string]interface{}
+	var logData map[string]any
+
 	err := json.Unmarshal(buf.Bytes(), &logData)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "error message", logData["message"])
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -38,7 +39,7 @@ func Test_LoadEnv(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := LoadEnv()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			hash := []struct{ key, value string }{
 				{"GO_ENV", tt.expected.AppEnv},

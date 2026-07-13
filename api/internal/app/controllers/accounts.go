@@ -39,6 +39,7 @@ func (c *accountsController) Me(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -62,6 +63,7 @@ func (c *accountsController) HandleUpdate(w http.ResponseWriter, r *http.Request
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -69,6 +71,7 @@ func (c *accountsController) HandleUpdate(w http.ResponseWriter, r *http.Request
 	if err := params.Validate(r.Body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -82,6 +85,7 @@ func (c *accountsController) HandleUpdate(w http.ResponseWriter, r *http.Request
 		c.log.Error().Err(err).Msg("Update failed")
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 
@@ -105,6 +109,7 @@ func (c *accountsController) HandleStats(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
 		return
 	}
 
@@ -112,6 +117,7 @@ func (c *accountsController) HandleStats(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
 		return
 	}
 

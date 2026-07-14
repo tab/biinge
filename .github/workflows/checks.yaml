@@ -47,7 +47,7 @@ jobs:
           cache-dependency-path: api/go.sum
       - name: Run static check
         # NOTE: https://github.com/dominikh/staticcheck-action/releases/tag/v1.3.1
-        uses: dominikh/staticcheck-action@fe1dd0c3658873b46f8c9bb3291096a617310ca6
+        uses: dominikh/staticcheck-action@9716614d4101e79b4340dd97b10e54d68234e431
         with:
           working-directory: api
 

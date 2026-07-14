@@ -6,8 +6,7 @@ enum KeychainKey: String {
     case refreshToken = "com.biinge.refreshToken"
 }
 
-/// A thin wrapper over the Security framework for storing auth tokens.
-/// Stateless and therefore safe to use from any isolation domain.
+/// A thin Security-framework wrapper for storing auth tokens
 struct Keychain: Sendable {
     func save(_ value: String, for key: KeychainKey) {
         delete(key)
@@ -15,7 +14,7 @@ struct Keychain: Sendable {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key.rawValue,
             kSecValueData as String: Data(value.utf8),
-            // Keep tokens on this device only — never migrated to a restored backup.
+            // Keep tokens on this device only — never migrated to a restored backup
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         ]
         SecItemAdd(query as CFDictionary, nil)

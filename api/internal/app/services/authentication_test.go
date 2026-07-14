@@ -449,7 +449,7 @@ func Test_Authentication_Refresh(t *testing.T) {
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
 
-	// expectReissue sets up the Generate calls performed by issueTokens.
+	// expectReissue sets up the Generate calls performed by issueTokens
 	expectReissue := func() {
 		jwtService.EXPECT().Generate(jwt.Payload{
 			ID:    id.String(),

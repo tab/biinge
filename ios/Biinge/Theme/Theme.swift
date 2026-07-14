@@ -17,7 +17,7 @@ extension Color {
         self.init(uiColor: UIColor(rgb: rgb))
     }
 
-    /// A color that resolves to `light` or `dark` based on the active interface style.
+    /// A color that resolves to `light` or `dark` based on the active interface style
     static func adaptive(light: UInt, dark: UInt) -> Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark ? UIColor(rgb: dark) : UIColor(rgb: light)

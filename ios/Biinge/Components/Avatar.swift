@@ -1,7 +1,7 @@
 import SwiftUI
 import CryptoKit
 
-/// Gravatar avatar derived from the MD5 of the user's email (matching the RN app).
+/// Gravatar avatar derived from the MD5 of the user's email (matching the RN app)
 struct Avatar: View {
     let email: String
     var size: CGFloat = 96

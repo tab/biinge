@@ -59,8 +59,7 @@ func (params *UpdateEpisodeRequestSerializer) Validate(body io.Reader) error {
 	return validate.Struct(params)
 }
 
-// EpisodeDetailsSerializer is a TMDB-sourced single episode with credits and
-// trailers, returned by GET /series/{id}/season/{seasonNumber}/episode/{episodeNumber}.
+// EpisodeDetailsSerializer is a TMDB-sourced episode with credits and trailers
 type EpisodeDetailsSerializer struct {
 	Id         uint64             `json:"id"`
 	Title      string             `json:"title"`

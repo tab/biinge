@@ -1,8 +1,6 @@
 package serializers
 
-// Search and trending results are TMDB-sourced browse lists. Movie and series
-// items carry the current user's tracking state (want/watched/none) so the
-// client can badge items already in the library; people items do not.
+// Search and trending items carry the user's tracking state so the client can badge library items
 
 type SearchMovieSerializer struct {
 	Id          uint64  `json:"id"`

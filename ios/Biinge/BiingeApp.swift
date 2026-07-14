@@ -18,7 +18,7 @@ struct BiingeApp: App {
     }
 }
 
-/// Splash while restoring the session, then the login or authenticated shell.
+/// Splash while restoring the session, then the login or authenticated shell
 struct RootContainer: View {
     let authManager: AuthManager
     let apiClient: APIClient
@@ -43,8 +43,7 @@ struct RootContainer: View {
     }
 
     #if DEBUG
-    /// Testing affordance: when launched with AUTOLOGIN_EMAIL / AUTOLOGIN_PASSWORD
-    /// (e.g. via SIMCTL_CHILD_* env vars), sign in automatically.
+    /// Signs in automatically when launched with AUTOLOGIN_EMAIL / AUTOLOGIN_PASSWORD
     private func debugAutoLoginIfNeeded() async {
         let env = ProcessInfo.processInfo.environment
         guard !authManager.isAuthenticated,

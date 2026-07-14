@@ -239,7 +239,7 @@ func (c *seriesController) HandleUnmarkEpisodeWatched(w http.ResponseWriter, r *
 	writeProgress(w, progress)
 }
 
-// parseTmdbParam reads a uint64 TMDB id from a chi URL parameter.
+// parseTmdbParam reads a uint64 TMDB id from a chi URL parameter
 func parseTmdbParam(r *http.Request, name string) (uint64, error) {
 	id, err := strconv.ParseUint(chi.URLParam(r, name), 10, 64)
 	if err != nil {

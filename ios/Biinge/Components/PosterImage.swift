@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// A 2:3 poster that loads from the TMDB image CDN, falling back to a gray card
-/// with the title when there is no image — matching the RN app's Image behavior.
+/// A 2:3 poster from the TMDB image CDN with a gray title-card fallback
 struct PosterImage: View {
     let path: String
     let title: String
@@ -20,8 +19,7 @@ struct PosterImage: View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 
-    /// Downsample target per TMDB source width, capped so full-size posters don't
-    /// decode a multi-MB bitmap into a small cell.
+    /// Downsample target per TMDB source width
     private static func maxPixel(for size: String) -> CGFloat {
         switch size {
         case "w185": return 400

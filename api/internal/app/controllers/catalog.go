@@ -171,8 +171,7 @@ func (c *catalogController) HandleTrendingPeople(w http.ResponseWriter, r *http.
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-// searchQuery extracts and validates the required `query` parameter, writing a
-// 400 response and returning ok=false when it is missing.
+// searchQuery extracts the required query parameter, writing a 400 when missing
 func searchQuery(w http.ResponseWriter, r *http.Request) (string, bool) {
 	query := strings.TrimSpace(r.URL.Query().Get("query"))
 	if query == "" {
@@ -185,7 +184,7 @@ func searchQuery(w http.ResponseWriter, r *http.Request) (string, bool) {
 	return query, true
 }
 
-// pageParam parses the optional `page` parameter, defaulting to the first page.
+// pageParam parses the optional `page` parameter, defaulting to the first page
 func pageParam(r *http.Request) uint64 {
 	page, err := strconv.ParseUint(r.URL.Query().Get("page"), 10, 64)
 	if err != nil || page == 0 {

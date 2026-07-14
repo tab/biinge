@@ -1,9 +1,7 @@
 import SwiftUI
 import Observation
 
-/// Owns the session: in-memory + Keychain tokens, the current user, and the
-/// login/refresh/logout flow. The APIClient performs the token exchange over
-/// the wire; this type owns storage and orchestration.
+/// Owns the session: tokens, the current user, and the login/refresh/logout flow
 @MainActor
 @Observable
 final class AuthManager {
@@ -17,7 +15,7 @@ final class AuthManager {
 
     var isAuthenticated: Bool { user != nil }
 
-    /// The preferred color scheme derived from the signed-in user's appearance.
+    /// The preferred color scheme derived from the signed-in user's appearance
     var colorScheme: ColorScheme? {
         switch user?.appearance {
         case .dark: return .dark
@@ -31,8 +29,7 @@ final class AuthManager {
         refreshToken = keychain.read(.refreshToken)
     }
 
-    /// Restores a session on launch by fetching the current user with the stored
-    /// token (which the client will refresh if it has expired).
+    /// Restores a session on launch by fetching the current user with the stored token
     func restore(using apiClient: APIClient) async {
         defer { isRestoring = false }
         guard accessToken != nil else { return }
@@ -58,7 +55,7 @@ final class AuthManager {
         clearSession()
     }
 
-    /// Persist a new appearance and update the in-memory user (which re-themes the app).
+    /// Persist a new appearance and update the in-memory user (which re-themes the app)
     func updateAppearance(_ appearance: Appearance, using apiClient: APIClient) async {
         guard let user else { return }
         let body = UpdateAccountBody(
@@ -71,10 +68,7 @@ final class AuthManager {
         }
     }
 
-    /// Exchanges the refresh token for a new pair, or clears the session and
-    /// surfaces `.unauthorized` if it can't. Concurrent callers (e.g. the several
-    /// requests that 401 together on launch) coalesce onto a single in-flight
-    /// refresh, so the refresh token is only spent once per cycle.
+    /// Exchanges the refresh token for a new pair, coalescing concurrent callers onto one refresh
     func refreshTokens(using apiClient: APIClient) async throws {
         if let inFlight = refreshTask {
             try await inFlight.value

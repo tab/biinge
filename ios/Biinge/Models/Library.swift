@@ -1,7 +1,6 @@
 import Foundation
 
-/// Library resources use camelCase JSON that already matches Swift property
-/// names, so no CodingKeys are needed.
+/// Library resources use camelCase JSON matching Swift property names, so no CodingKeys
 
 enum WatchState: String, Codable, Sendable {
     case want
@@ -27,7 +26,7 @@ struct LibrarySeries: Decodable, Sendable, Identifiable, Equatable {
     let episodesCount: Int
     let watchedEpisodesCount: Int
 
-    /// Share of episodes watched across all seasons, clamped to 0...1.
+    /// Share of episodes watched across all seasons, clamped to 0...1
     var progress: Double {
         guard episodesCount > 0 else { return 0 }
         return min(Double(watchedEpisodesCount) / Double(episodesCount), 1)

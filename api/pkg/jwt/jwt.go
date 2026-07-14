@@ -8,9 +8,7 @@ import (
 	"biinge-api/internal/config"
 )
 
-// Token type claim values. Tokens issued before this claim existed carry an
-// empty Type and are treated as valid on both the access and refresh paths for
-// backward compatibility.
+// Token type claim values; legacy tokens with an empty Type stay valid on both paths
 const (
 	TokenTypeAccess  = "access"
 	TokenTypeRefresh = "refresh"

@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// A small filled pie showing watch progress (0...100), used on watching shows.
-/// A thin ring, a 2px empty border, then the filled wedge — matching the RN app.
+/// A small filled pie showing watch progress, used on watching shows
 struct PieChartView: View {
     let percent: Double
     var color: Color = .white

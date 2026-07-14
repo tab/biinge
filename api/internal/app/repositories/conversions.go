@@ -6,9 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// toInt32Slice converts a slice of uint64 identifiers (used across the domain
-// models) into the []int32 representation expected by the sqlc-generated
-// `= ANY($1::integer[])` query parameters.
+// toInt32Slice converts uint64 ids into the []int32 expected by ANY($1::integer[]) params
 func toInt32Slice(ids []uint64) []int32 {
 	result := make([]int32, len(ids))
 	for i, id := range ids {
@@ -18,8 +16,7 @@ func toInt32Slice(ids []uint64) []int32 {
 	return result
 }
 
-// timestampFromTime maps a domain time.Time into a nullable pgtype.Timestamp,
-// treating the zero time as SQL NULL (e.g. an episode without an air date).
+// timestampFromTime maps a time.Time into a nullable pgtype.Timestamp (zero time → SQL NULL)
 func timestampFromTime(t time.Time) pgtype.Timestamp {
 	if t.IsZero() {
 		return pgtype.Timestamp{Valid: false}

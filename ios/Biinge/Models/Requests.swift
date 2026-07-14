@@ -1,6 +1,6 @@
 import Foundation
 
-/// Request bodies for library mutations and the watched-progress cascade.
+/// Request bodies for library mutations and the watched-progress cascade
 
 struct CreateMovieBody: Encodable, Sendable {
     let id: Int
@@ -42,8 +42,7 @@ struct UpdateAccountBody: Encodable, Sendable {
     }
 }
 
-// Progress payloads carry metadata so the server can materialize the
-// series/season/episode rows it needs when marking items watched.
+// Progress payloads carry metadata so the server can materialize series/season/episode rows
 
 struct ProgressSeries: Encodable, Sendable {
     let title: String

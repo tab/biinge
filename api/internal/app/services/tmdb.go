@@ -152,10 +152,7 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 		return nil, errors.ErrFailedToFetchMovie
 	}
 
-	// Read-repair: a title saved in pre-production keeps whatever poster it had at
-	// add-time. When TMDB now serves a different (final) poster, refresh the stored
-	// row so the library list stops showing the stale one — without needing the
-	// user to re-toggle want/watched. State and pinned are left untouched.
+	// Read-repair: refresh a stale add-time poster/title from TMDB, leaving state and pinned untouched
 	if details.PosterPath != "" && details.PosterPath != movie.PosterPath {
 		runtime := uint64(details.Runtime)
 		if runtime == 0 {
@@ -310,9 +307,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		return nil, errors.ErrFailedToFetchSeries
 	}
 
-	// Read-repair the stored poster (see FetchMovieDetails). Episode/season counts
-	// are preserved from the stored row; only poster, title, and status are
-	// refreshed from TMDB. State and pinned are left untouched.
+	// Read-repair the stored poster/title/status (see FetchMovieDetails), leaving counts, state and pinned untouched
 	if details.PosterPath != "" && details.PosterPath != tvShow.PosterPath {
 		title := details.Title
 		if title == "" {
@@ -554,8 +549,7 @@ func (p *tmdbProvider) SearchPeople(ctx context.Context, query string, page uint
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	// User-initiated search: only drop poster-less and flagged-adult results so a
-	// deliberate lookup can still surface lesser-known people.
+	// User-initiated search: only drop poster-less and flagged-adult results
 	return buildPeopleList(response, 0), nil
 }
 
@@ -566,19 +560,14 @@ func (p *tmdbProvider) FetchTrendingPeople(ctx context.Context) (*serializers.Pa
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	// Discovery list: also require a notable credit to weed out the unknown and
-	// unflagged-adult performers that clutter TMDB's popular-people feed.
+	// Discovery list: also require a notable credit to weed out unknown performers
 	return buildPeopleList(response, minNotableVoteCount), nil
 }
 
-// minNotableVoteCount is the vote-count floor a person's best-known title must
-// clear to appear in the discovery list. TMDB rarely flags adult/unknown people,
-// but their only credits are obscure (a handful of votes), so this removes them
-// without needing an adult flag we cannot trust.
+// minNotableVoteCount is the vote-count floor a person's best-known title must clear for the discovery list
 const minNotableVoteCount = 100
 
-// buildMovieList filters out adult and poster-less results, merges the user's
-// tracking state, and wraps the page in a pagination envelope.
+// buildMovieList filters adult and poster-less results, merges tracking state, and paginates
 func (p *tmdbProvider) buildMovieList(ctx context.Context, response *tmdb.MovieListResult, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
 	ids := make([]uint64, 0, len(response.Results))
 	for _, item := range response.Results {
@@ -627,7 +616,7 @@ func (p *tmdbProvider) buildMovieList(ctx context.Context, response *tmdb.MovieL
 	}, nil
 }
 
-// buildSeriesList mirrors buildMovieList for TV results (TMDB uses "name").
+// buildSeriesList mirrors buildMovieList for TV results (TMDB uses "name")
 func (p *tmdbProvider) buildSeriesList(ctx context.Context, response *tmdb.TvListResult, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error) {
 	ids := make([]uint64, 0, len(response.Results))
 	for _, item := range response.Results {
@@ -676,8 +665,7 @@ func (p *tmdbProvider) buildSeriesList(ctx context.Context, response *tmdb.TvLis
 	}, nil
 }
 
-// buildPeopleList filters out adult and profile-less results; people carry no
-// tracking state, so no database lookup is needed.
+// buildPeopleList filters adult and profile-less results (people carry no tracking state)
 func buildPeopleList(response *tmdb.PersonListResult, minKnownForVotes int) *serializers.PaginationResponse[serializers.SearchPersonSerializer] {
 	data := make([]serializers.SearchPersonSerializer, 0, len(response.Results))
 	for _, item := range response.Results {
@@ -706,8 +694,7 @@ func buildPeopleList(response *tmdb.PersonListResult, minKnownForVotes int) *ser
 	}
 }
 
-// hasNotableCredit reports whether any of the person's known-for titles clears the
-// vote-count floor, i.e. the person has at least one recognised piece of work.
+// hasNotableCredit reports whether any known-for title clears the vote-count floor
 func hasNotableCredit(knownFor []tmdb.PersonKnownFor, minVotes int) bool {
 	for _, credit := range knownFor {
 		if credit.VoteCount >= minVotes {

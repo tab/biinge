@@ -39,15 +39,13 @@ func Test_RegistrationRequest_Validate(t *testing.T) {
 			expected: errors.ErrEmptyPassword,
 		},
 		{
-			// first_name is now enforced (validate:"required"), so an empty
-			// value is rejected by the struct validator.
+			// first_name is enforced (validate:"required"), so an empty value is rejected
 			name:    "Empty first name",
 			body:    strings.NewReader(`{ "login": "john.doe", "email": "john.doe@example.com", "password": "password123", "first_name": "", "last_name": "Doe", "appearance": "light" }`),
 			wantErr: true,
 		},
 		{
-			// last_name is now enforced (validate:"required"), so an empty
-			// value is rejected by the struct validator.
+			// last_name is enforced (validate:"required"), so an empty value is rejected
 			name:    "Empty last name",
 			body:    strings.NewReader(`{ "login": "john.doe", "email": "john.doe@example.com", "password": "password123", "first_name": "John", "last_name": "", "appearance": "light" }`),
 			wantErr: true,

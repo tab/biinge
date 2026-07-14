@@ -446,15 +446,12 @@ func (c *client) FetchTrendingTv(ctx context.Context) (*TvListResult, error) {
 }
 
 func (c *client) FetchTrendingPeople(ctx context.Context) (*PersonListResult, error) {
-	// TMDB's trending/person feed is heavily polluted with unflagged adult and
-	// unknown entries and returns no known_for to filter on. person/popular is far
-	// cleaner and includes known_for so callers can drop non-notable people.
+	// person/popular is far cleaner than trending/person and includes known_for for filtering
 	endpoint := c.cfg.BaseURL + "/person/popular"
 	return fetchList[PersonListResult](ctx, c, endpoint, nil)
 }
 
-// fetchList performs a GET against a TMDB list endpoint and decodes the paged
-// result, mapping TMDB status codes to the package's sentinel errors.
+// fetchList GETs a TMDB list endpoint, mapping status codes to the package's sentinel errors
 func fetchList[T any](ctx context.Context, c *client, endpoint string, params map[string]string) (*T, error) {
 	request := c.apiClient.R().
 		SetContext(ctx).

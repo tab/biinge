@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// Movies, series, people, and episodes are all presented as modal sheets via
-/// the `present*` environment actions (see `presentsDetails`).
+/// Movies, series, people, and episodes are presented as modal sheets via the present* actions
 
 private struct APIClientKey: EnvironmentKey {
     static let defaultValue: APIClient? = nil
@@ -44,7 +43,7 @@ extension EnvironmentValues {
         set { self[PresentPersonKey.self] = newValue }
     }
 
-    /// Presents an episode detail as a modal sheet (showId, seasonNumber, episodeNumber).
+    /// Presents an episode detail as a modal sheet (showId, seasonNumber, episodeNumber)
     var presentEpisode: @MainActor (Int, Int, Int) -> Void {
         get { self[PresentEpisodeKey.self] }
         set { self[PresentEpisodeKey.self] = newValue }
@@ -52,9 +51,7 @@ extension EnvironmentValues {
 }
 
 extension View {
-    /// Enables the `present*` actions for the subtree and presents those details
-    /// as modal sheets. Applied recursively inside each sheet so nested
-    /// navigation (a show's cast, an episode, a person's films) stacks correctly.
+    /// Enables the present* actions for the subtree, applied recursively inside each sheet
     func presentsDetails() -> some View {
         modifier(PresentsDetailsModifier())
     }

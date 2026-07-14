@@ -1,6 +1,6 @@
 import Foundation
 
-/// Auth/user resources use snake_case JSON, so they need explicit CodingKeys.
+/// Auth/user resources use snake_case JSON, so they need explicit CodingKeys
 
 struct TokenPair: Decodable, Sendable {
     let accessToken: String

@@ -50,8 +50,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 			return
 		}
 
-		// Reject refresh tokens presented as access credentials. Legacy tokens
-		// without a type (empty) are still accepted for backward compatibility.
+		// Reject refresh tokens as access credentials; legacy untyped tokens stay accepted
 		if claims.Type == jwt.TokenTypeRefresh {
 			m.log.Error().Msg("Refresh token used on a protected endpoint")
 			w.WriteHeader(http.StatusUnauthorized)

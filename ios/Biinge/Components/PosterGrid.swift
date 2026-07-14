@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A scrolling two-column grid of poster cells (4:6 posters, matching the RN grid).
+/// A scrolling two-column grid of poster cells (4:6 posters, matching the RN grid)
 struct PosterGrid<Item: Identifiable, Cell: View>: View {
     let items: [Item]
     @ViewBuilder let cell: (Item) -> Cell

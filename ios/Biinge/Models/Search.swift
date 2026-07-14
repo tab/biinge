@@ -1,6 +1,6 @@
 import Foundation
 
-/// Search and trending result items (camelCase JSON matches Swift names).
+/// Search and trending result items (camelCase JSON matches Swift names)
 
 struct SearchMovie: Decodable, Sendable, Identifiable {
     let id: Int

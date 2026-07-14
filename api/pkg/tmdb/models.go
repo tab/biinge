@@ -263,7 +263,7 @@ type EpisodeDetails struct {
 	Videos         Videos  `json:"videos"`
 }
 
-// TvSeason is a season summary as returned within a TMDB /tv/{id} response.
+// TvSeason is a season summary as returned within a TMDB /tv/{id} response
 type TvSeason struct {
 	Id           uint64 `json:"id"`
 	Name         string `json:"name"`
@@ -274,7 +274,7 @@ type TvSeason struct {
 	Overview     string `json:"overview"`
 }
 
-// SeasonSummaryItem is the transformed (camelCase) season summary embedded in TvResponse.
+// SeasonSummaryItem is the transformed (camelCase) season summary embedded in TvResponse
 type SeasonSummaryItem struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
@@ -284,7 +284,7 @@ type SeasonSummaryItem struct {
 	AirDate       string `json:"airDate,omitempty"`
 }
 
-// SeasonResponse is the transformed season detail (with its episodes).
+// SeasonResponse is the transformed season detail (with its episodes)
 type SeasonResponse struct {
 	Id         uint64                `json:"id"`
 	Title      string                `json:"title"`
@@ -295,7 +295,7 @@ type SeasonResponse struct {
 	Episodes   []EpisodeResponseItem `json:"episodes"`
 }
 
-// EpisodeResponseItem is a lightweight episode within a season detail.
+// EpisodeResponseItem is a lightweight episode within a season detail
 type EpisodeResponseItem struct {
 	Id         uint64  `json:"id"`
 	Title      string  `json:"title"`
@@ -307,7 +307,7 @@ type EpisodeResponseItem struct {
 	AirDate    string  `json:"airDate,omitempty"`
 }
 
-// EpisodeResponse is the transformed single-episode detail (with credits + videos).
+// EpisodeResponse is the transformed single-episode detail (with credits + videos)
 type EpisodeResponse struct {
 	Id         uint64       `json:"id"`
 	Title      string       `json:"title"`

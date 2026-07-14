@@ -432,8 +432,7 @@ func TransformEpisodeDetails(episode *EpisodeDetails) *EpisodeResponse {
 	}
 }
 
-// buildCastCredits selects directors and billed cast that have a profile image,
-// deduplicated by person id — the same shape used for movie and tv credits.
+// buildCastCredits selects directors and billed cast with a profile image, deduplicated by person id
 func buildCastCredits(credits Credits) []CreditItem {
 	directorCredits := make([]CreditItem, 0)
 
@@ -470,7 +469,7 @@ func buildCastCredits(credits Credits) []CreditItem {
 	})
 }
 
-// buildTrailers keeps only official YouTube trailers.
+// buildTrailers keeps only official YouTube trailers
 func buildTrailers(videos Videos) []VideoItem {
 	result := make([]VideoItem, 0)
 

@@ -11,8 +11,7 @@ import (
 	"biinge-api/internal/config/logger"
 )
 
-// Progress orchestrates the cascading watched-state changes for a show and its
-// seasons and episodes.
+// Progress orchestrates the cascading watched-state changes for a show
 type Progress interface {
 	MarkShow(ctx context.Context, userId uuid.UUID, show models.ShowInput) (*models.SeriesProgress, error)
 	UnmarkShow(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error)

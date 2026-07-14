@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Pin marker shown on pinned library items (top-right).
+/// Pin marker shown on pinned library items (top-right)
 struct PinBadge: View {
     var body: some View {
         Image(systemName: "pin.fill")
@@ -14,8 +14,7 @@ struct PinBadge: View {
     }
 }
 
-/// Watched / in-library check shown on posters (top-left). Shared across search
-/// results, recommendations, and person credits so the marker is consistent.
+/// Watched / in-library check shown on posters (top-left)
 struct WatchedBadge: View {
     var body: some View {
         Image(systemName: "checkmark")
@@ -28,7 +27,7 @@ struct WatchedBadge: View {
     }
 }
 
-/// Watch-progress pie shown on watching shows (top-left).
+/// Watch-progress pie shown on watching shows (top-left)
 struct ProgressBadge: View {
     let percent: Double
 

@@ -58,8 +58,7 @@ func (params *UpdateSeasonRequestSerializer) Validate(body io.Reader) error {
 	return validate.Struct(params)
 }
 
-// validateItemState trims and validates the state of a season or episode
-// against the full set of tracking states supported by the state_types enum.
+// validateItemState trims and validates a season/episode state against the state_types enum
 func validateItemState(state *string) error {
 	*state = strings.TrimSpace(*state)
 	switch *state {
@@ -72,7 +71,7 @@ func validateItemState(state *string) error {
 	}
 }
 
-// SeasonSummarySerializer is a season overview embedded in a series' details.
+// SeasonSummarySerializer is a season overview embedded in a series' details
 type SeasonSummarySerializer struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
@@ -82,8 +81,7 @@ type SeasonSummarySerializer struct {
 	AirDate       string `json:"airDate,omitempty"`
 }
 
-// SeasonDetailsSerializer is a TMDB-sourced season with its episodes, returned
-// by GET /series/{id}/season/{seasonNumber}.
+// SeasonDetailsSerializer is a TMDB-sourced season with its episodes
 type SeasonDetailsSerializer struct {
 	Id         uint64                    `json:"id"`
 	TmdbShowId uint64                    `json:"tmdbShowId,omitempty"`
@@ -95,7 +93,7 @@ type SeasonDetailsSerializer struct {
 	Episodes   []SeasonEpisodeSerializer `json:"episodes"`
 }
 
-// SeasonEpisodeSerializer is a lightweight episode within a season's details.
+// SeasonEpisodeSerializer is a lightweight episode within a season's details
 type SeasonEpisodeSerializer struct {
 	Id         uint64  `json:"id"`
 	Title      string  `json:"title"`

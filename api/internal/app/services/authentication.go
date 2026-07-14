@@ -125,8 +125,7 @@ func (a *authentication) Refresh(_ context.Context, params *serializers.RefreshR
 		return nil, errors.ErrInvalidToken
 	}
 
-	// Reject access tokens presented on the refresh path. Legacy tokens without
-	// a type (empty) are still accepted for backward compatibility.
+	// Reject access tokens on the refresh path; legacy untyped tokens stay accepted
 	if payload.Type == jwt.TokenTypeAccess {
 		a.log.Error().Msg("Access token used on refresh endpoint")
 		return nil, errors.ErrInvalidToken
@@ -135,7 +134,7 @@ func (a *authentication) Refresh(_ context.Context, params *serializers.RefreshR
 	return a.issueTokens(payload.ID, payload.Email)
 }
 
-// issueTokens generates a fresh access + refresh token pair for a user.
+// issueTokens generates a fresh access + refresh token pair for a user
 func (a *authentication) issueTokens(id, email string) (*serializers.TokenSerializer, error) {
 	accessToken, err := a.jwt.Generate(jwt.Payload{
 		ID:    id,

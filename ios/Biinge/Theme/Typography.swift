@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Type scale mirroring the RN app's typography (size / weight).
+/// Type scale mirroring the RN app's typography (size / weight)
 extension Font {
     static let biingeTitle1 = Font.system(size: 26, weight: .bold)
     static let biingeTitle2 = Font.system(size: 22, weight: .regular)

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The authenticated shell: a four-tab layout matching the RN app.
+/// The authenticated shell: a four-tab layout matching the RN app
 struct RootView: View {
     let authManager: AuthManager
     let apiClient: APIClient

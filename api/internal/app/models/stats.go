@@ -1,6 +1,6 @@
 package models
 
-// Stats is a user's aggregate watch statistics. Minutes are summed runtimes.
+// Stats is a user's aggregate watch statistics. Minutes are summed runtimes
 type Stats struct {
 	MoviesWant      uint64
 	MoviesWatched   uint64

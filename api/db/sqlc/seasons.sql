@@ -1,6 +1,9 @@
 -- name: DeleteSeason :exec
 DELETE FROM seasons WHERE id = $1;
 
+-- name: DeleteSeasonsBySeriesId :exec
+DELETE FROM seasons WHERE series_id = $1;
+
 -- name: UpsertSeason :one
 INSERT INTO seasons (
   series_id,

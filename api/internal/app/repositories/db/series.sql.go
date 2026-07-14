@@ -35,9 +35,10 @@ INSERT INTO series (
   seasons_count,
   episodes_count,
   status,
-  state
+  state,
+  tracked_state
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8
+  $1, $2, $3, $4, $5, $6, $7, $8, $8
 )
 RETURNING
   id,
@@ -49,6 +50,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -87,6 +89,7 @@ func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Ser
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
+		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -155,6 +158,7 @@ SELECT
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -175,6 +179,7 @@ func (q *Queries) FindSeriesById(ctx context.Context, id uuid.UUID) (Series, err
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
+		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -282,6 +287,7 @@ SELECT
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -307,6 +313,7 @@ func (q *Queries) FindSeriesByTmdbId(ctx context.Context, arg FindSeriesByTmdbId
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
+		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -325,6 +332,7 @@ SELECT
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -356,6 +364,7 @@ func (q *Queries) FindSeriesByTmdbIds(ctx context.Context, arg FindSeriesByTmdbI
 			&i.EpisodesCount,
 			&i.Status,
 			&i.State,
+			&i.TrackedState,
 			&i.Pinned,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -428,6 +437,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -462,6 +472,7 @@ func (q *Queries) UpdateSeries(ctx context.Context, arg UpdateSeriesParams) (Ser
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
+		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -473,6 +484,7 @@ const updateSeriesByTmdbId = `-- name: UpdateSeriesByTmdbId :one
 UPDATE series
 SET
   state = $3,
+  tracked_state = $3,
   pinned = $4,
   updated_at = NOW()
 WHERE tmdb_id = $1 AND user_id = $2
@@ -486,6 +498,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -516,6 +529,7 @@ func (q *Queries) UpdateSeriesByTmdbId(ctx context.Context, arg UpdateSeriesByTm
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
+		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -553,6 +567,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -591,6 +606,7 @@ func (q *Queries) UpsertSeries(ctx context.Context, arg UpsertSeriesParams) (Ser
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
+		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,

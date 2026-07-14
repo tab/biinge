@@ -10,11 +10,10 @@ import (
 	"biinge-api/internal/app/models"
 )
 
-// tmdbDateLayout is the date format TMDB uses for air dates.
+// tmdbDateLayout is the date format TMDB uses for air dates
 const tmdbDateLayout = "2006-01-02"
 
-// ProgressSeriesSerializer carries the show-level metadata needed to persist a
-// series row while recording progress. The series TMDB id comes from the URL.
+// ProgressSeriesSerializer carries the show-level metadata persisted while recording progress
 type ProgressSeriesSerializer struct {
 	Title         string `json:"title"`
 	PosterPath    string `json:"posterPath"`
@@ -34,8 +33,7 @@ func (s ProgressSeriesSerializer) toInput(tmdbId uint64) models.SeriesInput {
 	}
 }
 
-// ProgressEpisodeSerializer is an episode with its own TMDB id, used inside
-// season and show payloads.
+// ProgressEpisodeSerializer is an episode with its own TMDB id, used inside season and show payloads
 type ProgressEpisodeSerializer struct {
 	Id         uint64 `json:"id"`
 	Title      string `json:"title"`
@@ -54,8 +52,7 @@ func (e ProgressEpisodeSerializer) toInput() models.EpisodeInput {
 	}
 }
 
-// ProgressSeasonSerializer is a season with its own TMDB id and episodes, used
-// inside a show payload.
+// ProgressSeasonSerializer is a season with its own TMDB id and episodes, used inside a show payload
 type ProgressSeasonSerializer struct {
 	Id            uint64                      `json:"id"`
 	Title         string                      `json:"title"`
@@ -74,8 +71,7 @@ func (s ProgressSeasonSerializer) toInput() models.SeasonInput {
 	}
 }
 
-// ProgressSeasonMetaSerializer is a season without its id (which comes from the
-// URL) used by the season and episode payloads.
+// ProgressSeasonMetaSerializer is a season without its id (taken from the URL)
 type ProgressSeasonMetaSerializer struct {
 	Title         string `json:"title"`
 	Number        uint64 `json:"number"`
@@ -92,8 +88,7 @@ func (s ProgressSeasonMetaSerializer) toInput(tmdbId uint64, episodes []Progress
 	}
 }
 
-// ProgressEpisodeMetaSerializer is an episode without its id (which comes from
-// the URL) used by the episode payload.
+// ProgressEpisodeMetaSerializer is an episode without its id (taken from the URL)
 type ProgressEpisodeMetaSerializer struct {
 	Title      string `json:"title"`
 	PosterPath string `json:"posterPath"`
@@ -111,7 +106,7 @@ func (e ProgressEpisodeMetaSerializer) toInput(tmdbId uint64) models.EpisodeInpu
 	}
 }
 
-// MarkShowRequestSerializer is the payload for marking a whole show watched.
+// MarkShowRequestSerializer is the payload for marking a whole show watched
 type MarkShowRequestSerializer struct {
 	Series  ProgressSeriesSerializer   `json:"series"`
 	Seasons []ProgressSeasonSerializer `json:"seasons"`
@@ -141,7 +136,7 @@ func (params *MarkShowRequestSerializer) ToInput(seriesTmdbId uint64) models.Sho
 	}
 }
 
-// MarkSeasonRequestSerializer is the payload for marking a whole season watched.
+// MarkSeasonRequestSerializer is the payload for marking a whole season watched
 type MarkSeasonRequestSerializer struct {
 	Series   ProgressSeriesSerializer     `json:"series"`
 	Season   ProgressSeasonMetaSerializer `json:"season"`
@@ -164,7 +159,7 @@ func (params *MarkSeasonRequestSerializer) ToInputs(seriesTmdbId, seasonTmdbId u
 	return params.Series.toInput(seriesTmdbId), params.Season.toInput(seasonTmdbId, params.Episodes)
 }
 
-// MarkEpisodeRequestSerializer is the payload for marking a single episode watched.
+// MarkEpisodeRequestSerializer is the payload for marking a single episode watched
 type MarkEpisodeRequestSerializer struct {
 	Series  ProgressSeriesSerializer      `json:"series"`
 	Season  ProgressSeasonMetaSerializer  `json:"season"`
@@ -189,11 +184,11 @@ func (params *MarkEpisodeRequestSerializer) ToInputs(seriesTmdbId, seasonTmdbId,
 		params.Episode.toInput(episodeTmdbId)
 }
 
-// ProgressResponseSerializer is the watched-progress snapshot returned by the
-// progress endpoints.
+// ProgressResponseSerializer is the watched-progress snapshot returned by the progress endpoints
 type ProgressResponseSerializer struct {
 	Id              uint64   `json:"id"`
 	State           string   `json:"state"`
+	TrackedState    string   `json:"trackedState,omitempty"`
 	WatchedSeasons  []uint64 `json:"watchedSeasons"`
 	WatchedEpisodes []uint64 `json:"watchedEpisodes"`
 }
@@ -212,6 +207,7 @@ func NewProgressResponse(progress *models.SeriesProgress) ProgressResponseSerial
 	return ProgressResponseSerializer{
 		Id:              progress.SeriesTmdbId,
 		State:           progress.State,
+		TrackedState:    progress.TrackedState,
 		WatchedSeasons:  seasons,
 		WatchedEpisodes: episodes,
 	}
@@ -226,8 +222,7 @@ func episodeInputs(episodes []ProgressEpisodeSerializer) []models.EpisodeInput {
 	return result
 }
 
-// parseAirDate parses a TMDB air date, returning the zero time for an empty or
-// malformed value (persisted as SQL NULL).
+// parseAirDate parses a TMDB air date, zero time (SQL NULL) for empty or malformed values
 func parseAirDate(value string) time.Time {
 	value = strings.TrimSpace(value)
 	if value == "" {

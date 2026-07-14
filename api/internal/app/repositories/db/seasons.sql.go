@@ -31,6 +31,15 @@ func (q *Queries) DeleteSeason(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteSeasonsBySeriesId = `-- name: DeleteSeasonsBySeriesId :exec
+DELETE FROM seasons WHERE series_id = $1
+`
+
+func (q *Queries) DeleteSeasonsBySeriesId(ctx context.Context, seriesID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSeasonsBySeriesId, seriesID)
+	return err
+}
+
 const findSeasonBySeriesAndTmdbId = `-- name: FindSeasonBySeriesAndTmdbId :one
 SELECT
   id,

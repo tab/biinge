@@ -37,6 +37,7 @@ SELECT
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -54,6 +55,7 @@ SELECT
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -71,6 +73,7 @@ SELECT
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at
@@ -86,9 +89,10 @@ INSERT INTO series (
   seasons_count,
   episodes_count,
   status,
-  state
+  state,
+  tracked_state
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8
+  $1, $2, $3, $4, $5, $6, $7, $8, $8
 )
 RETURNING
   id,
@@ -100,6 +104,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at;
@@ -124,6 +129,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at;
@@ -132,6 +138,7 @@ RETURNING
 UPDATE series
 SET
   state = $3,
+  tracked_state = $3,
   pinned = $4,
   updated_at = NOW()
 WHERE tmdb_id = $1 AND user_id = $2
@@ -145,6 +152,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at;
@@ -185,6 +193,7 @@ RETURNING
   episodes_count,
   status,
   state,
+  tracked_state,
   pinned,
   created_at,
   updated_at;

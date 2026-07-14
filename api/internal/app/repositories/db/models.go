@@ -147,6 +147,7 @@ type Series struct {
 	EpisodesCount uint64
 	Status        string
 	State         StateTypes
+	TrackedState  NullStateTypes
 	Pinned        bool
 	CreatedAt     pgtype.Timestamp
 	UpdatedAt     pgtype.Timestamp

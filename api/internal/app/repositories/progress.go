@@ -12,14 +12,7 @@ import (
 	"biinge-api/internal/app/repositories/postgres"
 )
 
-// SeriesProgressRepository owns the transactional cascade that keeps a show's
-// series/season/episode rows and their derived watched state consistent.
-//
-// Storage model: an episode row exists only while it is watched. A season's
-// state is derived from whether all of its episodes are watched; a series'
-// state is derived from its total watched-episode count versus the show's
-// episode count and in-production status. Unmarking a show or season deletes
-// the row and lets the ON DELETE CASCADE remove its children.
+// SeriesProgressRepository keeps a show's series/season/episode rows and their derived watched state consistent
 type SeriesProgressRepository interface {
 	MarkShowWatched(ctx context.Context, userId uuid.UUID, show models.ShowInput) (*models.SeriesProgress, error)
 	UnmarkShowWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error)
@@ -38,7 +31,7 @@ func NewSeriesProgressRepository(client postgres.Postgres) SeriesProgressReposit
 	return &seriesProgress{client: client}
 }
 
-// withTx runs fn inside a database transaction, rolling back on error.
+// withTx runs fn inside a database transaction, rolling back on error
 func (r *seriesProgress) withTx(ctx context.Context, fn func(q *db.Queries) error) error {
 	tx, err := r.client.Db().Begin(ctx)
 	if err != nil {
@@ -141,14 +134,33 @@ func (r *seriesProgress) MarkEpisodeWatched(ctx context.Context, userId uuid.UUI
 }
 
 func (r *seriesProgress) UnmarkShowWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
-	err := r.withTx(ctx, func(q *db.Queries) error {
-		return q.DeleteSeriesByTmdbId(ctx, db.DeleteSeriesByTmdbIdParams{TmdbID: seriesTmdbId, UserID: userId})
-	})
-	if err != nil {
-		return nil, err
-	}
+	var progress *models.SeriesProgress
 
-	return &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}, nil
+	err := r.withTx(ctx, func(q *db.Queries) error {
+		series, err := q.FindSeriesByTmdbId(ctx, db.FindSeriesByTmdbIdParams{TmdbID: seriesTmdbId, UserID: userId})
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				progress = &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}
+				return nil
+			}
+
+			return err
+		}
+
+		if err = q.DeleteSeasonsBySeriesId(ctx, series.ID); err != nil {
+			return err
+		}
+
+		if err = recomputeSeries(ctx, q, series); err != nil {
+			return err
+		}
+
+		progress, err = buildProgress(ctx, q, userId, seriesTmdbId)
+
+		return err
+	})
+
+	return progress, err
 }
 
 func (r *seriesProgress) UnmarkSeasonWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId, seasonTmdbId uint64) (*models.SeriesProgress, error) {
@@ -236,7 +248,7 @@ func (r *seriesProgress) Progress(ctx context.Context, userId uuid.UUID, seriesT
 	return buildProgress(ctx, r.client.Queries(), userId, seriesTmdbId)
 }
 
-// upsertSeries inserts or updates the series row and returns it.
+// upsertSeries inserts or updates the series row and returns it
 func upsertSeries(ctx context.Context, q *db.Queries, userId uuid.UUID, input models.SeriesInput) (db.Series, error) {
 	return q.UpsertSeries(ctx, db.UpsertSeriesParams{
 		UserID:        userId,
@@ -250,7 +262,7 @@ func upsertSeries(ctx context.Context, q *db.Queries, userId uuid.UUID, input mo
 	})
 }
 
-// upsertSeason inserts or updates the season row and returns it.
+// upsertSeason inserts or updates the season row and returns it
 func upsertSeason(ctx context.Context, q *db.Queries, seriesID uuid.UUID, input models.SeasonInput) (db.Season, error) {
 	return q.UpsertSeason(ctx, db.UpsertSeasonParams{
 		SeriesID:      seriesID,
@@ -262,7 +274,7 @@ func upsertSeason(ctx context.Context, q *db.Queries, seriesID uuid.UUID, input 
 	})
 }
 
-// upsertEpisode inserts or updates an episode row in the given state.
+// upsertEpisode inserts or updates an episode row in the given state
 func upsertEpisode(ctx context.Context, q *db.Queries, seasonID uuid.UUID, input models.EpisodeInput, state string) (db.Episode, error) {
 	return q.UpsertEpisode(ctx, db.UpsertEpisodeParams{
 		SeasonID:   seasonID,
@@ -275,8 +287,7 @@ func upsertEpisode(ctx context.Context, q *db.Queries, seasonID uuid.UUID, input
 	})
 }
 
-// markSeason upserts a season, all of its provided episodes as watched, and
-// sets the season state to watched.
+// markSeason upserts a season with all provided episodes watched and sets the season state to watched
 func markSeason(ctx context.Context, q *db.Queries, seriesID uuid.UUID, season models.SeasonInput) error {
 	row, err := upsertSeason(ctx, q, seriesID, season)
 	if err != nil {
@@ -292,8 +303,7 @@ func markSeason(ctx context.Context, q *db.Queries, seriesID uuid.UUID, season m
 	return q.SetSeasonState(ctx, db.SetSeasonStateParams{ID: row.ID, State: db.StateTypes(models.StateTypeWatched)})
 }
 
-// recomputeSeason derives a season's state from its watched-episode count and
-// deletes the row entirely once it has no episodes left.
+// recomputeSeason derives a season's state from its watched-episode count, deleting the row once empty
 func recomputeSeason(ctx context.Context, q *db.Queries, seasonID uuid.UUID, episodesCount uint64) error {
 	count, err := q.CountEpisodesBySeason(ctx, seasonID)
 	if err != nil {
@@ -313,8 +323,6 @@ func recomputeSeason(ctx context.Context, q *db.Queries, seasonID uuid.UUID, epi
 }
 
 // recomputeSeries derives a series' state from its total watched-episode count
-// and deletes the row entirely once it has no watched episodes left. Returns
-// the derived state (StateTypeNone when the row was deleted).
 func recomputeSeries(ctx context.Context, q *db.Queries, series db.Series) error {
 	count, err := q.CountEpisodesBySeriesId(ctx, series.ID)
 	if err != nil {
@@ -323,15 +331,18 @@ func recomputeSeries(ctx context.Context, q *db.Queries, series db.Series) error
 
 	state := deriveSeriesState(uint64(count), series.EpisodesCount, series.Status)
 	if state == models.StateTypeNone {
+		// an explicitly tracked show reverts to the user's choice; auto-tracked rows are deleted
+		if series.TrackedState.Valid {
+			return q.SetSeriesState(ctx, db.SetSeriesStateParams{ID: series.ID, State: series.TrackedState.StateTypes})
+		}
+
 		return q.DeleteSeries(ctx, series.ID)
 	}
 
 	return q.SetSeriesState(ctx, db.SetSeriesStateParams{ID: series.ID, State: db.StateTypes(state)})
 }
 
-// deriveSeriesState mirrors the client's show-state rule: no watched episodes
-// means untracked; every episode watched on a finished show means watched;
-// anything in between (or a show still in production) means watching.
+// deriveSeriesState maps the watched count and show status to none/watching/watched
 func deriveSeriesState(watched, total uint64, status string) string {
 	if watched == 0 {
 		return models.StateTypeNone
@@ -344,8 +355,7 @@ func deriveSeriesState(watched, total uint64, status string) string {
 	return models.StateTypeWatching
 }
 
-// buildProgress reads the current watched state for a show, returning an empty
-// none-state result when the series is no longer tracked.
+// buildProgress reads the current watched state for a show (none-state when untracked)
 func buildProgress(ctx context.Context, q *db.Queries, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
 	series, err := q.FindSeriesByTmdbId(ctx, db.FindSeriesByTmdbIdParams{TmdbID: seriesTmdbId, UserID: userId})
 	if err != nil {
@@ -366,9 +376,15 @@ func buildProgress(ctx context.Context, q *db.Queries, userId uuid.UUID, seriesT
 		return nil, err
 	}
 
+	trackedState := ""
+	if series.TrackedState.Valid {
+		trackedState = string(series.TrackedState.StateTypes)
+	}
+
 	return &models.SeriesProgress{
 		SeriesTmdbId:    seriesTmdbId,
 		State:           string(series.State),
+		TrackedState:    trackedState,
 		WatchedSeasons:  seasons,
 		WatchedEpisodes: episodes,
 	}, nil

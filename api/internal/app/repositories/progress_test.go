@@ -56,6 +56,23 @@ func episodeInput(tmdbID uint64) models.EpisodeInput {
 	return models.EpisodeInput{TmdbId: tmdbID, Title: "Episode", Runtime: 42}
 }
 
+// createTrackedSeries tracks a show explicitly so tracked_state records the user's choice
+func createTrackedSeries(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, state string) {
+	t.Helper()
+
+	_, err := client.Queries().CreateSeries(context.Background(), db.CreateSeriesParams{
+		UserID:        userID,
+		TmdbID:        tmdbID,
+		Title:         "Test Show",
+		PosterPath:    "/poster.jpg",
+		SeasonsCount:  1,
+		EpisodesCount: 2,
+		Status:        "Ended",
+		State:         db.StateTypes(state),
+	})
+	require.NoError(t, err)
+}
+
 func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	if os.Getenv("GO_ENV") == "ci" {
 		t.Skip("integration test requires a database")
@@ -147,7 +164,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 		assert.ElementsMatch(t, []uint64{20, 21, 30}, progress.WatchedEpisodes)
 	})
 
-	t.Run("unmarking the last episode untracks the show", func(t *testing.T) {
+	t.Run("unmarking the last episode untracks an auto-tracked show", func(t *testing.T) {
 		const seriesID uint64 = 104
 
 		_, err := repository.MarkEpisodeWatched(
@@ -159,6 +176,73 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 		require.NoError(t, err)
 
 		progress, err := repository.UnmarkEpisodeWatched(ctx, userID, seriesID, 500, 40)
+		require.NoError(t, err)
+
+		assert.Equal(t, models.StateTypeNone, progress.State)
+		assert.Empty(t, progress.TrackedState)
+		assert.Empty(t, progress.WatchedEpisodes)
+		assert.Empty(t, progress.WatchedSeasons)
+	})
+
+	t.Run("unmarking the last episode reverts an explicitly tracked show to its chosen state", func(t *testing.T) {
+		const seriesID uint64 = 106
+
+		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+
+		createTrackedSeries(t, client, userID, seriesID, models.StateTypeWant)
+
+		progress, err := repository.MarkEpisodeWatched(
+			ctx, userID,
+			seriesInput(seriesID, 2, "Ended"),
+			seasonInput(700, 2),
+			episodeInput(60),
+		)
+		require.NoError(t, err)
+		assert.Equal(t, models.StateTypeWatching, progress.State, "progress on a want show derives watching")
+		assert.Equal(t, models.StateTypeWant, progress.TrackedState)
+
+		progress, err = repository.UnmarkEpisodeWatched(ctx, userID, seriesID, 700, 60)
+		require.NoError(t, err)
+
+		assert.Equal(t, models.StateTypeWant, progress.State, "the explicit want survives losing all progress")
+		assert.Empty(t, progress.WatchedEpisodes)
+		assert.Empty(t, progress.WatchedSeasons)
+	})
+
+	t.Run("unmarking the whole show reverts an explicitly tracked show", func(t *testing.T) {
+		const seriesID uint64 = 107
+
+		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+
+		createTrackedSeries(t, client, userID, seriesID, models.StateTypeWatching)
+
+		_, err := repository.MarkSeasonWatched(
+			ctx, userID,
+			seriesInput(seriesID, 2, "Ended"),
+			seasonInput(800, 2, episodeInput(70), episodeInput(71)),
+		)
+		require.NoError(t, err)
+
+		progress, err := repository.UnmarkShowWatched(ctx, userID, seriesID)
+		require.NoError(t, err)
+
+		assert.Equal(t, models.StateTypeWatching, progress.State)
+		assert.Empty(t, progress.WatchedEpisodes)
+		assert.Empty(t, progress.WatchedSeasons)
+	})
+
+	t.Run("unmarking the whole show untracks an auto-tracked show", func(t *testing.T) {
+		const seriesID uint64 = 108
+
+		_, err := repository.MarkEpisodeWatched(
+			ctx, userID,
+			seriesInput(seriesID, 2, "Ended"),
+			seasonInput(900, 2),
+			episodeInput(80),
+		)
+		require.NoError(t, err)
+
+		progress, err := repository.UnmarkShowWatched(ctx, userID, seriesID)
 		require.NoError(t, err)
 
 		assert.Equal(t, models.StateTypeNone, progress.State)

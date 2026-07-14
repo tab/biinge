@@ -9,9 +9,16 @@ struct TvDetailView: View {
     @Environment(\.presentSeries) private var presentSeries
 
     @State private var details: SeriesDetails?
-    @State private var progress: WatchProgress?
     @State private var isLoading = true
     @State private var showMenu = false
+    /// Serializes progress writes and versions optimistic mutations so only the newest applies state
+    @State private var progressWrites: Task<Void, Never>?
+    @State private var progressGeneration = 0
+
+    /// Progress lives in the store so marks made in an episode sheet update this screen instantly
+    private var progress: WatchProgress? {
+        store.progress(id: seriesId)
+    }
 
     private var watchedEpisodeIds: Set<Int> {
         Set(progress?.watchedEpisodes ?? [])
@@ -152,7 +159,7 @@ struct TvDetailView: View {
                         } label: {
                             PosterImage(path: item.posterPath, title: item.title, size: "w185").frame(width: 120)
                                 .overlay(alignment: .topLeading) {
-                                    if let state = item.state, state != .none { WatchedBadge() }
+                                    if isTracked(item) { WatchedBadge() }
                                 }
                         }
                         .buttonStyle(.plain)
@@ -161,6 +168,12 @@ struct TvDetailView: View {
                 .padding(.horizontal, 15)
             }
         }
+    }
+
+    /// Live store membership, with the response's snapshot as fallback until the library loads
+    private func isTracked(_ item: Recommendation) -> Bool {
+        store.currentState(id: item.id) != nil
+            || (!store.hasLoaded && (item.state ?? WatchState.none) != WatchState.none)
     }
 
     private func playButton(_ key: String) -> some View {
@@ -210,13 +223,18 @@ struct TvDetailView: View {
     private func load() async {
         guard let apiClient else { return }
         isLoading = true
+        // load the library too — opened from Search, the state pill would read an empty store
+        async let libraryLoad: Void = store.loadIfNeeded()
         async let detail = try? await apiClient.seriesDetails(id: seriesId)
         async let prog = try? await apiClient.progress(showId: seriesId)
         details = await detail
-        progress = await prog
         isLoading = false
         if let details {
             store.refreshMetadata(id: seriesId, title: details.title, posterPath: details.posterPath)
+        }
+        await libraryLoad
+        if details != nil, let fetched = await prog {
+            setProgress(fetched)
         }
     }
 
@@ -235,45 +253,37 @@ struct TvDetailView: View {
         }
     }
 
-    private func markEpisode(season: SeasonSummary, episode: EpisodeSummary, watched: Bool) async {
+    private func markEpisode(season: SeasonSummary, episodes: [EpisodeSummary], episode: EpisodeSummary, watched: Bool) async {
         guard let apiClient, let details else { return }
-        let series = ProgressSeries(
-            title: details.title,
-            posterPath: details.posterPath,
-            seasonsCount: details.seasonsCount ?? 0,
-            episodesCount: details.episodesCount ?? 0,
-            status: details.status ?? ""
+        let optimistic = baseProgress.togglingEpisode(
+            id: episode.id, watched: watched, seasonId: season.id,
+            seasonEpisodes: episodes, totalEpisodesCount: details.episodesCount,
+            showStatus: details.status
         )
-        do {
-            let updated: WatchProgress
+        let series = progressSeries(details)
+        applyOptimistic(optimistic) {
             if watched {
                 let body = MarkEpisodeBody(
                     series: series,
                     season: ProgressSeasonMeta(title: season.title, number: season.number, episodesCount: season.episodesCount),
                     episode: ProgressEpisodeMeta(title: episode.title, posterPath: episode.posterPath, runtime: episode.runtime, airDate: episode.airDate ?? "")
                 )
-                updated = try await apiClient.markEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id, body)
+                return try await apiClient.markEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id, body)
             } else {
-                updated = try await apiClient.unmarkEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id)
+                return try await apiClient.unmarkEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id)
             }
-            progress = updated
-            store.applyProgress(id: seriesId, state: updated.state, watchedEpisodesCount: updated.watchedEpisodes.count)
-        } catch {
-            // keep the last known progress
         }
     }
 
     private func markSeason(_ season: SeasonSummary, _ episodes: [EpisodeSummary], _ watched: Bool) async {
         guard let apiClient, let details else { return }
-        let series = ProgressSeries(
-            title: details.title,
-            posterPath: details.posterPath,
-            seasonsCount: details.seasonsCount ?? 0,
-            episodesCount: details.episodesCount ?? 0,
-            status: details.status ?? ""
+        let optimistic = baseProgress.togglingSeason(
+            id: season.id, episodeIds: episodes.map(\.id),
+            watched: watched, totalEpisodesCount: details.episodesCount,
+            showStatus: details.status
         )
-        do {
-            let updated: WatchProgress
+        let series = progressSeries(details)
+        applyOptimistic(optimistic) {
             if watched {
                 let body = MarkSeasonBody(
                     series: series,
@@ -282,21 +292,73 @@ struct TvDetailView: View {
                         ProgressEpisode(id: $0.id, title: $0.title, posterPath: $0.posterPath, runtime: $0.runtime, airDate: $0.airDate ?? "")
                     }
                 )
-                updated = try await apiClient.markSeason(showId: seriesId, seasonId: season.id, body)
+                return try await apiClient.markSeason(showId: seriesId, seasonId: season.id, body)
             } else {
-                updated = try await apiClient.unmarkSeason(showId: seriesId, seasonId: season.id)
+                return try await apiClient.unmarkSeason(showId: seriesId, seasonId: season.id)
             }
-            progress = updated
-            store.applyProgress(id: seriesId, state: updated.state, watchedEpisodesCount: updated.watchedEpisodes.count)
-        } catch {
-            // keep the last known progress
         }
+    }
+
+    // MARK: - Optimistic progress plumbing
+
+    /// The progress a mutation builds on: the loaded value, or an empty baseline before the fetch lands
+    private var baseProgress: WatchProgress {
+        progress ?? WatchProgress(
+            id: seriesId,
+            state: store.currentState(id: seriesId) ?? .none,
+            trackedState: store.currentState(id: seriesId),
+            watchedSeasons: [],
+            watchedEpisodes: []
+        )
+    }
+
+    private func progressSeries(_ details: SeriesDetails) -> ProgressSeries {
+        ProgressSeries(
+            title: details.title,
+            posterPath: details.posterPath,
+            seasonsCount: details.seasonsCount ?? 0,
+            episodesCount: details.episodesCount ?? 0,
+            status: details.status ?? ""
+        )
+    }
+
+    /// Show `optimistic` immediately, enqueue the serialized write, and let only the newest mutation reconcile
+    private func applyOptimistic(_ optimistic: WatchProgress, write: @escaping () async throws -> WatchProgress) {
+        progressGeneration += 1
+        let generation = progressGeneration
+        let snapshot = progress
+        setProgress(optimistic)
+
+        let prior = progressWrites
+        progressWrites = Task {
+            await prior?.value
+            do {
+                let updated = try await write()
+                guard generation == progressGeneration else { return }
+                setProgress(updated)
+            } catch {
+                guard generation == progressGeneration else { return }
+                if let fresh = try? await apiClient?.progress(showId: seriesId), generation == progressGeneration {
+                    setProgress(fresh)
+                } else if generation == progressGeneration, let snapshot {
+                    setProgress(snapshot)
+                }
+            }
+        }
+    }
+
+    /// One funnel into the store: this screen's checkmarks, episode sheets above, and the grid
+    private func setProgress(_ value: WatchProgress) {
+        guard let details else { return }
+        store.apply(
+            value, id: seriesId,
+            title: details.title, posterPath: details.posterPath,
+            episodesCount: details.episodesCount ?? 0, pinned: details.pinned
+        )
     }
 }
 
-/// The action row on a series: two white pills (Want + Watching/Watched) when
-/// the show isn't tracked, or a single accent state pill (opening the action
-/// menu) when it is.
+/// The action row on a series: white state pills, or a single accent pill when tracked
 struct TvActionsView: View {
     let seriesId: Int
     let details: SeriesDetails
@@ -354,7 +416,7 @@ struct TvActionsView: View {
     }
 }
 
-/// The action menu shown when tapping a tracked show's state pill.
+/// The action menu shown when tapping a tracked show's state pill
 struct TvActionMenu: View {
     let posterPath: String
     let state: WatchState?
@@ -436,14 +498,13 @@ struct TvActionMenu: View {
     }
 }
 
-/// Horizontal season selector + the selected season's episode list + a
-/// mark-whole-season action, matching the RN app.
+/// Horizontal season selector with the selected season's episode list and a mark-season action
 private struct SeasonsView: View {
     let seasons: [SeasonSummary]
     let showId: Int
     let watchedEpisodeIds: Set<Int>
     let watchedSeasonIds: Set<Int>
-    let onMarkEpisode: (SeasonSummary, EpisodeSummary, Bool) async -> Void
+    let onMarkEpisode: (SeasonSummary, [EpisodeSummary], EpisodeSummary, Bool) async -> Void
     let onMarkSeason: (SeasonSummary, [EpisodeSummary], Bool) async -> Void
 
     @Environment(\.apiClient) private var apiClient
@@ -451,6 +512,8 @@ private struct SeasonsView: View {
     @State private var episodes: [EpisodeSummary] = []
     @State private var isLoading = false
     @State private var loadTask: Task<Void, Never>?
+    /// Episodes already fetched this visit, keyed by season id, so switching back is instant
+    @State private var episodesBySeason: [Int: [EpisodeSummary]] = [:]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -488,7 +551,7 @@ private struct SeasonsView: View {
                             showsDivider: index > 0
                         ) { watched in
                             if let season = selected {
-                                await onMarkEpisode(season, episode, watched)
+                                await onMarkEpisode(season, episodes, episode, watched)
                             }
                         }
                     }
@@ -522,6 +585,11 @@ private struct SeasonsView: View {
     private func select(_ season: SeasonSummary) {
         selected = season
         loadTask?.cancel()
+        if let cached = episodesBySeason[season.id] {
+            episodes = cached
+            isLoading = false
+            return
+        }
         loadTask = Task { await loadEpisodes(season) }
     }
 
@@ -529,8 +597,11 @@ private struct SeasonsView: View {
         guard let apiClient else { return }
         isLoading = true
         let loaded = (try? await apiClient.seasonDetails(showId: showId, season: season.number).episodes) ?? []
-        // A newer selection may have superseded this load; only the current one wins.
+        // A newer selection may have superseded this load; only the current one wins
         guard !Task.isCancelled, selected?.id == season.id else { return }
+        if !loaded.isEmpty {
+            episodesBySeason[season.id] = loaded
+        }
         episodes = loaded
         isLoading = false
     }
@@ -544,7 +615,7 @@ private struct EpisodeRow: View {
     let showsDivider: Bool
     let onToggle: (Bool) async -> Void
     @Environment(\.presentEpisode) private var presentEpisode
-    @State private var dragX: CGFloat = 0
+    @GestureState private var dragX: CGFloat = 0
 
     private let revealWidth: CGFloat = 78
     private let triggerThreshold: CGFloat = 62
@@ -558,7 +629,8 @@ private struct EpisodeRow: View {
                 swipeActionStrip
                 rowContent
                     .background(Color.biingeCard)
-                    .offset(x: max(dragX, 0))
+                    .offset(x: dragX)
+                    .animation(.interactiveSpring(response: 0.3, dampingFraction: 0.82), value: dragX)
                     .onTapGesture {
                         presentEpisode(showId, seasonNumber, episode.number)
                     }
@@ -568,8 +640,7 @@ private struct EpisodeRow: View {
         }
     }
 
-    // Leading strip revealed while swiping right. Same gray background for both
-    // actions; only the icon differs — checkmark to mark watched, return to remove.
+    // leading strip revealed while swiping right; checkmark to mark watched, return to remove
     private var swipeActionStrip: some View {
         HStack(spacing: 0) {
             Image(systemName: isWatched ? "arrow.uturn.backward" : "checkmark")
@@ -615,24 +686,18 @@ private struct EpisodeRow: View {
         .contentShape(Rectangle())
     }
 
-    // Horizontal, rightward swipe toggles watched. `simultaneousGesture` keeps the
-    // parent ScrollView's vertical scrolling intact; the height check ignores
-    // vertical-dominant drags so scrolling never trips the toggle.
+    // rightward swipe toggles watched; @GestureState auto-resets even when the ScrollView steals the drag
     private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 18)
-            .onChanged { value in
-                let horizontal = value.translation.width
-                if horizontal > 0 && abs(horizontal) > abs(value.translation.height) {
-                    dragX = min(horizontal, revealWidth)
-                }
+        DragGesture(minimumDistance: 20)
+            .updating($dragX) { value, state, _ in
+                guard value.translation.width > 0,
+                      abs(value.translation.width) > abs(value.translation.height) else { return }
+                state = min(value.translation.width, revealWidth)
             }
             .onEnded { value in
-                let horizontalIntent = abs(value.translation.width) > abs(value.translation.height)
-                if horizontalIntent && value.translation.width > triggerThreshold {
+                guard value.translation.width > abs(value.translation.height) else { return }
+                if value.translation.width > triggerThreshold {
                     Task { await onToggle(!isWatched) }
-                }
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
-                    dragX = 0
                 }
             }
     }

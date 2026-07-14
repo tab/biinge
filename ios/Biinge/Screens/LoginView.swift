@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct LoginView: View {
     let authManager: AuthManager
@@ -8,6 +9,7 @@ struct LoginView: View {
     @State private var password = ""
     @State private var isSubmitting = false
     @State private var errorMessage: String?
+    @State private var backgroundImage: UIImage?
     @FocusState private var focusedField: Field?
 
     private enum Field {
@@ -15,65 +17,82 @@ struct LoginView: View {
     }
 
     var body: some View {
-        ZStack {
-            Image("LoginBackground")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
+        VStack(spacing: 0) {
+            Spacer(minLength: 0)
 
-            LinearGradient(
-                colors: [.black.opacity(0), .black.opacity(0.55), .black],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            VStack(spacing: 15) {
+                inputField("Email", text: $email, field: .email)
+                    .keyboardType(.emailAddress)
+                    .textContentType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .password }
 
-            VStack(spacing: 0) {
-                Spacer()
+                inputField("Password", text: $password, field: .password, secure: true)
+                    .textContentType(.password)
+                    .submitLabel(.go)
+                    .onSubmit { Task { await submit() } }
 
-                VStack(spacing: 15) {
-                    inputField("Email", text: $email, field: .email)
-                        .keyboardType(.emailAddress)
-                        .textContentType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .submitLabel(.next)
-                        .onSubmit { focusedField = .password }
-
-                    inputField("Password", text: $password, field: .password, secure: true)
-                        .textContentType(.password)
-                        .submitLabel(.go)
-                        .onSubmit { Task { await submit() } }
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.biingeFootnote)
-                            .foregroundStyle(Color(rgb: 0xFF6B6B))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-
-                    Button {
-                        Task { await submit() }
-                    } label: {
-                        ZStack {
-                            Text("Login or Register")
-                                .font(.biingeCallout)
-                                .foregroundStyle(.white)
-                                .opacity(isSubmitting ? 0 : 1)
-                            if isSubmitting {
-                                ProgressView().tint(.white)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 15)
-                        .background(Color(rgb: 0x181818), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-                    }
-                    .opacity(isSubmitting ? 0.5 : 1)
-                    .disabled(isSubmitting)
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.biingeFootnote)
+                        .foregroundStyle(Color(rgb: 0xFF6B6B))
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
+
+                Button {
+                    Task { await submit() }
+                } label: {
+                    ZStack {
+                        Text("Login or Register")
+                            .font(.biingeCallout)
+                            .foregroundStyle(.white)
+                            .opacity(isSubmitting ? 0 : 1)
+                        if isSubmitting {
+                            ProgressView().tint(.white)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .background(Color(rgb: 0x181818), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                }
+                .opacity(isSubmitting ? 0.5 : 1)
+                .disabled(isSubmitting)
+
+                Text("API: \(Config.baseURL.absoluteString)")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(Color.biingeGray)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .textSelection(.enabled)
+                    .padding(.top, 4)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 60)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 60)
+        // the form is the keyboard-avoiding layer; the artwork ignores every safe area to stay full-bleed
+        .background {
+            ZStack {
+                Color.black
+
+                if let backgroundImage {
+                    Image(uiImage: backgroundImage)
+                        .resizable()
+                        .scaledToFill()
+                }
+
+                LinearGradient(
+                    colors: [.black.opacity(0), .black.opacity(0.55), .black],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            .ignoresSafeArea()
+        }
+        .task {
+            // pre-decode the full-screen PNG off the main thread to avoid a first-render hitch
+            backgroundImage = await UIImage(named: "LoginBackground")?.byPreparingForDisplay()
         }
     }
 

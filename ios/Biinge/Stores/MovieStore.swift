@@ -1,6 +1,6 @@
 import Observation
 
-/// Holds the user's movie library (want / watched), mirroring the RN MovieContext.
+/// Holds the user's movie library (want / watched), mirroring the RN MovieContext
 @MainActor
 @Observable
 final class MovieStore {
@@ -44,41 +44,71 @@ final class MovieStore {
     }
 
     func isPinned(id: Int) -> Bool {
-        (wantMovies + watchedMovies).first(where: { $0.id == id })?.pinned ?? false
+        firstMatch(id: id)?.pinned ?? false
     }
 
-    // MARK: - Mutations (optimistic; resync from the server on failure)
+    /// Locate a movie in either segment without concatenating (copying) the lists
+    private func firstMatch(id: Int) -> LibraryMovie? {
+        wantMovies.first { $0.id == id } ?? watchedMovies.first { $0.id == id }
+    }
 
-    /// Move a movie into `target` (want/watched); tapping the current state removes it.
+    // MARK: - Mutations (optimistic: local first, serialized server write after)
+
+    /// Move a movie into `target` (want/watched); tapping the current state removes it
     func toggle(id: Int, title: String, posterPath: String, runtime: Int, target: WatchState) async {
         let current = currentState(id: id)
         let pinned = isPinned(id: id)
-        do {
-            if current == target {
+        if current == target {
+            removeLocal(id: id)
+            enqueueWrite { [apiClient] in
                 try await apiClient.deleteMovie(id: id)
-                removeLocal(id: id)
-            } else if current == nil {
+            }
+        } else if current == nil {
+            insertLocal(LibraryMovie(id: id, title: title, posterPath: posterPath, pinned: false, state: target))
+            enqueueWrite { [apiClient] in
                 _ = try await apiClient.createMovie(
                     CreateMovieBody(id: id, title: title, posterPath: posterPath, runtime: runtime, state: target.rawValue)
                 )
-                insertLocal(LibraryMovie(id: id, title: title, posterPath: posterPath, pinned: false, state: target))
-            } else {
-                _ = try await apiClient.updateMovie(id: id, UpdateMovieBody(state: target.rawValue, pinned: pinned))
-                removeLocal(id: id)
-                insertLocal(LibraryMovie(id: id, title: title, posterPath: posterPath, pinned: pinned, state: target))
             }
-        } catch {
-            await load()
+        } else {
+            removeLocal(id: id)
+            insertLocal(LibraryMovie(id: id, title: title, posterPath: posterPath, pinned: pinned, state: target))
+            enqueueWrite { [apiClient] in
+                _ = try await apiClient.updateMovie(id: id, UpdateMovieBody(state: target.rawValue, pinned: pinned))
+            }
         }
     }
 
     func setPinned(id: Int, pinned: Bool) async {
         guard let current = currentState(id: id) else { return }
         setPinnedLocal(id: id, pinned: pinned)
-        do {
+        enqueueWrite { [apiClient] in
             _ = try await apiClient.updateMovie(id: id, UpdateMovieBody(state: current.rawValue, pinned: pinned))
-        } catch {
-            await load() // reconcile exact server ordering only if the write failed
+        }
+    }
+
+    // MARK: - Write queue
+
+    private var writeChain: Task<Void, Never>?
+    private var pendingWrites = 0
+    private var writeFailed = false
+
+    /// Runs server writes in submission order; a failure resyncs once the queue drains
+    private func enqueueWrite(_ op: @escaping () async throws -> Void) {
+        pendingWrites += 1
+        let prior = writeChain
+        writeChain = Task {
+            await prior?.value
+            do {
+                try await op()
+            } catch {
+                writeFailed = true
+            }
+            pendingWrites -= 1
+            if pendingWrites == 0, writeFailed {
+                writeFailed = false
+                await load()
+            }
         }
     }
 
@@ -87,8 +117,7 @@ final class MovieStore {
         repartition(&watchedMovies, id: id, pinned: pinned)
     }
 
-    /// Flip a movie's pinned flag and float pinned items to the top (stable), matching
-    /// the server's `pinned DESC` ordering without a full reload.
+    /// Flip a movie's pinned flag and float pinned items to the top, matching the server's ordering
     private func repartition(_ list: inout [LibraryMovie], id: Int, pinned: Bool) {
         guard let index = list.firstIndex(where: { $0.id == id }) else { return }
         let existing = list[index]
@@ -112,8 +141,7 @@ final class MovieStore {
         watchedMovies.removeAll { $0.id == id }
     }
 
-    /// Push fresher poster/title from a detail load into the cached grid item so the
-    /// grid reflects the server's read-repair without waiting for a full reload.
+    /// Push fresher poster/title from a detail load into the cached grid item
     func refreshMetadata(id: Int, title: String, posterPath: String) {
         applyMetadata(id: id, title: title, posterPath: posterPath, to: &wantMovies)
         applyMetadata(id: id, title: title, posterPath: posterPath, to: &watchedMovies)

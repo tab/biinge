@@ -1,8 +1,6 @@
 import Foundation
 
-/// Thread-safe HTTP client for the biinge API. Endpoints are modeled as methods;
-/// a single `perform` funnel adds Bearer auth and transparently refreshes the
-/// token pair once on a 401 before retrying.
+/// Thread-safe HTTP client for the biinge API; refreshes the token pair once on 401
 actor APIClient {
     private let baseURL: URL
     private let authManager: AuthManager
@@ -13,7 +11,11 @@ actor APIClient {
     init(baseURL: URL, authManager: AuthManager) {
         self.baseURL = baseURL
         self.authManager = authManager
-        self.session = URLSession(configuration: .default)
+        // fail fast instead of the 60s default so an unreachable server errors in seconds
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 15
+        config.timeoutIntervalForResource = 30
+        self.session = URLSession(configuration: config)
     }
 
     // MARK: - Auth endpoints (unauthenticated)

@@ -11,8 +11,15 @@ struct EpisodeDetailView: View {
 
     @State private var episode: EpisodeDetails?
     @State private var series: SeriesDetails?
-    @State private var progress: WatchProgress?
     @State private var isLoading = true
+    /// Serializes writes and versions optimistic mutations so only the newest applies state
+    @State private var progressWrites: Task<Void, Never>?
+    @State private var progressGeneration = 0
+
+    /// Progress lives in the store, shared with the show detail underneath this sheet
+    private var progress: WatchProgress? {
+        store.progress(id: showId)
+    }
 
     private var season: SeasonSummary? {
         series?.seasons.first { $0.number == seasonNumber }
@@ -136,17 +143,35 @@ struct EpisodeDetailView: View {
     private func load() async {
         guard let apiClient else { return }
         isLoading = true
+        async let libraryLoad: Void = store.loadIfNeeded()
         async let episodeResult = try? await apiClient.episodeDetails(showId: showId, season: seasonNumber, episode: episodeNumber)
         async let seriesResult = try? await apiClient.seriesDetails(id: showId)
         async let progressResult = try? await apiClient.progress(showId: showId)
         episode = await episodeResult
         series = await seriesResult
-        progress = await progressResult
         isLoading = false
+        await libraryLoad
+        if series != nil, let fetched = await progressResult {
+            setProgress(fetched)
+        }
     }
 
     private func toggleWatched(_ ep: EpisodeDetails) async {
         guard let apiClient, let series, let season else { return }
+        let watched = !isWatched
+        let base = progress ?? WatchProgress(
+            id: showId,
+            state: store.currentState(id: showId) ?? .none,
+            trackedState: store.currentState(id: showId),
+            watchedSeasons: [],
+            watchedEpisodes: []
+        )
+        // no episode list here, so season completeness on mark is reconciled by the server
+        let optimistic = base.togglingEpisode(
+            id: ep.id, watched: watched, seasonId: season.id,
+            totalEpisodesCount: series.episodesCount,
+            showStatus: series.status
+        )
         let seriesMeta = ProgressSeries(
             title: series.title,
             posterPath: series.posterPath,
@@ -154,22 +179,48 @@ struct EpisodeDetailView: View {
             episodesCount: series.episodesCount ?? 0,
             status: series.status ?? ""
         )
-        do {
-            let updated: WatchProgress
-            if isWatched {
-                updated = try await apiClient.unmarkEpisode(showId: showId, seasonId: season.id, episodeId: ep.id)
-            } else {
-                let body = MarkEpisodeBody(
-                    series: seriesMeta,
-                    season: ProgressSeasonMeta(title: season.title, number: season.number, episodesCount: season.episodesCount),
-                    episode: ProgressEpisodeMeta(title: ep.title, posterPath: ep.posterPath, runtime: ep.runtime, airDate: ep.airDate ?? "")
-                )
-                updated = try await apiClient.markEpisode(showId: showId, seasonId: season.id, episodeId: ep.id, body)
+
+        progressGeneration += 1
+        let generation = progressGeneration
+        let snapshot = progress
+        setProgress(optimistic)
+
+        let prior = progressWrites
+        progressWrites = Task {
+            await prior?.value
+            do {
+                let updated: WatchProgress
+                if watched {
+                    let body = MarkEpisodeBody(
+                        series: seriesMeta,
+                        season: ProgressSeasonMeta(title: season.title, number: season.number, episodesCount: season.episodesCount),
+                        episode: ProgressEpisodeMeta(title: ep.title, posterPath: ep.posterPath, runtime: ep.runtime, airDate: ep.airDate ?? "")
+                    )
+                    updated = try await apiClient.markEpisode(showId: showId, seasonId: season.id, episodeId: ep.id, body)
+                } else {
+                    updated = try await apiClient.unmarkEpisode(showId: showId, seasonId: season.id, episodeId: ep.id)
+                }
+                guard generation == progressGeneration else { return }
+                setProgress(updated)
+            } catch {
+                guard generation == progressGeneration else { return }
+                // Prefer server truth; fall back to the pre-mutation snapshot offline
+                if let fresh = try? await apiClient.progress(showId: showId), generation == progressGeneration {
+                    setProgress(fresh)
+                } else if generation == progressGeneration, let snapshot {
+                    setProgress(snapshot)
+                }
             }
-            progress = updated
-            store.applyProgress(id: showId, state: updated.state, watchedEpisodesCount: updated.watchedEpisodes.count)
-        } catch {
-            // keep the last known state
         }
+    }
+
+    /// One funnel into the store: this screen's button, the show detail underneath, and the grid
+    private func setProgress(_ value: WatchProgress) {
+        guard let series else { return }
+        store.apply(
+            value, id: showId,
+            title: series.title, posterPath: series.posterPath,
+            episodesCount: series.episodesCount ?? 0, pinned: series.pinned
+        )
     }
 }

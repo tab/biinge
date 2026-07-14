@@ -1,6 +1,6 @@
 import Observation
 
-/// Holds the user's TV library (want / watching / watched), mirroring the RN TvContext.
+/// Holds the user's TV library (want / watching / watched), mirroring the RN TvContext
 @MainActor
 @Observable
 final class TvStore {
@@ -9,6 +9,8 @@ final class TvStore {
     private(set) var watchedShows: [LibrarySeries] = []
     private(set) var isLoading = false
     private(set) var hasLoaded = false
+    /// Per-show watch progress shared by the detail screens and the grid
+    private(set) var progressByShow: [Int: WatchProgress] = [:]
 
     private let apiClient: APIClient
 
@@ -48,19 +50,23 @@ final class TvStore {
     }
 
     func isPinned(id: Int) -> Bool {
-        (wantShows + watchingShows + watchedShows).first(where: { $0.id == id })?.pinned ?? false
+        firstMatch(id: id)?.pinned ?? false
     }
 
-    /// Marks the library stale so the tab reloads next time it appears (used after
-    /// episode marking changes a show's derived state on the server).
-    func invalidate() {
-        hasLoaded = false
+    /// Locate a show in any segment without concatenating (copying) the lists
+    private func firstMatch(id: Int) -> LibrarySeries? {
+        wantShows.first { $0.id == id }
+            ?? watchingShows.first { $0.id == id }
+            ?? watchedShows.first { $0.id == id }
     }
 
-    // MARK: - Mutations
+    func progress(id: Int) -> WatchProgress? {
+        progressByShow[id]
+    }
 
-    /// Move a show into `target` (want/watching/watched); tapping the current
-    /// state removes it.
+    // MARK: - Mutations (optimistic: local first, serialized server write after)
+
+    /// Move a show into `target`; tapping the current state removes it
     func toggle(
         id: Int,
         title: String,
@@ -71,11 +77,20 @@ final class TvStore {
         target: WatchState
     ) async {
         let current = currentState(id: id)
-        do {
-            if current == target {
+        if current == target {
+            removeLocal(id: id)
+            // untracking deletes episode rows server-side, so open sheets drop their checkmarks too
+            progressByShow[id] = WatchProgress(id: id, state: .none, trackedState: nil, watchedSeasons: [], watchedEpisodes: [])
+            enqueueWrite { [apiClient] in
                 try await apiClient.deleteSeries(id: id)
-                removeLocal(id: id)
-            } else if current == nil {
+            }
+        } else if current == nil {
+            insertLocal(LibrarySeries(
+                id: id, title: title, posterPath: posterPath, pinned: false,
+                state: target, episodesCount: episodesCount, watchedEpisodesCount: 0
+            ))
+            retrackProgress(id: id, state: target)
+            enqueueWrite { [apiClient] in
                 _ = try await apiClient.createSeries(
                     CreateSeriesBody(
                         id: id, title: title, posterPath: posterPath,
@@ -83,26 +98,56 @@ final class TvStore {
                         status: status, state: target.rawValue
                     )
                 )
-                insertLocal(LibrarySeries(
-                    id: id, title: title, posterPath: posterPath, pinned: false,
-                    state: target, episodesCount: episodesCount, watchedEpisodesCount: 0
-                ))
-            } else {
-                _ = try await apiClient.updateSeries(id: id, UpdateSeriesBody(state: target.rawValue, pinned: isPinned(id: id)))
-                moveLocal(id: id, to: target)
             }
-        } catch {
-            await load()
+        } else {
+            let pinned = isPinned(id: id)
+            moveLocal(id: id, to: target)
+            retrackProgress(id: id, state: target)
+            enqueueWrite { [apiClient] in
+                _ = try await apiClient.updateSeries(id: id, UpdateSeriesBody(state: target.rawValue, pinned: pinned))
+            }
         }
+    }
+
+    /// Explicit tracking updates the cached progress; unmark-all reverts to this state
+    private func retrackProgress(id: Int, state: WatchState) {
+        guard let cached = progressByShow[id] else { return }
+        progressByShow[id] = WatchProgress(
+            id: cached.id, state: state, trackedState: state,
+            watchedSeasons: cached.watchedSeasons, watchedEpisodes: cached.watchedEpisodes
+        )
     }
 
     func setPinned(id: Int, pinned: Bool) async {
         guard let current = currentState(id: id) else { return }
         setPinnedLocal(id: id, pinned: pinned)
-        do {
+        enqueueWrite { [apiClient] in
             _ = try await apiClient.updateSeries(id: id, UpdateSeriesBody(state: current.rawValue, pinned: pinned))
-        } catch {
-            await load() // reconcile exact server ordering only if the write failed
+        }
+    }
+
+    // MARK: - Write queue
+
+    private var writeChain: Task<Void, Never>?
+    private var pendingWrites = 0
+    private var writeFailed = false
+
+    /// Runs server writes in submission order; a failure resyncs once the queue drains
+    private func enqueueWrite(_ op: @escaping () async throws -> Void) {
+        pendingWrites += 1
+        let prior = writeChain
+        writeChain = Task {
+            await prior?.value
+            do {
+                try await op()
+            } catch {
+                writeFailed = true
+            }
+            pendingWrites -= 1
+            if pendingWrites == 0, writeFailed {
+                writeFailed = false
+                await load()
+            }
         }
     }
 
@@ -115,9 +160,9 @@ final class TvStore {
         }
     }
 
-    /// Move an already-tracked show to a new state segment, preserving its counts.
+    /// Move an already-tracked show to a new state segment, preserving its counts
     private func moveLocal(id: Int, to target: WatchState) {
-        guard let existing = (wantShows + watchingShows + watchedShows).first(where: { $0.id == id }) else { return }
+        guard let existing = firstMatch(id: id) else { return }
         removeLocal(id: id)
         insertLocal(LibrarySeries(
             id: existing.id, title: existing.title, posterPath: existing.posterPath,
@@ -132,8 +177,7 @@ final class TvStore {
         repartition(&watchedShows, id: id, pinned: pinned)
     }
 
-    /// Flip a show's pinned flag and float pinned items to the top (stable), matching
-    /// the server's `pinned DESC` ordering without a full reload.
+    /// Flip a show's pinned flag and float pinned items to the top, matching the server's ordering
     private func repartition(_ list: inout [LibrarySeries], id: Int, pinned: Bool) {
         guard let index = list.firstIndex(where: { $0.id == id }) else { return }
         let existing = list[index]
@@ -151,25 +195,27 @@ final class TvStore {
         watchedShows.removeAll { $0.id == id }
     }
 
-    /// Reflect a mark/unmark from a detail screen in the cached grid: update the
-    /// show's watched-episode count (drives the progress badge) and move it to the
-    /// segment matching its new derived state — no full library reload. Falls back
-    /// to invalidation if the show isn't cached yet (e.g. it was just tracked).
-    func applyProgress(id: Int, state: WatchState, watchedEpisodesCount: Int) {
-        guard let current = (wantShows + watchingShows + watchedShows).first(where: { $0.id == id }) else {
-            invalidate()
-            return
-        }
-        let updated = LibrarySeries(
-            id: current.id, title: current.title, posterPath: current.posterPath,
-            pinned: current.pinned, state: state,
-            episodesCount: current.episodesCount, watchedEpisodesCount: watchedEpisodesCount
-        )
-        if current.state == state {
-            replaceInPlace(updated)
-        } else {
-            removeLocal(id: id)
-            insertLocal(updated)
+    /// Caches progress for the detail screens and reflects it into the grid, inserting or removing the show as needed
+    func apply(_ value: WatchProgress, id: Int, title: String, posterPath: String, episodesCount: Int, pinned: Bool) {
+        progressByShow[id] = value
+        let watchedCount = value.watchedEpisodes.count
+        if let current = firstMatch(id: id) {
+            let updated = LibrarySeries(
+                id: current.id, title: current.title, posterPath: current.posterPath,
+                pinned: current.pinned, state: value.state,
+                episodesCount: current.episodesCount, watchedEpisodesCount: watchedCount
+            )
+            if current.state == value.state {
+                replaceInPlace(updated)
+            } else {
+                removeLocal(id: id)
+                insertLocal(updated) // insertLocal ignores .none, so this removes
+            }
+        } else if value.state != .none {
+            insertLocal(LibrarySeries(
+                id: id, title: title, posterPath: posterPath, pinned: pinned,
+                state: value.state, episodesCount: episodesCount, watchedEpisodesCount: watchedCount
+            ))
         }
     }
 
@@ -179,8 +225,7 @@ final class TvStore {
         if let i = watchedShows.firstIndex(where: { $0.id == show.id }) { watchedShows[i] = show }
     }
 
-    /// Push fresher poster/title from a detail load into the cached grid item so the
-    /// grid reflects the server's read-repair without waiting for a full reload.
+    /// Push fresher poster/title from a detail load into the cached grid item
     func refreshMetadata(id: Int, title: String, posterPath: String) {
         applyMetadata(id: id, title: title, posterPath: posterPath, to: &wantShows)
         applyMetadata(id: id, title: title, posterPath: posterPath, to: &watchingShows)

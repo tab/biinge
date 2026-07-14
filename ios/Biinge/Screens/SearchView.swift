@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(\.apiClient) private var apiClient
+    @Environment(MovieStore.self) private var movieStore
+    @Environment(TvStore.self) private var tvStore
 
     @State private var query = ""
     @State private var movies: [SearchMovie] = []
@@ -68,7 +70,7 @@ struct SearchView: View {
                         PosterImage(path: movie.posterPath, title: movie.title, size: "w185")
                             .frame(width: 120)
                             .overlay(alignment: .topLeading) {
-                                if let state = movie.state, state != .none { WatchedBadge() }
+                                if isTrackedMovie(movie.id, snapshot: movie.state) { WatchedBadge() }
                             }
                     }
                     .buttonStyle(.plain)
@@ -88,7 +90,7 @@ struct SearchView: View {
                         PosterImage(path: show.posterPath, title: show.title, size: "w185")
                             .frame(width: 120)
                             .overlay(alignment: .topLeading) {
-                                if let state = show.state, state != .none { WatchedBadge() }
+                                if isTrackedSeries(show.id, snapshot: show.state) { WatchedBadge() }
                             }
                     }
                     .buttonStyle(.plain)
@@ -119,6 +121,17 @@ struct SearchView: View {
         }
     }
 
+    /// Live store membership, with the response's snapshot as fallback until the library loads
+    private func isTrackedMovie(_ id: Int, snapshot: WatchState?) -> Bool {
+        movieStore.currentState(id: id) != nil
+            || (!movieStore.hasLoaded && (snapshot ?? WatchState.none) != WatchState.none)
+    }
+
+    private func isTrackedSeries(_ id: Int, snapshot: WatchState?) -> Bool {
+        tvStore.currentState(id: id) != nil
+            || (!tvStore.hasLoaded && (snapshot ?? WatchState.none) != WatchState.none)
+    }
+
     private func run() async {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty {
@@ -136,9 +149,12 @@ struct SearchView: View {
         async let m = try? await apiClient.trendingMovies().data
         async let s = try? await apiClient.trendingSeries().data
         async let p = try? await apiClient.trendingPeople().data
-        movies = await m ?? []
-        series = await s ?? []
-        people = await p ?? []
+        let (loadedMovies, loadedSeries, loadedPeople) = await (m, s, p)
+        // a cancelled task (typing) must not wipe the visible results with empties
+        guard !Task.isCancelled else { return }
+        movies = loadedMovies ?? []
+        series = loadedSeries ?? []
+        people = loadedPeople ?? []
         isLoading = false
     }
 
@@ -148,9 +164,11 @@ struct SearchView: View {
         async let m = try? await apiClient.searchMovies(query: term).data
         async let s = try? await apiClient.searchSeries(query: term).data
         async let p = try? await apiClient.searchPeople(query: term).data
-        movies = await m ?? []
-        series = await s ?? []
-        people = await p ?? []
+        let (loadedMovies, loadedSeries, loadedPeople) = await (m, s, p)
+        guard !Task.isCancelled else { return }
+        movies = loadedMovies ?? []
+        series = loadedSeries ?? []
+        people = loadedPeople ?? []
         isLoading = false
     }
 }

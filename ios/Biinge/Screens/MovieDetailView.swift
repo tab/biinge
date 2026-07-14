@@ -143,7 +143,7 @@ struct MovieDetailView: View {
                         } label: {
                             PosterImage(path: item.posterPath, title: item.title, size: "w185").frame(width: 120)
                                 .overlay(alignment: .topLeading) {
-                                    if let state = item.state, state != .none { WatchedBadge() }
+                                    if isTracked(item) { WatchedBadge() }
                                 }
                         }
                         .buttonStyle(.plain)
@@ -152,6 +152,12 @@ struct MovieDetailView: View {
                 .padding(.horizontal, 15)
             }
         }
+    }
+
+    /// Live store membership, with the response's snapshot as fallback until the library loads
+    private func isTracked(_ item: Recommendation) -> Bool {
+        store.currentState(id: item.id) != nil
+            || (!store.hasLoaded && (item.state ?? WatchState.none) != WatchState.none)
     }
 
     private func playButton(_ key: String) -> some View {
@@ -206,16 +212,18 @@ struct MovieDetailView: View {
     private func load() async {
         guard let apiClient else { return }
         isLoading = true
+        // load the library too — opened from Search, the state pill would read an empty store
+        async let libraryLoad: Void = store.loadIfNeeded()
         details = try? await apiClient.movieDetails(id: movieId)
         isLoading = false
         if let details {
             store.refreshMetadata(id: movieId, title: details.title, posterPath: details.posterPath)
         }
+        await libraryLoad
     }
 
     private func handleMenu(_ action: MovieActionMenu.MenuAction, _ movie: MovieDetails) async {
-        // The menu stays open on actions (only Cancel dismisses it); it just
-        // re-renders with the new state.
+        // the menu stays open on actions; only Cancel dismisses it
         switch action {
         case .toggleWant:
             await store.toggle(id: movieId, title: movie.title, posterPath: movie.posterPath, runtime: movie.runtime ?? 0, target: .want)
@@ -229,8 +237,7 @@ struct MovieDetailView: View {
     }
 }
 
-/// The action row on a movie: two white "Want"/"Watched" pills when the movie
-/// isn't tracked, or a single accent pill (opening the action menu) when it is.
+/// The action row on a movie: white Want/Watched pills, or a single accent pill when tracked
 struct MovieActionsView: View {
     let movieId: Int
     let details: MovieDetails
@@ -275,7 +282,7 @@ struct MovieActionsView: View {
     }
 }
 
-/// The full-screen action menu shown when tapping a tracked movie's state pill.
+/// The full-screen action menu shown when tapping a tracked movie's state pill
 struct MovieActionMenu: View {
     let posterPath: String
     let state: WatchState?
@@ -349,7 +356,7 @@ struct MovieActionMenu: View {
     }
 }
 
-/// Shared error state for detail screens (e.g. missing TMDB token).
+/// Shared error state for detail screens (e.g. missing TMDB token)
 struct DetailLoadError: View {
     var body: some View {
         ContentUnavailableView(

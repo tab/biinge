@@ -2,18 +2,20 @@ import SwiftUI
 import ImageIO
 import UIKit
 
-/// Decoded-image cache + a downsampling loader. `AsyncImage` re-decodes a full-size
-/// JPEG every time a cell scrolls back into view and keeps no decoded cache; this
-/// downsamples each image to a target pixel size and caches the resulting `UIImage`,
-/// so scrolling a large poster grid stays smooth and bounded in memory.
+/// Downsampling decoded-image cache so poster grids scroll smoothly within bounded memory
 final class ImageCache: @unchecked Sendable {
     static let shared = ImageCache()
 
     private let cache = NSCache<NSString, UIImage>()
     private let session: URLSession
+    /// Coalesces concurrent loads of the same image into one download + decode
+    private var inFlight: [NSString: Task<UIImage?, Never>] = [:]
+    private let lock = NSLock()
 
     private init() {
-        cache.countLimit = 250
+        // bounded by decoded-bitmap bytes; a count limit alone could balloon to hundreds of MB
+        cache.totalCostLimit = 128 * 1024 * 1024
+        cache.countLimit = 500
         let config = URLSessionConfiguration.default
         config.urlCache = URLCache(memoryCapacity: 16 * 1024 * 1024, diskCapacity: 256 * 1024 * 1024)
         config.requestCachePolicy = .returnCacheDataElseLoad
@@ -24,7 +26,7 @@ final class ImageCache: @unchecked Sendable {
         "\(url.absoluteString)#\(Int(maxPixel))" as NSString
     }
 
-    /// Synchronous cache peek so a scrolled-back cell shows instantly (no flash).
+    /// Synchronous cache peek so a scrolled-back cell shows instantly (no flash)
     func cached(_ url: URL, maxPixel: CGFloat) -> UIImage? {
         cache.object(forKey: key(url, maxPixel))
     }
@@ -32,10 +34,44 @@ final class ImageCache: @unchecked Sendable {
     func load(_ url: URL, maxPixel: CGFloat) async -> UIImage? {
         let cacheKey = key(url, maxPixel)
         if let hit = cache.object(forKey: cacheKey) { return hit }
-        guard let (data, _) = try? await session.data(from: url),
-              let image = Self.downsample(data, maxPixel: maxPixel) else { return nil }
-        cache.setObject(image, forKey: cacheKey)
+
+        let (task, isCreator) = inFlightTask(for: cacheKey) {
+            Task { [session] () -> UIImage? in
+                guard let (data, _) = try? await session.data(from: url) else { return nil }
+                return Self.downsample(data, maxPixel: maxPixel)
+            }
+        }
+
+        let image = await task.value
+        // only the creator caches and unregisters, cache-before-clear so no request misses both
+        if isCreator {
+            if let image {
+                // Cost = decoded bitmap footprint, so totalCostLimit bounds real memory
+                let cost = image.cgImage.map { $0.bytesPerRow * $0.height } ?? 0
+                cache.setObject(image, forKey: cacheKey, cost: cost)
+            }
+            clearInFlight(cacheKey)
+        }
         return image
+    }
+
+    /// Returns or registers the in-flight task for `key`; synchronous so the lock never spans an await
+    private func inFlightTask(
+        for key: NSString,
+        orCreate make: () -> Task<UIImage?, Never>
+    ) -> (task: Task<UIImage?, Never>, isCreator: Bool) {
+        lock.lock()
+        defer { lock.unlock() }
+        if let existing = inFlight[key] { return (existing, false) }
+        let task = make()
+        inFlight[key] = task
+        return (task, true)
+    }
+
+    private func clearInFlight(_ key: NSString) {
+        lock.lock()
+        defer { lock.unlock() }
+        inFlight[key] = nil
     }
 
     private static func downsample(_ data: Data, maxPixel: CGFloat) -> UIImage? {
@@ -52,9 +88,7 @@ final class ImageCache: @unchecked Sendable {
     }
 }
 
-/// A downsampling, decoded-cached replacement for `AsyncImage`. Reloads when `url`
-/// changes (correct for recycled cells, no stale-image glitch) and serves cache hits
-/// synchronously so scroll-back doesn't flash the placeholder.
+/// A downsampling, decoded-cached replacement for `AsyncImage`
 struct CachedImage<Placeholder: View>: View {
     let url: URL?
     let maxPixel: CGFloat
@@ -62,6 +96,20 @@ struct CachedImage<Placeholder: View>: View {
     @ViewBuilder var placeholder: () -> Placeholder
 
     @State private var image: UIImage?
+
+    init(
+        url: URL?,
+        maxPixel: CGFloat,
+        grayscale: Bool = false,
+        @ViewBuilder placeholder: @escaping () -> Placeholder
+    ) {
+        self.url = url
+        self.maxPixel = maxPixel
+        self.grayscale = grayscale
+        self.placeholder = placeholder
+        // seed from the cache at construction; .task fires after the first frame and would flash
+        _image = State(initialValue: url.flatMap { ImageCache.shared.cached($0, maxPixel: maxPixel) })
+    }
 
     var body: some View {
         Group {
@@ -83,7 +131,7 @@ struct CachedImage<Placeholder: View>: View {
             return
         }
         if let hit = ImageCache.shared.cached(url, maxPixel: maxPixel) {
-            image = hit
+            if image !== hit { image = hit }
             return
         }
         image = nil

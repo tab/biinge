@@ -3,6 +3,7 @@ import SwiftUI
 struct PersonDetailView: View {
     let personId: Int
     @Environment(\.apiClient) private var apiClient
+    @Environment(MovieStore.self) private var movieStore
     @Environment(\.presentMovie) private var presentMovie
     @Environment(\.dismiss) private var dismiss
 
@@ -102,7 +103,7 @@ struct PersonDetailView: View {
                     } label: {
                         PosterImage(path: credit.posterPath, title: credit.title, size: "w342", cornerRadius: 6)
                             .overlay(alignment: .topLeading) {
-                                if let state = credit.state, state != .none {
+                                if isTracked(credit) {
                                     WatchedBadge()
                                 }
                             }
@@ -134,10 +135,18 @@ struct PersonDetailView: View {
         return "\(parts[2]).\(parts[1]).\(parts[0])"
     }
 
+    /// Live store membership, with the response's snapshot as fallback until the library loads
+    private func isTracked(_ credit: MovieCredit) -> Bool {
+        movieStore.currentState(id: credit.id) != nil
+            || (!movieStore.hasLoaded && (credit.state ?? WatchState.none) != WatchState.none)
+    }
+
     private func load() async {
         guard let apiClient else { return }
         isLoading = true
+        async let libraryLoad: Void = movieStore.loadIfNeeded()
         details = try? await apiClient.personDetails(id: personId)
         isLoading = false
+        await libraryLoad
     }
 }

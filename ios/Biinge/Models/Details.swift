@@ -1,6 +1,6 @@
 import Foundation
 
-/// TMDB-sourced detail resources (camelCase JSON matches Swift names).
+/// TMDB-sourced detail resources (camelCase JSON matches Swift names)
 
 struct CreditPerson: Decodable, Sendable, Identifiable {
     let id: Int
@@ -115,10 +115,81 @@ struct PersonDetails: Decodable, Sendable {
     let movieCredits: [MovieCredit]
 }
 
-/// Per-show watched progress (ids of watched seasons/episodes).
+/// Per-show watched progress; trackedState is the user's explicit choice that unmark-all reverts to
 struct WatchProgress: Decodable, Sendable {
     let id: Int
     let state: WatchState
+    let trackedState: WatchState?
     let watchedSeasons: [Int]
     let watchedEpisodes: [Int]
+}
+
+// MARK: - Optimistic mutations
+
+/// Local approximations of the server's derived progress, replaced by the server response
+extension WatchProgress {
+    /// TMDB status of a show still airing; never derived "watched" (mirrors the server)
+    static let tvInProductionStatus = "Returning Series"
+
+    /// Progress after toggling one episode; a known `seasonEpisodes` list also flips season completeness
+    func togglingEpisode(
+        id episodeId: Int,
+        watched: Bool,
+        seasonId: Int,
+        seasonEpisodes: [EpisodeSummary] = [],
+        totalEpisodesCount: Int? = nil,
+        showStatus: String? = nil
+    ) -> WatchProgress {
+        var episodes = Set(watchedEpisodes)
+        var seasons = Set(watchedSeasons)
+        if watched {
+            episodes.insert(episodeId)
+            if !seasonEpisodes.isEmpty, seasonEpisodes.allSatisfy({ episodes.contains($0.id) }) {
+                seasons.insert(seasonId)
+            }
+        } else {
+            episodes.remove(episodeId)
+            seasons.remove(seasonId)
+        }
+        return replacing(seasons: seasons, episodes: episodes, totalEpisodesCount: totalEpisodesCount, showStatus: showStatus)
+    }
+
+    /// Progress after marking/unmarking a whole season
+    func togglingSeason(
+        id seasonId: Int,
+        episodeIds: [Int],
+        watched: Bool,
+        totalEpisodesCount: Int? = nil,
+        showStatus: String? = nil
+    ) -> WatchProgress {
+        var episodes = Set(watchedEpisodes)
+        var seasons = Set(watchedSeasons)
+        if watched {
+            episodes.formUnion(episodeIds)
+            seasons.insert(seasonId)
+        } else {
+            episodes.subtract(episodeIds)
+            seasons.remove(seasonId)
+        }
+        return replacing(seasons: seasons, episodes: episodes, totalEpisodesCount: totalEpisodesCount, showStatus: showStatus)
+    }
+
+    private func replacing(seasons: Set<Int>, episodes: Set<Int>, totalEpisodesCount: Int?, showStatus: String?) -> WatchProgress {
+        WatchProgress(
+            id: id,
+            state: derivedState(watchedCount: episodes.count, totalCount: totalEpisodesCount, status: showStatus),
+            trackedState: trackedState,
+            watchedSeasons: Array(seasons),
+            watchedEpisodes: Array(episodes)
+        )
+    }
+
+    /// Mirrors the server's deriveSeriesState; zero watched episodes revert to trackedState or untrack
+    private func derivedState(watchedCount: Int, totalCount: Int?, status: String?) -> WatchState {
+        if watchedCount == 0 { return trackedState ?? .none }
+        if let totalCount, totalCount > 0, watchedCount >= totalCount, status != Self.tvInProductionStatus {
+            return .watched
+        }
+        return .watching
+    }
 }

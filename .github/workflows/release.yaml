@@ -95,6 +95,8 @@ jobs:
           context: api
           push: true
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.value }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.value }}
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
@@ -153,3 +155,32 @@ jobs:
         run: docker pull ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
       - name: Restart the service
         run: docker compose -f "${{ secrets.COMPOSE_PATH }}" up -d biinge-api
+
+  sentry:
+    name: Sentry Release
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+    steps:
+      - name: Checkout code
+        # NOTE: https://github.com/actions/checkout/releases/tag/v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Install Sentry CLI
+        run: curl -sL https://sentry.io/get-cli/ | bash
+      - name: Create Sentry release
+        # release name matches APP_VERSION baked into the image, so events line up
+        # set-commits --auto needs the Sentry GitHub integration; drop to --local otherwise
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          sentry-cli releases new "$VERSION"
+          sentry-cli releases set-commits "$VERSION" --auto \
+            || echo "set-commits skipped; connect the Sentry GitHub integration for suspect commits"
+          sentry-cli releases finalize "$VERSION"
+          sentry-cli releases deploys "$VERSION" new -e production

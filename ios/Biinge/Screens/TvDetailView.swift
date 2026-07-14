@@ -541,14 +541,17 @@ private struct SeasonsView: View {
                 ProgressView().tint(Color.biingePrimary)
                     .frame(maxWidth: .infinity).padding(.vertical, 20)
             } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(episodes.enumerated()), id: \.element.id) { index, episode in
+                // A List gives native, system-driven swipe actions that never fight
+                // the parent ScrollView (a custom DragGesture does). Scrolling is
+                // disabled so the outer scroll drives, and the height is fixed to the
+                // rows since a scroll-disabled List does not self-size.
+                List {
+                    ForEach(episodes) { episode in
                         EpisodeRow(
                             showId: showId,
                             seasonNumber: selected?.number ?? 0,
                             episode: episode,
-                            isWatched: watchedEpisodeIds.contains(episode.id),
-                            showsDivider: index > 0
+                            isWatched: watchedEpisodeIds.contains(episode.id)
                         ) { watched in
                             if let season = selected {
                                 await onMarkEpisode(season, episodes, episode, watched)
@@ -556,7 +559,10 @@ private struct SeasonsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 15)
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .scrollDisabled(true)
+                .frame(height: CGFloat(episodes.count) * EpisodeRow.height)
 
                 if let season = selected, !episodes.isEmpty {
                     let seasonWatched = watchedSeasonIds.contains(season.id)
@@ -608,54 +614,39 @@ private struct SeasonsView: View {
 }
 
 private struct EpisodeRow: View {
+    /// Fixed row height so the scroll-disabled List can be sized to its contents
+    static let height: CGFloat = 58
+
     let showId: Int
     let seasonNumber: Int
     let episode: EpisodeSummary
     let isWatched: Bool
-    let showsDivider: Bool
     let onToggle: (Bool) async -> Void
     @Environment(\.presentEpisode) private var presentEpisode
-    @GestureState private var dragX: CGFloat = 0
-
-    private let revealWidth: CGFloat = 78
-    private let triggerThreshold: CGFloat = 62
 
     var body: some View {
-        VStack(spacing: 0) {
-            if showsDivider {
-                Divider()
-            }
-            ZStack(alignment: .leading) {
-                swipeActionStrip
-                rowContent
-                    .background(Color.biingeCard)
-                    .offset(x: dragX)
-                    .animation(.interactiveSpring(response: 0.3, dampingFraction: 0.82), value: dragX)
-                    .onTapGesture {
-                        presentEpisode(showId, seasonNumber, episode.number)
-                    }
-                    .simultaneousGesture(swipeGesture)
-            }
-            .clipped()
+        Button {
+            presentEpisode(showId, seasonNumber, episode.number)
+        } label: {
+            rowContent
         }
-    }
-
-    // leading strip revealed while swiping right; checkmark to mark watched, return to remove
-    private var swipeActionStrip: some View {
-        HStack(spacing: 0) {
-            Image(systemName: isWatched ? "arrow.uturn.backward" : "checkmark")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(.white)
-                .padding(.leading, 24)
-                .opacity(dragX > 10 ? 1 : 0)
-            Spacer(minLength: 0)
+        .buttonStyle(.plain)
+        .frame(height: Self.height)
+        .listRowInsets(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 15))
+        .listRowBackground(Color.biingeCard)
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button {
+                Task { await onToggle(!isWatched) }
+            } label: {
+                Label(isWatched ? "Remove" : "Watched",
+                      systemImage: isWatched ? "arrow.uturn.backward" : "checkmark")
+            }
+            .tint(isWatched ? Color.biingeGraniteGray : Color.biingePrimary)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.biingeGraniteGray)
     }
 
     private var rowContent: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             HStack(spacing: 6) {
                 Text("\(episode.number)")
                     .font(.biingeCaption1).foregroundStyle(Color.biingeGraniteGray)
@@ -668,7 +659,7 @@ private struct EpisodeRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(episode.title)
                     .font(.biingeSubhead).foregroundStyle(.primary)
-                    .lineLimit(2).multilineTextAlignment(.leading)
+                    .lineLimit(1)
                 Text(episodeMeta)
                     .font(.biingeCaption2).foregroundStyle(Color.biingeSpanishGray)
             }
@@ -681,25 +672,8 @@ private struct EpisodeRow: View {
                 }
             }
         }
-        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
-    }
-
-    // rightward swipe toggles watched; @GestureState auto-resets even when the ScrollView steals the drag
-    private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 20)
-            .updating($dragX) { value, state, _ in
-                guard value.translation.width > 0,
-                      abs(value.translation.width) > abs(value.translation.height) else { return }
-                state = min(value.translation.width, revealWidth)
-            }
-            .onEnded { value in
-                guard value.translation.width > abs(value.translation.height) else { return }
-                if value.translation.width > triggerThreshold {
-                    Task { await onToggle(!isWatched) }
-                }
-            }
     }
 
     private var episodeMeta: String {

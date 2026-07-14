@@ -7,6 +7,7 @@ RUN apk add --no-cache --update git tzdata ca-certificates
 WORKDIR /app
 
 COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . ./
 RUN go build -o /app/biinge /app/cmd/biinge/main.go

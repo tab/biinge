@@ -17,11 +17,13 @@ import (
 	"biinge-api/internal/config/router"
 	"biinge-api/internal/config/server"
 	"biinge-api/pkg/jwt"
+	"biinge-api/pkg/sentry"
 	"biinge-api/pkg/tmdb"
 )
 
 var Module = fx.Options(
 	logger.Module,
+	sentry.Module,
 
 	controllers.Module,
 	repositories.Module,
@@ -40,6 +42,7 @@ func registerHooks(
 	lifecycle fx.Lifecycle,
 	cfg *config.Config,
 	server server.Server,
+	sentry sentry.Sentry,
 	log *logger.Logger,
 ) {
 	lifecycle.Append(fx.Hook{
@@ -56,6 +59,8 @@ func registerHooks(
 		},
 		OnStop: func(ctx context.Context) error {
 			log.Info().Msg("Shutting down server...")
+
+			sentry.Flush()
 
 			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()

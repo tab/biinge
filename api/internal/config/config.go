@@ -23,12 +23,14 @@ type TMDBConfig struct {
 type Config struct {
 	AppEnv        string
 	AppName       string
+	AppVersion    string
 	AppAddr       string
 	ClientURL     string
 	DatabaseDSN   string
 	SecretKeyBase string
 	JWTSecretKey  string
 	LogLevel      string
+	SentryDSN     string
 
 	TMDBConfig
 }
@@ -51,12 +53,14 @@ func LoadConfig() *Config {
 	return &Config{
 		AppEnv:        env,
 		AppName:       getEnvString("APP_NAME"),
+		AppVersion:    getEnvString("APP_VERSION"),
 		AppAddr:       getEnvString("APP_ADDRESS"),
 		ClientURL:     getEnvString("CLIENT_URL"),
 		DatabaseDSN:   getEnvString("DATABASE_DSN"),
 		SecretKeyBase: getEnvString("SECRET_KEY_BASE"),
 		JWTSecretKey:  getEnvString("JWT_SECRET_KEY"),
 		LogLevel:      getEnvString("LOG_LEVEL"),
+		SentryDSN:     getEnvString("SENTRY_DSN"),
 
 		TMDBConfig: TMDBConfig{
 			BaseURL:            getEnvString("TMDB_BASE_URL"),

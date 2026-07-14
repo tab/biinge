@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -28,6 +29,11 @@ func NewRouter(
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
+
+	// report panics to Sentry, then repanic so Recoverer still returns a 500
+	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})
+	r.Use(sentryHandler.Handle)
+
 	r.Use(middleware.Recoverer)
 
 	r.Use(tracer.Trace)
@@ -38,7 +44,7 @@ func NewRouter(
 		cors.Handler(cors.Options{
 			AllowedOrigins: []string{"http://*", cfg.ClientURL},
 			AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-			AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"},
+			AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID", "sentry-trace", "baggage"},
 			ExposedHeaders: []string{"X-Request-ID", "X-Trace-ID"},
 			MaxAge:         300,
 		}),

@@ -253,6 +253,9 @@ actor APIClient {
         do {
             return try decoder.decode(T.self, from: data)
         } catch {
+            // a decode failure means the response shape diverged from the model;
+            // the server-side Sentry can't see this, so report it from the client
+            Monitoring.capture(error, operation: "decode \(T.self)")
             throw APIError.decoding
         }
     }

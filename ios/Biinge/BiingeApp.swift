@@ -6,6 +6,7 @@ struct BiingeApp: App {
     @State private var apiClient: APIClient
 
     init() {
+        Monitoring.start()
         let authManager = AuthManager()
         _authManager = State(initialValue: authManager)
         _apiClient = State(initialValue: APIClient(baseURL: Config.baseURL, authManager: authManager))

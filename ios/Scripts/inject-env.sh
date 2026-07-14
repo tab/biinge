@@ -1,31 +1,40 @@
 #!/bin/sh
 #
-# Injects API_BASE_URL from .env into the built app's Info.plist, so a standalone
-# (non-Xcode) launch reads the right API URL. Config.swift reads it back at
-# runtime. .env is gitignored — edit it to switch between local and production.
+# Injects selected .env values into the built app's Info.plist, so a standalone
+# (non-Xcode) launch reads them. Config.swift reads them back at runtime.
+# .env is gitignored — edit it to switch between local and production.
 #
 # Wire this as the LAST "Run Script" build phase on the Biinge target, and set
 # ENABLE_USER_SCRIPT_SANDBOXING = NO so it can read .env from $SRCROOT.
 set -eu
 
 env_file="${SRCROOT}/.env"
+plist="${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
 
 if [ ! -f "${env_file}" ]; then
-  echo "warning: ${env_file} not found; skipping API_BASE_URL injection (Config.swift will use its fallback)"
+  echo "warning: ${env_file} not found; skipping .env injection (Config.swift will use its fallbacks)"
   exit 0
 fi
 
-# Read API_BASE_URL=... (last match wins); trim whitespace and surrounding quotes.
-value=$(grep -E '^[[:space:]]*API_BASE_URL[[:space:]]*=' "${env_file}" | tail -n 1 | cut -d '=' -f2-)
-value=$(printf '%s' "${value}" | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; s/^"//; s/"$//')
+# Inject one KEY=value from .env into the plist; leaves the plist default when unset.
+inject() {
+  key="$1"
 
-if [ -z "${value}" ]; then
-  echo "warning: API_BASE_URL not set in .env; skipping"
-  exit 0
-fi
+  # Read KEY=... (last match wins); trim whitespace and surrounding quotes.
+  value=$(grep -E "^[[:space:]]*${key}[[:space:]]*=" "${env_file}" | tail -n 1 | cut -d '=' -f2-)
+  value=$(printf '%s' "${value}" | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; s/^"//; s/"$//')
 
-plist="${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
-/usr/libexec/PlistBuddy -c "Set :API_BASE_URL ${value}" "${plist}" 2>/dev/null \
-  || /usr/libexec/PlistBuddy -c "Add :API_BASE_URL string ${value}" "${plist}"
+  if [ -z "${value}" ]; then
+    echo "note: ${key} not set in .env; leaving Info.plist default"
+    return 0
+  fi
 
-echo "note: injected API_BASE_URL=${value} from .env"
+  /usr/libexec/PlistBuddy -c "Set :${key} ${value}" "${plist}" 2>/dev/null \
+    || /usr/libexec/PlistBuddy -c "Add :${key} string ${value}" "${plist}"
+
+  echo "note: injected ${key} from .env"
+}
+
+inject API_BASE_URL
+inject SENTRY_DSN
+inject SENTRY_ENABLED

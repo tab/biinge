@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -41,11 +42,21 @@ func Test_LoggerMiddleware_Logger(t *testing.T) {
 	tests := []struct {
 		name     string
 		traceId  string
+		useTLS   bool
 		expected result
 	}{
 		{
 			name:    "Success",
 			traceId: "test-trace-id",
+			expected: result{
+				code:   http.StatusOK,
+				status: "200 OK",
+			},
+		},
+		{
+			name:    "Success over TLS",
+			traceId: "test-trace-id",
+			useTLS:  true,
 			expected: result{
 				code:   http.StatusOK,
 				status: "200 OK",
@@ -62,6 +73,10 @@ func Test_LoggerMiddleware_Logger(t *testing.T) {
 
 			req, err := http.NewRequest(http.MethodGet, "/test", nil)
 			require.NoError(t, err)
+
+			if tt.useTLS {
+				req.TLS = &tls.ConnectionState{}
+			}
 
 			ctx := NewContextModifier(req.Context()).
 				WithTraceId(tt.traceId).

@@ -340,3 +340,124 @@ func Test_AuthenticationController_Login(t *testing.T) {
 		})
 	}
 }
+
+func Test_AuthenticationController_Refresh(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+
+	authentication := services.NewMockAuthentication(ctrl)
+	log := logger.NewLogger(cfg)
+	controller := NewAuthenticationController(authentication, log)
+
+	type result struct {
+		response serializers.TokenSerializer
+		error    serializers.ErrorSerializer
+		status   string
+		code     int
+	}
+
+	tests := []struct {
+		name     string
+		before   func()
+		body     io.Reader
+		expected result
+		error    bool
+	}{
+		{
+			name: "Success",
+			before: func() {
+				authentication.EXPECT().Refresh(gomock.Any(), &serializers.RefreshRequestSerializer{
+					RefreshToken: "jwt-refresh-token",
+				}).Return(&serializers.TokenSerializer{
+					AccessToken:  "new-access-token",
+					RefreshToken: "new-refresh-token",
+				}, nil)
+			},
+			body: strings.NewReader(`{ "refresh_token": "jwt-refresh-token" }`),
+			expected: result{
+				response: serializers.TokenSerializer{
+					AccessToken:  "new-access-token",
+					RefreshToken: "new-refresh-token",
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name:   "Validation Error – Empty Refresh Token",
+			before: func() {},
+			body:   strings.NewReader(`{ "refresh_token": "" }`),
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "invalid token"},
+				status: "400 Bad Request",
+				code:   http.StatusBadRequest,
+			},
+			error: true,
+		},
+		{
+			name: "Error – Invalid Refresh Token",
+			before: func() {
+				authentication.EXPECT().Refresh(gomock.Any(), gomock.Any()).Return(nil, errors.ErrInvalidToken)
+			},
+			body: strings.NewReader(`{ "refresh_token": "expired-token" }`),
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "invalid token"},
+				status: "401 Unauthorized",
+				code:   http.StatusUnauthorized,
+			},
+			error: true,
+		},
+		{
+			name: "Error",
+			before: func() {
+				authentication.EXPECT().Refresh(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
+			},
+			body: strings.NewReader(`{ "refresh_token": "jwt-refresh-token" }`),
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "401 Unauthorized",
+				code:   http.StatusUnauthorized,
+			},
+			error: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			req := httptest.NewRequest(http.MethodPost, "/api/tokens", tt.body)
+			w := httptest.NewRecorder()
+
+			r := chi.NewRouter()
+			r.Post("/api/tokens", controller.HandleRefresh)
+			r.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			if tt.error {
+				var response serializers.ErrorSerializer
+
+				err := json.NewDecoder(resp.Body).Decode(&response)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected.error, response)
+			} else {
+				var response serializers.TokenSerializer
+
+				err := json.NewDecoder(resp.Body).Decode(&response)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected.response, response)
+			}
+
+			assert.Equal(t, tt.expected.code, resp.StatusCode)
+			assert.Equal(t, tt.expected.status, resp.Status)
+		})
+	}
+}

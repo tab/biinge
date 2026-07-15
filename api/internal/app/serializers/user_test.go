@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"biinge-api/internal/app/errors"
 )
@@ -15,6 +16,7 @@ func Test_UpdateAccountRequest_Validate(t *testing.T) {
 		name     string
 		body     io.Reader
 		expected error
+		wantErr  bool
 	}{
 		{
 			name:     "Success",
@@ -36,6 +38,11 @@ func Test_UpdateAccountRequest_Validate(t *testing.T) {
 			body:     strings.NewReader(`{ "first_name": "John", "last_name": "Doe", "appearance": "" }`),
 			expected: errors.ErrEmptyAppearance,
 		},
+		{
+			name:    "Malformed JSON",
+			body:    strings.NewReader(`{ invalid`),
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -43,6 +50,11 @@ func Test_UpdateAccountRequest_Validate(t *testing.T) {
 			var params UpdateAccountRequestSerializer
 
 			err := params.Validate(tt.body)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
 
 			assert.Equal(t, tt.expected, err)
 		})

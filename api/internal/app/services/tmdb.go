@@ -402,6 +402,41 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		})
 	}
 
+	tvCreditIds := make([]uint64, 0, len(details.TvCredits))
+	for _, item := range details.TvCredits {
+		tvCreditIds = append(tvCreditIds, uint64(item.Id))
+	}
+
+	seriesList, err := p.series.FindSeriesByTmdbIds(ctx, tvCreditIds, userId)
+	if err != nil {
+		p.log.Error().
+			Err(err).
+			Msg("Failed to fetch tv credit states")
+
+		return nil, errors.ErrFailedToFetchResults
+	}
+
+	tvCreditStatesMap := make(map[uint64]string)
+	for _, tvShow := range seriesList {
+		tvCreditStatesMap[tvShow.TmdbId] = tvShow.State
+	}
+
+	tvCredits := make([]serializers.TvCreditSerializer, 0, len(details.TvCredits))
+	for _, item := range details.TvCredits {
+		state := models.StateTypeNone
+		if tvShowState, exists := tvCreditStatesMap[uint64(item.Id)]; exists {
+			state = tvShowState
+		}
+
+		tvCredits = append(tvCredits, serializers.TvCreditSerializer{
+			Id:            uint64(item.Id),
+			Title:         item.Title,
+			PosterPath:    item.PosterPath,
+			State:         state,
+			EpisodesCount: item.EpisodesCount,
+		})
+	}
+
 	return &serializers.PersonDetailsSerializer{
 		Id:           id,
 		Name:         details.Name,
@@ -409,6 +444,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		ProfilePath:  details.ProfilePath,
 		Gender:       details.Gender,
 		MovieCredits: movieCredits,
+		TvCredits:    tvCredits,
 	}, nil
 }
 

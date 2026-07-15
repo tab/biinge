@@ -60,6 +60,11 @@ func Test_RegistrationRequest_Validate(t *testing.T) {
 			body:    strings.NewReader(`{ "login": "john.doe", "email": "not-an-email", "password": "password123", "first_name": "John", "last_name": "Doe", "appearance": "light" }`),
 			wantErr: true,
 		},
+		{
+			name:    "Malformed JSON",
+			body:    strings.NewReader(`{ invalid`),
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -83,6 +88,7 @@ func Test_LoginRequest_Validate(t *testing.T) {
 		name     string
 		body     io.Reader
 		expected error
+		wantErr  bool
 	}{
 		{
 			name:     "Success",
@@ -99,6 +105,11 @@ func Test_LoginRequest_Validate(t *testing.T) {
 			body:     strings.NewReader(`{ "email": "john.doe@example.com", "password": "" }`),
 			expected: errors.ErrEmptyPassword,
 		},
+		{
+			name:    "Malformed JSON",
+			body:    strings.NewReader(`{ invalid`),
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -106,6 +117,56 @@ func Test_LoginRequest_Validate(t *testing.T) {
 			var params LoginRequestSerializer
 
 			err := params.Validate(tt.body)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			assert.Equal(t, tt.expected, err)
+		})
+	}
+}
+
+func Test_RefreshRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name     string
+		body     io.Reader
+		expected error
+		wantErr  bool
+	}{
+		{
+			name:     "Success",
+			body:     strings.NewReader(`{ "refresh_token": "some-refresh-token" }`),
+			expected: nil,
+		},
+		{
+			name:     "Empty refresh token",
+			body:     strings.NewReader(`{ "refresh_token": "" }`),
+			expected: errors.ErrInvalidToken,
+		},
+		{
+			name:     "Whitespace refresh token",
+			body:     strings.NewReader(`{ "refresh_token": "   " }`),
+			expected: errors.ErrInvalidToken,
+		},
+		{
+			name:    "Malformed JSON",
+			body:    strings.NewReader(`{ invalid`),
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var params RefreshRequestSerializer
+
+			err := params.Validate(tt.body)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
 
 			assert.Equal(t, tt.expected, err)
 		})

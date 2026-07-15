@@ -321,3 +321,125 @@ func Test_AccountsController_Update(t *testing.T) {
 		})
 	}
 }
+
+func Test_AccountsController_HandleStats(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+
+	users := services.NewMockUsers(ctrl)
+	stats := services.NewMockStats(ctrl)
+	log := logger.NewLogger(cfg)
+	controller := NewAccountsController(users, stats, log)
+
+	id, err := uuid.NewRandom()
+	require.NoError(t, err)
+
+	type result struct {
+		response serializers.StatsSerializer
+		error    serializers.ErrorSerializer
+		status   string
+		code     int
+	}
+
+	tests := []struct {
+		name        string
+		before      func()
+		currentUser *models.User
+		expected    result
+		error       bool
+	}{
+		{
+			name: "Success",
+			before: func() {
+				stats.EXPECT().Get(gomock.Any(), id).Return(&models.Stats{
+					MoviesWant:      2,
+					MoviesWatched:   5,
+					MoviesMinutes:   600,
+					SeriesWant:      1,
+					SeriesWatching:  3,
+					SeriesWatched:   4,
+					EpisodesWatched: 42,
+					EpisodesMinutes: 1800,
+				}, nil)
+			},
+			currentUser: &models.User{ID: id},
+			expected: result{
+				response: serializers.StatsSerializer{
+					Movies:   serializers.MovieStatsSerializer{Want: 2, Watched: 5, Minutes: 600},
+					Series:   serializers.SeriesStatsSerializer{Want: 1, Watching: 3, Watched: 4},
+					Episodes: serializers.EpisodeStatsSerializer{Watched: 42, Minutes: 1800},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name:        "Unauthorized",
+			before:      func() {},
+			currentUser: nil,
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "unauthorized"},
+				status: "401 Unauthorized",
+				code:   http.StatusUnauthorized,
+			},
+			error: true,
+		},
+		{
+			name: "Service Error",
+			before: func() {
+				stats.EXPECT().Get(gomock.Any(), id).Return(nil, assert.AnError)
+			},
+			currentUser: &models.User{ID: id},
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/stats", nil)
+			if tt.currentUser != nil {
+				ctx := context.WithValue(req.Context(), middlewares.CurrentUser{}, tt.currentUser)
+				req = req.WithContext(ctx)
+			}
+
+			w := httptest.NewRecorder()
+
+			r := chi.NewRouter()
+			r.Get("/api/stats", controller.HandleStats)
+			r.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			if tt.error {
+				var response serializers.ErrorSerializer
+
+				err := json.NewDecoder(resp.Body).Decode(&response)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected.error, response)
+			} else {
+				var response serializers.StatsSerializer
+
+				err := json.NewDecoder(resp.Body).Decode(&response)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected.response, response)
+			}
+
+			assert.Equal(t, tt.expected.code, resp.StatusCode)
+			assert.Equal(t, tt.expected.status, resp.Status)
+		})
+	}
+}

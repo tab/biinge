@@ -113,6 +113,35 @@ func Test_AuthMiddleware_Authenticate(t *testing.T) {
 				code:   http.StatusUnauthorized,
 			},
 		},
+		{
+			name:   "Missing Authorization header",
+			before: func() {},
+			header: "",
+			expected: result{
+				status: "401 Unauthorized",
+				code:   http.StatusUnauthorized,
+			},
+		},
+		{
+			name:   "Empty bearer token",
+			before: func() {},
+			header: "Bearer ",
+			expected: result{
+				status: "401 Unauthorized",
+				code:   http.StatusUnauthorized,
+			},
+		},
+		{
+			name: "Invalid user Id in claims",
+			before: func() {
+				jwtService.EXPECT().Decode("valid-token-bad-id").Return(&jwt.Payload{ID: "not-a-uuid"}, nil)
+			},
+			header: "Bearer valid-token-bad-id",
+			expected: result{
+				status: "401 Unauthorized",
+				code:   http.StatusUnauthorized,
+			},
+		},
 	}
 
 	for _, tt := range tests {

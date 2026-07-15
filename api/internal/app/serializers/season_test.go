@@ -11,7 +11,7 @@ import (
 	"biinge-api/internal/app/errors"
 )
 
-func Test_CreateMovieRequest_Validate(t *testing.T) {
+func Test_CreateSeasonRequest_Validate(t *testing.T) {
 	tests := []struct {
 		name     string
 		body     io.Reader
@@ -20,32 +20,32 @@ func Test_CreateMovieRequest_Validate(t *testing.T) {
 	}{
 		{
 			name:     "Success",
-			body:     strings.NewReader(`{ "id": 1, "title": "Movie", "posterPath": "/poster.jpg", "runtime": 120, "state": "want" }`),
+			body:     strings.NewReader(`{ "id": 1, "title": "Season One", "number": 1, "episodesCount": 10, "state": "watching" }`),
 			expected: nil,
 		},
 		{
 			name:     "Empty title",
-			body:     strings.NewReader(`{ "id": 1, "title": "", "state": "want" }`),
+			body:     strings.NewReader(`{ "id": 1, "title": "", "state": "watching" }`),
 			expected: errors.ErrEmptyTitle,
 		},
 		{
 			name:     "Whitespace title",
-			body:     strings.NewReader(`{ "id": 1, "title": "   ", "state": "want" }`),
+			body:     strings.NewReader(`{ "id": 1, "title": "   ", "state": "watching" }`),
 			expected: errors.ErrEmptyTitle,
 		},
 		{
 			name:     "Empty state",
-			body:     strings.NewReader(`{ "id": 1, "title": "Movie", "state": "" }`),
+			body:     strings.NewReader(`{ "id": 1, "title": "Season One", "state": "" }`),
 			expected: errors.ErrEmptyState,
 		},
 		{
 			name:     "Invalid state",
-			body:     strings.NewReader(`{ "id": 1, "title": "Movie", "state": "invalid" }`),
+			body:     strings.NewReader(`{ "id": 1, "title": "Season One", "state": "invalid" }`),
 			expected: errors.ErrInvalidState,
 		},
 		{
 			name:    "Missing id",
-			body:    strings.NewReader(`{ "title": "Movie", "state": "want" }`),
+			body:    strings.NewReader(`{ "title": "Season One", "state": "watching" }`),
 			wantErr: true,
 		},
 		{
@@ -57,7 +57,7 @@ func Test_CreateMovieRequest_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var params CreateMovieRequestSerializer
+			var params CreateSeasonRequestSerializer
 
 			err := params.Validate(tt.body)
 
@@ -71,7 +71,7 @@ func Test_CreateMovieRequest_Validate(t *testing.T) {
 	}
 }
 
-func Test_UpdateMovieRequest_Validate(t *testing.T) {
+func Test_UpdateSeasonRequest_Validate(t *testing.T) {
 	tests := []struct {
 		name     string
 		body     io.Reader
@@ -80,17 +80,17 @@ func Test_UpdateMovieRequest_Validate(t *testing.T) {
 	}{
 		{
 			name:     "Success",
-			body:     strings.NewReader(`{ "state": "want", "pinned": true }`),
+			body:     strings.NewReader(`{ "state": "none" }`),
 			expected: nil,
 		},
 		{
 			name:     "Empty state",
-			body:     strings.NewReader(`{ "state": "", "pinned": true }`),
+			body:     strings.NewReader(`{ "state": "" }`),
 			expected: errors.ErrEmptyState,
 		},
 		{
 			name:     "Invalid state",
-			body:     strings.NewReader(`{ "state": "invalid", "pinned": true }`),
+			body:     strings.NewReader(`{ "state": "invalid" }`),
 			expected: errors.ErrInvalidState,
 		},
 		{
@@ -102,7 +102,7 @@ func Test_UpdateMovieRequest_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var params UpdateMovieRequestSerializer
+			var params UpdateSeasonRequestSerializer
 
 			err := params.Validate(tt.body)
 

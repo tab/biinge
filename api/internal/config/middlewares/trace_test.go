@@ -23,13 +23,21 @@ func Test_TraceMiddleware_Trace(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		traceId  string
-		expected result
+		name          string
+		headerTraceId string
+		expected      result
 	}{
 		{
-			name:    "Success",
-			traceId: "test-trace-id",
+			name:          "Generates a new trace Id when the header is absent",
+			headerTraceId: "",
+			expected: result{
+				code:   http.StatusOK,
+				status: "200 OK",
+			},
+		},
+		{
+			name:          "Propagates an existing trace Id from the header",
+			headerTraceId: "test-trace-id",
 			expected: result{
 				code:   http.StatusOK,
 				status: "200 OK",
@@ -39,7 +47,15 @@ func Test_TraceMiddleware_Trace(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var (
+				contextTraceId        string
+				responseHeaderTraceId string
+			)
+
 			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				contextTraceId, _ = CurrentTraceIdFromContext(r.Context())
+				responseHeaderTraceId = r.Header.Get(TraceKey)
+
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte("Success"))
 			})
@@ -47,10 +63,9 @@ func Test_TraceMiddleware_Trace(t *testing.T) {
 			req, err := http.NewRequest(http.MethodGet, "/test", nil)
 			require.NoError(t, err)
 
-			ctx := NewContextModifier(req.Context()).
-				WithTraceId(tt.traceId).
-				Context()
-			req = req.WithContext(ctx)
+			if tt.headerTraceId != "" {
+				req.Header.Set(TraceKey, tt.headerTraceId)
+			}
 
 			rr := httptest.NewRecorder()
 
@@ -58,6 +73,14 @@ func Test_TraceMiddleware_Trace(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, rr.Code)
 			assert.Equal(t, tt.expected.status, rr.Result().Status)
+
+			if tt.headerTraceId != "" {
+				assert.Equal(t, tt.headerTraceId, contextTraceId)
+				assert.Equal(t, tt.headerTraceId, responseHeaderTraceId)
+			} else {
+				assert.NotEmpty(t, contextTraceId)
+				assert.Equal(t, contextTraceId, responseHeaderTraceId)
+			}
 		})
 	}
 }

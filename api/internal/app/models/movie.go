@@ -22,6 +22,7 @@ type Movie struct {
 	Runtime    uint64
 	State      string
 	Pinned     bool
+	WatchedAt  time.Time
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

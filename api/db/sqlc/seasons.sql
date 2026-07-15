@@ -28,11 +28,17 @@ RETURNING
   number,
   episodes_count,
   state,
+  watched_at,
   created_at,
   updated_at;
 
 -- name: SetSeasonState :exec
-UPDATE seasons SET state = $2, updated_at = NOW() WHERE id = $1;
+UPDATE seasons
+SET
+  state = $2,
+  watched_at = CASE WHEN $2 = 'watched'::state_types THEN COALESCE(watched_at, NOW()) ELSE NULL END,
+  updated_at = NOW()
+WHERE id = $1;
 
 -- name: FindSeasonBySeriesAndTmdbId :one
 SELECT
@@ -43,6 +49,7 @@ SELECT
   number,
   episodes_count,
   state,
+  watched_at,
   created_at,
   updated_at
 FROM seasons

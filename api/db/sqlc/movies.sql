@@ -13,6 +13,7 @@ SELECT
   m.runtime,
   m.pinned,
   m.state,
+  m.watched_at,
   m.created_at,
   m.updated_at,
   counter.total
@@ -30,6 +31,7 @@ SELECT
   runtime,
   pinned,
   state,
+  watched_at,
   created_at,
   updated_at
 FROM movies
@@ -45,6 +47,7 @@ SELECT
   runtime,
   pinned,
   state,
+  watched_at,
   created_at,
   updated_at
 FROM movies
@@ -60,6 +63,7 @@ SELECT
   runtime,
   pinned,
   state,
+  watched_at,
   created_at,
   updated_at
 FROM movies
@@ -72,9 +76,10 @@ INSERT INTO movies (
   title,
   poster_path,
   runtime,
-  state
+  state,
+  watched_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6
+  $1, $2, $3, $4, $5, $6, CASE WHEN $6 = 'watched'::state_types THEN NOW() ELSE NULL END
 )
 RETURNING
   id,
@@ -82,9 +87,10 @@ RETURNING
   tmdb_id,
   title,
   poster_path,
-  pinned,
   runtime,
   state,
+  pinned,
+  watched_at,
   created_at,
   updated_at;
 
@@ -103,8 +109,9 @@ RETURNING
   title,
   poster_path,
   runtime,
-  pinned,
   state,
+  pinned,
+  watched_at,
   created_at,
   updated_at;
 
@@ -113,6 +120,7 @@ UPDATE movies
 SET
   state = $3,
   pinned = $4,
+  watched_at = CASE WHEN $3 = 'watched'::state_types THEN COALESCE(watched_at, NOW()) ELSE NULL END,
   updated_at = NOW()
 WHERE tmdb_id = $1 AND user_id = $2
 RETURNING
@@ -122,8 +130,9 @@ RETURNING
   title,
   poster_path,
   runtime,
-  pinned,
   state,
+  pinned,
+  watched_at,
   created_at,
   updated_at;
 

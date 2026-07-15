@@ -58,6 +58,7 @@ func (m *movie) List(ctx context.Context, userId uuid.UUID, state string, limit,
 			PosterPath: row.PosterPath,
 			Pinned:     row.Pinned,
 			State:      string(row.State),
+			WatchedAt:  row.WatchedAt.Time,
 			CreatedAt:  row.CreatedAt.Time,
 			UpdatedAt:  row.UpdatedAt.Time,
 		})
@@ -88,6 +89,7 @@ func (m *movie) Create(ctx context.Context, params *models.Movie) (*models.Movie
 		Runtime:    result.Runtime,
 		State:      string(result.State),
 		Pinned:     result.Pinned,
+		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
 		UpdatedAt:  result.UpdatedAt.Time,
 	}, nil
@@ -113,6 +115,7 @@ func (m *movie) Update(ctx context.Context, params *models.Movie) (*models.Movie
 		Runtime:    result.Runtime,
 		State:      string(result.State),
 		Pinned:     result.Pinned,
+		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
 		UpdatedAt:  result.UpdatedAt.Time,
 	}, nil
@@ -138,6 +141,7 @@ func (m *movie) UpdateByTmdbId(ctx context.Context, params *models.Movie) (*mode
 		Runtime:    result.Runtime,
 		State:      string(result.State),
 		Pinned:     result.Pinned,
+		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
 		UpdatedAt:  result.UpdatedAt.Time,
 	}, nil
@@ -169,6 +173,7 @@ func (m *movie) FindById(ctx context.Context, id uuid.UUID) (*models.Movie, erro
 		Runtime:    result.Runtime,
 		State:      string(result.State),
 		Pinned:     result.Pinned,
+		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
 		UpdatedAt:  result.UpdatedAt.Time,
 	}, nil
@@ -192,6 +197,7 @@ func (m *movie) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUI
 		Runtime:    result.Runtime,
 		State:      string(result.State),
 		Pinned:     result.Pinned,
+		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
 		UpdatedAt:  result.UpdatedAt.Time,
 	}, nil
@@ -217,6 +223,7 @@ func (m *movie) FindMoviesByTmdbIds(ctx context.Context, tmdbIds []uint64, userI
 			Runtime:    row.Runtime,
 			State:      string(row.State),
 			Pinned:     row.Pinned,
+			WatchedAt:  row.WatchedAt.Time,
 			CreatedAt:  row.CreatedAt.Time,
 			UpdatedAt:  row.UpdatedAt.Time,
 		})

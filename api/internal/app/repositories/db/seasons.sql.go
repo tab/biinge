@@ -49,6 +49,7 @@ SELECT
   number,
   episodes_count,
   state,
+  watched_at,
   created_at,
   updated_at
 FROM seasons
@@ -71,6 +72,7 @@ func (q *Queries) FindSeasonBySeriesAndTmdbId(ctx context.Context, arg FindSeaso
 		&i.Number,
 		&i.EpisodesCount,
 		&i.State,
+		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -78,7 +80,12 @@ func (q *Queries) FindSeasonBySeriesAndTmdbId(ctx context.Context, arg FindSeaso
 }
 
 const setSeasonState = `-- name: SetSeasonState :exec
-UPDATE seasons SET state = $2, updated_at = NOW() WHERE id = $1
+UPDATE seasons
+SET
+  state = $2,
+  watched_at = CASE WHEN $2 = 'watched'::state_types THEN COALESCE(watched_at, NOW()) ELSE NULL END,
+  updated_at = NOW()
+WHERE id = $1
 `
 
 type SetSeasonStateParams struct {
@@ -115,6 +122,7 @@ RETURNING
   number,
   episodes_count,
   state,
+  watched_at,
   created_at,
   updated_at
 `
@@ -146,6 +154,7 @@ func (q *Queries) UpsertSeason(ctx context.Context, arg UpsertSeasonParams) (Sea
 		&i.Number,
 		&i.EpisodesCount,
 		&i.State,
+		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

@@ -108,6 +108,7 @@ type Episode struct {
 	Runtime    uint64
 	State      StateTypes
 	AirAt      pgtype.Timestamp
+	WatchedAt  pgtype.Timestamp
 	CreatedAt  pgtype.Timestamp
 	UpdatedAt  pgtype.Timestamp
 }
@@ -121,6 +122,7 @@ type Movie struct {
 	Runtime    uint64
 	State      StateTypes
 	Pinned     bool
+	WatchedAt  pgtype.Timestamp
 	CreatedAt  pgtype.Timestamp
 	UpdatedAt  pgtype.Timestamp
 }
@@ -133,6 +135,7 @@ type Season struct {
 	Number        uint64
 	EpisodesCount uint64
 	State         StateTypes
+	WatchedAt     pgtype.Timestamp
 	CreatedAt     pgtype.Timestamp
 	UpdatedAt     pgtype.Timestamp
 }

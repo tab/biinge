@@ -34,9 +34,10 @@ INSERT INTO episodes (
   poster_path,
   runtime,
   state,
-  air_at
+  air_at,
+  watched_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7
+  $1, $2, $3, $4, $5, $6, $7, CASE WHEN $6 = 'watched'::state_types THEN NOW() ELSE NULL END
 )
 ON CONFLICT (season_id, tmdb_id) DO UPDATE SET
   title = EXCLUDED.title,
@@ -44,6 +45,7 @@ ON CONFLICT (season_id, tmdb_id) DO UPDATE SET
   runtime = EXCLUDED.runtime,
   state = EXCLUDED.state,
   air_at = EXCLUDED.air_at,
+  watched_at = CASE WHEN EXCLUDED.state = 'watched'::state_types THEN COALESCE(episodes.watched_at, NOW()) ELSE NULL END,
   updated_at = NOW()
 RETURNING
   id,
@@ -54,6 +56,7 @@ RETURNING
   runtime,
   state,
   air_at,
+  watched_at,
   created_at,
   updated_at
 `
@@ -88,6 +91,7 @@ func (q *Queries) UpsertEpisode(ctx context.Context, arg UpsertEpisodeParams) (E
 		&i.Runtime,
 		&i.State,
 		&i.AirAt,
+		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

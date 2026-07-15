@@ -75,7 +75,8 @@ CREATE TABLE public.episodes (
     state public.state_types NOT NULL,
     air_at timestamp without time zone,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    watched_at timestamp without time zone
 );
 
 
@@ -95,7 +96,8 @@ CREATE TABLE public.movies (
     state public.state_types NOT NULL,
     pinned boolean DEFAULT false NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    watched_at timestamp without time zone
 );
 
 
@@ -114,7 +116,8 @@ CREATE TABLE public.seasons (
     episodes_count integer DEFAULT 0 NOT NULL,
     state public.state_types NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    watched_at timestamp without time zone
 );
 
 
@@ -134,10 +137,10 @@ CREATE TABLE public.series (
     episodes_count integer DEFAULT 0 NOT NULL,
     status character varying(255) DEFAULT ''::character varying NOT NULL,
     state public.state_types NOT NULL,
-    tracked_state public.state_types,
     pinned boolean DEFAULT false NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    tracked_state public.state_types
 );
 
 

@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 
 struct ProfileView: View {
@@ -182,6 +183,31 @@ struct ModalScaffold<Content: View>: View {
     }
 }
 
+/// Chart palette: status hues for library bars, media hues for the watch-time donut
+private enum StatPalette {
+    static let want = Color(rgb: 0x999999)
+    static let watching = Color(rgb: 0xEEC01E)
+    static let watched = Color(rgb: 0x27AE60)
+    static let moviesTime = Color(rgb: 0x8B5CF6)
+    static let tvTime = Color(rgb: 0x22B8CF)
+}
+
+/// One status row in a library breakdown bar chart
+private struct StatBar: Identifiable {
+    let label: String
+    let count: Int
+    let color: Color
+    var id: String { label }
+}
+
+/// One slice of the watch-time donut
+private struct TimeSlice: Identifiable {
+    let label: String
+    let minutes: Int
+    let color: Color
+    var id: String { label }
+}
+
 struct StatisticsView: View {
     @Environment(\.apiClient) private var apiClient
     @State private var stats: AccountStats?
@@ -189,20 +215,7 @@ struct StatisticsView: View {
     var body: some View {
         ModalScaffold(title: "Statistics") {
             if let stats {
-                statGroup("Movies", [
-                    ("Want", "\(stats.movies.want)"),
-                    ("Watched", "\(stats.movies.watched)"),
-                    ("Watch time", formatMinutes(stats.movies.minutes)),
-                ])
-                statGroup("TV Shows", [
-                    ("Want", "\(stats.series.want)"),
-                    ("Watching", "\(stats.series.watching)"),
-                    ("Watched", "\(stats.series.watched)"),
-                ])
-                statGroup("Episodes", [
-                    ("Watched", "\(stats.episodes.watched)"),
-                    ("Watch time", formatMinutes(stats.episodes.minutes)),
-                ])
+                content(stats)
             } else {
                 ProgressView().tint(Color.biingeLoader)
                     .frame(maxWidth: .infinity)
@@ -212,18 +225,152 @@ struct StatisticsView: View {
         .task { stats = try? await apiClient?.stats() }
     }
 
-    private func statGroup(_ title: String, _ rows: [(String, String)]) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title).font(.biingeSubhead).foregroundStyle(Color.biingeGraniteGray)
-            ForEach(rows, id: \.0) { label, value in
-                HStack {
-                    Text(label).foregroundStyle(.primary)
-                    Spacer()
-                    Text(value).foregroundStyle(.secondary)
+    @ViewBuilder
+    private func content(_ stats: AccountStats) -> some View {
+        VStack(alignment: .leading, spacing: 28) {
+            watchTime(stats)
+            breakdown(
+                "Movies",
+                bars: [
+                    StatBar(label: "Want", count: stats.movies.want, color: StatPalette.want),
+                    StatBar(label: "Watched", count: stats.movies.watched, color: StatPalette.watched),
+                ],
+                caption: "\(formatMinutes(stats.movies.minutes)) watched"
+            )
+            breakdown(
+                "TV Shows",
+                bars: [
+                    StatBar(label: "Want", count: stats.series.want, color: StatPalette.want),
+                    StatBar(label: "Watching", count: stats.series.watching, color: StatPalette.watching),
+                    StatBar(label: "Watched", count: stats.series.watched, color: StatPalette.watched),
+                ],
+                caption: "\(stats.episodes.watched) episodes · \(formatMinutes(stats.episodes.minutes)) watched"
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func watchTime(_ stats: AccountStats) -> some View {
+        let total = stats.movies.minutes + stats.episodes.minutes
+        let slices = [
+            TimeSlice(label: "Movies", minutes: stats.movies.minutes, color: StatPalette.moviesTime),
+            TimeSlice(label: "TV", minutes: stats.episodes.minutes, color: StatPalette.tvTime),
+        ]
+
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeading("Watch time")
+            if total > 0 {
+                HStack(spacing: 24) {
+                    donut(slices, total: total)
+                        .frame(width: 116, height: 116)
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(slices) { legendRow($0, total: total) }
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                .font(.biingeCallout)
+            } else {
+                Text("No watch time yet")
+                    .font(.biingeCallout)
+                    .foregroundStyle(Color.biingeGraniteGray)
             }
         }
+    }
+
+    private func donut(_ slices: [TimeSlice], total: Int) -> some View {
+        Chart(slices) { slice in
+            SectorMark(
+                angle: .value("Minutes", slice.minutes),
+                innerRadius: .ratio(0.62),
+                angularInset: 1.5
+            )
+            .cornerRadius(3)
+            .foregroundStyle(slice.color)
+        }
+        .chartLegend(.hidden)
+        .overlay {
+            VStack(spacing: 1) {
+                Text(formatMinutes(total))
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                Text("total")
+                    .font(.biingeFootnote)
+                    .foregroundStyle(Color.biingeGraniteGray)
+            }
+            .padding(.horizontal, 8)
+        }
+    }
+
+    private func legendRow(_ slice: TimeSlice, total: Int) -> some View {
+        let pct = total > 0 ? Int((Double(slice.minutes) / Double(total) * 100).rounded()) : 0
+        return HStack(spacing: 10) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(slice.color)
+                .frame(width: 10, height: 10)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(slice.label)
+                    .font(.biingeCaption2)
+                    .foregroundStyle(.primary)
+                Text(formatMinutes(slice.minutes))
+                    .font(.biingeFootnote)
+                    .foregroundStyle(Color.biingeGraniteGray)
+            }
+            Spacer(minLength: 8)
+            Text("\(pct)%")
+                .font(.biingeCaption1)
+                .monospacedDigit()
+                .foregroundStyle(slice.color)
+        }
+    }
+
+    @ViewBuilder
+    private func breakdown(_ title: String, bars: [StatBar], caption: String) -> some View {
+        let total = bars.reduce(0) { $0 + $1.count }
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeading(title)
+            if total > 0 {
+                VStack(spacing: 12) {
+                    ForEach(bars.sorted { $0.count > $1.count }) { statBarRow($0, total: total) }
+                }
+                Text(caption)
+                    .font(.biingeFootnote)
+                    .foregroundStyle(Color.biingeGraniteGray)
+            } else {
+                Text("Nothing tracked yet")
+                    .font(.biingeCallout)
+                    .foregroundStyle(Color.biingeGraniteGray)
+            }
+        }
+    }
+
+    /// One status row: label, a track filled to the status' share of the library, and the count
+    private func statBarRow(_ bar: StatBar, total: Int) -> some View {
+        let fraction = total > 0 ? Double(bar.count) / Double(total) : 0
+        return HStack(spacing: 12) {
+            Text(bar.label)
+                .font(.biingeCaption2)
+                .foregroundStyle(Color.biingeText)
+                .frame(width: 80, alignment: .leading)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.biingeSecondaryCard)
+                    Capsule()
+                        .fill(bar.color)
+                        .frame(width: fraction > 0 ? max(4, geo.size.width * fraction) : 0)
+                }
+            }
+            .frame(height: 10)
+            Text("\(bar.count)")
+                .font(.biingeCaption2)
+                .monospacedDigit()
+                .foregroundStyle(Color.biingeText)
+                .frame(width: 52, alignment: .trailing)
+        }
+    }
+
+    private func sectionHeading(_ title: String) -> some View {
+        Text(title).font(.biingeSubhead).foregroundStyle(Color.biingeGraniteGray)
     }
 
     private func formatMinutes(_ minutes: Int) -> String {

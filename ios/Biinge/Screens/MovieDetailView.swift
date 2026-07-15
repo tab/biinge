@@ -19,7 +19,7 @@ struct MovieDetailView: View {
                 if let details {
                     content(details)
                 } else if isLoading {
-                    ProgressView().tint(Color.biingePrimary)
+                    ProgressView().tint(Color.biingeLoader)
                         .frame(maxWidth: .infinity).padding(.top, 160)
                 } else {
                     DetailLoadError()
@@ -102,8 +102,7 @@ struct MovieDetailView: View {
             .padding(.top, 20)
             .padding(.bottom, 40)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.biingeCard)
-            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 12, topTrailingRadius: 12))
+            .detailCardBackground()
         }
     }
 
@@ -255,7 +254,7 @@ struct MovieActionsView: View {
                         .font(.biingeCallout).fontWeight(.semibold)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 15)
-                        .background(Color.biingePrimary, in: Capsule())
+                        .background(Color.biingeAccent, in: Capsule())
                 }
                 .buttonStyle(.plain)
             } else {
@@ -308,6 +307,7 @@ struct MovieActionMenu: View {
             VStack(spacing: 28) {
                 PosterImage(path: posterPath, title: "", size: "w342", cornerRadius: 12)
                     .containerRelativeFrame(.horizontal) { width, _ in width * 0.55 }
+                    .onTapGesture { onCancel() }
 
                 VStack(spacing: 2) {
                     ForEach(options, id: \.title) { option in

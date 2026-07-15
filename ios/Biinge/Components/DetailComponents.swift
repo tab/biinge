@@ -1,5 +1,16 @@
 import SwiftUI
 
+extension View {
+    /// Rounded-top card backing for detail sheets; bleeds card color through the bottom safe area
+    func detailCardBackground() -> some View {
+        background(
+            UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20, style: .continuous)
+                .fill(Color.biingeCard)
+                .ignoresSafeArea(edges: .bottom)
+        )
+    }
+}
+
 struct ProfileCircle: View {
     let path: String
     var size: CGFloat = 64

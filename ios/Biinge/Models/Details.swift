@@ -106,6 +106,13 @@ struct MovieCredit: Decodable, Sendable, Identifiable {
     let type: String?
 }
 
+struct TvCredit: Decodable, Sendable, Identifiable {
+    let id: Int
+    let title: String
+    let posterPath: String
+    let state: WatchState?
+}
+
 struct PersonDetails: Decodable, Sendable {
     let id: Int
     let name: String
@@ -113,6 +120,23 @@ struct PersonDetails: Decodable, Sendable {
     let profilePath: String
     let gender: Int
     let movieCredits: [MovieCredit]
+    let tvCredits: [TvCredit]
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, birthday, profilePath, gender, movieCredits, tvCredits
+    }
+
+    // Credits default to empty so an API without tvCredits (not yet deployed) still decodes
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        birthday = try container.decodeIfPresent(String.self, forKey: .birthday)
+        profilePath = try container.decode(String.self, forKey: .profilePath)
+        gender = try container.decode(Int.self, forKey: .gender)
+        movieCredits = try container.decodeIfPresent([MovieCredit].self, forKey: .movieCredits) ?? []
+        tvCredits = try container.decodeIfPresent([TvCredit].self, forKey: .tvCredits) ?? []
+    }
 }
 
 /// Per-show watched progress; trackedState is the user's explicit choice that unmark-all reverts to

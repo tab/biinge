@@ -26,6 +26,10 @@ extension Color {
 
     // Brand
     static let biingePrimary = Color(rgb: 0xEEC01E)
+    /// Primary call-to-action accent (tracked-state action buttons)
+    static let biingeAccent = Color(rgb: 0xE5484D)
+    /// Loader tint: white on dark surfaces, a visible gray on light ones
+    static let biingeLoader = adaptive(light: 0x6E6969, dark: 0xFFFFFF)
 
     // Adaptive semantic (values from the RN app's light/dark themes)
     static let biingeBackground = adaptive(light: 0xFFFFFF, dark: 0x000000)

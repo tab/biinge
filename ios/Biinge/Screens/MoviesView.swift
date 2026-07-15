@@ -43,7 +43,7 @@ struct MoviesView: View {
     @ViewBuilder
     private var content: some View {
         if store.isLoading && !store.hasLoaded {
-            ProgressView().tint(Color.biingePrimary)
+            ProgressView().tint(Color.biingeLoader)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if movies.isEmpty {
             ContentUnavailableView(

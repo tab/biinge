@@ -4,7 +4,9 @@ struct PersonDetailView: View {
     let personId: Int
     @Environment(\.apiClient) private var apiClient
     @Environment(MovieStore.self) private var movieStore
+    @Environment(TvStore.self) private var tvStore
     @Environment(\.presentMovie) private var presentMovie
+    @Environment(\.presentSeries) private var presentSeries
     @Environment(\.dismiss) private var dismiss
 
     @State private var details: PersonDetails?
@@ -16,7 +18,7 @@ struct PersonDetailView: View {
                 if let details {
                     content(details)
                 } else if isLoading {
-                    ProgressView().tint(Color.biingePrimary)
+                    ProgressView().tint(Color.biingeLoader)
                         .frame(maxWidth: .infinity).padding(.top, 220)
                 } else {
                     DetailLoadError()
@@ -43,14 +45,16 @@ struct PersonDetailView: View {
                 if !cast.isEmpty {
                     creditsGrid(title: person.gender == 1 ? "Actress" : "Actor", items: cast)
                 }
+                if !person.tvCredits.isEmpty {
+                    tvCreditsGrid(title: "TV Shows", items: person.tvCredits)
+                }
                 if !crew.isEmpty {
                     creditsGrid(title: "Director", items: crew)
                 }
             }
             .padding(.vertical, 20)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.biingeCard)
-            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 12, topTrailingRadius: 12))
+            .detailCardBackground()
         }
     }
 
@@ -115,6 +119,34 @@ struct PersonDetailView: View {
         }
     }
 
+    private func tvCreditsGrid(title: String, items: [TvCredit]) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.biingeSubhead)
+                .foregroundStyle(Color.biingeGrayDark)
+                .padding(.horizontal, 10)
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 3),
+                spacing: 5
+            ) {
+                ForEach(items) { credit in
+                    Button {
+                        presentSeries(credit.id)
+                    } label: {
+                        PosterImage(path: credit.posterPath, title: credit.title, size: "w342", cornerRadius: 6)
+                            .overlay(alignment: .topLeading) {
+                                if isTracked(credit) {
+                                    WatchedBadge()
+                                }
+                            }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 5)
+        }
+    }
+
     private var closeButton: some View {
         Button { dismiss() } label: {
             Image(systemName: "xmark")
@@ -141,12 +173,20 @@ struct PersonDetailView: View {
             || (!movieStore.hasLoaded && (credit.state ?? WatchState.none) != WatchState.none)
     }
 
+    private func isTracked(_ credit: TvCredit) -> Bool {
+        tvStore.currentState(id: credit.id) != nil
+            || (!tvStore.hasLoaded && (credit.state ?? WatchState.none) != WatchState.none)
+    }
+
     private func load() async {
         guard let apiClient else { return }
         isLoading = true
-        async let libraryLoad: Void = movieStore.loadIfNeeded()
+        // load both libraries so movie and TV watched badges resolve
+        async let movieLoad: Void = movieStore.loadIfNeeded()
+        async let tvLoad: Void = tvStore.loadIfNeeded()
         details = try? await apiClient.personDetails(id: personId)
         isLoading = false
-        await libraryLoad
+        await movieLoad
+        await tvLoad
     }
 }

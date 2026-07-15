@@ -32,7 +32,7 @@ struct SearchView: View {
                         DetailSection(title: "People") { peopleRow }
                     }
                     if isLoading {
-                        ProgressView().tint(Color.biingePrimary)
+                        ProgressView().tint(Color.biingeLoader)
                             .frame(maxWidth: .infinity).padding(.top, 40)
                     } else if isEmpty {
                         ContentUnavailableView(

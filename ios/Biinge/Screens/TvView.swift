@@ -55,7 +55,7 @@ struct TvView: View {
     @ViewBuilder
     private var content: some View {
         if store.isLoading && !store.hasLoaded {
-            ProgressView().tint(Color.biingePrimary)
+            ProgressView().tint(Color.biingeLoader)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if shows.isEmpty {
             ContentUnavailableView(

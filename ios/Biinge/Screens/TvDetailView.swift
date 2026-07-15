@@ -35,7 +35,7 @@ struct TvDetailView: View {
                     if let details {
                         content(details)
                     } else if isLoading {
-                        ProgressView().tint(Color.biingePrimary)
+                        ProgressView().tint(Color.biingeLoader)
                             .frame(maxWidth: .infinity).padding(.top, 160)
                     } else {
                         DetailLoadError()
@@ -128,8 +128,7 @@ struct TvDetailView: View {
             .padding(.top, 20)
             .padding(.bottom, 40)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.biingeCard)
-            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 12, topTrailingRadius: 12))
+            .detailCardBackground()
         }
     }
 
@@ -383,7 +382,7 @@ struct TvActionsView: View {
                         .font(.biingeCallout).fontWeight(.semibold)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 15)
-                        .background(Color.biingePrimary, in: Capsule())
+                        .background(Color.biingeAccent, in: Capsule())
                 }
                 .buttonStyle(.plain)
             } else {
@@ -443,6 +442,7 @@ struct TvActionMenu: View {
             VStack(spacing: 28) {
                 PosterImage(path: posterPath, title: "", size: "w342", cornerRadius: 12)
                     .containerRelativeFrame(.horizontal) { width, _ in width * 0.55 }
+                    .onTapGesture { onCancel() }
 
                 VStack(spacing: 2) {
                     ForEach(options, id: \.title) { option in
@@ -526,10 +526,10 @@ private struct SeasonsView: View {
                         } label: {
                             Text(season.title)
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(isActive ? .white : Color.biingeGrayDark)
+                                .foregroundStyle(isActive ? Color.biingeBackground : Color.biingeGrayDark)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 5)
-                                .background(isActive ? Color(rgb: 0x2B2835) : .clear, in: Capsule())
+                                .background(isActive ? Color.biingeText : .clear, in: Capsule())
                         }
                         .buttonStyle(.plain)
                     }
@@ -538,7 +538,7 @@ private struct SeasonsView: View {
             }
 
             if isLoading {
-                ProgressView().tint(Color.biingePrimary)
+                ProgressView().tint(Color.biingeLoader)
                     .frame(maxWidth: .infinity).padding(.vertical, 20)
             } else {
                 // A List gives native, system-driven swipe actions that never fight

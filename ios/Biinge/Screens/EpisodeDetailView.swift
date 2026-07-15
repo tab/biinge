@@ -36,7 +36,7 @@ struct EpisodeDetailView: View {
                 if let episode {
                     content(episode)
                 } else if isLoading {
-                    ProgressView().tint(Color.biingePrimary)
+                    ProgressView().tint(Color.biingeLoader)
                         .frame(maxWidth: .infinity).padding(.top, 160)
                 } else {
                     DetailLoadError()
@@ -110,8 +110,7 @@ struct EpisodeDetailView: View {
             .padding(.top, 20)
             .padding(.bottom, 40)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.biingeCard)
-            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 12, topTrailingRadius: 12))
+            .detailCardBackground()
         }
     }
 

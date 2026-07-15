@@ -9,7 +9,7 @@ struct SplashView: View {
                     .font(.system(size: 44, weight: .heavy))
                     .foregroundStyle(Color.biingePrimary)
                 ProgressView()
-                    .tint(Color.biingePrimary)
+                    .tint(Color.biingeLoader)
             }
         }
     }

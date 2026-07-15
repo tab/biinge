@@ -32,6 +32,14 @@ inject() {
   /usr/libexec/PlistBuddy -c "Set :${key} ${value}" "${plist}" 2>/dev/null \
     || /usr/libexec/PlistBuddy -c "Add :${key} string ${value}" "${plist}"
 
+  # Read back and fail the build if the value did not actually land, so a
+  # misinjected app can never silently fall back to the localhost default.
+  written=$(/usr/libexec/PlistBuddy -c "Print :${key}" "${plist}" 2>/dev/null || true)
+  if [ "${written}" != "${value}" ]; then
+    echo "error: ${key} failed to inject into ${plist} (got '${written}')"
+    exit 1
+  fi
+
   echo "note: injected ${key} from .env"
 }
 

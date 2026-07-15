@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct LoginView: View {
     let authManager: AuthManager
@@ -9,7 +8,6 @@ struct LoginView: View {
     @State private var password = ""
     @State private var isSubmitting = false
     @State private var errorMessage: String?
-    @State private var backgroundImage: UIImage?
     @FocusState private var focusedField: Field?
 
     private enum Field {
@@ -71,29 +69,8 @@ struct LoginView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 24)
         .padding(.bottom, 60)
-        // the form is the keyboard-avoiding layer; the artwork ignores every safe area to stay full-bleed
-        .background {
-            ZStack {
-                Color.black
-
-                if let backgroundImage {
-                    Image(uiImage: backgroundImage)
-                        .resizable()
-                        .scaledToFill()
-                }
-
-                LinearGradient(
-                    colors: [.black.opacity(0), .black.opacity(0.55), .black],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-            .ignoresSafeArea()
-        }
-        .task {
-            // pre-decode the full-screen PNG off the main thread to avoid a first-render hitch
-            backgroundImage = await UIImage(named: "LoginBackground")?.byPreparingForDisplay()
-        }
+        // the form is the keyboard-avoiding layer; the artwork stays full-bleed behind it
+        .background { BrandBackground() }
     }
 
     private func inputField(_ placeholder: String, text: Binding<String>, field: Field, secure: Bool = false) -> some View {

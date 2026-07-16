@@ -201,6 +201,15 @@ actor APIClient {
 
     // MARK: - Request plumbing
 
+    /// Client identifier sent on every request, e.g. "Biinge/1.0.0 (build 12; iOS 26.0.0)"
+    private static let userAgent: String = {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "0"
+        let build = info?["CFBundleVersion"] as? String ?? "0"
+        let os = ProcessInfo.processInfo.operatingSystemVersion
+        return "Biinge/\(version) (build \(build); iOS \(os.majorVersion).\(os.minorVersion).\(os.patchVersion))"
+    }()
+
     private func makeRequest(_ method: String, _ path: String, query: [URLQueryItem], body: Data?) -> URLRequest {
         var components = URLComponents(string: baseURL.absoluteString + path) ?? URLComponents()
         if !query.isEmpty {
@@ -209,6 +218,7 @@ actor APIClient {
         var request = URLRequest(url: components.url ?? baseURL)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
         if let body {
             request.httpBody = body
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

@@ -19,13 +19,29 @@ type EpisodeStatsSerializer struct {
 	Minutes uint64 `json:"minutes"`
 }
 
+type MonthlyActivitySerializer struct {
+	Month        string `json:"month"`
+	MovieMinutes uint64 `json:"movieMinutes"`
+	TvMinutes    uint64 `json:"tvMinutes"`
+}
+
 type StatsSerializer struct {
-	Movies   MovieStatsSerializer   `json:"movies"`
-	Series   SeriesStatsSerializer  `json:"series"`
-	Episodes EpisodeStatsSerializer `json:"episodes"`
+	Movies   MovieStatsSerializer        `json:"movies"`
+	Series   SeriesStatsSerializer       `json:"series"`
+	Episodes EpisodeStatsSerializer      `json:"episodes"`
+	Activity []MonthlyActivitySerializer `json:"activity"`
 }
 
 func NewStatsSerializer(stats *models.Stats) StatsSerializer {
+	activity := make([]MonthlyActivitySerializer, 0, len(stats.Activity))
+	for _, month := range stats.Activity {
+		activity = append(activity, MonthlyActivitySerializer{
+			Month:        month.Month.Format("2006-01"),
+			MovieMinutes: month.MovieMinutes,
+			TvMinutes:    month.TvMinutes,
+		})
+	}
+
 	return StatsSerializer{
 		Movies: MovieStatsSerializer{
 			Want:    stats.MoviesWant,
@@ -41,5 +57,6 @@ func NewStatsSerializer(stats *models.Stats) StatsSerializer {
 			Watched: stats.EpisodesWatched,
 			Minutes: stats.EpisodesMinutes,
 		},
+		Activity: activity,
 	}
 }

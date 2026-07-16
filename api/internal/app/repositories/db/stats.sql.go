@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const episodeStats = `-- name: EpisodeStats :one
@@ -75,4 +76,61 @@ func (q *Queries) SeriesStats(ctx context.Context, userID uuid.UUID) (SeriesStat
 	var i SeriesStatsRow
 	err := row.Scan(&i.WantCount, &i.WatchingCount, &i.WatchedCount)
 	return i, err
+}
+
+const watchActivityByMonth = `-- name: WatchActivityByMonth :many
+WITH months AS (
+  SELECT generate_series(
+    date_trunc('month', NOW()) - INTERVAL '11 months',
+    date_trunc('month', NOW()),
+    INTERVAL '1 month'
+  ) AS month
+),
+watched AS (
+  SELECT date_trunc('month', mv.watched_at) AS month, mv.runtime AS minutes, 'movie' AS kind
+  FROM movies mv
+  WHERE mv.user_id = $1 AND mv.watched_at IS NOT NULL
+  UNION ALL
+  SELECT date_trunc('month', e.watched_at) AS month, e.runtime AS minutes, 'tv' AS kind
+  FROM episodes e
+    JOIN seasons s ON e.season_id = s.id
+    JOIN series t ON s.series_id = t.id
+  WHERE t.user_id = $1 AND e.watched_at IS NOT NULL
+)
+SELECT
+  m.month::date AS month,
+  COALESCE(SUM(w.minutes) FILTER (WHERE w.kind = 'movie'), 0)::bigint AS movie_minutes,
+  COALESCE(SUM(w.minutes) FILTER (WHERE w.kind = 'tv'), 0)::bigint AS tv_minutes
+FROM months m
+  LEFT JOIN watched w ON w.month = m.month
+GROUP BY m.month
+ORDER BY m.month
+`
+
+type WatchActivityByMonthRow struct {
+	Month        pgtype.Date
+	MovieMinutes int64
+	TvMinutes    int64
+}
+
+// Watched minutes per month for the last 12 months (dense: months with no
+// activity return zero), split into movie and TV runtime.
+func (q *Queries) WatchActivityByMonth(ctx context.Context, userID uuid.UUID) ([]WatchActivityByMonthRow, error) {
+	rows, err := q.db.Query(ctx, watchActivityByMonth, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []WatchActivityByMonthRow
+	for rows.Next() {
+		var i WatchActivityByMonthRow
+		if err := rows.Scan(&i.Month, &i.MovieMinutes, &i.TvMinutes); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -366,6 +367,9 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					SeriesWatched:   4,
 					EpisodesWatched: 42,
 					EpisodesMinutes: 1800,
+					Activity: []models.MonthlyWatch{
+						{Month: time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 300},
+					},
 				}, nil)
 			},
 			currentUser: &models.User{ID: id},
@@ -374,6 +378,9 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					Movies:   serializers.MovieStatsSerializer{Want: 2, Watched: 5, Minutes: 600},
 					Series:   serializers.SeriesStatsSerializer{Want: 1, Watching: 3, Watched: 4},
 					Episodes: serializers.EpisodeStatsSerializer{Watched: 42, Minutes: 1800},
+					Activity: []serializers.MonthlyActivitySerializer{
+						{Month: "2026-01", MovieMinutes: 120, TvMinutes: 300},
+					},
 				},
 				status: "200 OK",
 				code:   http.StatusOK,

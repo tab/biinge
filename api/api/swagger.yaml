@@ -1697,10 +1697,33 @@ components:
           required:
             - watched
             - minutes
+        activity:
+          type: array
+          description: "Watched runtime per month over the last 12 months, split by media kind"
+          items:
+            type: object
+            properties:
+              month:
+                type: string
+                description: "Calendar month in YYYY-MM format"
+                example: "2026-01"
+              movieMinutes:
+                type: integer
+                format: int64
+                description: "Total watched movie runtime in that month, in minutes"
+              tvMinutes:
+                type: integer
+                format: int64
+                description: "Total watched episode runtime in that month, in minutes"
+            required:
+              - month
+              - movieMinutes
+              - tvMinutes
       required:
         - movies
         - series
         - episodes
+        - activity
 
     UpdateAccountRequest:
       type: object

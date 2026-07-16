@@ -37,6 +37,20 @@ func (s *stats) Get(ctx context.Context, userId uuid.UUID) (*models.Stats, error
 		return nil, err
 	}
 
+	activity, err := s.client.Queries().WatchActivityByMonth(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	months := make([]models.MonthlyWatch, 0, len(activity))
+	for _, row := range activity {
+		months = append(months, models.MonthlyWatch{
+			Month:        row.Month.Time,
+			MovieMinutes: uint64(row.MovieMinutes),
+			TvMinutes:    uint64(row.TvMinutes),
+		})
+	}
+
 	return &models.Stats{
 		MoviesWant:      uint64(movies.WantCount),
 		MoviesWatched:   uint64(movies.WatchedCount),
@@ -46,5 +60,6 @@ func (s *stats) Get(ctx context.Context, userId uuid.UUID) (*models.Stats, error
 		SeriesWatched:   uint64(series.WatchedCount),
 		EpisodesWatched: uint64(episodes.WatchedCount),
 		EpisodesMinutes: uint64(episodes.WatchedMinutes),
+		Activity:        months,
 	}, nil
 }

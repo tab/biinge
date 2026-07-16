@@ -2,6 +2,7 @@ package serializers
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -18,6 +19,10 @@ func Test_NewStatsSerializer(t *testing.T) {
 		SeriesWatched:   6,
 		EpisodesWatched: 7,
 		EpisodesMinutes: 800,
+		Activity: []models.MonthlyWatch{
+			{Month: time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 240},
+			{Month: time.Date(2026, time.March, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 0, TvMinutes: 90},
+		},
 	}
 
 	expected := StatsSerializer{
@@ -34,6 +39,10 @@ func Test_NewStatsSerializer(t *testing.T) {
 		Episodes: EpisodeStatsSerializer{
 			Watched: 7,
 			Minutes: 800,
+		},
+		Activity: []MonthlyActivitySerializer{
+			{Month: "2026-02", MovieMinutes: 120, TvMinutes: 240},
+			{Month: "2026-03", MovieMinutes: 0, TvMinutes: 90},
 		},
 	}
 

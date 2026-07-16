@@ -27,7 +27,10 @@ struct EpisodeDetailView: View {
 
     private var isWatched: Bool {
         guard let episode else { return false }
-        return progress?.watchedEpisodes.contains(episode.id) ?? false
+        // Prefer live store progress (reflects optimistic toggles); fall back to the
+        // server-provided flag when the sheet is opened without progress loaded
+        if let progress { return progress.watchedEpisodes.contains(episode.id) }
+        return episode.watched
     }
 
     var body: some View {
@@ -145,12 +148,14 @@ struct EpisodeDetailView: View {
         async let libraryLoad: Void = store.loadIfNeeded()
         async let episodeResult = try? await apiClient.episodeDetails(showId: showId, season: seasonNumber, episode: episodeNumber)
         async let seriesResult = try? await apiClient.seriesDetails(id: showId)
-        async let progressResult = try? await apiClient.progress(showId: showId)
         episode = await episodeResult
         series = await seriesResult
         isLoading = false
         await libraryLoad
-        if series != nil, let fetched = await progressResult {
+        // The episode payload carries its own watched flag, so only fetch progress to
+        // seed the store when it isn't already loaded (e.g. opened via deep link)
+        if series != nil, store.progress(id: showId) == nil,
+           let fetched = try? await apiClient.progress(showId: showId) {
             setProgress(fetched)
         }
     }

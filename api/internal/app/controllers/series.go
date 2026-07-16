@@ -265,7 +265,8 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if _, ok := middlewares.CurrentUserFromContext(r.Context()); !ok {
+	user, ok := middlewares.CurrentUserFromContext(r.Context())
+	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
 
@@ -288,7 +289,7 @@ func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	response, err := c.provider.FetchTvSeasonDetails(r.Context(), id, seasonNumber)
+	response, err := c.provider.FetchTvSeasonDetails(r.Context(), id, seasonNumber, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
@@ -303,7 +304,8 @@ func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Re
 func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if _, ok := middlewares.CurrentUserFromContext(r.Context()); !ok {
+	user, ok := middlewares.CurrentUserFromContext(r.Context())
+	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
 
@@ -334,7 +336,7 @@ func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	response, err := c.provider.FetchTvEpisodeDetails(r.Context(), id, seasonNumber, episodeNumber)
+	response, err := c.provider.FetchTvEpisodeDetails(r.Context(), id, seasonNumber, episodeNumber, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})

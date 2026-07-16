@@ -15,8 +15,8 @@ import (
 type TmdbProvider interface {
 	FetchMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error)
 	FetchTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error)
-	FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64) (*serializers.SeasonDetailsSerializer, error)
-	FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64) (*serializers.EpisodeDetailsSerializer, error)
+	FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error)
+	FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64, userId uuid.UUID) (*serializers.EpisodeDetailsSerializer, error)
 	FetchPersonDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.PersonDetailsSerializer, error)
 
 	SearchMovies(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error)
@@ -28,24 +28,37 @@ type TmdbProvider interface {
 }
 
 type tmdbProvider struct {
-	client tmdb.Client
-	movies Movies
-	series Series
-	log    *logger.Logger
+	client   tmdb.Client
+	movies   Movies
+	series   Series
+	progress Progress
+	log      *logger.Logger
 }
 
 func NewTmdbProvider(
 	client tmdb.Client,
 	movies Movies,
 	series Series,
+	progress Progress,
 	log *logger.Logger,
 ) TmdbProvider {
 	return &tmdbProvider{
-		client: client,
-		movies: movies,
-		series: series,
-		log:    log.WithComponent("TmdbProvider"),
+		client:   client,
+		movies:   movies,
+		series:   series,
+		progress: progress,
+		log:      log.WithComponent("TmdbProvider"),
 	}
+}
+
+// toIdSet builds a lookup set from a slice of TMDB ids
+func toIdSet(ids []uint64) map[uint64]struct{} {
+	set := make(map[uint64]struct{}, len(ids))
+	for _, id := range ids {
+		set[id] = struct{}{}
+	}
+
+	return set
 }
 
 func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error) {
@@ -495,7 +508,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 	}, nil
 }
 
-func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64) (*serializers.SeasonDetailsSerializer, error) {
+func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error) {
 	p.log.Debug().Uint64("ShowId", showId).Uint64("SeasonNumber", seasonNumber).Msg("Fetching tv season details")
 
 	response, err := p.client.FetchTvSeasonDetails(ctx, showId, seasonNumber)
@@ -504,10 +517,20 @@ func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonN
 		return nil, tmdb.ErrFailedToFetchSeasonDetails
 	}
 
+	progress, err := p.progress.Get(ctx, userId, showId)
+	if err != nil {
+		p.log.Error().Err(err).Uint64("ShowId", showId).Msg("Failed to fetch watched state for season details")
+		return nil, tmdb.ErrFailedToFetchSeasonDetails
+	}
+
+	watchedSeasons := toIdSet(progress.WatchedSeasons)
+	watchedEpisodes := toIdSet(progress.WatchedEpisodes)
+
 	details := tmdb.TransformSeasonDetails(response)
 
 	episodes := make([]serializers.SeasonEpisodeSerializer, 0, len(details.Episodes))
 	for _, item := range details.Episodes {
+		_, watched := watchedEpisodes[item.Id]
 		episodes = append(episodes, serializers.SeasonEpisodeSerializer{
 			Id:         item.Id,
 			Title:      item.Title,
@@ -517,8 +540,11 @@ func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonN
 			Overview:   item.Overview,
 			Rating:     item.Rating,
 			AirDate:    item.AirDate,
+			Watched:    watched,
 		})
 	}
+
+	_, seasonWatched := watchedSeasons[details.Id]
 
 	return &serializers.SeasonDetailsSerializer{
 		Id:         details.Id,
@@ -528,11 +554,12 @@ func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonN
 		PosterPath: details.PosterPath,
 		AirDate:    details.AirDate,
 		Overview:   details.Overview,
+		Watched:    seasonWatched,
 		Episodes:   episodes,
 	}, nil
 }
 
-func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64) (*serializers.EpisodeDetailsSerializer, error) {
+func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64, userId uuid.UUID) (*serializers.EpisodeDetailsSerializer, error) {
 	p.log.Debug().
 		Uint64("ShowId", showId).
 		Uint64("SeasonNumber", seasonNumber).
@@ -551,7 +578,15 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 		return nil, tmdb.ErrFailedToFetchEpisodeDetails
 	}
 
+	progress, err := p.progress.Get(ctx, userId, showId)
+	if err != nil {
+		p.log.Error().Err(err).Uint64("ShowId", showId).Msg("Failed to fetch watched state for episode details")
+		return nil, tmdb.ErrFailedToFetchEpisodeDetails
+	}
+
 	details := tmdb.TransformEpisodeDetails(response)
+
+	_, watched := toIdSet(progress.WatchedEpisodes)[details.Id]
 
 	credits := make([]serializers.PersonSerializer, 0, len(details.Credits))
 	for _, item := range details.Credits {
@@ -580,6 +615,7 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 		Overview:   details.Overview,
 		Rating:     details.Rating,
 		AirDate:    details.AirDate,
+		Watched:    watched,
 		Credits:    credits,
 		Videos:     videos,
 	}, nil

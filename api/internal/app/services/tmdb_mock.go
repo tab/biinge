@@ -133,33 +133,33 @@ func (mr *MockTmdbProviderMockRecorder) FetchTvDetails(ctx, id, userId any) *gom
 }
 
 // FetchTvEpisodeDetails mocks base method.
-func (m *MockTmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64) (*serializers.EpisodeDetailsSerializer, error) {
+func (m *MockTmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64, userId uuid.UUID) (*serializers.EpisodeDetailsSerializer, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FetchTvEpisodeDetails", ctx, showId, seasonNumber, episodeNumber)
+	ret := m.ctrl.Call(m, "FetchTvEpisodeDetails", ctx, showId, seasonNumber, episodeNumber, userId)
 	ret0, _ := ret[0].(*serializers.EpisodeDetailsSerializer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FetchTvEpisodeDetails indicates an expected call of FetchTvEpisodeDetails.
-func (mr *MockTmdbProviderMockRecorder) FetchTvEpisodeDetails(ctx, showId, seasonNumber, episodeNumber any) *gomock.Call {
+func (mr *MockTmdbProviderMockRecorder) FetchTvEpisodeDetails(ctx, showId, seasonNumber, episodeNumber, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchTvEpisodeDetails", reflect.TypeOf((*MockTmdbProvider)(nil).FetchTvEpisodeDetails), ctx, showId, seasonNumber, episodeNumber)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchTvEpisodeDetails", reflect.TypeOf((*MockTmdbProvider)(nil).FetchTvEpisodeDetails), ctx, showId, seasonNumber, episodeNumber, userId)
 }
 
 // FetchTvSeasonDetails mocks base method.
-func (m *MockTmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64) (*serializers.SeasonDetailsSerializer, error) {
+func (m *MockTmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FetchTvSeasonDetails", ctx, showId, seasonNumber)
+	ret := m.ctrl.Call(m, "FetchTvSeasonDetails", ctx, showId, seasonNumber, userId)
 	ret0, _ := ret[0].(*serializers.SeasonDetailsSerializer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FetchTvSeasonDetails indicates an expected call of FetchTvSeasonDetails.
-func (mr *MockTmdbProviderMockRecorder) FetchTvSeasonDetails(ctx, showId, seasonNumber any) *gomock.Call {
+func (mr *MockTmdbProviderMockRecorder) FetchTvSeasonDetails(ctx, showId, seasonNumber, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchTvSeasonDetails", reflect.TypeOf((*MockTmdbProvider)(nil).FetchTvSeasonDetails), ctx, showId, seasonNumber)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchTvSeasonDetails", reflect.TypeOf((*MockTmdbProvider)(nil).FetchTvSeasonDetails), ctx, showId, seasonNumber, userId)
 }
 
 // SearchMovies mocks base method.

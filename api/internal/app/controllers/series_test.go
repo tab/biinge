@@ -325,7 +325,7 @@ func Test_SeriesController_HandleSeasonDetails(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				provider.EXPECT().FetchTvSeasonDetails(gomock.Any(), uint64(1399), uint64(1)).Return(&serializers.SeasonDetailsSerializer{
+				provider.EXPECT().FetchTvSeasonDetails(gomock.Any(), uint64(1399), uint64(1), gomock.Any()).Return(&serializers.SeasonDetailsSerializer{
 					Id:     3624,
 					Title:  "Season 1",
 					Number: 1,
@@ -382,7 +382,7 @@ func Test_SeriesController_HandleSeasonDetails(t *testing.T) {
 		{
 			name: "Provider Error",
 			before: func() {
-				provider.EXPECT().FetchTvSeasonDetails(gomock.Any(), uint64(1399), uint64(1)).Return(nil, assert.AnError)
+				provider.EXPECT().FetchTvSeasonDetails(gomock.Any(), uint64(1399), uint64(1), gomock.Any()).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			path:     "/series/1399/season/1",
@@ -461,7 +461,7 @@ func Test_SeriesController_HandleEpisodeDetails(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				provider.EXPECT().FetchTvEpisodeDetails(gomock.Any(), uint64(1399), uint64(1), uint64(1)).Return(&serializers.EpisodeDetailsSerializer{
+				provider.EXPECT().FetchTvEpisodeDetails(gomock.Any(), uint64(1399), uint64(1), uint64(1), gomock.Any()).Return(&serializers.EpisodeDetailsSerializer{
 					Id:      63056,
 					Title:   "Winter Is Coming",
 					Number:  1,
@@ -532,7 +532,7 @@ func Test_SeriesController_HandleEpisodeDetails(t *testing.T) {
 		{
 			name: "Provider Error",
 			before: func() {
-				provider.EXPECT().FetchTvEpisodeDetails(gomock.Any(), uint64(1399), uint64(1), uint64(1)).Return(nil, assert.AnError)
+				provider.EXPECT().FetchTvEpisodeDetails(gomock.Any(), uint64(1399), uint64(1), uint64(1), gomock.Any()).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			path:     "/series/1399/season/1/episode/1",

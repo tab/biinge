@@ -1,76 +1,5 @@
 package serializers
 
-import (
-	"encoding/json"
-	"io"
-	"strings"
-
-	"biinge-api/internal/app/errors"
-	"biinge-api/internal/app/models"
-)
-
-type SeasonSerializer struct {
-	Id            uint64 `json:"id"`
-	Number        uint64 `json:"number"`
-	Title         string `json:"title"`
-	EpisodesCount uint64 `json:"episodesCount"`
-	State         string `json:"state"`
-}
-
-type CreateSeasonRequestSerializer struct {
-	Id            uint64 `json:"id" validate:"required"`
-	Title         string `json:"title" validate:"required"`
-	Number        uint64 `json:"number" validate:"omitempty,min=0"`
-	EpisodesCount uint64 `json:"episodesCount" validate:"omitempty,min=0"`
-	State         string `json:"state" validate:"omitempty,oneof=want watching watched none"`
-}
-
-func (params *CreateSeasonRequestSerializer) Validate(body io.Reader) error {
-	if err := json.NewDecoder(body).Decode(params); err != nil {
-		return err
-	}
-
-	params.Title = strings.TrimSpace(params.Title)
-	if params.Title == "" {
-		return errors.ErrEmptyTitle
-	}
-
-	if err := validateItemState(&params.State); err != nil {
-		return err
-	}
-
-	return validate.Struct(params)
-}
-
-type UpdateSeasonRequestSerializer struct {
-	State string `json:"state" validate:"omitempty,oneof=want watching watched none"`
-}
-
-func (params *UpdateSeasonRequestSerializer) Validate(body io.Reader) error {
-	if err := json.NewDecoder(body).Decode(params); err != nil {
-		return err
-	}
-
-	if err := validateItemState(&params.State); err != nil {
-		return err
-	}
-
-	return validate.Struct(params)
-}
-
-// validateItemState trims and validates a season/episode state against the state_types enum
-func validateItemState(state *string) error {
-	*state = strings.TrimSpace(*state)
-	switch *state {
-	case models.StateTypeWant, models.StateTypeWatching, models.StateTypeWatched, models.StateTypeNone:
-		return nil
-	case "":
-		return errors.ErrEmptyState
-	default:
-		return errors.ErrInvalidState
-	}
-}
-
 // SeasonSummarySerializer is a season overview embedded in a series' details
 type SeasonSummarySerializer struct {
 	Id            uint64 `json:"id"`
@@ -81,7 +10,7 @@ type SeasonSummarySerializer struct {
 	AirDate       string `json:"airDate,omitempty"`
 }
 
-// SeasonDetailsSerializer is a TMDB-sourced season with its episodes
+// SeasonDetailsSerializer is a TMDB-sourced season with its episodes and the user's watched state
 type SeasonDetailsSerializer struct {
 	Id         uint64                    `json:"id"`
 	TmdbShowId uint64                    `json:"tmdbShowId,omitempty"`
@@ -90,6 +19,7 @@ type SeasonDetailsSerializer struct {
 	PosterPath string                    `json:"posterPath"`
 	AirDate    string                    `json:"airDate,omitempty"`
 	Overview   string                    `json:"overview"`
+	Watched    bool                      `json:"watched"`
 	Episodes   []SeasonEpisodeSerializer `json:"episodes"`
 }
 
@@ -103,4 +33,5 @@ type SeasonEpisodeSerializer struct {
 	Overview   string  `json:"overview"`
 	Rating     float64 `json:"rating,omitempty"`
 	AirDate    string  `json:"airDate,omitempty"`
+	Watched    bool    `json:"watched"`
 }

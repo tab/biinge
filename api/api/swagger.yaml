@@ -2346,10 +2346,14 @@ components:
           type: string
           format: date
           description: "Episode air date"
+        watched:
+          type: boolean
+          description: "Whether the current user has marked this episode watched"
       required:
         - id
         - title
         - number
+        - watched
 
     SeasonDetailsSerializer:
       type: object
@@ -2379,6 +2383,9 @@ components:
         overview:
           type: string
           description: "Season overview"
+        watched:
+          type: boolean
+          description: "Whether the current user has marked the whole season watched"
         episodes:
           type: array
           items:
@@ -2387,6 +2394,7 @@ components:
         - id
         - title
         - number
+        - watched
         - episodes
 
     EpisodeDetailsSerializer:
@@ -2421,6 +2429,9 @@ components:
           type: string
           format: date
           description: "Episode air date"
+        watched:
+          type: boolean
+          description: "Whether the current user has marked this episode watched"
         credits:
           type: array
           description: "Episode cast and crew"
@@ -2435,6 +2446,7 @@ components:
         - id
         - title
         - number
+        - watched
 
     SearchMovieSerializer:
       type: object

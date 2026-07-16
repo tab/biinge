@@ -73,6 +73,25 @@ struct EpisodeSummary: Decodable, Sendable, Identifiable {
     let overview: String
     let rating: Double?
     let airDate: String?
+    let watched: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, number, posterPath, runtime, overview, rating, airDate, watched
+    }
+
+    // watched defaults to false so an API that predates the field still decodes
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        number = try c.decode(Int.self, forKey: .number)
+        posterPath = try c.decode(String.self, forKey: .posterPath)
+        runtime = try c.decode(Int.self, forKey: .runtime)
+        overview = try c.decode(String.self, forKey: .overview)
+        rating = try c.decodeIfPresent(Double.self, forKey: .rating)
+        airDate = try c.decodeIfPresent(String.self, forKey: .airDate)
+        watched = try c.decodeIfPresent(Bool.self, forKey: .watched) ?? false
+    }
 }
 
 struct SeasonDetails: Decodable, Sendable {
@@ -82,7 +101,25 @@ struct SeasonDetails: Decodable, Sendable {
     let posterPath: String
     let airDate: String?
     let overview: String
+    let watched: Bool
     let episodes: [EpisodeSummary]
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, number, posterPath, airDate, overview, watched, episodes
+    }
+
+    // watched defaults to false so an API that predates the field still decodes
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        number = try c.decode(Int.self, forKey: .number)
+        posterPath = try c.decode(String.self, forKey: .posterPath)
+        airDate = try c.decodeIfPresent(String.self, forKey: .airDate)
+        overview = try c.decode(String.self, forKey: .overview)
+        watched = try c.decodeIfPresent(Bool.self, forKey: .watched) ?? false
+        episodes = try c.decode([EpisodeSummary].self, forKey: .episodes)
+    }
 }
 
 struct EpisodeDetails: Decodable, Sendable {
@@ -94,8 +131,29 @@ struct EpisodeDetails: Decodable, Sendable {
     let overview: String
     let rating: Double?
     let airDate: String?
+    let watched: Bool
     let credits: [CreditPerson]
     let videos: [Video]
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, number, posterPath, runtime, overview, rating, airDate, watched, credits, videos
+    }
+
+    // watched defaults to false so an API that predates the field still decodes
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        number = try c.decode(Int.self, forKey: .number)
+        posterPath = try c.decode(String.self, forKey: .posterPath)
+        runtime = try c.decode(Int.self, forKey: .runtime)
+        overview = try c.decode(String.self, forKey: .overview)
+        rating = try c.decodeIfPresent(Double.self, forKey: .rating)
+        airDate = try c.decodeIfPresent(String.self, forKey: .airDate)
+        watched = try c.decodeIfPresent(Bool.self, forKey: .watched) ?? false
+        credits = try c.decode([CreditPerson].self, forKey: .credits)
+        videos = try c.decode([Video].self, forKey: .videos)
+    }
 }
 
 struct MovieCredit: Decodable, Sendable, Identifiable {

@@ -220,7 +220,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	userId := uuid.New()
 	movieID := uuid.New()
@@ -454,7 +455,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	userId := uuid.New()
 	seriesID := uuid.New()
@@ -691,7 +693,8 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	userId := uuid.New()
 
@@ -805,7 +808,9 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	userId := uuid.New()
 
 	tests := []struct {
 		name     string
@@ -814,9 +819,13 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 		error    error
 	}{
 		{
-			name: "Success",
+			name: "Success merges watched state",
 			before: func() {
 				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(sampleSeasonDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{
+					WatchedSeasons:  []uint64{50},
+					WatchedEpisodes: []uint64{80},
+				}, nil)
 			},
 			expected: &serializers.SeasonDetailsSerializer{
 				Id:         50,
@@ -826,8 +835,29 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 				PosterPath: "/s1.jpg",
 				AirDate:    "2008-01-20",
 				Overview:   "The first season.",
+				Watched:    true,
 				Episodes: []serializers.SeasonEpisodeSerializer{
-					{Id: 80, Title: "Pilot", Number: 1, PosterPath: "/e1.jpg", Runtime: 58, Overview: "The pilot.", Rating: 8.0, AirDate: "2008-01-20"},
+					{Id: 80, Title: "Pilot", Number: 1, PosterPath: "/e1.jpg", Runtime: 58, Overview: "The pilot.", Rating: 8.0, AirDate: "2008-01-20", Watched: true},
+				},
+			},
+		},
+		{
+			name: "Success with nothing watched",
+			before: func() {
+				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(sampleSeasonDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+			},
+			expected: &serializers.SeasonDetailsSerializer{
+				Id:         50,
+				TmdbShowId: 300,
+				Title:      "Season 1",
+				Number:     1,
+				PosterPath: "/s1.jpg",
+				AirDate:    "2008-01-20",
+				Overview:   "The first season.",
+				Watched:    false,
+				Episodes: []serializers.SeasonEpisodeSerializer{
+					{Id: 80, Title: "Pilot", Number: 1, PosterPath: "/e1.jpg", Runtime: 58, Overview: "The pilot.", Rating: 8.0, AirDate: "2008-01-20", Watched: false},
 				},
 			},
 		},
@@ -839,13 +869,22 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 			expected: nil,
 			error:    tmdb.ErrFailedToFetchSeasonDetails,
 		},
+		{
+			name: "Progress error",
+			before: func() {
+				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(sampleSeasonDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(nil, assert.AnError)
+			},
+			expected: nil,
+			error:    tmdb.ErrFailedToFetchSeasonDetails,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := provider.FetchTvSeasonDetails(ctx, 300, 1)
+			result, err := provider.FetchTvSeasonDetails(ctx, 300, 1, userId)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)
@@ -866,7 +905,9 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	userId := uuid.New()
 
 	tests := []struct {
 		name     string
@@ -875,9 +916,12 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 		error    error
 	}{
 		{
-			name: "Success",
+			name: "Success merges watched state",
 			before: func() {
 				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(sampleEpisodeDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{
+					WatchedEpisodes: []uint64{80},
+				}, nil)
 			},
 			expected: &serializers.EpisodeDetailsSerializer{
 				Id:         80,
@@ -888,6 +932,32 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				Overview:   "The pilot.",
 				Rating:     8.0,
 				AirDate:    "2008-01-20",
+				Watched:    true,
+				Credits: []serializers.PersonSerializer{
+					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
+					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
+				},
+				Videos: []serializers.VideoSerializer{
+					{Id: "ev1", Key: "evkey"},
+				},
+			},
+		},
+		{
+			name: "Success not watched",
+			before: func() {
+				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(sampleEpisodeDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+			},
+			expected: &serializers.EpisodeDetailsSerializer{
+				Id:         80,
+				Title:      "Pilot",
+				Number:     1,
+				PosterPath: "/e1.jpg",
+				Runtime:    58,
+				Overview:   "The pilot.",
+				Rating:     8.0,
+				AirDate:    "2008-01-20",
+				Watched:    false,
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -905,13 +975,22 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 			expected: nil,
 			error:    tmdb.ErrFailedToFetchEpisodeDetails,
 		},
+		{
+			name: "Progress error",
+			before: func() {
+				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(sampleEpisodeDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(nil, assert.AnError)
+			},
+			expected: nil,
+			error:    tmdb.ErrFailedToFetchEpisodeDetails,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := provider.FetchTvEpisodeDetails(ctx, 300, 1, 1)
+			result, err := provider.FetchTvEpisodeDetails(ctx, 300, 1, 1, userId)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)
@@ -932,7 +1011,8 @@ func Test_Tmdb_SearchMovies(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	userId := uuid.New()
 
@@ -1004,7 +1084,8 @@ func Test_Tmdb_FetchTrendingMovies(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	userId := uuid.New()
 
@@ -1066,7 +1147,8 @@ func Test_Tmdb_SearchSeries(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	userId := uuid.New()
 
@@ -1138,7 +1220,8 @@ func Test_Tmdb_FetchTrendingSeries(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	userId := uuid.New()
 
@@ -1200,7 +1283,8 @@ func Test_Tmdb_SearchPeople(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	tests := []struct {
 		name     string
@@ -1263,7 +1347,8 @@ func Test_Tmdb_FetchTrendingPeople(t *testing.T) {
 	client := tmdb.NewMockClient(ctrl)
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, newTestLogger())
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
 
 	tests := []struct {
 		name     string

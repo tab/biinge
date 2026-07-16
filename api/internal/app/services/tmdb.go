@@ -58,7 +58,7 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 			Uint64("Id", id).
 			Msg("Failed to fetch movie details")
 
-		return nil, tmdb.ErrFailedToFetchMovieDetails
+		return p.fallbackMovieDetails(ctx, id, userId)
 	}
 
 	details := tmdb.TransformMovieDetails(response)
@@ -191,6 +191,28 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 	}, nil
 }
 
+// fallbackMovieDetails serves stored library data when TMDB is unavailable, else a fetch error
+func (p *tmdbProvider) fallbackMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error) {
+	movie, err := p.movies.FindByTmdbId(ctx, id, userId)
+	if err != nil {
+		return nil, tmdb.ErrFailedToFetchMovieDetails
+	}
+
+	p.log.Warn().Uint64("Id", id).Msg("Serving stored movie details while TMDB is unavailable")
+
+	return &serializers.MovieDetailsSerializer{
+		Id:              id,
+		Pinned:          movie.Pinned,
+		State:           movie.State,
+		Title:           movie.Title,
+		PosterPath:      movie.PosterPath,
+		Runtime:         int(movie.Runtime),
+		Credits:         make([]serializers.PersonSerializer, 0),
+		Recommendations: make([]serializers.RecommendationSerializer, 0),
+		Videos:          make([]serializers.VideoSerializer, 0),
+	}, nil
+}
+
 func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error) {
 	p.log.Debug().Uint64("Id", id).Msg("Fetching tv details")
 
@@ -201,7 +223,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 			Uint64("Id", id).
 			Msg("Failed to fetch tv details")
 
-		return nil, tmdb.ErrFailedToFetchTvDetails
+		return p.fallbackTvDetails(ctx, id, userId)
 	}
 
 	details := tmdb.TransformTvDetails(response)
@@ -345,6 +367,31 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		Recommendations: recommendations,
 		Videos:          videos,
 		Seasons:         seasons,
+	}, nil
+}
+
+// fallbackTvDetails serves stored library data when TMDB is unavailable, else a fetch error
+func (p *tmdbProvider) fallbackTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error) {
+	tvShow, err := p.series.FindByTmdbId(ctx, id, userId)
+	if err != nil {
+		return nil, tmdb.ErrFailedToFetchTvDetails
+	}
+
+	p.log.Warn().Uint64("Id", id).Msg("Serving stored series details while TMDB is unavailable")
+
+	return &serializers.SeriesDetailsSerializer{
+		Id:              id,
+		Pinned:          tvShow.Pinned,
+		State:           tvShow.State,
+		Status:          tvShow.Status,
+		Title:           tvShow.Title,
+		PosterPath:      tvShow.PosterPath,
+		SeasonsCount:    tvShow.SeasonsCount,
+		EpisodesCount:   tvShow.EpisodesCount,
+		Credits:         make([]serializers.PersonSerializer, 0),
+		Recommendations: make([]serializers.RecommendationSerializer, 0),
+		Videos:          make([]serializers.VideoSerializer, 0),
+		Seasons:         make([]serializers.SeasonSummarySerializer, 0),
 	}, nil
 }
 

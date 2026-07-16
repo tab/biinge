@@ -376,9 +376,32 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			},
 		},
 		{
-			name: "Client error",
+			name: "Client error - serves stored library data",
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(nil, assert.AnError)
+
+				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(&models.Movie{
+					ID: movieID, TmdbId: 100, Title: "Stored Title", PosterPath: "/stored.jpg", Runtime: 120, State: "watched", Pinned: true,
+				}, nil)
+			},
+			expected: &serializers.MovieDetailsSerializer{
+				Id:              100,
+				Pinned:          true,
+				State:           "watched",
+				Title:           "Stored Title",
+				PosterPath:      "/stored.jpg",
+				Runtime:         120,
+				Credits:         []serializers.PersonSerializer{},
+				Recommendations: []serializers.RecommendationSerializer{},
+				Videos:          []serializers.VideoSerializer{},
+			},
+		},
+		{
+			name: "Client error - not in library returns error",
+			before: func() {
+				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(nil, assert.AnError)
+
+				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(nil, errors.ErrMovieNotFound)
 			},
 			expected: nil,
 			error:    tmdb.ErrFailedToFetchMovieDetails,
@@ -587,9 +610,35 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			},
 		},
 		{
-			name: "Client error",
+			name: "Client error - serves stored library data",
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(nil, assert.AnError)
+
+				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(&models.Series{
+					ID: seriesID, TmdbId: 300, Title: "Stored Title", PosterPath: "/stored.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended", State: "watched", Pinned: true,
+				}, nil)
+			},
+			expected: &serializers.SeriesDetailsSerializer{
+				Id:              300,
+				Pinned:          true,
+				State:           "watched",
+				Status:          "Ended",
+				Title:           "Stored Title",
+				PosterPath:      "/stored.jpg",
+				SeasonsCount:    5,
+				EpisodesCount:   62,
+				Credits:         []serializers.PersonSerializer{},
+				Recommendations: []serializers.RecommendationSerializer{},
+				Videos:          []serializers.VideoSerializer{},
+				Seasons:         []serializers.SeasonSummarySerializer{},
+			},
+		},
+		{
+			name: "Client error - not in library returns error",
+			before: func() {
+				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(nil, assert.AnError)
+
+				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(nil, errors.ErrSeriesNotFound)
 			},
 			expected: nil,
 			error:    tmdb.ErrFailedToFetchTvDetails,

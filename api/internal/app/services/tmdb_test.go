@@ -1404,3 +1404,140 @@ func Test_Tmdb_FetchTrendingPeople(t *testing.T) {
 		})
 	}
 }
+
+func Test_Tmdb_FetchUpNext(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	client := tmdb.NewMockClient(ctrl)
+	moviesSvc := NewMockMovies(ctrl)
+	seriesSvc := NewMockSeries(ctrl)
+	progressSvc := NewMockProgress(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	userId := uuid.New()
+
+	tests := []struct {
+		name     string
+		before   func()
+		expected *serializers.UpNextSerializer
+		error    error
+	}{
+		{
+			name: "Suggests the next unwatched aired episode and released movies",
+			before: func() {
+				seriesSvc.EXPECT().List(ctx, userId, models.StateTypeWatching, gomock.Any()).Return([]models.Series{
+					{TmdbId: 300, Title: "Breaking Bad", PosterPath: "/bb.jpg", Pinned: true},
+					{TmdbId: 400, Title: "Dropped Show", PosterPath: "/d.jpg", Pinned: false},
+				}, uint64(2), nil)
+
+				// season 1 (id 50) is fully watched, so it is skipped without a fetch; the resume point is S2E2
+				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(&tmdb.TvDetails{Id: 300, Seasons: []tmdb.TvSeason{{Id: 50, SeasonNumber: 1}, {Id: 60, SeasonNumber: 2}}}, nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{WatchedSeasons: []uint64{50}, WatchedEpisodes: []uint64{201}}, nil)
+				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(2)).Return(&tmdb.SeasonDetails{Episodes: []tmdb.Episode{
+					{ID: 201, EpisodeNumber: 1, SeasonNumber: 2, Name: "Seen", AirDate: "2000-01-01"},
+					{ID: 202, EpisodeNumber: 2, SeasonNumber: 2, Name: "Next Ep", Overview: "The next one.", Runtime: 47, StillPath: "/a.jpg", AirDate: "2000-01-08", VoteAverage: 9.0},
+					{ID: 203, EpisodeNumber: 3, SeasonNumber: 2, Name: "Future", AirDate: "2999-01-01"},
+				}}, nil)
+
+				moviesSvc.EXPECT().List(ctx, userId, models.StateTypeWant, gomock.Any()).Return([]models.Movie{
+					{TmdbId: 500, Title: "Dune", Pinned: true},
+					{TmdbId: 550, Title: "Old Film", Pinned: true},
+					{TmdbId: 600, Title: "Unpinned", Pinned: false},
+				}, uint64(3), nil)
+
+				// 500 released by status, 550 released by a past date; 600 is unpinned and never looked up
+				client.EXPECT().FetchMovieDetails(ctx, uint64(500)).Return(&tmdb.MovieDetails{Id: 500, Title: "Dune", PosterPath: "/dune.jpg", Overview: "Paul's journey.", Status: "Released", ReleaseDate: "2021-10-22", Runtime: 155, VoteAverage: 8.0}, nil)
+				client.EXPECT().FetchMovieDetails(ctx, uint64(550)).Return(&tmdb.MovieDetails{Id: 550, Title: "Old Film", PosterPath: "/old.jpg", Overview: "Classic.", Status: "", ReleaseDate: "2000-06-15", Runtime: 120, VoteAverage: 7.0}, nil)
+			},
+			expected: &serializers.UpNextSerializer{
+				Episodes: []serializers.UpNextEpisodeSerializer{
+					{SeriesId: 300, SeriesTitle: "Breaking Bad", SeriesPosterPath: "/bb.jpg", Id: 202, Title: "Next Ep", SeasonNumber: 2, Number: 2, PosterPath: "/a.jpg", Overview: "The next one.", Runtime: 47, Rating: 9.0, AirDate: "2000-01-08"},
+				},
+				Movies: []serializers.UpNextMovieSerializer{
+					{Id: 500, Title: "Dune", PosterPath: "/dune.jpg", Overview: "Paul's journey.", Runtime: 155, Rating: 8.0, ReleaseDate: "2021-10-22"},
+					{Id: 550, Title: "Old Film", PosterPath: "/old.jpg", Overview: "Classic.", Runtime: 120, Rating: 7.0, ReleaseDate: "2000-06-15"},
+				},
+			},
+		},
+		{
+			name: "Skips a show whose next episode has not aired and unreleased movies",
+			before: func() {
+				seriesSvc.EXPECT().List(ctx, userId, models.StateTypeWatching, gomock.Any()).Return([]models.Series{{TmdbId: 300, Title: "Breaking Bad", Pinned: true}}, uint64(1), nil)
+				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(&tmdb.TvDetails{Id: 300, Seasons: []tmdb.TvSeason{{Id: 50, SeasonNumber: 1}}}, nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{WatchedEpisodes: []uint64{201}}, nil)
+				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(&tmdb.SeasonDetails{Episodes: []tmdb.Episode{
+					{ID: 201, EpisodeNumber: 1, AirDate: "2000-01-01"},
+					{ID: 202, EpisodeNumber: 2, AirDate: "2999-01-01"},
+				}}, nil)
+
+				moviesSvc.EXPECT().List(ctx, userId, models.StateTypeWant, gomock.Any()).Return([]models.Movie{{TmdbId: 500, Title: "Future Film", Pinned: true}}, uint64(1), nil)
+				client.EXPECT().FetchMovieDetails(ctx, uint64(500)).Return(&tmdb.MovieDetails{Id: 500, Status: "Post Production", ReleaseDate: "2999-01-01"}, nil)
+			},
+			expected: &serializers.UpNextSerializer{
+				Episodes: []serializers.UpNextEpisodeSerializer{},
+				Movies:   []serializers.UpNextMovieSerializer{},
+			},
+		},
+		{
+			name: "Skips items when TMDB lookups fail",
+			before: func() {
+				seriesSvc.EXPECT().List(ctx, userId, models.StateTypeWatching, gomock.Any()).Return([]models.Series{{TmdbId: 300, Pinned: true}}, uint64(1), nil)
+				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(&tmdb.TvDetails{Id: 300, Seasons: []tmdb.TvSeason{{Id: 50, SeasonNumber: 1}}}, nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{}, nil)
+				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(nil, assert.AnError)
+
+				moviesSvc.EXPECT().List(ctx, userId, models.StateTypeWant, gomock.Any()).Return([]models.Movie{{TmdbId: 500, Pinned: true}}, uint64(1), nil)
+				client.EXPECT().FetchMovieDetails(ctx, uint64(500)).Return(nil, assert.AnError)
+			},
+			expected: &serializers.UpNextSerializer{
+				Episodes: []serializers.UpNextEpisodeSerializer{},
+				Movies:   []serializers.UpNextMovieSerializer{},
+			},
+		},
+		{
+			name: "Returns empty when nothing is pinned",
+			before: func() {
+				seriesSvc.EXPECT().List(ctx, userId, models.StateTypeWatching, gomock.Any()).Return([]models.Series{{TmdbId: 300, Pinned: false}}, uint64(1), nil)
+				moviesSvc.EXPECT().List(ctx, userId, models.StateTypeWant, gomock.Any()).Return([]models.Movie{{TmdbId: 500, Pinned: false}}, uint64(1), nil)
+			},
+			expected: &serializers.UpNextSerializer{
+				Episodes: []serializers.UpNextEpisodeSerializer{},
+				Movies:   []serializers.UpNextMovieSerializer{},
+			},
+		},
+		{
+			name: "Series list error is returned",
+			before: func() {
+				seriesSvc.EXPECT().List(ctx, userId, models.StateTypeWatching, gomock.Any()).Return(nil, uint64(0), assert.AnError)
+			},
+			expected: nil,
+			error:    assert.AnError,
+		},
+		{
+			name: "Movie list error is returned",
+			before: func() {
+				seriesSvc.EXPECT().List(ctx, userId, models.StateTypeWatching, gomock.Any()).Return([]models.Series{}, uint64(0), nil)
+				moviesSvc.EXPECT().List(ctx, userId, models.StateTypeWant, gomock.Any()).Return(nil, uint64(0), assert.AnError)
+			},
+			expected: nil,
+			error:    assert.AnError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			result, err := provider.FetchUpNext(ctx, userId)
+
+			if tt.error != nil {
+				require.ErrorIs(t, err, tt.error)
+				assert.Nil(t, result)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
+			}
+		})
+	}
+}

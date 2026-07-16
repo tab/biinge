@@ -3,6 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"sort"
+	"sync"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -27,6 +30,8 @@ type TmdbProvider interface {
 	FetchTrendingMovies(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error)
 	FetchTrendingSeries(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error)
 	FetchTrendingPeople(ctx context.Context) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error)
+
+	FetchUpNext(ctx context.Context, userId uuid.UUID) (*serializers.UpNextSerializer, error)
 }
 
 type tmdbProvider struct {
@@ -849,4 +854,242 @@ func hasNotableCredit(knownFor []tmdb.PersonKnownFor, minVotes int) bool {
 	}
 
 	return false
+}
+
+// upNextConcurrency bounds the parallel TMDB detail lookups a single up-next request may run
+const upNextConcurrency = 8
+
+// tmdbReleasedStatus is the TMDB movie status meaning the film is out
+const tmdbReleasedStatus = "Released"
+
+// FetchUpNext builds the user's ready-to-watch queue from pinned library items: the latest aired-but-unwatched episode of each pinned show and any released, unwatched pinned movie
+func (p *tmdbProvider) FetchUpNext(ctx context.Context, userId uuid.UUID) (*serializers.UpNextSerializer, error) {
+	episodes, err := p.upNextEpisodes(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	movies, err := p.upNextMovies(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &serializers.UpNextSerializer{Episodes: episodes, Movies: movies}, nil
+}
+
+// upNextEpisodes returns the next unwatched-but-aired episode of each pinned watching show, most recent first
+func (p *tmdbProvider) upNextEpisodes(ctx context.Context, userId uuid.UUID) ([]serializers.UpNextEpisodeSerializer, error) {
+	watching, _, err := p.series.List(ctx, userId, models.StateTypeWatching, &Pagination{Page: DefaultPage, PerPage: MaxPerPage})
+	if err != nil {
+		return nil, err
+	}
+
+	pinned := make([]models.Series, 0, len(watching))
+	for _, show := range watching {
+		if show.Pinned {
+			pinned = append(pinned, show)
+		}
+	}
+
+	entries := boundedMap(pinned, upNextConcurrency, func(show models.Series) *serializers.UpNextEpisodeSerializer {
+		return p.nextUnwatchedEpisode(ctx, userId, show)
+	})
+
+	episodes := make([]serializers.UpNextEpisodeSerializer, 0, len(pinned))
+
+	for _, entry := range entries {
+		if entry != nil {
+			episodes = append(episodes, *entry)
+		}
+	}
+
+	// most-recently-aired first (ISO dates sort lexically)
+	sort.SliceStable(episodes, func(i, j int) bool { return episodes[i].AirDate > episodes[j].AirDate })
+
+	return episodes, nil
+}
+
+// nextUnwatchedEpisode walks a show's seasons in order and returns the first unwatched episode that has aired (the resume point), skipping on any TMDB failure
+func (p *tmdbProvider) nextUnwatchedEpisode(ctx context.Context, userId uuid.UUID, show models.Series) *serializers.UpNextEpisodeSerializer {
+	detail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d", show.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+		return p.client.FetchTvDetails(ctx, show.TmdbId)
+	})
+	if err != nil {
+		p.log.Warn().Err(err).Uint64("ShowId", show.TmdbId).Msg("Skipping show in up-next; TMDB details unavailable")
+		return nil
+	}
+
+	progress, err := p.progress.Get(ctx, userId, show.TmdbId)
+	if err != nil {
+		p.log.Warn().Err(err).Uint64("ShowId", show.TmdbId).Msg("Skipping show in up-next; progress unavailable")
+		return nil
+	}
+
+	watchedEpisodes := toIdSet(progress.WatchedEpisodes)
+	watchedSeasons := toIdSet(progress.WatchedSeasons)
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+
+	// regular seasons only (drop specials), ascending so the walk follows air order
+	seasons := make([]tmdb.TvSeason, 0, len(detail.Seasons))
+	for _, season := range detail.Seasons {
+		if season.SeasonNumber >= 1 {
+			seasons = append(seasons, season)
+		}
+	}
+
+	sort.SliceStable(seasons, func(i, j int) bool { return seasons[i].SeasonNumber < seasons[j].SeasonNumber })
+
+	for _, season := range seasons {
+		if _, done := watchedSeasons[season.Id]; done {
+			continue // fully watched, skip without fetching
+		}
+
+		seasonDetail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d", show.TmdbId, season.SeasonNumber), cache.DetailsTTL, func() (*tmdb.SeasonDetails, error) {
+			return p.client.FetchTvSeasonDetails(ctx, show.TmdbId, uint64(season.SeasonNumber))
+		})
+		if err != nil {
+			p.log.Warn().Err(err).Uint64("ShowId", show.TmdbId).Int("Season", season.SeasonNumber).Msg("Skipping show in up-next; season details unavailable")
+			return nil
+		}
+
+		for _, episode := range seasonDetail.Episodes {
+			if _, watched := watchedEpisodes[uint64(episode.ID)]; watched {
+				continue
+			}
+
+			// the first unwatched episode is the resume point: suggest it only if it has aired
+			if airedOnOrBefore(episode.AirDate, today) {
+				entry := upNextEpisodeEntry(show, episode)
+				return &entry
+			}
+
+			return nil
+		}
+	}
+
+	return nil
+}
+
+// airedOnOrBefore reports whether a TMDB air date parses and falls on or before the given day
+func airedOnOrBefore(airDate string, day time.Time) bool {
+	date, err := tmdb.ParseDate(airDate)
+	if err != nil || date.IsZero() {
+		return false
+	}
+
+	return !date.After(day)
+}
+
+// upNextEpisodeEntry builds an up-next row from a show and one of its episodes
+func upNextEpisodeEntry(show models.Series, episode tmdb.Episode) serializers.UpNextEpisodeSerializer {
+	return serializers.UpNextEpisodeSerializer{
+		SeriesId:         show.TmdbId,
+		SeriesTitle:      show.Title,
+		SeriesPosterPath: show.PosterPath,
+		Id:               uint64(episode.ID),
+		Title:            episode.Name,
+		SeasonNumber:     uint64(episode.SeasonNumber),
+		Number:           uint64(episode.EpisodeNumber),
+		PosterPath:       episode.StillPath,
+		Overview:         episode.Overview,
+		Runtime:          uint64(max(episode.Runtime, 0)),
+		Rating:           episode.VoteAverage,
+		AirDate:          episode.AirDate,
+	}
+}
+
+// upNextMovies returns the released movies among the user's pinned want list, preserving library order
+func (p *tmdbProvider) upNextMovies(ctx context.Context, userId uuid.UUID) ([]serializers.UpNextMovieSerializer, error) {
+	want, _, err := p.movies.List(ctx, userId, models.StateTypeWant, &Pagination{Page: DefaultPage, PerPage: MaxPerPage})
+	if err != nil {
+		return nil, err
+	}
+
+	pinned := make([]models.Movie, 0, len(want))
+	for _, movie := range want {
+		if movie.Pinned {
+			pinned = append(pinned, movie)
+		}
+	}
+
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+
+	entries := boundedMap(pinned, upNextConcurrency, func(movie models.Movie) *serializers.UpNextMovieSerializer {
+		return p.releasedMovie(ctx, movie, today)
+	})
+
+	movies := make([]serializers.UpNextMovieSerializer, 0, len(pinned))
+
+	for _, entry := range entries {
+		if entry != nil {
+			movies = append(movies, *entry)
+		}
+	}
+
+	return movies, nil
+}
+
+// releasedMovie resolves a want-list movie when it has been released, skipping on any TMDB failure
+func (p *tmdbProvider) releasedMovie(ctx context.Context, movie models.Movie, today time.Time) *serializers.UpNextMovieSerializer {
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:movie:%d", movie.TmdbId), cache.DetailsTTL, func() (*tmdb.MovieDetails, error) {
+		return p.client.FetchMovieDetails(ctx, movie.TmdbId)
+	})
+	if err != nil {
+		p.log.Warn().Err(err).Uint64("MovieId", movie.TmdbId).Msg("Skipping movie in up-next; TMDB details unavailable")
+		return nil
+	}
+
+	if !isReleased(response.Status, response.ReleaseDate, today) {
+		return nil
+	}
+
+	entry := serializers.UpNextMovieSerializer{
+		Id:          movie.TmdbId,
+		Title:       response.Title,
+		PosterPath:  response.PosterPath,
+		Overview:    response.Overview,
+		Runtime:     uint64(max(response.Runtime, 0)),
+		Rating:      response.VoteAverage,
+		ReleaseDate: response.ReleaseDate,
+	}
+
+	return &entry
+}
+
+// isReleased reports whether a movie is out: a "Released" status, or a release date on or before today
+func isReleased(status, releaseDate string, today time.Time) bool {
+	if status == tmdbReleasedStatus {
+		return true
+	}
+
+	date, err := tmdb.ParseDate(releaseDate)
+	if err != nil || date.IsZero() {
+		return false
+	}
+
+	return !date.After(today)
+}
+
+// boundedMap applies fn to every item concurrently, capped at `concurrency` in-flight, preserving input order
+func boundedMap[T any, R any](items []T, concurrency int, fn func(T) R) []R {
+	results := make([]R, len(items))
+	semaphore := make(chan struct{}, concurrency)
+
+	var wg sync.WaitGroup
+	for i := range items {
+		wg.Add(1)
+
+		semaphore <- struct{}{}
+
+		go func(i int) {
+			defer wg.Done()
+			defer func() { <-semaphore }()
+
+			results[i] = fn(items[i])
+		}(i)
+	}
+
+	wg.Wait()
+
+	return results
 }

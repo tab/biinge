@@ -25,6 +25,7 @@ func NewRouter(
 	series controllers.SeriesController,
 	people controllers.PeopleController,
 	catalog controllers.CatalogController,
+	upNext controllers.UpNextController,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -114,6 +115,8 @@ func NewRouter(
 				r.Get("/series", catalog.HandleTrendingSeries)
 				r.Get("/people", catalog.HandleTrendingPeople)
 			})
+
+			r.Get("/up-next", upNext.HandleUpNext)
 		})
 	})
 

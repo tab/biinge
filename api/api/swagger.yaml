@@ -1560,6 +1560,34 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/up-next:
+    get:
+      summary: "Up next"
+      description: "Upcoming and recently aired episodes across the current user's watching shows"
+      tags:
+        - series
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpNextSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
 components:
   securitySchemes:
     BearerAuth:
@@ -2447,6 +2475,111 @@ components:
         - title
         - number
         - watched
+
+    UpNextEpisodeSerializer:
+      type: object
+      properties:
+        seriesId:
+          type: integer
+          format: int64
+          description: "Show TMDB ID"
+        seriesTitle:
+          type: string
+          description: "Show title"
+        seriesPosterPath:
+          type: string
+          description: "Path to the show's poster image"
+        id:
+          type: integer
+          format: int64
+          description: "Episode TMDB ID"
+        title:
+          type: string
+          description: "Episode title"
+        seasonNumber:
+          type: integer
+          format: int64
+          description: "Season number"
+        number:
+          type: integer
+          format: int64
+          description: "Episode number"
+        posterPath:
+          type: string
+          description: "Path to episode still image"
+        overview:
+          type: string
+          description: "Episode overview"
+        runtime:
+          type: integer
+          format: int64
+          description: "Episode runtime in minutes"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        airDate:
+          type: string
+          format: date
+          description: "Episode air date"
+      required:
+        - seriesId
+        - seriesTitle
+        - id
+        - title
+        - seasonNumber
+        - number
+        - airDate
+
+    UpNextMovieSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Movie TMDB ID"
+        title:
+          type: string
+          description: "Movie title"
+        posterPath:
+          type: string
+          description: "Path to the movie poster image"
+        overview:
+          type: string
+          description: "Movie overview"
+        runtime:
+          type: integer
+          format: int64
+          description: "Runtime in minutes"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        releaseDate:
+          type: string
+          format: date
+          description: "Release date"
+      required:
+        - id
+        - title
+        - releaseDate
+
+    UpNextSerializer:
+      type: object
+      properties:
+        episodes:
+          type: array
+          description: "Latest aired but unwatched episode of each pinned watching show, most recent first"
+          items:
+            $ref: "#/components/schemas/UpNextEpisodeSerializer"
+        movies:
+          type: array
+          description: "Released but unwatched movies from the user's pinned want list"
+          items:
+            $ref: "#/components/schemas/UpNextMovieSerializer"
+      required:
+        - episodes
+        - movies
 
     SearchMovieSerializer:
       type: object

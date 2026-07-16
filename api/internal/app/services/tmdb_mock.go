@@ -162,6 +162,21 @@ func (mr *MockTmdbProviderMockRecorder) FetchTvSeasonDetails(ctx, showId, season
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchTvSeasonDetails", reflect.TypeOf((*MockTmdbProvider)(nil).FetchTvSeasonDetails), ctx, showId, seasonNumber, userId)
 }
 
+// FetchUpNext mocks base method.
+func (m *MockTmdbProvider) FetchUpNext(ctx context.Context, userId uuid.UUID) (*serializers.UpNextSerializer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FetchUpNext", ctx, userId)
+	ret0, _ := ret[0].(*serializers.UpNextSerializer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FetchUpNext indicates an expected call of FetchUpNext.
+func (mr *MockTmdbProviderMockRecorder) FetchUpNext(ctx, userId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchUpNext", reflect.TypeOf((*MockTmdbProvider)(nil).FetchUpNext), ctx, userId)
+}
+
 // SearchMovies mocks base method.
 func (m *MockTmdbProvider) SearchMovies(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
 	m.ctrl.T.Helper()

@@ -30,6 +30,10 @@ func (m *loggerMiddleware) Log(next http.Handler) http.Handler {
 		traceId, _ := CurrentTraceIdFromContext(r.Context())
 		requestId := middleware.GetReqID(r.Context())
 
+		// seed a holder the auth middleware fills in, so we can log the user id
+		ctx, userHolder := WithUserHolder(r.Context())
+		r = r.WithContext(ctx)
+
 		reqLogger := m.log.
 			WithComponent("http").
 			WithRequestId(requestId).
@@ -47,7 +51,17 @@ func (m *loggerMiddleware) Log(next http.Handler) http.Handler {
 		size := ww.BytesWritten()
 		duration := time.Since(startTime)
 
-		reqLogger.Info().
+		// Level by outcome so failures surface above the info noise: 5xx errors, 4xx warnings
+		event := reqLogger.Info()
+
+		switch {
+		case status >= http.StatusInternalServerError:
+			event = reqLogger.Error()
+		case status >= http.StatusBadRequest:
+			event = reqLogger.Warn()
+		}
+
+		event.
 			Str("method", r.Method).
 			Str("uri", r.RequestURI).
 			Str("proto", r.Proto).
@@ -56,7 +70,12 @@ func (m *loggerMiddleware) Log(next http.Handler) http.Handler {
 			Str("user_agent", r.UserAgent()).
 			Int("status", status).
 			Int("size", size).
-			Dur("duration", duration).
-			Msgf("%s %s - %d %dB in %s", r.Method, r.RequestURI, status, size, duration)
+			Dur("duration", duration)
+
+		if userHolder.UserId != "" {
+			event.Str("user_id", userHolder.UserId)
+		}
+
+		event.Msgf("%s %s - %d %dB in %s", r.Method, r.RequestURI, status, size, duration)
 	})
 }

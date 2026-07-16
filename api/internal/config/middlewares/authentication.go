@@ -81,6 +81,8 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 			WithCurrentUser(user).
 			Context()
 
+		SetCurrentUserId(r.Context(), user.ID.String())
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

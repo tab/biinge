@@ -28,7 +28,7 @@ func NewRouter(
 ) http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
+	r.Use(middlewares.RequestID)
 
 	// report panics to Sentry, then repanic so Recoverer still returns a 500
 	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})

@@ -42,12 +42,25 @@ func Test_LoggerMiddleware_Logger(t *testing.T) {
 	tests := []struct {
 		name     string
 		traceId  string
+		userId   string
 		useTLS   bool
+		status   int
 		expected result
 	}{
 		{
 			name:    "Success",
 			traceId: "test-trace-id",
+			status:  http.StatusOK,
+			expected: result{
+				code:   http.StatusOK,
+				status: "200 OK",
+			},
+		},
+		{
+			name:    "Success with authenticated user",
+			traceId: "test-trace-id",
+			userId:  "user-123",
+			status:  http.StatusOK,
 			expected: result{
 				code:   http.StatusOK,
 				status: "200 OK",
@@ -57,9 +70,28 @@ func Test_LoggerMiddleware_Logger(t *testing.T) {
 			name:    "Success over TLS",
 			traceId: "test-trace-id",
 			useTLS:  true,
+			status:  http.StatusOK,
 			expected: result{
 				code:   http.StatusOK,
 				status: "200 OK",
+			},
+		},
+		{
+			name:    "Client error logs at warn",
+			traceId: "test-trace-id",
+			status:  http.StatusUnprocessableEntity,
+			expected: result{
+				code:   http.StatusUnprocessableEntity,
+				status: "422 Unprocessable Entity",
+			},
+		},
+		{
+			name:    "Server error logs at error",
+			traceId: "test-trace-id",
+			status:  http.StatusInternalServerError,
+			expected: result{
+				code:   http.StatusInternalServerError,
+				status: "500 Internal Server Error",
 			},
 		},
 	}
@@ -67,8 +99,12 @@ func Test_LoggerMiddleware_Logger(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(http.StatusOK)
-				_, _ = w.Write([]byte("Success"))
+				if tt.userId != "" {
+					SetCurrentUserId(r.Context(), tt.userId)
+				}
+
+				w.WriteHeader(tt.status)
+				_, _ = w.Write([]byte("body"))
 			})
 
 			req, err := http.NewRequest(http.MethodGet, "/test", nil)

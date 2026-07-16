@@ -228,6 +228,9 @@ struct StatisticsView: View {
     @ViewBuilder
     private func content(_ stats: AccountStats) -> some View {
         VStack(alignment: .leading, spacing: 28) {
+            if let activity = stats.activity {
+                watchActivity(activity)
+            }
             watchTime(stats)
             breakdown(
                 "Movies",
@@ -246,6 +249,57 @@ struct StatisticsView: View {
                 ],
                 caption: "\(stats.episodes.watched) episodes · \(formatMinutes(stats.episodes.minutes)) watched"
             )
+        }
+    }
+
+    @ViewBuilder
+    private func watchActivity(_ months: [AccountStats.Monthly]) -> some View {
+        let total = months.reduce(0) { $0 + $1.totalMinutes }
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeading("Watch activity")
+            if total > 0 {
+                Chart(months) { month in
+                    BarMark(
+                        x: .value("Month", month.date, unit: .month),
+                        y: .value("Minutes", month.movieMinutes)
+                    )
+                    .foregroundStyle(by: .value("Kind", "Movies"))
+                    BarMark(
+                        x: .value("Month", month.date, unit: .month),
+                        y: .value("Minutes", month.tvMinutes)
+                    )
+                    .foregroundStyle(by: .value("Kind", "TV"))
+                }
+                .chartForegroundStyleScale(
+                    domain: ["Movies", "TV"],
+                    range: [StatPalette.moviesTime, StatPalette.tvTime]
+                )
+                .chartLegend(position: .bottom, spacing: 12)
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                        AxisValueLabel {
+                            if let minutes = value.as(Int.self) {
+                                Text("\(minutes / 60)h")
+                            }
+                        }
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .month, count: 2)) { _ in
+                        AxisTick()
+                        AxisValueLabel(format: .dateTime.month(.narrow))
+                    }
+                }
+                .frame(height: 180)
+                Text("\(formatMinutes(total)) in the last 12 months")
+                    .font(.biingeFootnote)
+                    .foregroundStyle(Color.biingeGraniteGray)
+            } else {
+                Text("No watch activity yet")
+                    .font(.biingeCallout)
+                    .foregroundStyle(Color.biingeGraniteGray)
+            }
         }
     }
 

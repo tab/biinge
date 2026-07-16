@@ -10,8 +10,11 @@ services:
       - ./api/.env.development
     environment:
       - DATABASE_DSN=postgres://postgres:postgres@database:5432/biinge-development?sslmode=disable
+      - REDIS_URL=redis://redis:6379
     depends_on:
       database:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - biinge-network
@@ -28,6 +31,19 @@ services:
       - biinge-database:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "biinge-development"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - biinge-network
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5

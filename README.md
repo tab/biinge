@@ -11,12 +11,16 @@ The two apps are decoupled by the HTTP contract in `api/api/swagger.yaml`; there
 
 ## Local development
 
-Start Postgres (and optionally build the API image):
+Start Postgres and Redis (and optionally build the API image):
 
 ```sh
-docker compose up -d database        # Postgres on :5432
+docker compose up -d database redis  # Postgres on :5432, Redis on :6379
 make -C api db:migrate               # apply migrations (GO_ENV=development)
 ```
+
+TMDB proxy responses (detail/search/trending) are cached in Redis when `REDIS_URL` is set
+(e.g. `redis://localhost:6379`); the cache is optional — with it unset, or Redis unreachable,
+the API just serves uncached.
 
 Run the API from source, or boot everything with readiness checks via [fuku](https://github.com/tab/fuku):
 

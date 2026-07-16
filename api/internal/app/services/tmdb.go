@@ -2,12 +2,14 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
+	"biinge-api/internal/config/cache"
 	"biinge-api/internal/config/logger"
 	"biinge-api/pkg/tmdb"
 )
@@ -32,6 +34,7 @@ type tmdbProvider struct {
 	movies   Movies
 	series   Series
 	progress Progress
+	cache    cache.Cache
 	log      *logger.Logger
 }
 
@@ -40,6 +43,7 @@ func NewTmdbProvider(
 	movies Movies,
 	series Series,
 	progress Progress,
+	store cache.Cache,
 	log *logger.Logger,
 ) TmdbProvider {
 	return &tmdbProvider{
@@ -47,6 +51,7 @@ func NewTmdbProvider(
 		movies:   movies,
 		series:   series,
 		progress: progress,
+		cache:    store,
 		log:      log.WithComponent("TmdbProvider"),
 	}
 }
@@ -64,7 +69,9 @@ func toIdSet(ids []uint64) map[uint64]struct{} {
 func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error) {
 	p.log.Debug().Uint64("Id", id).Msg("Fetching movie details")
 
-	response, err := p.client.FetchMovieDetails(ctx, id)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:movie:%d", id), cache.DetailsTTL, func() (*tmdb.MovieDetails, error) {
+		return p.client.FetchMovieDetails(ctx, id)
+	})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -229,7 +236,9 @@ func (p *tmdbProvider) fallbackMovieDetails(ctx context.Context, id uint64, user
 func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error) {
 	p.log.Debug().Uint64("Id", id).Msg("Fetching tv details")
 
-	response, err := p.client.FetchTvDetails(ctx, id)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d", id), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+		return p.client.FetchTvDetails(ctx, id)
+	})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -411,7 +420,9 @@ func (p *tmdbProvider) fallbackTvDetails(ctx context.Context, id uint64, userId 
 func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.PersonDetailsSerializer, error) {
 	p.log.Debug().Uint64("Id", id).Msg("Fetching person details")
 
-	response, err := p.client.FetchPersonDetails(ctx, id)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:person:%d", id), cache.DetailsTTL, func() (*tmdb.PersonDetails, error) {
+		return p.client.FetchPersonDetails(ctx, id)
+	})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -511,7 +522,9 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error) {
 	p.log.Debug().Uint64("ShowId", showId).Uint64("SeasonNumber", seasonNumber).Msg("Fetching tv season details")
 
-	response, err := p.client.FetchTvSeasonDetails(ctx, showId, seasonNumber)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d", showId, seasonNumber), cache.DetailsTTL, func() (*tmdb.SeasonDetails, error) {
+		return p.client.FetchTvSeasonDetails(ctx, showId, seasonNumber)
+	})
 	if err != nil {
 		p.log.Error().Err(err).Uint64("ShowId", showId).Uint64("SeasonNumber", seasonNumber).Msg("Failed to fetch tv season details")
 		return nil, tmdb.ErrFailedToFetchSeasonDetails
@@ -566,7 +579,9 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 		Uint64("EpisodeNumber", episodeNumber).
 		Msg("Fetching tv episode details")
 
-	response, err := p.client.FetchTvEpisodeDetails(ctx, showId, seasonNumber, episodeNumber)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d:episode:%d", showId, seasonNumber, episodeNumber), cache.DetailsTTL, func() (*tmdb.EpisodeDetails, error) {
+		return p.client.FetchTvEpisodeDetails(ctx, showId, seasonNumber, episodeNumber)
+	})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -622,7 +637,9 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 }
 
 func (p *tmdbProvider) SearchMovies(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
-	response, err := p.client.SearchMovies(ctx, query, page)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:search:movies:%d:%s", page, query), cache.SearchTTL, func() (*tmdb.MovieListResult, error) {
+		return p.client.SearchMovies(ctx, query, page)
+	})
 	if err != nil {
 		p.log.Error().Err(err).Str("query", query).Msg("Failed to search movies")
 		return nil, errors.ErrFailedToFetchResults
@@ -632,7 +649,9 @@ func (p *tmdbProvider) SearchMovies(ctx context.Context, query string, page uint
 }
 
 func (p *tmdbProvider) FetchTrendingMovies(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error) {
-	response, err := p.client.FetchTrendingMovies(ctx)
+	response, err := cache.Fetch(ctx, p.cache, p.log, "tmdb:v1:trending:movies", cache.TrendingTTL, func() (*tmdb.MovieListResult, error) {
+		return p.client.FetchTrendingMovies(ctx)
+	})
 	if err != nil {
 		p.log.Error().Err(err).Msg("Failed to fetch trending movies")
 		return nil, errors.ErrFailedToFetchResults
@@ -642,7 +661,9 @@ func (p *tmdbProvider) FetchTrendingMovies(ctx context.Context, userId uuid.UUID
 }
 
 func (p *tmdbProvider) SearchSeries(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error) {
-	response, err := p.client.SearchTv(ctx, query, page)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:search:tv:%d:%s", page, query), cache.SearchTTL, func() (*tmdb.TvListResult, error) {
+		return p.client.SearchTv(ctx, query, page)
+	})
 	if err != nil {
 		p.log.Error().Err(err).Str("query", query).Msg("Failed to search series")
 		return nil, errors.ErrFailedToFetchResults
@@ -652,7 +673,9 @@ func (p *tmdbProvider) SearchSeries(ctx context.Context, query string, page uint
 }
 
 func (p *tmdbProvider) FetchTrendingSeries(ctx context.Context, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchSeriesSerializer], error) {
-	response, err := p.client.FetchTrendingTv(ctx)
+	response, err := cache.Fetch(ctx, p.cache, p.log, "tmdb:v1:trending:tv", cache.TrendingTTL, func() (*tmdb.TvListResult, error) {
+		return p.client.FetchTrendingTv(ctx)
+	})
 	if err != nil {
 		p.log.Error().Err(err).Msg("Failed to fetch trending series")
 		return nil, errors.ErrFailedToFetchResults
@@ -662,7 +685,9 @@ func (p *tmdbProvider) FetchTrendingSeries(ctx context.Context, userId uuid.UUID
 }
 
 func (p *tmdbProvider) SearchPeople(ctx context.Context, query string, page uint64) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error) {
-	response, err := p.client.SearchPeople(ctx, query, page)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:search:people:%d:%s", page, query), cache.SearchTTL, func() (*tmdb.PersonListResult, error) {
+		return p.client.SearchPeople(ctx, query, page)
+	})
 	if err != nil {
 		p.log.Error().Err(err).Str("query", query).Msg("Failed to search people")
 		return nil, errors.ErrFailedToFetchResults
@@ -673,7 +698,9 @@ func (p *tmdbProvider) SearchPeople(ctx context.Context, query string, page uint
 }
 
 func (p *tmdbProvider) FetchTrendingPeople(ctx context.Context) (*serializers.PaginationResponse[serializers.SearchPersonSerializer], error) {
-	response, err := p.client.FetchTrendingPeople(ctx)
+	response, err := cache.Fetch(ctx, p.cache, p.log, "tmdb:v1:trending:people", cache.TrendingTTL, func() (*tmdb.PersonListResult, error) {
+		return p.client.FetchTrendingPeople(ctx)
+	})
 	if err != nil {
 		p.log.Error().Err(err).Msg("Failed to fetch trending people")
 		return nil, errors.ErrFailedToFetchResults

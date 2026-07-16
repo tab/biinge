@@ -12,6 +12,7 @@ import (
 	"biinge-api/internal/app/repositories"
 	"biinge-api/internal/app/services"
 	"biinge-api/internal/config"
+	"biinge-api/internal/config/cache"
 	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 	"biinge-api/internal/config/router"
@@ -24,6 +25,7 @@ import (
 var Module = fx.Options(
 	logger.Module,
 	sentry.Module,
+	cache.Module,
 
 	controllers.Module,
 	repositories.Module,

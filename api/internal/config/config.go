@@ -32,6 +32,8 @@ type Config struct {
 	LogLevel      string
 	SentryDSN     string
 
+	RedisURL string
+
 	TMDBConfig
 }
 
@@ -61,6 +63,8 @@ func LoadConfig() *Config {
 		JWTSecretKey:  getEnvString("JWT_SECRET_KEY"),
 		LogLevel:      getEnvString("LOG_LEVEL"),
 		SentryDSN:     getEnvString("SENTRY_DSN"),
+
+		RedisURL: getEnvString("REDIS_URL"),
 
 		TMDBConfig: TMDBConfig{
 			BaseURL:            getEnvString("TMDB_BASE_URL"),

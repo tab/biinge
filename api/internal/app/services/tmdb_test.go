@@ -12,6 +12,7 @@ import (
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
+	"biinge-api/internal/config/cache"
 	"biinge-api/pkg/tmdb"
 )
 
@@ -221,7 +222,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 	movieID := uuid.New()
@@ -456,7 +457,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 	seriesID := uuid.New()
@@ -694,7 +695,7 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -809,7 +810,7 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 	userId := uuid.New()
 
 	tests := []struct {
@@ -906,7 +907,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 	userId := uuid.New()
 
 	tests := []struct {
@@ -1012,7 +1013,7 @@ func Test_Tmdb_SearchMovies(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1085,7 +1086,7 @@ func Test_Tmdb_FetchTrendingMovies(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1148,7 +1149,7 @@ func Test_Tmdb_SearchSeries(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1221,7 +1222,7 @@ func Test_Tmdb_FetchTrendingSeries(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1284,7 +1285,7 @@ func Test_Tmdb_SearchPeople(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	tests := []struct {
 		name     string
@@ -1348,7 +1349,7 @@ func Test_Tmdb_FetchTrendingPeople(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, newTestLogger())
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
 
 	tests := []struct {
 		name     string

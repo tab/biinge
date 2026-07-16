@@ -81,6 +81,12 @@ actor APIClient {
         try await get("/trending/people")
     }
 
+    // MARK: - Up next
+
+    func upNext() async throws -> UpNext {
+        try await get("/up-next")
+    }
+
     // MARK: - Library
 
     func movies(type: String) async throws -> Paginated<LibraryMovie> {

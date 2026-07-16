@@ -32,10 +32,13 @@ struct RootView: View {
             Tab("TV", systemImage: "tv", value: 1) {
                 TvView(store: tvStore).presentsDetails()
             }
-            Tab("Search", systemImage: "magnifyingglass", value: 2) {
+            Tab("Up Next", systemImage: "calendar", value: 2) {
+                UpNextView().presentsDetails()
+            }
+            Tab("Search", systemImage: "magnifyingglass", value: 3) {
                 SearchView().presentsDetails()
             }
-            Tab("Profile", systemImage: "person.crop.circle", value: 3) {
+            Tab("Profile", systemImage: "person.crop.circle", value: 4) {
                 ProfileView(authManager: authManager)
             }
         }

@@ -26,6 +26,19 @@ func (q *Queries) CountEpisodesBySeriesId(ctx context.Context, seriesID uuid.UUI
 	return count, err
 }
 
+const countWatchedSeasonsBySeriesId = `-- name: CountWatchedSeasonsBySeriesId :one
+SELECT COUNT(*)
+FROM seasons
+WHERE series_id = $1 AND state = 'watched' AND number > 0
+`
+
+func (q *Queries) CountWatchedSeasonsBySeriesId(ctx context.Context, seriesID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countWatchedSeasonsBySeriesId, seriesID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createSeries = `-- name: CreateSeries :one
 INSERT INTO series (
   user_id,
@@ -50,10 +63,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 `
 
 type CreateSeriesParams struct {
@@ -89,10 +102,10 @@ func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Ser
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
-		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.TrackedState,
 	)
 	return i, err
 }
@@ -158,10 +171,10 @@ SELECT
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 FROM series
 WHERE id = $1 LIMIT 1
 `
@@ -179,10 +192,10 @@ func (q *Queries) FindSeriesById(ctx context.Context, id uuid.UUID) (Series, err
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
-		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.TrackedState,
 	)
 	return i, err
 }
@@ -287,10 +300,10 @@ SELECT
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 FROM series
 WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1
 `
@@ -313,10 +326,10 @@ func (q *Queries) FindSeriesByTmdbId(ctx context.Context, arg FindSeriesByTmdbId
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
-		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.TrackedState,
 	)
 	return i, err
 }
@@ -332,10 +345,10 @@ SELECT
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 FROM series
 WHERE tmdb_id = ANY($1::integer[]) AND user_id = $2
 `
@@ -364,10 +377,10 @@ func (q *Queries) FindSeriesByTmdbIds(ctx context.Context, arg FindSeriesByTmdbI
 			&i.EpisodesCount,
 			&i.Status,
 			&i.State,
-			&i.TrackedState,
 			&i.Pinned,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.TrackedState,
 		); err != nil {
 			return nil, err
 		}
@@ -437,10 +450,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 `
 
 type UpdateSeriesParams struct {
@@ -472,10 +485,10 @@ func (q *Queries) UpdateSeries(ctx context.Context, arg UpdateSeriesParams) (Ser
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
-		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.TrackedState,
 	)
 	return i, err
 }
@@ -498,10 +511,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 `
 
 type UpdateSeriesByTmdbIdParams struct {
@@ -529,10 +542,10 @@ func (q *Queries) UpdateSeriesByTmdbId(ctx context.Context, arg UpdateSeriesByTm
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
-		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.TrackedState,
 	)
 	return i, err
 }
@@ -567,10 +580,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 `
 
 type UpsertSeriesParams struct {
@@ -606,10 +619,10 @@ func (q *Queries) UpsertSeries(ctx context.Context, arg UpsertSeriesParams) (Ser
 		&i.EpisodesCount,
 		&i.Status,
 		&i.State,
-		&i.TrackedState,
 		&i.Pinned,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.TrackedState,
 	)
 	return i, err
 }

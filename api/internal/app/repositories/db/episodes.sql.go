@@ -56,9 +56,9 @@ RETURNING
   runtime,
   state,
   air_at,
-  watched_at,
   created_at,
-  updated_at
+  updated_at,
+  watched_at
 `
 
 type UpsertEpisodeParams struct {
@@ -91,9 +91,9 @@ func (q *Queries) UpsertEpisode(ctx context.Context, arg UpsertEpisodeParams) (E
 		&i.Runtime,
 		&i.State,
 		&i.AirAt,
-		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WatchedAt,
 	)
 	return i, err
 }

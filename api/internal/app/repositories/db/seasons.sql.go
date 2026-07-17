@@ -49,9 +49,9 @@ SELECT
   number,
   episodes_count,
   state,
-  watched_at,
   created_at,
-  updated_at
+  updated_at,
+  watched_at
 FROM seasons
 WHERE series_id = $1 AND tmdb_id = $2 LIMIT 1
 `
@@ -72,9 +72,9 @@ func (q *Queries) FindSeasonBySeriesAndTmdbId(ctx context.Context, arg FindSeaso
 		&i.Number,
 		&i.EpisodesCount,
 		&i.State,
-		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WatchedAt,
 	)
 	return i, err
 }
@@ -122,9 +122,9 @@ RETURNING
   number,
   episodes_count,
   state,
-  watched_at,
   created_at,
-  updated_at
+  updated_at,
+  watched_at
 `
 
 type UpsertSeasonParams struct {
@@ -154,9 +154,9 @@ func (q *Queries) UpsertSeason(ctx context.Context, arg UpsertSeasonParams) (Sea
 		&i.Number,
 		&i.EpisodesCount,
 		&i.State,
-		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WatchedAt,
 	)
 	return i, err
 }

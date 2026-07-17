@@ -322,14 +322,19 @@ func recomputeSeason(ctx context.Context, q *db.Queries, seasonID uuid.UUID, epi
 	return q.SetSeasonState(ctx, db.SetSeasonStateParams{ID: seasonID, State: db.StateTypes(state)})
 }
 
-// recomputeSeries derives a series' state from its total watched-episode count
+// recomputeSeries derives a series' state from its watched episodes and seasons
 func recomputeSeries(ctx context.Context, q *db.Queries, series db.Series) error {
-	count, err := q.CountEpisodesBySeriesId(ctx, series.ID)
+	episodes, err := q.CountEpisodesBySeriesId(ctx, series.ID)
 	if err != nil {
 		return err
 	}
 
-	state := deriveSeriesState(uint64(count), series.EpisodesCount, series.Status)
+	seasons, err := q.CountWatchedSeasonsBySeriesId(ctx, series.ID)
+	if err != nil {
+		return err
+	}
+
+	state := deriveSeriesState(uint64(episodes), uint64(seasons), series.SeasonsCount, series.Status)
 	if state == models.StateTypeNone {
 		// an explicitly tracked show reverts to the user's choice; auto-tracked rows are deleted
 		if series.TrackedState.Valid {
@@ -342,13 +347,15 @@ func recomputeSeries(ctx context.Context, q *db.Queries, series db.Series) error
 	return q.SetSeriesState(ctx, db.SetSeriesStateParams{ID: series.ID, State: db.StateTypes(state)})
 }
 
-// deriveSeriesState maps the watched count and show status to none/watching/watched
-func deriveSeriesState(watched, total uint64, status string) string {
-	if watched == 0 {
+// deriveSeriesState maps watched progress and show status to none/watching/watched
+// a finished show becomes watched once every regular season is watched, rather than
+// comparing raw episode counts, whose show-level TMDB total often drifts from the seasons
+func deriveSeriesState(watchedEpisodes, watchedSeasons, totalSeasons uint64, status string) string {
+	if watchedEpisodes == 0 {
 		return models.StateTypeNone
 	}
 
-	if total > 0 && watched >= total && status != models.TvInProductionStatus {
+	if totalSeasons > 0 && watchedSeasons >= totalSeasons && status != models.TvInProductionStatus {
 		return models.StateTypeWatched
 	}
 

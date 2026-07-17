@@ -90,9 +90,9 @@ RETURNING
   runtime,
   state,
   pinned,
-  watched_at,
   created_at,
-  updated_at;
+  updated_at,
+  watched_at;
 
 -- name: UpdateMovie :one
 UPDATE movies
@@ -111,9 +111,9 @@ RETURNING
   runtime,
   state,
   pinned,
-  watched_at,
   created_at,
-  updated_at;
+  updated_at,
+  watched_at;
 
 -- name: UpdateMovieByTmdbId :one
 UPDATE movies
@@ -132,9 +132,9 @@ RETURNING
   runtime,
   state,
   pinned,
-  watched_at,
   created_at,
-  updated_at;
+  updated_at,
+  watched_at;
 
 -- name: DeleteMovie :exec
 DELETE FROM movies WHERE id = $1;

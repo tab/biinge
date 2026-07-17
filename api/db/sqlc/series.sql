@@ -37,10 +37,10 @@ SELECT
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 FROM series
 WHERE tmdb_id = ANY(@tmdb_ids::integer[]) AND user_id = @user_id;
 
@@ -55,10 +55,10 @@ SELECT
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 FROM series
 WHERE id = $1 LIMIT 1;
 
@@ -73,10 +73,10 @@ SELECT
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at
+  updated_at,
+  tracked_state
 FROM series
 WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1;
 
@@ -104,10 +104,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at;
+  updated_at,
+  tracked_state;
 
 -- name: UpdateSeries :one
 UPDATE series
@@ -129,10 +129,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at;
+  updated_at,
+  tracked_state;
 
 -- name: UpdateSeriesByTmdbId :one
 UPDATE series
@@ -152,10 +152,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at;
+  updated_at,
+  tracked_state;
 
 -- name: DeleteSeries :exec
 DELETE FROM series WHERE id = $1;
@@ -193,10 +193,10 @@ RETURNING
   episodes_count,
   status,
   state,
-  tracked_state,
   pinned,
   created_at,
-  updated_at;
+  updated_at,
+  tracked_state;
 
 -- name: SetSeriesState :exec
 UPDATE series SET state = $2, updated_at = NOW() WHERE id = $1;
@@ -209,6 +209,11 @@ WHERE s.series_id = $1;
 
 -- name: FindWatchedSeasonTmdbIdsBySeriesId :many
 SELECT tmdb_id FROM seasons WHERE series_id = $1 AND state = 'watched';
+
+-- name: CountWatchedSeasonsBySeriesId :one
+SELECT COUNT(*)
+FROM seasons
+WHERE series_id = $1 AND state = 'watched' AND number > 0;
 
 -- name: FindEpisodeTmdbIdsBySeriesId :many
 SELECT e.tmdb_id

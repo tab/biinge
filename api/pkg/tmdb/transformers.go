@@ -372,6 +372,8 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 		ImdbId:          tvShow.ImdbId,
 		ReleaseDate:     tvShow.ReleaseDate,
 		Rating:          tvShow.VoteAverage,
+		SeasonsCount:    tvShow.SeasonsCount,
+		EpisodesCount:   tvShow.EpisodesCount,
 		Credits:         uniqueCredits,
 		Recommendations: recommendations,
 		Videos:          videos,

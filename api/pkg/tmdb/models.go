@@ -202,6 +202,8 @@ type TvDetails struct {
 	ReleaseDate     string          `json:"first_air_date"`
 	Runtime         int             `json:"runtime"`
 	VoteAverage     float64         `json:"vote_average"`
+	SeasonsCount    int             `json:"number_of_seasons"`
+	EpisodesCount   int             `json:"number_of_episodes"`
 	Credits         Credits         `json:"credits"`
 	Recommendations Recommendations `json:"recommendations"`
 	Videos          Videos          `json:"videos"`
@@ -217,6 +219,8 @@ type TvResponse struct {
 	ImdbId          string               `json:"imdb_id"`
 	ReleaseDate     string               `json:"release_date"`
 	Rating          float64              `json:"rating"`
+	SeasonsCount    int                  `json:"number_of_seasons"`
+	EpisodesCount   int                  `json:"number_of_episodes"`
 	Credits         []CreditItem         `json:"credits"`
 	Recommendations []RecommendationItem `json:"recommendations"`
 	Videos          []VideoItem          `json:"videos"`

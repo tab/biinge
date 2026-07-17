@@ -28,9 +28,9 @@ RETURNING
   number,
   episodes_count,
   state,
-  watched_at,
   created_at,
-  updated_at;
+  updated_at,
+  watched_at;
 
 -- name: SetSeasonState :exec
 UPDATE seasons
@@ -49,9 +49,9 @@ SELECT
   number,
   episodes_count,
   state,
-  watched_at,
   created_at,
-  updated_at
+  updated_at,
+  watched_at
 FROM seasons
 WHERE series_id = $1 AND tmdb_id = $2 LIMIT 1;
 

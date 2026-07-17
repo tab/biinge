@@ -28,9 +28,9 @@ RETURNING
   runtime,
   state,
   air_at,
-  watched_at,
   created_at,
-  updated_at;
+  updated_at,
+  watched_at;
 
 -- name: DeleteEpisodeBySeasonAndTmdbId :exec
 DELETE FROM episodes WHERE season_id = $1 AND tmdb_id = $2;

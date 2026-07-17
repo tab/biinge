@@ -33,9 +33,9 @@ RETURNING
   runtime,
   state,
   pinned,
-  watched_at,
   created_at,
-  updated_at
+  updated_at,
+  watched_at
 `
 
 type CreateMovieParams struct {
@@ -66,9 +66,9 @@ func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie
 		&i.Runtime,
 		&i.State,
 		&i.Pinned,
-		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WatchedAt,
 	)
 	return i, err
 }
@@ -370,9 +370,9 @@ RETURNING
   runtime,
   state,
   pinned,
-  watched_at,
   created_at,
-  updated_at
+  updated_at,
+  watched_at
 `
 
 type UpdateMovieParams struct {
@@ -399,9 +399,9 @@ func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie
 		&i.Runtime,
 		&i.State,
 		&i.Pinned,
-		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WatchedAt,
 	)
 	return i, err
 }
@@ -423,9 +423,9 @@ RETURNING
   runtime,
   state,
   pinned,
-  watched_at,
   created_at,
-  updated_at
+  updated_at,
+  watched_at
 `
 
 type UpdateMovieByTmdbIdParams struct {
@@ -452,9 +452,9 @@ func (q *Queries) UpdateMovieByTmdbId(ctx context.Context, arg UpdateMovieByTmdb
 		&i.Runtime,
 		&i.State,
 		&i.Pinned,
-		&i.WatchedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WatchedAt,
 	)
 	return i, err
 }

@@ -128,6 +128,28 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 		assert.Equal(t, []uint64{200}, progress.WatchedSeasons)
 	})
 
+	t.Run("finishing every season marks a show watched even when the episode total drifts", func(t *testing.T) {
+		const seriesID uint64 = 109
+
+		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+
+		// the show-level episode total (99) is far above the two episodes that actually exist,
+		// mirroring TMDB's drifted number_of_episodes; completing the season must still win
+		series := seriesInput(seriesID, 99, "Ended")
+
+		for _, ep := range []uint64{90, 91} {
+			_, err := repository.MarkEpisodeWatched(ctx, userID, series, seasonInput(210, 2), episodeInput(ep))
+			require.NoError(t, err)
+		}
+
+		progress, err := repository.Progress(ctx, userID, seriesID)
+		require.NoError(t, err)
+
+		assert.Equal(t, models.StateTypeWatched, progress.State)
+		assert.Equal(t, []uint64{210}, progress.WatchedSeasons)
+		assert.ElementsMatch(t, []uint64{90, 91}, progress.WatchedEpisodes)
+	})
+
 	t.Run("in-production show with all episodes watched stays watching", func(t *testing.T) {
 		const seriesID uint64 = 102
 

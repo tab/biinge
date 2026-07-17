@@ -108,9 +108,9 @@ type Episode struct {
 	Runtime    uint64
 	State      StateTypes
 	AirAt      pgtype.Timestamp
-	WatchedAt  pgtype.Timestamp
 	CreatedAt  pgtype.Timestamp
 	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamp
 }
 
 type Movie struct {
@@ -122,9 +122,9 @@ type Movie struct {
 	Runtime    uint64
 	State      StateTypes
 	Pinned     bool
-	WatchedAt  pgtype.Timestamp
 	CreatedAt  pgtype.Timestamp
 	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamp
 }
 
 type Season struct {
@@ -135,9 +135,9 @@ type Season struct {
 	Number        uint64
 	EpisodesCount uint64
 	State         StateTypes
-	WatchedAt     pgtype.Timestamp
 	CreatedAt     pgtype.Timestamp
 	UpdatedAt     pgtype.Timestamp
+	WatchedAt     pgtype.Timestamp
 }
 
 type Series struct {
@@ -150,10 +150,10 @@ type Series struct {
 	EpisodesCount uint64
 	Status        string
 	State         StateTypes
-	TrackedState  NullStateTypes
 	Pinned        bool
 	CreatedAt     pgtype.Timestamp
 	UpdatedAt     pgtype.Timestamp
+	TrackedState  NullStateTypes
 }
 
 type User struct {

@@ -3,12 +3,22 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
 const DebugLevel = "debug"
+
+// Application environment names
+const (
+	DevelopmentEnv = "development"
+	TestEnv        = "test"
+)
+
+// minJWTSecretLength is the minimum length for an HS256 signing key (256 bits)
+const minJWTSecretLength = 32
 
 type TMDBConfig struct {
 	BaseURL      string
@@ -40,7 +50,7 @@ type Config struct {
 func LoadConfig() *Config {
 	env := os.Getenv("GO_ENV")
 	if env == "" {
-		env = "development"
+		env = DevelopmentEnv
 	}
 
 	envFiles := []string{
@@ -73,6 +83,39 @@ func LoadConfig() *Config {
 			Locale:             getEnvString("TMDB_LOCALE"),
 		},
 	}
+}
+
+// Validate checks required config is set and the JWT secret is strong enough
+func (c *Config) Validate() error {
+	var missing []string
+
+	if c.DatabaseDSN == "" {
+		missing = append(missing, "DATABASE_DSN")
+	}
+
+	if c.APIReadAccessToken == "" {
+		missing = append(missing, "TMDB_API_READ_ACCESS_TOKEN")
+	}
+
+	if c.JWTSecretKey == "" {
+		missing = append(missing, "JWT_SECRET_KEY")
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required configuration: %s", strings.Join(missing, ", "))
+	}
+
+	// Require a strong signing key outside local dev
+	if !c.isLocalEnv() && len(c.JWTSecretKey) < minJWTSecretLength {
+		return fmt.Errorf("JWT_SECRET_KEY must be at least %d bytes, got %d", minJWTSecretLength, len(c.JWTSecretKey))
+	}
+
+	return nil
+}
+
+// isLocalEnv reports whether the app runs in a local development or test environment
+func (c *Config) isLocalEnv() bool {
+	return c.AppEnv == DevelopmentEnv || c.AppEnv == TestEnv
 }
 
 func getEnvString(envVar string) string {

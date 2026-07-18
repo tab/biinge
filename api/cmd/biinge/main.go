@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"go.uber.org/fx"
@@ -13,6 +14,11 @@ import (
 
 func main() {
 	cfg := config.LoadConfig()
+
+	if err := cfg.Validate(); err != nil {
+		fmt.Fprintln(os.Stderr, "invalid configuration:", err)
+		os.Exit(1)
+	}
 
 	fx.New(
 		fx.WithLogger(

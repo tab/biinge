@@ -7,18 +7,53 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F1A0BE8050014A037F24A33 /* SeriesDetailsCountsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */; };
 		AA0000000000000000000013 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000012 /* Sentry */; };
+		B4FC64E474064EEB6EE1DAD1 /* WatchProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */; };
+		DC7601986612F3D072689188 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC77ED4BCBCD9C6813A11A00 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		AEDFC63FCD088FDDF9533872 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000006 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000005;
+			remoteInfo = Biinge;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchProgressTests.swift; sourceTree = "<group>"; };
 		AA0000000000000000000004 /* Biinge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Biinge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SeriesDetailsCountsTests.swift; sourceTree = "<group>"; };
+		ECFE9D5EA252E309865D9818 /* BiingeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BiingeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC77ED4BCBCD9C6813A11A00 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AA0000000000000000000003 /* Biinge */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Biinge; sourceTree = "<group>"; };
+		AA0000000000000000000003 /* Biinge */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Biinge;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		80EFAF487BF7EDE63B462F82 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC7601986612F3D072689188 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000008 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -30,11 +65,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		19F2440B5777D0CE267BB3B6 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				FC77ED4BCBCD9C6813A11A00 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		9B2FE24F58FD32E451E32DFD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				19F2440B5777D0CE267BB3B6 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AA0000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000003 /* Biinge */,
 				AA0000000000000000000002 /* Products */,
+				9B2FE24F58FD32E451E32DFD /* Frameworks */,
+				FABE31F33F7F8572363E7372 /* BiingeTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -42,13 +95,42 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000004 /* Biinge.app */,
+				ECFE9D5EA252E309865D9818 /* BiingeTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FABE31F33F7F8572363E7372 /* BiingeTests */ = {
+			isa = PBXGroup;
+			children = (
+				E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */,
+				7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */,
+			);
+			name = BiingeTests;
+			path = BiingeTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		01D880855DEA876E1AF4F7B6 /* BiingeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2BB491C08C4A4660F2E45819 /* Build configuration list for PBXNativeTarget "BiingeTests" */;
+			buildPhases = (
+				6FE7E4B7D0E5E89CCF8BDF39 /* Sources */,
+				80EFAF487BF7EDE63B462F82 /* Frameworks */,
+				BD17F7B9A9618FA81E750A6F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A420545C57A2A795B365B1CF /* PBXTargetDependency */,
+			);
+			name = BiingeTests;
+			productName = BiingeTests;
+			productReference = ECFE9D5EA252E309865D9818 /* BiingeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		AA0000000000000000000005 /* Biinge */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA000000000000000000000A /* Build configuration list for PBXNativeTarget "Biinge" */;
@@ -106,12 +188,20 @@
 			projectRoot = "";
 			targets = (
 				AA0000000000000000000005 /* Biinge */,
+				01D880855DEA876E1AF4F7B6 /* BiingeTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AA0000000000000000000009 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD17F7B9A9618FA81E750A6F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -145,6 +235,15 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6FE7E4B7D0E5E89CCF8BDF39 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9F1A0BE8050014A037F24A33 /* SeriesDetailsCountsTests.swift in Sources */,
+				B4FC64E474064EEB6EE1DAD1 /* WatchProgressTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000007 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,7 +253,55 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		A420545C57A2A795B365B1CF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Biinge;
+			target = AA0000000000000000000005 /* Biinge */;
+			targetProxy = AEDFC63FCD088FDDF9533872 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		20B8DA5ADD923B02C18DE077 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = GUNG7F2T7B;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.biinge.BiingeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Biinge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Biinge";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		99D46A9B103D2EB8B00D50D5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = GUNG7F2T7B;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.biinge.BiingeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Biinge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Biinge";
+			};
+			name = Debug;
+		};
 		AA000000000000000000000C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -257,6 +404,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		2BB491C08C4A4660F2E45819 /* Build configuration list for PBXNativeTarget "BiingeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				20B8DA5ADD923B02C18DE077 /* Release */,
+				99D46A9B103D2EB8B00D50D5 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AA000000000000000000000A /* Build configuration list for PBXNativeTarget "Biinge" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

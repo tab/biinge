@@ -45,7 +45,7 @@ the API needs a real TMDB token — see [api/README.md](../api/README.md#configu
 
 ```sh
 make lint     # SwiftLint (skipped if not installed)
-make test     # compiles the scheme for the simulator (CI build gate)
+make test     # runs the BiingeTests unit tests on the simulator
 make clean
 ```
 

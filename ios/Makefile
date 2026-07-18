@@ -13,7 +13,7 @@ build:
 test:
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) \
 		-destination '$(DESTINATION)' -derivedDataPath $(DERIVED) \
-		CODE_SIGNING_ALLOWED=NO build
+		CODE_SIGNING_ALLOWED=NO test -only-testing:BiingeTests
 
 .PHONY: lint
 lint:

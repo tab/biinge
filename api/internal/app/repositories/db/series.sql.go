@@ -334,6 +334,52 @@ func (q *Queries) FindSeriesByTmdbId(ctx context.Context, arg FindSeriesByTmdbId
 	return i, err
 }
 
+const findSeriesByTmdbIdForUpdate = `-- name: FindSeriesByTmdbIdForUpdate :one
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  seasons_count,
+  episodes_count,
+  status,
+  state,
+  pinned,
+  created_at,
+  updated_at,
+  tracked_state
+FROM series
+WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1
+FOR UPDATE
+`
+
+type FindSeriesByTmdbIdForUpdateParams struct {
+	TmdbID uint64
+	UserID uuid.UUID
+}
+
+func (q *Queries) FindSeriesByTmdbIdForUpdate(ctx context.Context, arg FindSeriesByTmdbIdForUpdateParams) (Series, error) {
+	row := q.db.QueryRow(ctx, findSeriesByTmdbIdForUpdate, arg.TmdbID, arg.UserID)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TmdbID,
+		&i.Title,
+		&i.PosterPath,
+		&i.SeasonsCount,
+		&i.EpisodesCount,
+		&i.Status,
+		&i.State,
+		&i.Pinned,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.TrackedState,
+	)
+	return i, err
+}
+
 const findSeriesByTmdbIds = `-- name: FindSeriesByTmdbIds :many
 SELECT
   id,

@@ -80,6 +80,25 @@ SELECT
 FROM series
 WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1;
 
+-- name: FindSeriesByTmdbIdForUpdate :one
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  seasons_count,
+  episodes_count,
+  status,
+  state,
+  pinned,
+  created_at,
+  updated_at,
+  tracked_state
+FROM series
+WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1
+FOR UPDATE;
+
 -- name: CreateSeries :one
 INSERT INTO series (
   user_id,

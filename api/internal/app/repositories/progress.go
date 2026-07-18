@@ -137,7 +137,8 @@ func (r *seriesProgress) UnmarkShowWatched(ctx context.Context, userId uuid.UUID
 	var progress *models.SeriesProgress
 
 	err := r.withTx(ctx, func(q *db.Queries) error {
-		series, err := q.FindSeriesByTmdbId(ctx, db.FindSeriesByTmdbIdParams{TmdbID: seriesTmdbId, UserID: userId})
+		// Lock the series row so a concurrent mark can't slip a new episode past the recompute
+		series, err := q.FindSeriesByTmdbIdForUpdate(ctx, db.FindSeriesByTmdbIdForUpdateParams{TmdbID: seriesTmdbId, UserID: userId})
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				progress = &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}
@@ -167,7 +168,8 @@ func (r *seriesProgress) UnmarkSeasonWatched(ctx context.Context, userId uuid.UU
 	var progress *models.SeriesProgress
 
 	err := r.withTx(ctx, func(q *db.Queries) error {
-		series, err := q.FindSeriesByTmdbId(ctx, db.FindSeriesByTmdbIdParams{TmdbID: seriesTmdbId, UserID: userId})
+		// Lock the series row so a concurrent mark can't slip a new episode past the recompute
+		series, err := q.FindSeriesByTmdbIdForUpdate(ctx, db.FindSeriesByTmdbIdForUpdateParams{TmdbID: seriesTmdbId, UserID: userId})
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				progress = &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}
@@ -204,7 +206,8 @@ func (r *seriesProgress) UnmarkEpisodeWatched(ctx context.Context, userId uuid.U
 	var progress *models.SeriesProgress
 
 	err := r.withTx(ctx, func(q *db.Queries) error {
-		series, err := q.FindSeriesByTmdbId(ctx, db.FindSeriesByTmdbIdParams{TmdbID: seriesTmdbId, UserID: userId})
+		// Lock the series row so a concurrent mark can't slip a new episode past the recompute
+		series, err := q.FindSeriesByTmdbIdForUpdate(ctx, db.FindSeriesByTmdbIdForUpdateParams{TmdbID: seriesTmdbId, UserID: userId})
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				progress = &models.SeriesProgress{SeriesTmdbId: seriesTmdbId, State: models.StateTypeNone}

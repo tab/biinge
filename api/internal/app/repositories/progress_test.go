@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
@@ -290,4 +291,65 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 		assert.Equal(t, []uint64{50}, progress.WatchedEpisodes)
 		assert.Empty(t, progress.WatchedSeasons, "season is no longer fully watched")
 	})
+}
+
+func Test_SeriesProgressRepository_ConcurrentMarkUnmark(t *testing.T) {
+	if os.Getenv("GO_ENV") == "ci" {
+		t.Skip("integration test requires a database")
+	}
+
+	ctx := context.Background()
+	cfg := &config.Config{DatabaseDSN: os.Getenv("DATABASE_DSN")}
+
+	client, err := postgres.NewPostgresClient(cfg)
+	require.NoError(t, err)
+
+	repository := NewSeriesProgressRepository(client)
+	userID := newProgressTestUser(t, client, "tv.concurrent")
+
+	const (
+		seriesID     uint64 = 200
+		seasonID     uint64 = 900
+		knownEpisode uint64 = 1
+		newEpisode   uint64 = 2
+	)
+
+	defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+
+	series := seriesInput(seriesID, 2, "Ended")
+
+	// seed one watched episode, which auto-tracks the show
+	_, err = repository.MarkEpisodeWatched(ctx, userID, series, seasonInput(seasonID, 2), episodeInput(knownEpisode))
+	require.NoError(t, err)
+
+	// Mark a new episode while unmarking the known one; the FOR UPDATE lock
+	// serializes the writers so the newly marked episode can never be lost
+	var (
+		wg                 sync.WaitGroup
+		markErr, unmarkErr error
+	)
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+
+		_, markErr = repository.MarkEpisodeWatched(ctx, userID, series, seasonInput(seasonID, 2), episodeInput(newEpisode))
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		_, unmarkErr = repository.UnmarkEpisodeWatched(ctx, userID, seriesID, seasonID, knownEpisode)
+	}()
+
+	wg.Wait()
+
+	require.NoError(t, markErr)
+	require.NoError(t, unmarkErr)
+
+	progress, err := repository.Progress(ctx, userID, seriesID)
+	require.NoError(t, err)
+
+	assert.Contains(t, progress.WatchedEpisodes, newEpisode, "the concurrently marked episode must survive")
 }

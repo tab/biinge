@@ -1,54 +1,55 @@
 # biinge
 
-Movie & TV tracker. Monorepo, one deployable unit per top-level directory.
+Movie & TV tracker — keep separate lists of what you want to watch, what
+you're watching, and what you've finished, across movies and TV shows.
 
-| Path   | What                                                                                  |
-| ------ | ------------------------------------------------------------------------------------- |
-| `api/` | Go backend — Chi, pgx/sqlc, goose, JWT, TMDB. PostgreSQL-backed REST API on `:8080`.  |
-| `ios/` | SwiftUI client (iOS 26, Swift 6, zero deps): login, library, detail, search, profile.  |
+![screenshots](https://github.com/user-attachments/assets/08474315-74c5-4677-847e-effa783401c3)
 
-The two apps are decoupled by the HTTP contract in `api/api/swagger.yaml`; there is no shared code directory.
+## Features
 
-## Local development
+- **Track movies and TV shows** — separate want / watching / watched lists
+- **Episode-level progress** — mark individual episodes and seasons; the show's state follows automatically
+- **Up Next** — a queue of aired-but-unwatched episodes and released movies from the titles you pin
+- **Search & trending** — browse TMDB's catalog of movies, shows, and people
+- **Statistics** — watch-time totals and a monthly activity chart
+- **Pinning & themes** — pin favorites to the top; dark, light, or system appearance
 
-Start Postgres and Redis (and optionally build the API image):
+## Repository layout
 
-```sh
-docker compose up -d database redis  # Postgres on :5432, Redis on :6379
-make -C api db:migrate               # apply migrations (GO_ENV=development)
-```
+Monorepo, one deployable unit per top-level directory. The two apps are
+decoupled by the HTTP contract in `api/api/swagger.yaml`; there is no shared
+code directory.
 
-TMDB proxy responses (detail/search/trending) are cached in Redis when `REDIS_URL` is set
-(e.g. `redis://localhost:6379`); the cache is optional — with it unset, or Redis unreachable,
-the API just serves uncached.
+## Running the full stack
 
-Run the API from source, or boot everything with readiness checks via [fuku](https://github.com/tab/fuku):
+Bring up the API and its dependencies, then run the app against it.
 
-```sh
-cd api && GO_ENV=development go run ./cmd/biinge   # http://localhost:8080
-# — or —
-fuku up                                            # runs the api, waits on /ready
-```
-
-Health: `GET /health` · Readiness: `GET /ready` · API base: `/api/v1`.
-
-Real TMDB and JWT secrets go in `api/.env.development.local` (gitignored); the committed
-`api/.env.development` holds `SECRET` placeholders.
-
-## iOS app
-
-Open `ios/Biinge.xcodeproj` in Xcode 26 and run on an iOS 26 simulator, or build from the CLI:
+**1. Start Postgres + Redis and the API** (env setup lives in
+[api/README.md](api/README.md#configuration)):
 
 ```sh
-make -C ios build
+docker compose up -d database redis                 # Postgres :5432, Redis :6379
+make -C api db:migrate                              # apply migrations
+cd api && GO_ENV=development go run ./cmd/biinge     # http://localhost:8080
 ```
 
-The app targets `http://localhost:8080/api/v1` by default; override with the `API_BASE_URL`
-scheme environment variable. Library lists are DB-backed, but detail/search/trending proxy
-TMDB, so they need a real read token in `api/.env.development.local`.
+Or boot the API with a readiness wait via [fuku](https://github.com/tab/fuku): `fuku up`.
+
+**2. Run the app** (details in [ios/README.md](ios/README.md)):
+
+```sh
+make -C ios build     # or open ios/Biinge.xcodeproj in Xcode 26
+```
+
+The app targets `http://localhost:8080/api/v1` by default. Library lists are
+DB-backed; detail, search, and trending proxy TMDB, so the API needs a real
+TMDB token — see [api/README.md](api/README.md#configuration).
 
 ## Conventions
 
-Each package owns a `Makefile` exposing the same targets (`lint`, `vet`, `test`, `all`) so CI
-stays uniform. The Go module is rooted inside `api/` (no `go.work`). CI lives in
-`.github/workflows/` and is scoped per package via `working-directory`.
+Each package owns a `Makefile` with matching targets (`lint`, `test`, `build`/`check`) so CI stays uniform. 
+The Go module is rooted inside `api/` (no `go.work`); CI in `.github/workflows/` is scoped per package via `working-directory`.
+
+## License
+
+MIT — see [api/LICENSE](api/LICENSE).

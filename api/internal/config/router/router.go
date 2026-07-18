@@ -2,11 +2,13 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
 
 	"biinge-api/internal/app/controllers"
 	"biinge-api/internal/config"
@@ -37,6 +39,9 @@ func NewRouter(
 
 	r.Use(middleware.Recoverer)
 
+	// Resolve the client IP from RemoteAddr (not spoofable headers) for rate-limit keys
+	r.Use(middleware.ClientIPFromRemoteAddr)
+
 	r.Use(tracer.Trace)
 	r.Use(logger.Log)
 
@@ -59,6 +64,8 @@ func NewRouter(
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Route("/users", func(r chi.Router) {
+			r.Use(httprate.LimitBy(5, time.Minute, keyByIP))
+
 			r.Post("/registrations", sessions.HandleRegistration)
 			r.Post("/sessions", sessions.HandleLogin)
 			r.Post("/tokens", sessions.HandleRefresh)
@@ -66,6 +73,7 @@ func NewRouter(
 
 		r.Group(func(r chi.Router) {
 			r.Use(authentication.Authenticate)
+			r.Use(httprate.LimitBy(120, time.Minute, keyByUserID))
 
 			r.Route("/accounts", func(r chi.Router) {
 				r.Get("/me", accounts.Me)
@@ -121,4 +129,18 @@ func NewRouter(
 	})
 
 	return r
+}
+
+// keyByIP keys the rate limiter on the resolved client IP
+func keyByIP(r *http.Request) (string, error) {
+	return httprate.CanonicalizeIP(middleware.GetClientIP(r.Context())), nil
+}
+
+// keyByUserID throttles authenticated traffic per user, falling back to IP
+func keyByUserID(r *http.Request) (string, error) {
+	if user, ok := middlewares.CurrentUserFromContext(r.Context()); ok {
+		return user.ID.String(), nil
+	}
+
+	return keyByIP(r)
 }

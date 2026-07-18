@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	BcryptHashCost = 14
+	BcryptHashCost = 12
 
 	AccessTokenDuration  = 24 * time.Hour
 	RefreshTokenDuration = 7 * 24 * time.Hour

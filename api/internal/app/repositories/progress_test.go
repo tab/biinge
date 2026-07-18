@@ -353,3 +353,37 @@ func Test_SeriesProgressRepository_ConcurrentMarkUnmark(t *testing.T) {
 
 	assert.Contains(t, progress.WatchedEpisodes, newEpisode, "the concurrently marked episode must survive")
 }
+
+func Test_SeriesProgressRepository_UpsertKeepsCountsOnZero(t *testing.T) {
+	if os.Getenv("GO_ENV") == "ci" {
+		t.Skip("integration test requires a database")
+	}
+
+	ctx := context.Background()
+	cfg := &config.Config{DatabaseDSN: os.Getenv("DATABASE_DSN")}
+
+	client, err := postgres.NewPostgresClient(cfg)
+	require.NoError(t, err)
+
+	repository := NewSeriesProgressRepository(client)
+	userID := newProgressTestUser(t, client, "tv.counts")
+
+	const seriesID uint64 = 300
+
+	defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+
+	// the first mark carries real counts (seasonInput sets SeasonsCount to 1)
+	_, err = repository.MarkEpisodeWatched(ctx, userID, seriesInput(seriesID, 3, "Ended"), seasonInput(310, 3), episodeInput(1))
+	require.NoError(t, err)
+
+	// a later mark arrives with zero counts, which must not wipe the stored values
+	zeroCounts := models.SeriesInput{TmdbId: seriesID, Title: "Test Show", PosterPath: "/poster.jpg", Status: "Ended"}
+	_, err = repository.MarkEpisodeWatched(ctx, userID, zeroCounts, seasonInput(310, 3), episodeInput(2))
+	require.NoError(t, err)
+
+	stored, err := client.Queries().FindSeriesByTmdbId(ctx, db.FindSeriesByTmdbIdParams{TmdbID: seriesID, UserID: userID})
+	require.NoError(t, err)
+
+	assert.Equal(t, uint64(1), stored.SeasonsCount, "seasons_count survives a zero-count upsert")
+	assert.Equal(t, uint64(3), stored.EpisodesCount, "episodes_count survives a zero-count upsert")
+}

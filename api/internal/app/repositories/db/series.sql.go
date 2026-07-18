@@ -612,8 +612,8 @@ INSERT INTO series (
 ON CONFLICT (user_id, tmdb_id) DO UPDATE SET
   title = EXCLUDED.title,
   poster_path = EXCLUDED.poster_path,
-  seasons_count = EXCLUDED.seasons_count,
-  episodes_count = EXCLUDED.episodes_count,
+  seasons_count = CASE WHEN EXCLUDED.seasons_count > 0 THEN EXCLUDED.seasons_count ELSE series.seasons_count END,
+  episodes_count = CASE WHEN EXCLUDED.episodes_count > 0 THEN EXCLUDED.episodes_count ELSE series.episodes_count END,
   status = EXCLUDED.status,
   updated_at = NOW()
 RETURNING

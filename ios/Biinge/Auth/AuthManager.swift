@@ -36,7 +36,10 @@ final class AuthManager {
         do {
             user = try await apiClient.me()
         } catch {
-            clearSession()
+            // Only drop the session when the token was actually rejected
+            if Self.isSessionInvalid(error) {
+                clearSession()
+            }
         }
     }
 
@@ -84,8 +87,12 @@ final class AuthManager {
                 let tokens = try await apiClient.refresh(refreshToken: refreshToken)
                 store(tokens)
             } catch {
-                clearSession()
-                throw APIError.unauthorized
+                // A rejected token ends the session; a transient error keeps it
+                if Self.isSessionInvalid(error) {
+                    clearSession()
+                    throw APIError.unauthorized
+                }
+                throw error
             }
         }
         refreshTask = task
@@ -105,5 +112,16 @@ final class AuthManager {
         refreshToken = nil
         keychain.delete(.accessToken)
         keychain.delete(.refreshToken)
+    }
+
+    /// Whether the error means the stored session is genuinely invalid
+    private static func isSessionInvalid(_ error: Error) -> Bool {
+        guard let apiError = error as? APIError else { return false }
+        switch apiError {
+        case .unauthorized, .badRequest:
+            return true
+        case .invalidResponse, .server, .network, .decoding:
+            return false
+        }
     }
 }

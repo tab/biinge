@@ -256,7 +256,7 @@ struct TvDetailView: View {
         guard let apiClient, let details else { return }
         let optimistic = baseProgress.togglingEpisode(
             id: episode.id, watched: watched, seasonId: season.id,
-            seasonEpisodes: episodes, totalEpisodesCount: details.episodesCount,
+            seasonEpisodes: episodes, totalSeasons: details.regularSeasonsCount,
             showStatus: details.status
         )
         let series = progressSeries(details)
@@ -278,7 +278,7 @@ struct TvDetailView: View {
         guard let apiClient, let details else { return }
         let optimistic = baseProgress.togglingSeason(
             id: season.id, episodeIds: episodes.map(\.id),
-            watched: watched, totalEpisodesCount: details.episodesCount,
+            watched: watched, totalSeasons: details.regularSeasonsCount,
             showStatus: details.status
         )
         let series = progressSeries(details)

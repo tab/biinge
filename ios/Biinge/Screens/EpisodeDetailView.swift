@@ -173,7 +173,7 @@ struct EpisodeDetailView: View {
         // no episode list here, so season completeness on mark is reconciled by the server
         let optimistic = base.togglingEpisode(
             id: ep.id, watched: watched, seasonId: season.id,
-            totalEpisodesCount: series.episodesCount,
+            totalSeasons: series.regularSeasonsCount,
             showStatus: series.status
         )
         let seriesMeta = ProgressSeries(

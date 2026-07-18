@@ -64,6 +64,13 @@ struct SeriesDetails: Decodable, Sendable {
     let seasons: [SeasonSummary]
 }
 
+extension SeriesDetails {
+    /// Regular-season count (excluding specials), preferring the server value over the loaded seasons
+    var regularSeasonsCount: Int {
+        seasonsCount ?? seasons.filter { $0.number > 0 }.count
+    }
+}
+
 struct EpisodeSummary: Decodable, Sendable, Identifiable {
     let id: Int
     let title: String
@@ -219,7 +226,7 @@ extension WatchProgress {
         watched: Bool,
         seasonId: Int,
         seasonEpisodes: [EpisodeSummary] = [],
-        totalEpisodesCount: Int? = nil,
+        totalSeasons: Int? = nil,
         showStatus: String? = nil
     ) -> WatchProgress {
         var episodes = Set(watchedEpisodes)
@@ -233,7 +240,7 @@ extension WatchProgress {
             episodes.remove(episodeId)
             seasons.remove(seasonId)
         }
-        return replacing(seasons: seasons, episodes: episodes, totalEpisodesCount: totalEpisodesCount, showStatus: showStatus)
+        return replacing(seasons: seasons, episodes: episodes, totalSeasons: totalSeasons, showStatus: showStatus)
     }
 
     /// Progress after marking/unmarking a whole season
@@ -241,7 +248,7 @@ extension WatchProgress {
         id seasonId: Int,
         episodeIds: [Int],
         watched: Bool,
-        totalEpisodesCount: Int? = nil,
+        totalSeasons: Int? = nil,
         showStatus: String? = nil
     ) -> WatchProgress {
         var episodes = Set(watchedEpisodes)
@@ -253,23 +260,28 @@ extension WatchProgress {
             episodes.subtract(episodeIds)
             seasons.remove(seasonId)
         }
-        return replacing(seasons: seasons, episodes: episodes, totalEpisodesCount: totalEpisodesCount, showStatus: showStatus)
+        return replacing(seasons: seasons, episodes: episodes, totalSeasons: totalSeasons, showStatus: showStatus)
     }
 
-    private func replacing(seasons: Set<Int>, episodes: Set<Int>, totalEpisodesCount: Int?, showStatus: String?) -> WatchProgress {
+    private func replacing(seasons: Set<Int>, episodes: Set<Int>, totalSeasons: Int?, showStatus: String?) -> WatchProgress {
         WatchProgress(
             id: id,
-            state: derivedState(watchedCount: episodes.count, totalCount: totalEpisodesCount, status: showStatus),
+            state: derivedState(
+                watchedEpisodesCount: episodes.count,
+                watchedSeasonsCount: seasons.count,
+                totalSeasons: totalSeasons,
+                status: showStatus
+            ),
             trackedState: trackedState,
             watchedSeasons: Array(seasons),
             watchedEpisodes: Array(episodes)
         )
     }
 
-    /// Mirrors the server's deriveSeriesState; zero watched episodes revert to trackedState or untrack
-    private func derivedState(watchedCount: Int, totalCount: Int?, status: String?) -> WatchState {
-        if watchedCount == 0 { return trackedState ?? .none }
-        if let totalCount, totalCount > 0, watchedCount >= totalCount, status != Self.tvInProductionStatus {
+    /// Mirrors the server's deriveSeriesState: watched once every regular season is watched, not by episode totals
+    private func derivedState(watchedEpisodesCount: Int, watchedSeasonsCount: Int, totalSeasons: Int?, status: String?) -> WatchState {
+        if watchedEpisodesCount == 0 { return trackedState ?? .none }
+        if let totalSeasons, totalSeasons > 0, watchedSeasonsCount >= totalSeasons, status != Self.tvInProductionStatus {
             return .watched
         }
         return .watching

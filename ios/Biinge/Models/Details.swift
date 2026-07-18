@@ -69,6 +69,11 @@ extension SeriesDetails {
     var regularSeasonsCount: Int {
         seasonsCount ?? seasons.filter { $0.number > 0 }.count
     }
+
+    /// Total episode count, preferring the server value over summing the loaded seasons
+    var totalEpisodesCount: Int {
+        episodesCount ?? seasons.reduce(0) { $0 + $1.episodesCount }
+    }
 }
 
 struct EpisodeSummary: Decodable, Sendable, Identifiable {

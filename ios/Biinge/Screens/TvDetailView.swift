@@ -242,7 +242,7 @@ struct TvDetailView: View {
         case .toggle(let target):
             await store.toggle(
                 id: seriesId, title: series.title, posterPath: series.posterPath,
-                seasonsCount: series.seasonsCount ?? 0, episodesCount: series.episodesCount ?? 0,
+                seasonsCount: series.regularSeasonsCount, episodesCount: series.totalEpisodesCount,
                 status: series.status ?? "", target: target
             )
         case .pin:
@@ -315,8 +315,8 @@ struct TvDetailView: View {
         ProgressSeries(
             title: details.title,
             posterPath: details.posterPath,
-            seasonsCount: details.seasonsCount ?? 0,
-            episodesCount: details.episodesCount ?? 0,
+            seasonsCount: details.regularSeasonsCount,
+            episodesCount: details.totalEpisodesCount,
             status: details.status ?? ""
         )
     }
@@ -352,7 +352,7 @@ struct TvDetailView: View {
         store.apply(
             value, id: seriesId,
             title: details.title, posterPath: details.posterPath,
-            episodesCount: details.episodesCount ?? 0, pinned: details.pinned
+            episodesCount: details.totalEpisodesCount, pinned: details.pinned
         )
     }
 }
@@ -398,7 +398,7 @@ struct TvActionsView: View {
         Task {
             await store.toggle(
                 id: seriesId, title: details.title, posterPath: details.posterPath,
-                seasonsCount: details.seasonsCount ?? 0, episodesCount: details.episodesCount ?? 0,
+                seasonsCount: details.regularSeasonsCount, episodesCount: details.totalEpisodesCount,
                 status: details.status ?? "", target: target
             )
         }

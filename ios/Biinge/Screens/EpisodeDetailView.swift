@@ -179,8 +179,8 @@ struct EpisodeDetailView: View {
         let seriesMeta = ProgressSeries(
             title: series.title,
             posterPath: series.posterPath,
-            seasonsCount: series.seasonsCount ?? 0,
-            episodesCount: series.episodesCount ?? 0,
+            seasonsCount: series.regularSeasonsCount,
+            episodesCount: series.totalEpisodesCount,
             status: series.status ?? ""
         )
 
@@ -224,7 +224,7 @@ struct EpisodeDetailView: View {
         store.apply(
             value, id: showId,
             title: series.title, posterPath: series.posterPath,
-            episodesCount: series.episodesCount ?? 0, pinned: series.pinned
+            episodesCount: series.totalEpisodesCount, pinned: series.pinned
         )
     }
 }

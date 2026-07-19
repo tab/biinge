@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"encoding/json"
+	stderrors "errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -176,4 +177,47 @@ func Test_AuthMiddleware_Authenticate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_AuthMiddleware_DoesNotLeakDatastoreErrors(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+
+	jwtService := jwt.NewMockJwt(ctrl)
+	users := services.NewMockUsers(ctrl)
+	log := logger.NewLogger(cfg)
+	middleware := NewAuthenticationMiddleware(jwtService, users, log)
+
+	id, err := uuid.NewRandom()
+	require.NoError(t, err)
+
+	// a raw datastore error carrying connection details must never reach the client
+	leaky := stderrors.New("failed to connect to `host=localhost user=postgres database=biinge`: connection refused")
+
+	jwtService.EXPECT().Decode("valid-token").Return(&jwt.Payload{ID: id.String()}, nil)
+	users.EXPECT().FindById(gomock.Any(), id).Return(nil, leaky)
+
+	handler := http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+		t.Fatal("handler must not run when the datastore fails")
+	})
+
+	req, _ := http.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Authorization", "Bearer valid-token")
+
+	rw := httptest.NewRecorder()
+	middleware.Authenticate(handler).ServeHTTP(rw, req)
+
+	body := rw.Body.String()
+
+	assert.Equal(t, http.StatusServiceUnavailable, rw.Code)
+	assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
+	assert.Contains(t, body, "service unavailable")
+	assert.NotContains(t, body, "postgres")
+	assert.NotContains(t, body, "host=")
 }

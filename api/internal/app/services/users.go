@@ -4,12 +4,17 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 
+	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/repositories"
 	"biinge-api/internal/app/repositories/db"
 	"biinge-api/internal/config/logger"
 )
+
+const uniqueViolationCode = "23505"
 
 type Users interface {
 	Create(ctx context.Context, params *models.User) (*models.User, error)
@@ -41,7 +46,7 @@ func (u *users) Create(ctx context.Context, params *models.User) (*models.User, 
 		Appearance:        db.AppearanceType(params.Appearance),
 	})
 	if err != nil {
-		return nil, err
+		return nil, u.wrapError(err)
 	}
 
 	return user, nil
@@ -55,7 +60,7 @@ func (u *users) Update(ctx context.Context, params *models.User) (*models.User, 
 		Appearance: db.AppearanceType(params.Appearance),
 	})
 	if err != nil {
-		return nil, err
+		return nil, u.wrapError(err)
 	}
 
 	return user, nil
@@ -64,7 +69,7 @@ func (u *users) Update(ctx context.Context, params *models.User) (*models.User, 
 func (u *users) FindById(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	user, err := u.repository.FindById(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, u.wrapError(err)
 	}
 
 	return user, nil
@@ -73,7 +78,7 @@ func (u *users) FindById(ctx context.Context, id uuid.UUID) (*models.User, error
 func (u *users) FindByLogin(ctx context.Context, login string) (*models.User, error) {
 	user, err := u.repository.FindByLogin(ctx, login)
 	if err != nil {
-		return nil, err
+		return nil, u.wrapError(err)
 	}
 
 	return user, nil
@@ -82,8 +87,29 @@ func (u *users) FindByLogin(ctx context.Context, login string) (*models.User, er
 func (u *users) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	user, err := u.repository.FindByEmail(ctx, email)
 	if err != nil {
-		return nil, err
+		return nil, u.wrapError(err)
 	}
 
 	return user, nil
+}
+
+// wrapError maps a repository error to a sentinel that is safe to surface to callers
+func (u *users) wrapError(err error) error {
+	if errors.Is(err, pgx.ErrNoRows) {
+		return errors.ErrUserNotFound
+	}
+
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == uniqueViolationCode {
+		switch pgErr.ConstraintName {
+		case "users_login_key":
+			return errors.ErrLoginAlreadyExists
+		case "users_email_key":
+			return errors.ErrEmailAlreadyExists
+		}
+	}
+
+	u.log.Error().Err(err).Msg("User repository error")
+
+	return errors.ErrFailedToProcessUser
 }

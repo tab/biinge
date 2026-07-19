@@ -5,16 +5,71 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
+	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/repositories"
 	"biinge-api/internal/app/repositories/db"
 	"biinge-api/internal/config"
 	"biinge-api/internal/config/logger"
 )
+
+func Test_Users_ErrorMapping(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	repository := repositories.NewMockUserRepository(ctrl)
+	log := logger.NewLogger(cfg)
+	service := NewUsers(repository, log)
+
+	id, err := uuid.NewRandom()
+	require.NoError(t, err)
+
+	t.Run("missing row maps to ErrUserNotFound", func(t *testing.T) {
+		repository.EXPECT().FindById(ctx, id).Return(nil, pgx.ErrNoRows)
+
+		_, err := service.FindById(ctx, id)
+
+		assert.ErrorIs(t, err, errors.ErrUserNotFound)
+	})
+
+	t.Run("duplicate login maps to ErrLoginAlreadyExists", func(t *testing.T) {
+		repository.EXPECT().Create(gomock.Any(), gomock.Any()).
+			Return(nil, &pgconn.PgError{Code: "23505", ConstraintName: "users_login_key"})
+
+		_, err := service.Create(ctx, &models.User{})
+
+		assert.ErrorIs(t, err, errors.ErrLoginAlreadyExists)
+	})
+
+	t.Run("duplicate email maps to ErrEmailAlreadyExists", func(t *testing.T) {
+		repository.EXPECT().Create(gomock.Any(), gomock.Any()).
+			Return(nil, &pgconn.PgError{Code: "23505", ConstraintName: "users_email_key"})
+
+		_, err := service.Create(ctx, &models.User{})
+
+		assert.ErrorIs(t, err, errors.ErrEmailAlreadyExists)
+	})
+
+	t.Run("other errors map to ErrFailedToProcessUser", func(t *testing.T) {
+		repository.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
+
+		_, err := service.Create(ctx, &models.User{})
+
+		assert.ErrorIs(t, err, errors.ErrFailedToProcessUser)
+	})
+}
 
 func Test_Users_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)

@@ -27,6 +27,8 @@ var (
 
 	ErrUserNotFound = errors.New("user not found")
 
+	ErrFailedToProcessUser = errors.New("failed to process user")
+
 	ErrUnauthorized = errors.New("unauthorized")
 
 	ErrFailedToFetchResults = errors.New("failed to fetch results")

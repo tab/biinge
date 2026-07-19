@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
 	"biinge-api/internal/config/logger"
@@ -41,8 +42,15 @@ func (c *authenticationController) HandleRegistration(w http.ResponseWriter, r *
 	response, err := c.service.Registration(r.Context(), &params)
 	if err != nil {
 		c.log.Error().Err(err).Msg("Registration failed")
-		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
+		switch {
+		case errors.Is(err, errors.ErrLoginAlreadyExists), errors.Is(err, errors.ErrEmailAlreadyExists):
+			w.WriteHeader(http.StatusConflict)
+			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "registration failed"})
+		}
 
 		return
 	}

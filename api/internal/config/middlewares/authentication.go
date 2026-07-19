@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
 	"biinge-api/internal/config/logger"
@@ -36,7 +37,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 		token, ok := extractBearerToken(r)
 		if !ok {
 			m.log.Error().Msg("Invalid authorization header")
-			w.WriteHeader(http.StatusUnauthorized)
+			writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 
 			return
 		}
@@ -44,8 +45,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 		claims, err := m.jwt.Decode(token)
 		if err != nil {
 			m.log.Error().Err(err).Msg("Failed to decode token")
-			w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+			writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 
 			return
 		}
@@ -53,8 +53,7 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 		// Reject refresh tokens as access credentials; legacy untyped tokens stay accepted
 		if claims.Type == jwt.TokenTypeRefresh {
 			m.log.Error().Msg("Refresh token used on a protected endpoint")
-			w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: jwt.ErrInvalidTokenType.Error()})
+			writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 
 			return
 		}
@@ -62,17 +61,23 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 		id, err := uuid.Parse(claims.ID)
 		if err != nil {
 			m.log.Error().Err(err).Msg("Failed to parse user Id from claims")
-			w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+			writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 
 			return
 		}
 
 		user, err := m.users.FindById(r.Context(), id)
 		if err != nil {
+			// A missing user is an auth failure; anything else is the datastore, not the caller
+			if errors.Is(err, errors.ErrUserNotFound) {
+				m.log.Error().Err(err).Msg("Token references an unknown user")
+				writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+
+				return
+			}
+
 			m.log.Error().Err(err).Msg("Failed to find user by identity number")
-			w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+			writeJSONError(w, http.StatusServiceUnavailable, "service unavailable")
 
 			return
 		}
@@ -85,6 +90,13 @@ func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler 
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// writeJSONError sends a constant JSON error body with the content type set before the status
+func writeJSONError(w http.ResponseWriter, status int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: message})
 }
 
 func extractBearerToken(r *http.Request) (string, bool) {

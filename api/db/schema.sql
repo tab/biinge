@@ -97,7 +97,9 @@ CREATE TABLE public.movies (
     pinned boolean DEFAULT false NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    watched_at timestamp without time zone
+    watched_at timestamp without time zone,
+    synced_at timestamp without time zone,
+    released_at timestamp without time zone
 );
 
 
@@ -140,7 +142,9 @@ CREATE TABLE public.series (
     pinned boolean DEFAULT false NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    tracked_state public.state_types
+    tracked_state public.state_types,
+    synced_at timestamp without time zone,
+    last_air_at timestamp without time zone
 );
 
 
@@ -251,6 +255,13 @@ CREATE INDEX episodes_tmdb_id_idx ON public.episodes USING btree (tmdb_id);
 
 
 --
+-- Name: movies_synced_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX movies_synced_at_idx ON public.movies USING btree (synced_at NULLS FIRST);
+
+
+--
 -- Name: movies_tmdb_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -297,6 +308,13 @@ CREATE UNIQUE INDEX seasons_series_id_tmdb_id_unique ON public.seasons USING btr
 --
 
 CREATE INDEX seasons_tmdb_id_idx ON public.seasons USING btree (tmdb_id);
+
+
+--
+-- Name: series_synced_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX series_synced_at_idx ON public.series USING btree (synced_at NULLS FIRST);
 
 
 --

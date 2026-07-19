@@ -12,6 +12,7 @@ services:
       - CLIENT_URL=http://localhost:3000
       - DATABASE_DSN=postgres://postgres:postgres@database:5432/biinge-development?sslmode=disable
       - LOG_LEVEL=info
+      - WORKER_SYNC_ENABLED=true
     networks:
       - biinge-network
 

@@ -11,6 +11,7 @@ import (
 	"biinge-api/internal/app/controllers"
 	"biinge-api/internal/app/repositories"
 	"biinge-api/internal/app/services"
+	"biinge-api/internal/app/worker"
 	"biinge-api/internal/config"
 	"biinge-api/internal/config/cache"
 	"biinge-api/internal/config/logger"
@@ -37,6 +38,7 @@ var Module = fx.Options(
 
 	jwt.Module,
 	tmdb.Module,
+	worker.Module,
 	fx.Invoke(registerHooks),
 )
 

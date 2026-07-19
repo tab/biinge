@@ -47,7 +47,21 @@ type CreateMovieParams struct {
 	State      StateTypes
 }
 
-func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie, error) {
+type CreateMovieRow struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TmdbID     uint64
+	Title      string
+	PosterPath string
+	Runtime    uint64
+	State      StateTypes
+	Pinned     bool
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamp
+}
+
+func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (CreateMovieRow, error) {
 	row := q.db.QueryRow(ctx, createMovie,
 		arg.UserID,
 		arg.TmdbID,
@@ -56,7 +70,7 @@ func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Movie
 		arg.Runtime,
 		arg.State,
 	)
-	var i Movie
+	var i CreateMovieRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -353,6 +367,102 @@ func (q *Queries) FindMoviesByTmdbIds(ctx context.Context, arg FindMoviesByTmdbI
 	return items, nil
 }
 
+const findMoviesToSync = `-- name: FindMoviesToSync :many
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime
+FROM movies
+WHERE (synced_at IS NULL OR synced_at < $1)
+  AND (released_at IS NULL OR released_at >= $2)
+ORDER BY synced_at ASC NULLS FIRST
+LIMIT $3
+`
+
+type FindMoviesToSyncParams struct {
+	StaleBefore   pgtype.Timestamp
+	ReleaseCutoff pgtype.Timestamp
+	BatchSize     int32
+}
+
+type FindMoviesToSyncRow struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TmdbID     uint64
+	Title      string
+	PosterPath string
+	Runtime    uint64
+}
+
+func (q *Queries) FindMoviesToSync(ctx context.Context, arg FindMoviesToSyncParams) ([]FindMoviesToSyncRow, error) {
+	rows, err := q.db.Query(ctx, findMoviesToSync, arg.StaleBefore, arg.ReleaseCutoff, arg.BatchSize)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FindMoviesToSyncRow
+	for rows.Next() {
+		var i FindMoviesToSyncRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TmdbID,
+			&i.Title,
+			&i.PosterPath,
+			&i.Runtime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const syncMovie = `-- name: SyncMovie :exec
+UPDATE movies
+SET
+  title = $1,
+  poster_path = $2,
+  runtime = $3,
+  released_at = $4,
+  synced_at = NOW()
+WHERE id = $5
+`
+
+type SyncMovieParams struct {
+	Title      string
+	PosterPath string
+	Runtime    uint64
+	ReleasedAt pgtype.Timestamp
+	ID         uuid.UUID
+}
+
+func (q *Queries) SyncMovie(ctx context.Context, arg SyncMovieParams) error {
+	_, err := q.db.Exec(ctx, syncMovie,
+		arg.Title,
+		arg.PosterPath,
+		arg.Runtime,
+		arg.ReleasedAt,
+		arg.ID,
+	)
+	return err
+}
+
+const touchMovieSynced = `-- name: TouchMovieSynced :exec
+UPDATE movies SET synced_at = NOW() WHERE id = $1
+`
+
+func (q *Queries) TouchMovieSynced(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, touchMovieSynced, id)
+	return err
+}
+
 const updateMovie = `-- name: UpdateMovie :one
 UPDATE movies
 SET
@@ -382,14 +492,28 @@ type UpdateMovieParams struct {
 	Runtime    uint64
 }
 
-func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (Movie, error) {
+type UpdateMovieRow struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TmdbID     uint64
+	Title      string
+	PosterPath string
+	Runtime    uint64
+	State      StateTypes
+	Pinned     bool
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamp
+}
+
+func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (UpdateMovieRow, error) {
 	row := q.db.QueryRow(ctx, updateMovie,
 		arg.ID,
 		arg.Title,
 		arg.PosterPath,
 		arg.Runtime,
 	)
-	var i Movie
+	var i UpdateMovieRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -435,14 +559,28 @@ type UpdateMovieByTmdbIdParams struct {
 	Pinned bool
 }
 
-func (q *Queries) UpdateMovieByTmdbId(ctx context.Context, arg UpdateMovieByTmdbIdParams) (Movie, error) {
+type UpdateMovieByTmdbIdRow struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TmdbID     uint64
+	Title      string
+	PosterPath string
+	Runtime    uint64
+	State      StateTypes
+	Pinned     bool
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamp
+}
+
+func (q *Queries) UpdateMovieByTmdbId(ctx context.Context, arg UpdateMovieByTmdbIdParams) (UpdateMovieByTmdbIdRow, error) {
 	row := q.db.QueryRow(ctx, updateMovieByTmdbId,
 		arg.TmdbID,
 		arg.UserID,
 		arg.State,
 		arg.Pinned,
 	)
-	var i Movie
+	var i UpdateMovieByTmdbIdRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

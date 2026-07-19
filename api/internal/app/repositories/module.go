@@ -14,4 +14,5 @@ var Module = fx.Options(
 	fx.Provide(NewSeriesProgressRepository),
 	fx.Provide(NewStatsRepository),
 	fx.Provide(NewUserRepository),
+	fx.Provide(NewSyncRepository),
 )

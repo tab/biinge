@@ -15,6 +15,16 @@ type SeriesInput struct {
 	Status        string
 }
 
+// SeriesSyncInput carries the TMDB-refreshed show fields the sync worker writes back
+type SeriesSyncInput struct {
+	Title         string
+	PosterPath    string
+	Status        string
+	SeasonsCount  uint64
+	EpisodesCount uint64
+	LastAirAt     time.Time
+}
+
 // SeasonInput carries the season-level fields and, for whole-season marks, its episodes
 type SeasonInput struct {
 	TmdbId        uint64

@@ -141,3 +141,30 @@ DELETE FROM movies WHERE id = $1;
 
 -- name: DeleteMovieByTmdbId :exec
 DELETE FROM movies WHERE tmdb_id = $1 AND user_id = $2;
+
+-- name: FindMoviesToSync :many
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  runtime
+FROM movies
+WHERE (synced_at IS NULL OR synced_at < @stale_before)
+  AND (released_at IS NULL OR released_at >= @release_cutoff)
+ORDER BY synced_at ASC NULLS FIRST
+LIMIT @batch_size;
+
+-- name: SyncMovie :exec
+UPDATE movies
+SET
+  title = @title,
+  poster_path = @poster_path,
+  runtime = @runtime,
+  released_at = @released_at,
+  synced_at = NOW()
+WHERE id = @id;
+
+-- name: TouchMovieSynced :exec
+UPDATE movies SET synced_at = NOW() WHERE id = $1;

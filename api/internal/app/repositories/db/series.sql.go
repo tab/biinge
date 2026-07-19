@@ -66,7 +66,9 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 `
 
 type CreateSeriesParams struct {
@@ -106,6 +108,8 @@ func (q *Queries) CreateSeries(ctx context.Context, arg CreateSeriesParams) (Ser
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
 	)
 	return i, err
 }
@@ -174,7 +178,9 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE id = $1 LIMIT 1
 `
@@ -196,6 +202,8 @@ func (q *Queries) FindSeriesById(ctx context.Context, id uuid.UUID) (Series, err
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
 	)
 	return i, err
 }
@@ -303,7 +311,9 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1
 `
@@ -330,6 +340,8 @@ func (q *Queries) FindSeriesByTmdbId(ctx context.Context, arg FindSeriesByTmdbId
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
 	)
 	return i, err
 }
@@ -348,7 +360,9 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1
 FOR UPDATE
@@ -376,6 +390,8 @@ func (q *Queries) FindSeriesByTmdbIdForUpdate(ctx context.Context, arg FindSerie
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
 	)
 	return i, err
 }
@@ -394,7 +410,9 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE tmdb_id = ANY($1::integer[]) AND user_id = $2
 `
@@ -427,6 +445,81 @@ func (q *Queries) FindSeriesByTmdbIds(ctx context.Context, arg FindSeriesByTmdbI
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.TrackedState,
+			&i.SyncedAt,
+			&i.LastAirAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findSeriesToSync = `-- name: FindSeriesToSync :many
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  seasons_count,
+  episodes_count,
+  status
+FROM series
+WHERE (synced_at IS NULL OR synced_at < $1)
+  AND (
+    last_air_at IS NULL
+    OR last_air_at >= $2
+    OR status = ANY($3::varchar[])
+  )
+ORDER BY synced_at ASC NULLS FIRST
+LIMIT $4
+`
+
+type FindSeriesToSyncParams struct {
+	StaleBefore    pgtype.Timestamp
+	AirCutoff      pgtype.Timestamp
+	ActiveStatuses []string
+	BatchSize      int32
+}
+
+type FindSeriesToSyncRow struct {
+	ID            uuid.UUID
+	UserID        uuid.UUID
+	TmdbID        uint64
+	Title         string
+	PosterPath    string
+	SeasonsCount  uint64
+	EpisodesCount uint64
+	Status        string
+}
+
+func (q *Queries) FindSeriesToSync(ctx context.Context, arg FindSeriesToSyncParams) ([]FindSeriesToSyncRow, error) {
+	rows, err := q.db.Query(ctx, findSeriesToSync,
+		arg.StaleBefore,
+		arg.AirCutoff,
+		arg.ActiveStatuses,
+		arg.BatchSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FindSeriesToSyncRow
+	for rows.Next() {
+		var i FindSeriesToSyncRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TmdbID,
+			&i.Title,
+			&i.PosterPath,
+			&i.SeasonsCount,
+			&i.EpisodesCount,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}
@@ -476,6 +569,85 @@ func (q *Queries) SetSeriesState(ctx context.Context, arg SetSeriesStateParams) 
 	return err
 }
 
+const syncSeries = `-- name: SyncSeries :one
+UPDATE series
+SET
+  title = $1,
+  poster_path = $2,
+  seasons_count = $3,
+  episodes_count = $4,
+  status = $5,
+  last_air_at = $6,
+  synced_at = NOW()
+WHERE id = $7
+RETURNING
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  seasons_count,
+  episodes_count,
+  status,
+  state,
+  pinned,
+  created_at,
+  updated_at,
+  tracked_state,
+  synced_at,
+  last_air_at
+`
+
+type SyncSeriesParams struct {
+	Title         string
+	PosterPath    string
+	SeasonsCount  uint64
+	EpisodesCount uint64
+	Status        string
+	LastAirAt     pgtype.Timestamp
+	ID            uuid.UUID
+}
+
+func (q *Queries) SyncSeries(ctx context.Context, arg SyncSeriesParams) (Series, error) {
+	row := q.db.QueryRow(ctx, syncSeries,
+		arg.Title,
+		arg.PosterPath,
+		arg.SeasonsCount,
+		arg.EpisodesCount,
+		arg.Status,
+		arg.LastAirAt,
+		arg.ID,
+	)
+	var i Series
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TmdbID,
+		&i.Title,
+		&i.PosterPath,
+		&i.SeasonsCount,
+		&i.EpisodesCount,
+		&i.Status,
+		&i.State,
+		&i.Pinned,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
+	)
+	return i, err
+}
+
+const touchSeriesSynced = `-- name: TouchSeriesSynced :exec
+UPDATE series SET synced_at = NOW() WHERE id = $1
+`
+
+func (q *Queries) TouchSeriesSynced(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, touchSeriesSynced, id)
+	return err
+}
+
 const updateSeries = `-- name: UpdateSeries :one
 UPDATE series
 SET
@@ -499,7 +671,9 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 `
 
 type UpdateSeriesParams struct {
@@ -535,6 +709,8 @@ func (q *Queries) UpdateSeries(ctx context.Context, arg UpdateSeriesParams) (Ser
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
 	)
 	return i, err
 }
@@ -560,7 +736,9 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 `
 
 type UpdateSeriesByTmdbIdParams struct {
@@ -592,6 +770,8 @@ func (q *Queries) UpdateSeriesByTmdbId(ctx context.Context, arg UpdateSeriesByTm
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
 	)
 	return i, err
 }
@@ -629,7 +809,9 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 `
 
 type UpsertSeriesParams struct {
@@ -669,6 +851,8 @@ func (q *Queries) UpsertSeries(ctx context.Context, arg UpsertSeriesParams) (Ser
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.TrackedState,
+		&i.SyncedAt,
+		&i.LastAirAt,
 	)
 	return i, err
 }

@@ -40,7 +40,9 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE tmdb_id = ANY(@tmdb_ids::integer[]) AND user_id = @user_id;
 
@@ -58,7 +60,9 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE id = $1 LIMIT 1;
 
@@ -76,7 +80,9 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1;
 
@@ -94,10 +100,32 @@ SELECT
   pinned,
   created_at,
   updated_at,
-  tracked_state
+  tracked_state,
+  synced_at,
+  last_air_at
 FROM series
 WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1
 FOR UPDATE;
+
+-- name: FindSeriesToSync :many
+SELECT
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  seasons_count,
+  episodes_count,
+  status
+FROM series
+WHERE (synced_at IS NULL OR synced_at < @stale_before)
+  AND (
+    last_air_at IS NULL
+    OR last_air_at >= @air_cutoff
+    OR status = ANY(@active_statuses::varchar[])
+  )
+ORDER BY synced_at ASC NULLS FIRST
+LIMIT @batch_size;
 
 -- name: CreateSeries :one
 INSERT INTO series (
@@ -126,7 +154,9 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state;
+  tracked_state,
+  synced_at,
+  last_air_at;
 
 -- name: UpdateSeries :one
 UPDATE series
@@ -151,7 +181,40 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state;
+  tracked_state,
+  synced_at,
+  last_air_at;
+
+-- name: SyncSeries :one
+UPDATE series
+SET
+  title = @title,
+  poster_path = @poster_path,
+  seasons_count = @seasons_count,
+  episodes_count = @episodes_count,
+  status = @status,
+  last_air_at = @last_air_at,
+  synced_at = NOW()
+WHERE id = @id
+RETURNING
+  id,
+  user_id,
+  tmdb_id,
+  title,
+  poster_path,
+  seasons_count,
+  episodes_count,
+  status,
+  state,
+  pinned,
+  created_at,
+  updated_at,
+  tracked_state,
+  synced_at,
+  last_air_at;
+
+-- name: TouchSeriesSynced :exec
+UPDATE series SET synced_at = NOW() WHERE id = $1;
 
 -- name: UpdateSeriesByTmdbId :one
 UPDATE series
@@ -174,7 +237,9 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state;
+  tracked_state,
+  synced_at,
+  last_air_at;
 
 -- name: DeleteSeries :exec
 DELETE FROM series WHERE id = $1;
@@ -215,7 +280,9 @@ RETURNING
   pinned,
   created_at,
   updated_at,
-  tracked_state;
+  tracked_state,
+  synced_at,
+  last_air_at;
 
 -- name: SetSeriesState :exec
 UPDATE series SET state = $2, updated_at = NOW() WHERE id = $1;

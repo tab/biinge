@@ -125,6 +125,8 @@ type Movie struct {
 	CreatedAt  pgtype.Timestamp
 	UpdatedAt  pgtype.Timestamp
 	WatchedAt  pgtype.Timestamp
+	SyncedAt   pgtype.Timestamp
+	ReleasedAt pgtype.Timestamp
 }
 
 type Season struct {
@@ -154,6 +156,8 @@ type Series struct {
 	CreatedAt     pgtype.Timestamp
 	UpdatedAt     pgtype.Timestamp
 	TrackedState  NullStateTypes
+	SyncedAt      pgtype.Timestamp
+	LastAirAt     pgtype.Timestamp
 }
 
 type User struct {

@@ -200,6 +200,7 @@ type TvDetails struct {
 	Status          string          `json:"status"`
 	ImdbId          string          `json:"imdb_id"`
 	ReleaseDate     string          `json:"first_air_date"`
+	LastAirDate     string          `json:"last_air_date"`
 	Runtime         int             `json:"runtime"`
 	VoteAverage     float64         `json:"vote_average"`
 	SeasonsCount    int             `json:"number_of_seasons"`

@@ -314,7 +314,7 @@ struct MovieActionMenu: View {
                         Button(action: option.action) {
                             Text(option.title)
                                 .font(.biingeBody).fontWeight(.semibold)
-                                .foregroundStyle(Color.biingeGraniteGray)
+                                .foregroundStyle(Color.biingeText.opacity(0.7))
                                 .padding(10)
                         }
                         .buttonStyle(.plain)
@@ -322,7 +322,7 @@ struct MovieActionMenu: View {
                     Button(action: onCancel) {
                         Text("Cancel")
                             .font(.biingeBody).fontWeight(.semibold)
-                            .foregroundStyle(Color.biingeGraniteGray)
+                            .foregroundStyle(Color.biingeText.opacity(0.7))
                             .padding(10)
                     }
                     .buttonStyle(.plain)

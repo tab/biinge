@@ -255,6 +255,13 @@ CREATE INDEX episodes_tmdb_id_idx ON public.episodes USING btree (tmdb_id);
 
 
 --
+-- Name: episodes_watched_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX episodes_watched_at_idx ON public.episodes USING btree (watched_at) WHERE (watched_at IS NOT NULL);
+
+
+--
 -- Name: movies_synced_at_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -287,6 +294,13 @@ CREATE INDEX movies_user_id_state_pinned_created_idx ON public.movies USING btre
 --
 
 CREATE UNIQUE INDEX movies_user_id_tmdb_id_unique ON public.movies USING btree (user_id, tmdb_id);
+
+
+--
+-- Name: movies_user_id_watched_at_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX movies_user_id_watched_at_idx ON public.movies USING btree (user_id, watched_at) WHERE (watched_at IS NOT NULL);
 
 
 --

@@ -161,10 +161,17 @@ paths:
   /api/v1/accounts/stats:
     get:
       summary: "Account statistics"
-      description: "Aggregate watch stats for the current user: counts by list plus total watched runtime in minutes"
+      description: "Aggregate watch stats for the current user: counts by list plus total watched runtime in minutes. Watched counts, minutes and activity cover the requested period; want and watching counts are always all-time"
       tags:
         - accounts
       parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, year, all]
+            default: all
+          description: "Calendar period for watched stats and activity: the current week (monday to sunday), month (1st to the last day), year (january to december) or the whole history. Unknown values fall back to all"
         - name: X-Request-ID
           in: header
           schema:
@@ -1679,6 +1686,11 @@ components:
       type: object
       description: "Aggregate watch statistics for the current user"
       properties:
+        period:
+          type: string
+          enum: [week, month, year, all]
+          description: "Calendar period the watched stats and activity cover"
+          example: "all"
         movies:
           type: object
           properties:
@@ -1727,27 +1739,29 @@ components:
             - minutes
         activity:
           type: array
-          description: "Watched runtime per month over the last 12 months, split by media kind"
+          description: "Watched runtime per bucket over the period, split by media kind. Buckets are dense, ordered oldest first and span the whole calendar period, so the rest of an unfinished period comes back as zeroes: 7 days for week, every day of the month for month, 12 months for year, and one bucket per year since the first watch for all"
           items:
             type: object
             properties:
-              month:
+              date:
                 type: string
-                description: "Calendar month in YYYY-MM format"
-                example: "2026-01"
+                format: date
+                description: "Start of the bucket in YYYY-MM-DD format"
+                example: "2026-01-01"
               movieMinutes:
                 type: integer
                 format: int64
-                description: "Total watched movie runtime in that month, in minutes"
+                description: "Total watched movie runtime in that bucket, in minutes"
               tvMinutes:
                 type: integer
                 format: int64
-                description: "Total watched episode runtime in that month, in minutes"
+                description: "Total watched episode runtime in that bucket, in minutes"
             required:
-              - month
+              - date
               - movieMinutes
               - tvMinutes
       required:
+        - period
         - movies
         - series
         - episodes

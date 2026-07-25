@@ -113,7 +113,9 @@ func (c *accountsController) HandleStats(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	result, err := c.stats.Get(r.Context(), user.ID)
+	period := models.NewStatsPeriod(r.URL.Query().Get("period"))
+
+	result, err := c.stats.Get(r.Context(), user.ID, period)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})

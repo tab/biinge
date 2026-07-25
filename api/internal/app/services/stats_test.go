@@ -26,14 +26,17 @@ func Test_Stats_Get(t *testing.T) {
 
 	tests := []struct {
 		name     string
+		period   models.StatsPeriod
 		before   func()
 		expected *models.Stats
 		error    error
 	}{
 		{
-			name: "Success",
+			name:   "Success",
+			period: models.StatsPeriodAll,
 			before: func() {
-				repository.EXPECT().Get(ctx, userId).Return(&models.Stats{
+				repository.EXPECT().Get(ctx, userId, models.StatsPeriodAll).Return(&models.Stats{
+					Period:          models.StatsPeriodAll,
 					MoviesWant:      3,
 					MoviesWatched:   10,
 					MoviesMinutes:   1200,
@@ -45,6 +48,7 @@ func Test_Stats_Get(t *testing.T) {
 				}, nil)
 			},
 			expected: &models.Stats{
+				Period:          models.StatsPeriodAll,
 				MoviesWant:      3,
 				MoviesWatched:   10,
 				MoviesMinutes:   1200,
@@ -56,9 +60,26 @@ func Test_Stats_Get(t *testing.T) {
 			},
 		},
 		{
-			name: "Error",
+			name:   "Passes the period through",
+			period: models.StatsPeriodWeek,
 			before: func() {
-				repository.EXPECT().Get(ctx, userId).Return(nil, assert.AnError)
+				repository.EXPECT().Get(ctx, userId, models.StatsPeriodWeek).Return(&models.Stats{
+					Period:        models.StatsPeriodWeek,
+					MoviesWatched: 2,
+					MoviesMinutes: 240,
+				}, nil)
+			},
+			expected: &models.Stats{
+				Period:        models.StatsPeriodWeek,
+				MoviesWatched: 2,
+				MoviesMinutes: 240,
+			},
+		},
+		{
+			name:   "Error",
+			period: models.StatsPeriodAll,
+			before: func() {
+				repository.EXPECT().Get(ctx, userId, models.StatsPeriodAll).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchStats,
@@ -69,7 +90,7 @@ func Test_Stats_Get(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := service.Get(ctx, userId)
+			result, err := service.Get(ctx, userId, tt.period)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)

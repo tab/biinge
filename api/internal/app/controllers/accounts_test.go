@@ -350,6 +350,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 
 	tests := []struct {
 		name        string
+		query       string
 		before      func()
 		currentUser *models.User
 		expected    result
@@ -358,7 +359,8 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				stats.EXPECT().Get(gomock.Any(), id).Return(&models.Stats{
+				stats.EXPECT().Get(gomock.Any(), id, models.StatsPeriodAll).Return(&models.Stats{
+					Period:          models.StatsPeriodAll,
 					MoviesWant:      2,
 					MoviesWatched:   5,
 					MoviesMinutes:   600,
@@ -367,20 +369,68 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					SeriesWatched:   4,
 					EpisodesWatched: 42,
 					EpisodesMinutes: 1800,
-					Activity: []models.MonthlyWatch{
-						{Month: time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 300},
+					Activity: []models.WatchBucket{
+						{Date: time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 300},
 					},
 				}, nil)
 			},
 			currentUser: &models.User{ID: id},
 			expected: result{
 				response: serializers.StatsSerializer{
+					Period:   "all",
 					Movies:   serializers.MovieStatsSerializer{Want: 2, Watched: 5, Minutes: 600},
 					Series:   serializers.SeriesStatsSerializer{Want: 1, Watching: 3, Watched: 4},
 					Episodes: serializers.EpisodeStatsSerializer{Watched: 42, Minutes: 1800},
-					Activity: []serializers.MonthlyActivitySerializer{
-						{Month: "2026-01", MovieMinutes: 120, TvMinutes: 300},
+					Activity: []serializers.ActivityBucketSerializer{
+						{Date: "2026-01-01", MovieMinutes: 120, TvMinutes: 300},
 					},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name:  "Windowed by the period query",
+			query: "?period=week",
+			before: func() {
+				stats.EXPECT().Get(gomock.Any(), id, models.StatsPeriodWeek).Return(&models.Stats{
+					Period:          models.StatsPeriodWeek,
+					MoviesWatched:   1,
+					MoviesMinutes:   120,
+					EpisodesWatched: 3,
+					EpisodesMinutes: 90,
+					Activity: []models.WatchBucket{
+						{Date: time.Date(2026, time.January, 20, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 90},
+					},
+				}, nil)
+			},
+			currentUser: &models.User{ID: id},
+			expected: result{
+				response: serializers.StatsSerializer{
+					Period:   "week",
+					Movies:   serializers.MovieStatsSerializer{Watched: 1, Minutes: 120},
+					Episodes: serializers.EpisodeStatsSerializer{Watched: 3, Minutes: 90},
+					Activity: []serializers.ActivityBucketSerializer{
+						{Date: "2026-01-20", MovieMinutes: 120, TvMinutes: 90},
+					},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name:  "Falls back to all for an unknown period",
+			query: "?period=decade",
+			before: func() {
+				stats.EXPECT().Get(gomock.Any(), id, models.StatsPeriodAll).Return(&models.Stats{
+					Period: models.StatsPeriodAll,
+				}, nil)
+			},
+			currentUser: &models.User{ID: id},
+			expected: result{
+				response: serializers.StatsSerializer{
+					Period:   "all",
+					Activity: []serializers.ActivityBucketSerializer{},
 				},
 				status: "200 OK",
 				code:   http.StatusOK,
@@ -400,7 +450,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
-				stats.EXPECT().Get(gomock.Any(), id).Return(nil, assert.AnError)
+				stats.EXPECT().Get(gomock.Any(), id, models.StatsPeriodAll).Return(nil, assert.AnError)
 			},
 			currentUser: &models.User{ID: id},
 			expected: result{
@@ -416,7 +466,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			req := httptest.NewRequest(http.MethodGet, "/api/stats", nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/stats"+tt.query, nil)
 			if tt.currentUser != nil {
 				ctx := context.WithValue(req.Context(), middlewares.CurrentUser{}, tt.currentUser)
 				req = req.WithContext(ctx)

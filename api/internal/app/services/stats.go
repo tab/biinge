@@ -12,7 +12,7 @@ import (
 )
 
 type Stats interface {
-	Get(ctx context.Context, userId uuid.UUID) (*models.Stats, error)
+	Get(ctx context.Context, userId uuid.UUID, period models.StatsPeriod) (*models.Stats, error)
 }
 
 type stats struct {
@@ -27,8 +27,8 @@ func NewStats(repository repositories.StatsRepository, log *logger.Logger) Stats
 	}
 }
 
-func (s *stats) Get(ctx context.Context, userId uuid.UUID) (*models.Stats, error) {
-	result, err := s.repository.Get(ctx, userId)
+func (s *stats) Get(ctx context.Context, userId uuid.UUID, period models.StatsPeriod) (*models.Stats, error) {
+	result, err := s.repository.Get(ctx, userId, period)
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to fetch stats")
 		return nil, errors.ErrFailedToFetchStats

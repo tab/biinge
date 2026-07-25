@@ -78,6 +78,71 @@ func seedStatsEpisodes(t *testing.T, client postgres.Postgres, seriesID uuid.UUI
 	}
 }
 
+// backdateStatsMovie re-dates a watched movie the given interval before the start of this year
+func backdateStatsMovie(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, back string) {
+	t.Helper()
+
+	_, err := client.Db().Exec(
+		context.Background(),
+		`UPDATE movies
+		 SET watched_at = date_trunc('year', NOW()) - $1::interval
+		 WHERE user_id = $2 AND tmdb_id = $3`,
+		back, userID, tmdbID,
+	)
+	require.NoError(t, err)
+}
+
+// backdateStatsEpisode re-dates a watched episode the given interval before the start of this year
+func backdateStatsEpisode(t *testing.T, client postgres.Postgres, tmdbID uint64, back string) {
+	t.Helper()
+
+	_, err := client.Db().Exec(
+		context.Background(),
+		`UPDATE episodes
+		 SET watched_at = date_trunc('year', NOW()) - $1::interval
+		 WHERE tmdb_id = $2`,
+		back, tmdbID,
+	)
+	require.NoError(t, err)
+}
+
+// anchorStatsMovie re-dates a watched movie to the exact start of the given calendar unit
+func anchorStatsMovie(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, unit string) {
+	t.Helper()
+
+	_, err := client.Db().Exec(
+		context.Background(),
+		`UPDATE movies
+		 SET watched_at = date_trunc($1::text, NOW())
+		 WHERE user_id = $2 AND tmdb_id = $3`,
+		unit, userID, tmdbID,
+	)
+	require.NoError(t, err)
+}
+
+// statsAnchor returns a date_trunc boundary as postgres computes it, so expectations
+// use the same calendar the queries do rather than the test process' clock
+func statsAnchor(t *testing.T, client postgres.Postgres, unit string) time.Time {
+	t.Helper()
+
+	var anchor time.Time
+
+	err := client.Db().QueryRow(context.Background(), `SELECT date_trunc($1::text, NOW())::date`, unit).Scan(&anchor)
+	require.NoError(t, err)
+
+	return anchor
+}
+
+// bucketDates renders activity bucket starts for comparison against calendar anchors
+func bucketDates(activity []models.WatchBucket) []string {
+	dates := make([]string, 0, len(activity))
+	for _, bucket := range activity {
+		dates = append(dates, bucket.Date.Format(time.DateOnly))
+	}
+
+	return dates
+}
+
 func Test_StatsRepository_Get(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
@@ -97,8 +162,10 @@ func Test_StatsRepository_Get(t *testing.T) {
 	seedStatsEpisodes(t, client, watchingSeries, 900201, 42, 42, 30)
 
 	t.Run("Aggregates counts and minutes across domains", func(t *testing.T) {
-		result, err := repository.Get(ctx, userID)
+		result, err := repository.Get(ctx, userID, models.StatsPeriodAll)
 		require.NoError(t, err)
+
+		assert.Equal(t, models.StatsPeriodAll, result.Period)
 
 		assert.Equal(t, uint64(2), result.MoviesWant)
 		assert.Equal(t, uint64(3), result.MoviesWatched)
@@ -113,14 +180,156 @@ func Test_StatsRepository_Get(t *testing.T) {
 	})
 }
 
+func Test_StatsRepository_Get_Periods(t *testing.T) {
+	ctx := context.Background()
+	client := newRepoTestClient(t)
+	repository := NewStatsRepository(client)
+	userID := newProgressTestUser(t, client, "stats.periods")
+
+	seedStatsMovie(t, client, userID, 910001, 40, models.StateTypeWant)
+	seedStatsMovie(t, client, userID, 910002, 100, models.StateTypeWatched)
+	seedStatsMovie(t, client, userID, 910003, 50, models.StateTypeWatched)
+	seedStatsMovie(t, client, userID, 910004, 70, models.StateTypeWatched)
+
+	series := seedStatsSeries(t, client, userID, 910101, models.StateTypeWatching)
+	seedStatsEpisodes(t, client, series, 910201, 42, 42, 30)
+
+	// Everything is seeded as watched now; push some of it into earlier years, far
+	// enough back that it stays out of the current week, month and year whatever today is
+	backdateStatsMovie(t, client, userID, 910003, "18 months")
+	backdateStatsMovie(t, client, userID, 910004, "30 months")
+	backdateStatsEpisode(t, client, 91020102, "18 months")
+
+	weekStart := statsAnchor(t, client, "week")
+	monthStart := statsAnchor(t, client, "month")
+	yearStart := statsAnchor(t, client, "year")
+	monthEnd := monthStart.AddDate(0, 1, -1)
+
+	tests := []struct {
+		period          models.StatsPeriod
+		moviesWatched   uint64
+		moviesMinutes   uint64
+		episodesWatched uint64
+		episodesMinutes uint64
+		buckets         int
+		firstBucket     time.Time
+		lastBucket      time.Time
+	}{
+		{models.StatsPeriodWeek, 1, 100, 2, 84, 7, weekStart, weekStart.AddDate(0, 0, 6)},
+		{models.StatsPeriodMonth, 1, 100, 2, 84, monthEnd.Day(), monthStart, monthEnd},
+		{models.StatsPeriodYear, 1, 100, 2, 84, 12, yearStart, yearStart.AddDate(0, 11, 0)},
+		{models.StatsPeriodAll, 3, 220, 3, 114, 4, yearStart.AddDate(-3, 0, 0), yearStart},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.period.String(), func(t *testing.T) {
+			result, err := repository.Get(ctx, userID, tt.period)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.period, result.Period)
+			assert.Equal(t, tt.moviesWatched, result.MoviesWatched)
+			assert.Equal(t, tt.moviesMinutes, result.MoviesMinutes)
+			assert.Equal(t, tt.episodesWatched, result.EpisodesWatched)
+			assert.Equal(t, tt.episodesMinutes, result.EpisodesMinutes)
+
+			// Backlog counts stay all-time whatever the window
+			assert.Equal(t, uint64(1), result.MoviesWant)
+			assert.Equal(t, uint64(1), result.SeriesWatching)
+
+			// The chart covers the whole calendar period, including days still to come
+			dates := bucketDates(result.Activity)
+			require.Len(t, dates, tt.buckets)
+			assert.Equal(t, tt.firstBucket.Format(time.DateOnly), dates[0])
+			assert.Equal(t, tt.lastBucket.Format(time.DateOnly), dates[len(dates)-1])
+
+			var movieMinutes, tvMinutes uint64
+			for _, bucket := range result.Activity {
+				movieMinutes += bucket.MovieMinutes
+				tvMinutes += bucket.TvMinutes
+			}
+
+			assert.Equal(t, tt.moviesMinutes, movieMinutes)
+			assert.Equal(t, tt.episodesMinutes, tvMinutes)
+		})
+	}
+
+	t.Run("Weeks run monday to sunday", func(t *testing.T) {
+		result, err := repository.Get(ctx, userID, models.StatsPeriodWeek)
+		require.NoError(t, err)
+
+		require.Len(t, result.Activity, 7)
+		assert.Equal(t, time.Monday, result.Activity[0].Date.Weekday())
+		assert.Equal(t, time.Sunday, result.Activity[6].Date.Weekday())
+	})
+
+	t.Run("Years run january to december", func(t *testing.T) {
+		result, err := repository.Get(ctx, userID, models.StatsPeriodYear)
+		require.NoError(t, err)
+
+		require.Len(t, result.Activity, 12)
+
+		for i, bucket := range result.Activity {
+			assert.Equal(t, time.Month(i+1), bucket.Date.Month())
+			assert.Equal(t, 1, bucket.Date.Day())
+		}
+	})
+
+	t.Run("All time buckets by year", func(t *testing.T) {
+		result, err := repository.Get(ctx, userID, models.StatsPeriodAll)
+		require.NoError(t, err)
+
+		require.Len(t, result.Activity, 4)
+
+		for i, bucket := range result.Activity {
+			assert.Equal(t, time.January, bucket.Date.Month())
+			assert.Equal(t, 1, bucket.Date.Day())
+			assert.Equal(t, yearStart.Year()-3+i, bucket.Date.Year())
+		}
+	})
+}
+
+func Test_StatsRepository_Get_MonthStartsOnTheFirst(t *testing.T) {
+	ctx := context.Background()
+	client := newRepoTestClient(t)
+	repository := NewStatsRepository(client)
+	userID := newProgressTestUser(t, client, "stats.monthstart")
+
+	seedStatsMovie(t, client, userID, 920001, 60, models.StateTypeWatched)
+	anchorStatsMovie(t, client, userID, 920001, "month")
+
+	// The first of the month can precede the current week, so only the wider windows are certain
+	for _, period := range []models.StatsPeriod{models.StatsPeriodMonth, models.StatsPeriodYear, models.StatsPeriodAll} {
+		t.Run(period.String(), func(t *testing.T) {
+			result, err := repository.Get(ctx, userID, period)
+			require.NoError(t, err)
+
+			assert.Equal(t, uint64(1), result.MoviesWatched)
+			assert.Equal(t, uint64(60), result.MoviesMinutes)
+		})
+	}
+
+	t.Run("Lands in the first bucket of the month", func(t *testing.T) {
+		result, err := repository.Get(ctx, userID, models.StatsPeriodMonth)
+		require.NoError(t, err)
+
+		require.NotEmpty(t, result.Activity)
+		assert.Equal(t, statsAnchor(t, client, "month").Format(time.DateOnly), result.Activity[0].Date.Format(time.DateOnly))
+		assert.Equal(t, uint64(60), result.Activity[0].MovieMinutes)
+	})
+}
+
 func Test_StatsRepository_Get_Empty(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewStatsRepository(client)
 	userID := newProgressTestUser(t, client, "stats.empty")
 
-	result, err := repository.Get(ctx, userID)
+	result, err := repository.Get(ctx, userID, models.StatsPeriodAll)
 	require.NoError(t, err)
+
+	// With nothing watched the history collapses to the current year
+	require.Len(t, result.Activity, 1)
+	assert.Equal(t, statsAnchor(t, client, "year").Format(time.DateOnly), result.Activity[0].Date.Format(time.DateOnly))
 
 	assert.Equal(t, uint64(0), result.MoviesWant)
 	assert.Equal(t, uint64(0), result.MoviesWatched)
@@ -140,7 +349,7 @@ func Test_StatsRepository_Get_QueryError(t *testing.T) {
 	canceled, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	result, err := repository.Get(canceled, userID)
+	result, err := repository.Get(canceled, userID, models.StatsPeriodAll)
 	require.Error(t, err)
 	assert.Nil(t, result)
 }

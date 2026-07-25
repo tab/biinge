@@ -43,16 +43,16 @@ func (m *MockStatsRepository) EXPECT() *MockStatsRepositoryMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockStatsRepository) Get(ctx context.Context, userId uuid.UUID) (*models.Stats, error) {
+func (m *MockStatsRepository) Get(ctx context.Context, userId uuid.UUID, period models.StatsPeriod) (*models.Stats, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", ctx, userId)
+	ret := m.ctrl.Call(m, "Get", ctx, userId, period)
 	ret0, _ := ret[0].(*models.Stats)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockStatsRepositoryMockRecorder) Get(ctx, userId any) *gomock.Call {
+func (mr *MockStatsRepositoryMockRecorder) Get(ctx, userId, period any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStatsRepository)(nil).Get), ctx, userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStatsRepository)(nil).Get), ctx, userId, period)
 }

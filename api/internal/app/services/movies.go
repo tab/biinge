@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
@@ -123,7 +124,11 @@ func (m *movies) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.
 func (m *movies) FindById(ctx context.Context, id uuid.UUID) (*models.Movie, error) {
 	item, err := m.repository.FindById(ctx, id)
 	if err != nil {
-		m.log.Error().Err(err).Msg("Failed to fetch movie by Id")
+		// a movie the user never added is the ordinary case, not a failure
+		if !errors.Is(err, pgx.ErrNoRows) {
+			m.log.Error().Err(err).Msg("Failed to fetch movie by Id")
+		}
+
 		return nil, errors.ErrMovieNotFound
 	}
 
@@ -133,7 +138,11 @@ func (m *movies) FindById(ctx context.Context, id uuid.UUID) (*models.Movie, err
 func (m *movies) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Movie, error) {
 	item, err := m.repository.FindByTmdbId(ctx, tmdbId, userId)
 	if err != nil {
-		m.log.Error().Err(err).Msg("Failed to fetch movie by TMDB Id")
+		// a movie the user never added is the ordinary case, not a failure
+		if !errors.Is(err, pgx.ErrNoRows) {
+			m.log.Error().Err(err).Msg("Failed to fetch movie by TMDB Id")
+		}
+
 		return nil, errors.ErrMovieNotFound
 	}
 

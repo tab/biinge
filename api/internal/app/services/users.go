@@ -46,7 +46,20 @@ func (u *users) Create(ctx context.Context, params *models.User) (*models.User, 
 		Appearance:        db.AppearanceType(params.Appearance),
 	})
 	if err != nil {
-		return nil, u.wrapError(err)
+		// registration races on the unique login and email indexes
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == uniqueViolationCode {
+			switch pgErr.ConstraintName {
+			case "users_login_key":
+				return nil, errors.ErrLoginAlreadyExists
+			case "users_email_key":
+				return nil, errors.ErrEmailAlreadyExists
+			}
+		}
+
+		u.log.Error().Err(err).Msg("Failed to create user")
+
+		return nil, errors.ErrFailedToProcessUser
 	}
 
 	return user, nil
@@ -60,7 +73,13 @@ func (u *users) Update(ctx context.Context, params *models.User) (*models.User, 
 		Appearance: db.AppearanceType(params.Appearance),
 	})
 	if err != nil {
-		return nil, u.wrapError(err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrUserNotFound
+		}
+
+		u.log.Error().Err(err).Msg("Failed to update user")
+
+		return nil, errors.ErrFailedToProcessUser
 	}
 
 	return user, nil
@@ -69,7 +88,13 @@ func (u *users) Update(ctx context.Context, params *models.User) (*models.User, 
 func (u *users) FindById(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	user, err := u.repository.FindById(ctx, id)
 	if err != nil {
-		return nil, u.wrapError(err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrUserNotFound
+		}
+
+		u.log.Error().Err(err).Msg("Failed to fetch user by Id")
+
+		return nil, errors.ErrFailedToProcessUser
 	}
 
 	return user, nil
@@ -78,7 +103,14 @@ func (u *users) FindById(ctx context.Context, id uuid.UUID) (*models.User, error
 func (u *users) FindByLogin(ctx context.Context, login string) (*models.User, error) {
 	user, err := u.repository.FindByLogin(ctx, login)
 	if err != nil {
-		return nil, u.wrapError(err)
+		// a login nobody holds is the ordinary case on a failed sign-in
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrUserNotFound
+		}
+
+		u.log.Error().Err(err).Msg("Failed to fetch user by login")
+
+		return nil, errors.ErrFailedToProcessUser
 	}
 
 	return user, nil
@@ -87,29 +119,15 @@ func (u *users) FindByLogin(ctx context.Context, login string) (*models.User, er
 func (u *users) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	user, err := u.repository.FindByEmail(ctx, email)
 	if err != nil {
-		return nil, u.wrapError(err)
+		// an unregistered email is the ordinary case when checking availability
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrUserNotFound
+		}
+
+		u.log.Error().Err(err).Msg("Failed to fetch user by email")
+
+		return nil, errors.ErrFailedToProcessUser
 	}
 
 	return user, nil
-}
-
-// wrapError maps a repository error to a sentinel that is safe to surface to callers
-func (u *users) wrapError(err error) error {
-	if errors.Is(err, pgx.ErrNoRows) {
-		return errors.ErrUserNotFound
-	}
-
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgErr.Code == uniqueViolationCode {
-		switch pgErr.ConstraintName {
-		case "users_login_key":
-			return errors.ErrLoginAlreadyExists
-		case "users_email_key":
-			return errors.ErrEmailAlreadyExists
-		}
-	}
-
-	u.log.Error().Err(err).Msg("User repository error")
-
-	return errors.ErrFailedToProcessUser
 }

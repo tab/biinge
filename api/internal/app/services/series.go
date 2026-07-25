@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
@@ -127,7 +128,11 @@ func (s *series) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.
 func (s *series) FindById(ctx context.Context, id uuid.UUID) (*models.Series, error) {
 	item, err := s.repository.FindById(ctx, id)
 	if err != nil {
-		s.log.Error().Err(err).Msg("Failed to fetch series by Id")
+		// a show the user never added is the ordinary case, not a failure
+		if !errors.Is(err, pgx.ErrNoRows) {
+			s.log.Error().Err(err).Msg("Failed to fetch series by Id")
+		}
+
 		return nil, errors.ErrSeriesNotFound
 	}
 
@@ -137,7 +142,11 @@ func (s *series) FindById(ctx context.Context, id uuid.UUID) (*models.Series, er
 func (s *series) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Series, error) {
 	item, err := s.repository.FindByTmdbId(ctx, tmdbId, userId)
 	if err != nil {
-		s.log.Error().Err(err).Msg("Failed to fetch series by TMDB Id")
+		// a show the user never added is the ordinary case, not a failure
+		if !errors.Is(err, pgx.ErrNoRows) {
+			s.log.Error().Err(err).Msg("Failed to fetch series by TMDB Id")
+		}
+
 		return nil, errors.ErrSeriesNotFound
 	}
 

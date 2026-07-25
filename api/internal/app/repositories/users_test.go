@@ -42,7 +42,7 @@ func Test_UserRepository_Create(t *testing.T) {
 				EncryptedPassword: "SECRET",
 				FirstName:         "John",
 				LastName:          "Doe",
-				Appearance:        models.DarkAppearance,
+				Appearance:        db.AppearanceType(models.DarkAppearance),
 			},
 			expected: &models.User{
 				Login:             "john.doe",
@@ -137,7 +137,7 @@ func Test_UserRepository_Update(t *testing.T) {
 		EncryptedPassword: "SECRET",
 		FirstName:         "Jane",
 		LastName:          "Doe",
-		Appearance:        models.DarkAppearance,
+		Appearance:        db.AppearanceType(models.DarkAppearance),
 	})
 	require.NoError(t, err)
 
@@ -155,7 +155,7 @@ func Test_UserRepository_Update(t *testing.T) {
 				ID:         account.ID,
 				FirstName:  "Jane",
 				LastName:   "Doe",
-				Appearance: models.LightAppearance,
+				Appearance: db.AppearanceType(models.LightAppearance),
 			},
 			expected: &models.User{
 				ID:         account.ID,
@@ -219,7 +219,7 @@ func Test_UserRepository_FindById(t *testing.T) {
 		Email:      "ann.doe@local",
 		FirstName:  "Ann",
 		LastName:   "Doe",
-		Appearance: models.DarkAppearance,
+		Appearance: db.AppearanceType(models.DarkAppearance),
 	})
 	require.NoError(t, err)
 
@@ -286,7 +286,7 @@ func Test_UserRepository_FindByLogin(t *testing.T) {
 		Email:      "alice.doe@local",
 		FirstName:  "Alice",
 		LastName:   "Doe",
-		Appearance: models.LightAppearance,
+		Appearance: db.AppearanceType(models.LightAppearance),
 	})
 	require.NoError(t, err)
 
@@ -353,7 +353,7 @@ func Test_UserRepository_FindByEmail(t *testing.T) {
 		Email:      "bob.doe@local",
 		FirstName:  "Bob",
 		LastName:   "Doe",
-		Appearance: models.DefaultAppearance,
+		Appearance: db.AppearanceType(models.DefaultAppearance),
 	})
 	require.NoError(t, err)
 

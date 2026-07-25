@@ -46,7 +46,7 @@ func Test_Movies_List(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().List(ctx, userId, "want", pagination.Limit(), pagination.Offset()).Return([]models.Movie{
+				repository.EXPECT().List(ctx, userId, models.StateTypeWant, pagination.Limit(), pagination.Offset()).Return([]models.Movie{
 					{TmdbId: 100, Title: "The Matrix", State: "want"},
 				}, uint64(1), nil)
 			},
@@ -58,7 +58,7 @@ func Test_Movies_List(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().List(ctx, userId, "want", pagination.Limit(), pagination.Offset()).Return(nil, uint64(0), assert.AnError)
+				repository.EXPECT().List(ctx, userId, models.StateTypeWant, pagination.Limit(), pagination.Offset()).Return(nil, uint64(0), assert.AnError)
 			},
 			expected: nil,
 			total:    0,
@@ -70,7 +70,7 @@ func Test_Movies_List(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, total, err := service.List(ctx, userId, "want", pagination)
+			result, total, err := service.List(ctx, userId, models.StateTypeWant, pagination)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)

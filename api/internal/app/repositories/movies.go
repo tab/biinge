@@ -11,7 +11,7 @@ import (
 )
 
 type MovieRepository interface {
-	List(ctx context.Context, userId uuid.UUID, state string, limit, offset uint64) ([]models.Movie, uint64, error)
+	List(ctx context.Context, userId uuid.UUID, state models.StateType, limit, offset uint64) ([]models.Movie, uint64, error)
 	Create(ctx context.Context, params *models.Movie) (*models.Movie, error)
 	Update(ctx context.Context, params *models.Movie) (*models.Movie, error)
 	UpdateByTmdbId(ctx context.Context, params *models.Movie) (*models.Movie, error)
@@ -30,7 +30,7 @@ func NewMovieRepository(client postgres.Postgres) MovieRepository {
 	return &movie{client: client}
 }
 
-func (m *movie) List(ctx context.Context, userId uuid.UUID, state string, limit, offset uint64) ([]models.Movie, uint64, error) {
+func (m *movie) List(ctx context.Context, userId uuid.UUID, state models.StateType, limit, offset uint64) ([]models.Movie, uint64, error) {
 	rows, err := m.client.Queries().FindMoviesByState(ctx, db.FindMoviesByStateParams{
 		UserID: userId,
 		State:  db.StateTypes(state),
@@ -57,7 +57,7 @@ func (m *movie) List(ctx context.Context, userId uuid.UUID, state string, limit,
 			Title:      row.Title,
 			PosterPath: row.PosterPath,
 			Pinned:     row.Pinned,
-			State:      string(row.State),
+			State:      models.StateType(row.State),
 			WatchedAt:  row.WatchedAt.Time,
 			CreatedAt:  row.CreatedAt.Time,
 			UpdatedAt:  row.UpdatedAt.Time,
@@ -87,7 +87,7 @@ func (m *movie) Create(ctx context.Context, params *models.Movie) (*models.Movie
 		Title:      result.Title,
 		PosterPath: result.PosterPath,
 		Runtime:    result.Runtime,
-		State:      string(result.State),
+		State:      models.StateType(result.State),
 		Pinned:     result.Pinned,
 		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
@@ -113,7 +113,7 @@ func (m *movie) Update(ctx context.Context, params *models.Movie) (*models.Movie
 		Title:      result.Title,
 		PosterPath: result.PosterPath,
 		Runtime:    result.Runtime,
-		State:      string(result.State),
+		State:      models.StateType(result.State),
 		Pinned:     result.Pinned,
 		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
@@ -139,7 +139,7 @@ func (m *movie) UpdateByTmdbId(ctx context.Context, params *models.Movie) (*mode
 		Title:      result.Title,
 		PosterPath: result.PosterPath,
 		Runtime:    result.Runtime,
-		State:      string(result.State),
+		State:      models.StateType(result.State),
 		Pinned:     result.Pinned,
 		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
@@ -171,7 +171,7 @@ func (m *movie) FindById(ctx context.Context, id uuid.UUID) (*models.Movie, erro
 		Title:      result.Title,
 		PosterPath: result.PosterPath,
 		Runtime:    result.Runtime,
-		State:      string(result.State),
+		State:      models.StateType(result.State),
 		Pinned:     result.Pinned,
 		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
@@ -195,7 +195,7 @@ func (m *movie) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUI
 		Title:      result.Title,
 		PosterPath: result.PosterPath,
 		Runtime:    result.Runtime,
-		State:      string(result.State),
+		State:      models.StateType(result.State),
 		Pinned:     result.Pinned,
 		WatchedAt:  result.WatchedAt.Time,
 		CreatedAt:  result.CreatedAt.Time,
@@ -221,7 +221,7 @@ func (m *movie) FindMoviesByTmdbIds(ctx context.Context, tmdbIds []uint64, userI
 			Title:      row.Title,
 			PosterPath: row.PosterPath,
 			Runtime:    row.Runtime,
-			State:      string(row.State),
+			State:      models.StateType(row.State),
 			Pinned:     row.Pinned,
 			WatchedAt:  row.WatchedAt.Time,
 			CreatedAt:  row.CreatedAt.Time,

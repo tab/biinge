@@ -106,7 +106,7 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	recommendationStatesMap := make(map[uint64]string)
+	recommendationStatesMap := make(map[uint64]models.StateType)
 	for _, movie := range moviesList {
 		recommendationStatesMap[movie.TmdbId] = movie.State
 	}
@@ -273,7 +273,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	recommendationStatesMap := make(map[uint64]string)
+	recommendationStatesMap := make(map[uint64]models.StateType)
 	for _, tvShow := range tvShowsList {
 		recommendationStatesMap[tvShow.TmdbId] = tvShow.State
 	}
@@ -461,7 +461,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	movieCreditStatesMap := make(map[uint64]string)
+	movieCreditStatesMap := make(map[uint64]models.StateType)
 	for _, movie := range moviesList {
 		movieCreditStatesMap[movie.TmdbId] = movie.State
 	}
@@ -496,7 +496,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	tvCreditStatesMap := make(map[uint64]string)
+	tvCreditStatesMap := make(map[uint64]models.StateType)
 	for _, tvShow := range seriesList {
 		tvCreditStatesMap[tvShow.TmdbId] = tvShow.State
 	}
@@ -735,7 +735,7 @@ func (p *tmdbProvider) buildMovieList(ctx context.Context, response *tmdb.MovieL
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	stateMap := make(map[uint64]string)
+	stateMap := make(map[uint64]models.StateType)
 	for _, movie := range moviesList {
 		stateMap[movie.TmdbId] = movie.State
 	}
@@ -784,7 +784,7 @@ func (p *tmdbProvider) buildSeriesList(ctx context.Context, response *tmdb.TvLis
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	stateMap := make(map[uint64]string)
+	stateMap := make(map[uint64]models.StateType)
 	for _, series := range seriesList {
 		stateMap[series.TmdbId] = series.State
 	}

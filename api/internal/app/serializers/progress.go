@@ -186,11 +186,11 @@ func (params *MarkEpisodeRequestSerializer) ToInputs(seriesTmdbId, seasonTmdbId,
 
 // ProgressResponseSerializer is the watched-progress snapshot returned by the progress endpoints
 type ProgressResponseSerializer struct {
-	Id              uint64   `json:"id"`
-	State           string   `json:"state"`
-	TrackedState    string   `json:"trackedState,omitempty"`
-	WatchedSeasons  []uint64 `json:"watchedSeasons"`
-	WatchedEpisodes []uint64 `json:"watchedEpisodes"`
+	Id              uint64           `json:"id"`
+	State           models.StateType `json:"state"`
+	TrackedState    models.StateType `json:"trackedState,omitempty"`
+	WatchedSeasons  []uint64         `json:"watchedSeasons"`
+	WatchedEpisodes []uint64         `json:"watchedEpisodes"`
 }
 
 func NewProgressResponse(progress *models.SeriesProgress) ProgressResponseSerializer {

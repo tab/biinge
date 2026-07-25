@@ -60,14 +60,7 @@ func (c *seriesController) HandleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	listType := models.StateTypeWant
-
-	switch r.URL.Query().Get("type") {
-	case models.StateTypeWatching:
-		listType = models.StateTypeWatching
-	case models.StateTypeWatched:
-		listType = models.StateTypeWatched
-	}
+	listType := models.NewSeriesListState(r.URL.Query().Get("type"))
 
 	pagination := services.NewPagination(r)
 
@@ -163,7 +156,7 @@ func (c *seriesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 		SeasonsCount:  params.SeasonsCount,
 		EpisodesCount: params.EpisodesCount,
 		Status:        params.Status,
-		State:         params.State,
+		State:         models.StateType(params.State),
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -212,7 +205,7 @@ func (c *seriesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	row, err := c.series.UpdateByTmdbId(r.Context(), &models.Series{
 		TmdbId: id,
 		UserId: user.ID,
-		State:  params.State,
+		State:  models.StateType(params.State),
 		Pinned: params.Pinned,
 	})
 	if err != nil {

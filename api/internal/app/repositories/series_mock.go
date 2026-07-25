@@ -131,7 +131,7 @@ func (mr *MockSeriesRepositoryMockRecorder) FindSeriesByTmdbIds(ctx, tmdbIds, us
 }
 
 // List mocks base method.
-func (m *MockSeriesRepository) List(ctx context.Context, userId uuid.UUID, state string, limit, offset uint64) ([]models.Series, uint64, error) {
+func (m *MockSeriesRepository) List(ctx context.Context, userId uuid.UUID, state models.StateType, limit, offset uint64) ([]models.Series, uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx, userId, state, limit, offset)
 	ret0, _ := ret[0].([]models.Series)

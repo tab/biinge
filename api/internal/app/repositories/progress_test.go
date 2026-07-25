@@ -25,7 +25,7 @@ func newProgressTestUser(t *testing.T, client postgres.Postgres, login string) u
 		EncryptedPassword: "SECRET",
 		FirstName:         "TV",
 		LastName:          "Tester",
-		Appearance:        models.DefaultAppearance,
+		Appearance:        db.AppearanceType(models.DefaultAppearance),
 	})
 	require.NoError(t, err)
 
@@ -58,7 +58,7 @@ func episodeInput(tmdbID uint64) models.EpisodeInput {
 }
 
 // createTrackedSeries tracks a show explicitly so tracked_state records the user's choice
-func createTrackedSeries(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, state string) {
+func createTrackedSeries(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, state models.StateType) {
 	t.Helper()
 
 	_, err := client.Queries().CreateSeries(context.Background(), db.CreateSeriesParams{

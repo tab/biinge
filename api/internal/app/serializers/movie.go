@@ -10,10 +10,10 @@ import (
 )
 
 type RecommendationSerializer struct {
-	Id         uint64 `json:"id"`
-	Title      string `json:"title"`
-	PosterPath string `json:"posterPath"`
-	State      string `json:"state,omitempty"`
+	Id         uint64           `json:"id"`
+	Title      string           `json:"title"`
+	PosterPath string           `json:"posterPath"`
+	State      models.StateType `json:"state,omitempty"`
 }
 
 type PersonSerializer struct {
@@ -29,11 +29,11 @@ type VideoSerializer struct {
 }
 
 type MovieSerializer struct {
-	Id         uint64 `json:"id"`
-	Title      string `json:"title"`
-	PosterPath string `json:"posterPath"`
-	Pinned     bool   `json:"pinned"`
-	State      string `json:"state"`
+	Id         uint64           `json:"id"`
+	Title      string           `json:"title"`
+	PosterPath string           `json:"posterPath"`
+	Pinned     bool             `json:"pinned"`
+	State      models.StateType `json:"state"`
 }
 
 type MovieDetailsSerializer struct {
@@ -42,7 +42,7 @@ type MovieDetailsSerializer struct {
 	Title           string                     `json:"title"`
 	PosterPath      string                     `json:"posterPath"`
 	Pinned          bool                       `json:"pinned"`
-	State           string                     `json:"state"`
+	State           models.StateType           `json:"state"`
 	Overview        string                     `json:"overview"`
 	Status          string                     `json:"status,omitempty"`
 	ReleaseDate     string                     `json:"releaseDate,omitempty"`
@@ -74,7 +74,7 @@ func (params *CreateMovieRequestSerializer) Validate(body io.Reader) error {
 	params.PosterPath = strings.TrimSpace(params.PosterPath)
 
 	params.State = strings.TrimSpace(params.State)
-	switch params.State {
+	switch models.StateType(params.State) {
 	case models.StateTypeWant, models.StateTypeWatched:
 	case "":
 		return errors.ErrEmptyState
@@ -96,7 +96,7 @@ func (params *UpdateMovieRequestSerializer) Validate(body io.Reader) error {
 	}
 
 	params.State = strings.TrimSpace(params.State)
-	switch params.State {
+	switch models.StateType(params.State) {
 	case models.StateTypeWant, models.StateTypeWatched:
 	case "":
 		return errors.ErrEmptyState

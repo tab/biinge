@@ -79,7 +79,7 @@ func (c *accountsController) HandleUpdate(w http.ResponseWriter, r *http.Request
 		ID:         user.ID,
 		FirstName:  params.FirstName,
 		LastName:   params.LastName,
-		Appearance: params.Appearance,
+		Appearance: models.Appearance(params.Appearance),
 	})
 	if err != nil {
 		c.log.Error().Err(err).Msg("Update failed")

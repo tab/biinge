@@ -16,7 +16,7 @@ type Series struct {
 	EpisodesCount        uint64
 	WatchedEpisodesCount uint64
 	Status               string
-	State                string
+	State                StateType
 	Pinned               bool
 	CreatedAt            time.Time
 	UpdatedAt            time.Time

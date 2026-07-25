@@ -48,10 +48,7 @@ func (c *moviesController) HandleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	listType := models.StateTypeWant
-	if r.URL.Query().Get("type") == models.StateTypeWatched {
-		listType = models.StateTypeWatched
-	}
+	listType := models.NewMovieListState(r.URL.Query().Get("type"))
 
 	pagination := services.NewPagination(r)
 
@@ -143,7 +140,7 @@ func (c *moviesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 		Title:      params.Title,
 		PosterPath: params.PosterPath,
 		Runtime:    params.Runtime,
-		State:      params.State,
+		State:      models.StateType(params.State),
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -192,7 +189,7 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	row, err := c.movies.UpdateByTmdbId(r.Context(), &models.Movie{
 		TmdbId: id,
 		UserId: user.ID,
-		State:  params.State,
+		State:  models.StateType(params.State),
 		Pinned: params.Pinned,
 	})
 	if err != nil {

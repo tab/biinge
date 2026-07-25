@@ -15,7 +15,7 @@ import (
 )
 
 // seedStatsMovie inserts a movie in the given state with the given runtime
-func seedStatsMovie(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID, runtime uint64, state string) {
+func seedStatsMovie(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID, runtime uint64, state models.StateType) {
 	t.Helper()
 
 	_, err := client.Queries().CreateMovie(context.Background(), db.CreateMovieParams{
@@ -30,7 +30,7 @@ func seedStatsMovie(t *testing.T, client postgres.Postgres, userID uuid.UUID, tm
 }
 
 // seedStatsSeries inserts a series in the given state and returns its id
-func seedStatsSeries(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, state string) uuid.UUID {
+func seedStatsSeries(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, state models.StateType) uuid.UUID {
 	t.Helper()
 
 	result, err := client.Queries().CreateSeries(context.Background(), db.CreateSeriesParams{

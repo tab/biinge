@@ -6,13 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	StateTypeWant     = "want"
-	StateTypeWatched  = "watched"
-	StateTypeWatching = "watching"
-	StateTypeNone     = "none"
-)
-
 type Movie struct {
 	ID         uuid.UUID
 	UserId     uuid.UUID
@@ -20,7 +13,7 @@ type Movie struct {
 	Title      string
 	PosterPath string
 	Runtime    uint64
-	State      string
+	State      StateType
 	Pinned     bool
 	WatchedAt  time.Time
 	CreatedAt  time.Time

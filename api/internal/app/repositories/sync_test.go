@@ -239,5 +239,5 @@ func Test_SyncRepository_SyncMovie_WritesSnapshot(t *testing.T) {
 	assert.Equal(t, "New", row.Title)
 	assert.Equal(t, "/new.jpg", row.PosterPath)
 	assert.Equal(t, uint64(120), row.Runtime)
-	assert.Equal(t, models.StateTypeWant, string(row.State), "sync must not touch user-driven state")
+	assert.Equal(t, models.StateTypeWant, models.StateType(row.State), "sync must not touch user-driven state")
 }

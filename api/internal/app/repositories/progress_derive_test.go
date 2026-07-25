@@ -15,7 +15,7 @@ func Test_deriveSeriesState(t *testing.T) {
 		watchedSeasons  uint64
 		totalSeasons    uint64
 		status          string
-		want            string
+		want            models.StateType
 	}{
 		{
 			name: "no watched episodes is untracked",

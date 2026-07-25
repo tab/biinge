@@ -8,15 +8,16 @@ import (
 	"github.com/google/uuid"
 
 	"biinge-api/internal/app/errors"
+	"biinge-api/internal/app/models"
 )
 
 type UserSerializer struct {
-	ID         uuid.UUID `json:"id"`
-	Login      string    `json:"login"`
-	Email      string    `json:"email"`
-	FirstName  string    `json:"first_name,omitempty"`
-	LastName   string    `json:"last_name,omitempty"`
-	Appearance string    `json:"appearance"`
+	ID         uuid.UUID         `json:"id"`
+	Login      string            `json:"login"`
+	Email      string            `json:"email"`
+	FirstName  string            `json:"first_name,omitempty"`
+	LastName   string            `json:"last_name,omitempty"`
+	Appearance models.Appearance `json:"appearance"`
 }
 
 type UpdateAccountRequestSerializer struct {

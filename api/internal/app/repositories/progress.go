@@ -278,7 +278,7 @@ func upsertSeason(ctx context.Context, q *db.Queries, seriesID uuid.UUID, input 
 }
 
 // upsertEpisode inserts or updates an episode row in the given state
-func upsertEpisode(ctx context.Context, q *db.Queries, seasonID uuid.UUID, input models.EpisodeInput, state string) (db.Episode, error) {
+func upsertEpisode(ctx context.Context, q *db.Queries, seasonID uuid.UUID, input models.EpisodeInput, state models.StateType) (db.Episode, error) {
 	return q.UpsertEpisode(ctx, db.UpsertEpisodeParams{
 		SeasonID:   seasonID,
 		TmdbID:     input.TmdbId,
@@ -353,7 +353,7 @@ func recomputeSeries(ctx context.Context, q *db.Queries, series db.Series) error
 // deriveSeriesState maps watched progress and show status to none/watching/watched
 // a finished show becomes watched once every regular season is watched, rather than
 // comparing raw episode counts, whose show-level TMDB total often drifts from the seasons
-func deriveSeriesState(watchedEpisodes, watchedSeasons, totalSeasons uint64, status string) string {
+func deriveSeriesState(watchedEpisodes, watchedSeasons, totalSeasons uint64, status string) models.StateType {
 	if watchedEpisodes == 0 {
 		return models.StateTypeNone
 	}
@@ -386,14 +386,14 @@ func buildProgress(ctx context.Context, q *db.Queries, userId uuid.UUID, seriesT
 		return nil, err
 	}
 
-	trackedState := ""
+	trackedState := models.StateType("")
 	if series.TrackedState.Valid {
-		trackedState = string(series.TrackedState.StateTypes)
+		trackedState = models.StateType(series.TrackedState.StateTypes)
 	}
 
 	return &models.SeriesProgress{
 		SeriesTmdbId:    seriesTmdbId,
-		State:           string(series.State),
+		State:           models.StateType(series.State),
 		TrackedState:    trackedState,
 		WatchedSeasons:  seasons,
 		WatchedEpisodes: episodes,

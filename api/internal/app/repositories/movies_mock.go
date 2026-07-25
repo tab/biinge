@@ -131,7 +131,7 @@ func (mr *MockMovieRepositoryMockRecorder) FindMoviesByTmdbIds(ctx, tmdbIds, use
 }
 
 // List mocks base method.
-func (m *MockMovieRepository) List(ctx context.Context, userId uuid.UUID, state string, limit, offset uint64) ([]models.Movie, uint64, error) {
+func (m *MockMovieRepository) List(ctx context.Context, userId uuid.UUID, state models.StateType, limit, offset uint64) ([]models.Movie, uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx, userId, state, limit, offset)
 	ret0, _ := ret[0].([]models.Movie)

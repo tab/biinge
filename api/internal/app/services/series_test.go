@@ -35,7 +35,7 @@ func Test_Series_List(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().List(ctx, userId, "watching", pagination.Limit(), pagination.Offset()).Return([]models.Series{
+				repository.EXPECT().List(ctx, userId, models.StateTypeWatching, pagination.Limit(), pagination.Offset()).Return([]models.Series{
 					{TmdbId: 300, Title: "Breaking Bad", State: "watching"},
 				}, uint64(1), nil)
 			},
@@ -47,7 +47,7 @@ func Test_Series_List(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().List(ctx, userId, "watching", pagination.Limit(), pagination.Offset()).Return(nil, uint64(0), assert.AnError)
+				repository.EXPECT().List(ctx, userId, models.StateTypeWatching, pagination.Limit(), pagination.Offset()).Return(nil, uint64(0), assert.AnError)
 			},
 			expected: nil,
 			total:    0,
@@ -59,7 +59,7 @@ func Test_Series_List(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, total, err := service.List(ctx, userId, "watching", pagination)
+			result, total, err := service.List(ctx, userId, models.StateTypeWatching, pagination)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)

@@ -52,8 +52,8 @@ type ShowInput struct {
 // SeriesProgress is a show's derived watched state; TrackedState is the user's explicit choice that unmark-all reverts to
 type SeriesProgress struct {
 	SeriesTmdbId    uint64
-	State           string
-	TrackedState    string
+	State           StateType
+	TrackedState    StateType
 	WatchedSeasons  []uint64
 	WatchedEpisodes []uint64
 }

@@ -189,13 +189,13 @@ func expectedTvCredits() []serializers.PersonSerializer {
 	}
 }
 
-func expectedMovieRecommendations(state string) []serializers.RecommendationSerializer {
+func expectedMovieRecommendations(state models.StateType) []serializers.RecommendationSerializer {
 	return []serializers.RecommendationSerializer{
 		{Id: 200, Title: "John Wick", PosterPath: "/jw.jpg", State: state},
 	}
 }
 
-func expectedTvRecommendations(state string) []serializers.RecommendationSerializer {
+func expectedTvRecommendations(state models.StateType) []serializers.RecommendationSerializer {
 	return []serializers.RecommendationSerializer{
 		{Id: 400, Title: "Better Call Saul", PosterPath: "/bcs.jpg", State: state},
 	}

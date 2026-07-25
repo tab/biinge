@@ -12,7 +12,7 @@ import (
 )
 
 type Series interface {
-	List(ctx context.Context, userId uuid.UUID, status string, pagination *Pagination) ([]models.Series, uint64, error)
+	List(ctx context.Context, userId uuid.UUID, state models.StateType, pagination *Pagination) ([]models.Series, uint64, error)
 	Create(ctx context.Context, params *models.Series) (*models.Series, error)
 	Update(ctx context.Context, params *models.Series) (*models.Series, error)
 	UpdateByTmdbId(ctx context.Context, params *models.Series) (*models.Series, error)
@@ -35,8 +35,8 @@ func NewSeries(repository repositories.SeriesRepository, log *logger.Logger) Ser
 	}
 }
 
-func (s *series) List(ctx context.Context, userId uuid.UUID, status string, pagination *Pagination) ([]models.Series, uint64, error) {
-	collection, total, err := s.repository.List(ctx, userId, status, pagination.Limit(), pagination.Offset())
+func (s *series) List(ctx context.Context, userId uuid.UUID, state models.StateType, pagination *Pagination) ([]models.Series, uint64, error) {
+	collection, total, err := s.repository.List(ctx, userId, state, pagination.Limit(), pagination.Offset())
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to fetch series")
 		return nil, 0, errors.ErrFailedToFetchSeriesList

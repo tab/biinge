@@ -12,7 +12,7 @@ import (
 )
 
 type Movies interface {
-	List(ctx context.Context, userId uuid.UUID, status string, pagination *Pagination) ([]models.Movie, uint64, error)
+	List(ctx context.Context, userId uuid.UUID, state models.StateType, pagination *Pagination) ([]models.Movie, uint64, error)
 	Create(ctx context.Context, params *models.Movie) (*models.Movie, error)
 	Update(ctx context.Context, params *models.Movie) (*models.Movie, error)
 	UpdateByTmdbId(ctx context.Context, params *models.Movie) (*models.Movie, error)
@@ -35,8 +35,8 @@ func NewMovies(repository repositories.MovieRepository, log *logger.Logger) Movi
 	}
 }
 
-func (m *movies) List(ctx context.Context, userId uuid.UUID, status string, pagination *Pagination) ([]models.Movie, uint64, error) {
-	collection, total, err := m.repository.List(ctx, userId, status, pagination.Limit(), pagination.Offset())
+func (m *movies) List(ctx context.Context, userId uuid.UUID, state models.StateType, pagination *Pagination) ([]models.Movie, uint64, error) {
+	collection, total, err := m.repository.List(ctx, userId, state, pagination.Limit(), pagination.Offset())
 	if err != nil {
 		m.log.Error().Err(err).Msg("Failed to fetch movies")
 		return nil, 0, errors.ErrFailedToFetchMovies

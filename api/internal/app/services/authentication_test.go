@@ -112,7 +112,7 @@ func Test_Authentication_Registration(t *testing.T) {
 				Password:   "password123",
 				FirstName:  "John",
 				LastName:   "Doe",
-				Appearance: models.DefaultAppearance,
+				Appearance: models.DefaultAppearance.String(),
 			},
 			expected: &serializers.TokenSerializer{
 				AccessToken:  "jwt-access-token",

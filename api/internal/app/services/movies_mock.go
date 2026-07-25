@@ -131,9 +131,9 @@ func (mr *MockMoviesMockRecorder) FindMoviesByTmdbIds(ctx, tmdbIds, userId any) 
 }
 
 // List mocks base method.
-func (m *MockMovies) List(ctx context.Context, userId uuid.UUID, status string, pagination *Pagination) ([]models.Movie, uint64, error) {
+func (m *MockMovies) List(ctx context.Context, userId uuid.UUID, state models.StateType, pagination *Pagination) ([]models.Movie, uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", ctx, userId, status, pagination)
+	ret := m.ctrl.Call(m, "List", ctx, userId, state, pagination)
 	ret0, _ := ret[0].([]models.Movie)
 	ret1, _ := ret[1].(uint64)
 	ret2, _ := ret[2].(error)
@@ -141,9 +141,9 @@ func (m *MockMovies) List(ctx context.Context, userId uuid.UUID, status string, 
 }
 
 // List indicates an expected call of List.
-func (mr *MockMoviesMockRecorder) List(ctx, userId, status, pagination any) *gomock.Call {
+func (mr *MockMoviesMockRecorder) List(ctx, userId, state, pagination any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockMovies)(nil).List), ctx, userId, status, pagination)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockMovies)(nil).List), ctx, userId, state, pagination)
 }
 
 // Update mocks base method.

@@ -11,7 +11,7 @@ import (
 )
 
 type SeriesRepository interface {
-	List(ctx context.Context, userId uuid.UUID, state string, limit, offset uint64) ([]models.Series, uint64, error)
+	List(ctx context.Context, userId uuid.UUID, state models.StateType, limit, offset uint64) ([]models.Series, uint64, error)
 	Create(ctx context.Context, params *models.Series) (*models.Series, error)
 	Update(ctx context.Context, params *models.Series) (*models.Series, error)
 	UpdateByTmdbId(ctx context.Context, params *models.Series) (*models.Series, error)
@@ -30,7 +30,7 @@ func NewSeriesRepository(client postgres.Postgres) SeriesRepository {
 	return &series{client: client}
 }
 
-func (s *series) List(ctx context.Context, userId uuid.UUID, state string, limit, offset uint64) ([]models.Series, uint64, error) {
+func (s *series) List(ctx context.Context, userId uuid.UUID, state models.StateType, limit, offset uint64) ([]models.Series, uint64, error) {
 	rows, err := s.client.Queries().FindSeriesByState(ctx, db.FindSeriesByStateParams{
 		UserID: userId,
 		State:  db.StateTypes(state),
@@ -59,7 +59,7 @@ func (s *series) List(ctx context.Context, userId uuid.UUID, state string, limit
 			EpisodesCount:        row.EpisodesCount,
 			WatchedEpisodesCount: uint64(row.WatchedEpisodesCount),
 			Pinned:               row.Pinned,
-			State:                string(row.State),
+			State:                models.StateType(row.State),
 			CreatedAt:            row.CreatedAt.Time,
 			UpdatedAt:            row.UpdatedAt.Time,
 		})
@@ -175,7 +175,7 @@ func seriesFromRow(row db.Series) *models.Series {
 		SeasonsCount:  row.SeasonsCount,
 		EpisodesCount: row.EpisodesCount,
 		Status:        row.Status,
-		State:         string(row.State),
+		State:         models.StateType(row.State),
 		Pinned:        row.Pinned,
 		CreatedAt:     row.CreatedAt.Time,
 		UpdatedAt:     row.UpdatedAt.Time,

@@ -59,7 +59,7 @@ func (a *authentication) Registration(ctx context.Context, params *serializers.R
 		return nil, errors.ErrEmailAlreadyExists
 	}
 
-	appearance := params.Appearance
+	appearance := models.Appearance(params.Appearance)
 	if appearance == "" {
 		appearance = models.DefaultAppearance
 	}

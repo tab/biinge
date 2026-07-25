@@ -10,13 +10,13 @@ import (
 )
 
 type SeriesSerializer struct {
-	Id                   uint64 `json:"id"`
-	Title                string `json:"title"`
-	PosterPath           string `json:"posterPath"`
-	Pinned               bool   `json:"pinned"`
-	State                string `json:"state"`
-	EpisodesCount        uint64 `json:"episodesCount"`
-	WatchedEpisodesCount uint64 `json:"watchedEpisodesCount"`
+	Id                   uint64           `json:"id"`
+	Title                string           `json:"title"`
+	PosterPath           string           `json:"posterPath"`
+	Pinned               bool             `json:"pinned"`
+	State                models.StateType `json:"state"`
+	EpisodesCount        uint64           `json:"episodesCount"`
+	WatchedEpisodesCount uint64           `json:"watchedEpisodesCount"`
 }
 
 type SeriesDetailsSerializer struct {
@@ -25,7 +25,7 @@ type SeriesDetailsSerializer struct {
 	Title           string                     `json:"title"`
 	PosterPath      string                     `json:"posterPath"`
 	Pinned          bool                       `json:"pinned"`
-	State           string                     `json:"state"`
+	State           models.StateType           `json:"state"`
 	Overview        string                     `json:"overview"`
 	Status          string                     `json:"status,omitempty"`
 	ReleaseDate     string                     `json:"releaseDate,omitempty"`
@@ -61,7 +61,7 @@ func (params *CreateSeriesRequestSerializer) Validate(body io.Reader) error {
 	params.PosterPath = strings.TrimSpace(params.PosterPath)
 
 	params.State = strings.TrimSpace(params.State)
-	switch params.State {
+	switch models.StateType(params.State) {
 	case models.StateTypeWant, models.StateTypeWatching, models.StateTypeWatched:
 	case "":
 		return errors.ErrEmptyState
@@ -83,7 +83,7 @@ func (params *UpdateSeriesRequestSerializer) Validate(body io.Reader) error {
 	}
 
 	params.State = strings.TrimSpace(params.State)
-	switch params.State {
+	switch models.StateType(params.State) {
 	case models.StateTypeWant, models.StateTypeWatching, models.StateTypeWatched:
 	case "":
 		return errors.ErrEmptyState

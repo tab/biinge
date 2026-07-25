@@ -1,11 +1,45 @@
 import Foundation
 
+/// Calendar period the statistics screen aggregates watched activity over
+enum StatsPeriod: String, Sendable, CaseIterable {
+    case week, month, year, all
+
+    /// Chip label
+    var title: String {
+        switch self {
+        case .week: return "Week"
+        case .month: return "Month"
+        case .year: return "Year"
+        case .all: return "All"
+        }
+    }
+
+    /// Calendar unit the API buckets this period's activity by
+    var unit: Calendar.Component {
+        switch self {
+        case .week, .month: return .day
+        case .year: return .month
+        case .all: return .year
+        }
+    }
+
+    /// Trailing phrase naming the period in captions
+    var phrase: String {
+        switch self {
+        case .week: return "this week"
+        case .month: return "this month"
+        case .year: return "this year"
+        case .all: return "all time"
+        }
+    }
+}
+
 struct AccountStats: Decodable, Sendable {
     let movies: Movies
     let series: Series
     let episodes: Episodes
     // optional so a stats payload without activity (older API) still decodes
-    let activity: [Monthly]?
+    let activity: [Bucket]?
 
     struct Movies: Decodable, Sendable {
         let want: Int
@@ -24,25 +58,26 @@ struct AccountStats: Decodable, Sendable {
         let minutes: Int
     }
 
-    /// Watched runtime for one calendar month, split by media kind
-    struct Monthly: Decodable, Sendable, Identifiable {
-        let month: String
+    /// Watched runtime for one activity bucket, split by media kind
+    struct Bucket: Decodable, Sendable, Identifiable {
+        let date: String
         let movieMinutes: Int
         let tvMinutes: Int
 
-        var id: String { month }
+        var id: String { date }
         var totalMinutes: Int { movieMinutes + tvMinutes }
 
-        /// First day of the month parsed from the "yyyy-MM" key
-        var date: Date {
-            let parts = month.split(separator: "-")
-            guard parts.count == 2, let year = Int(parts[0]), let monthValue = Int(parts[1]) else {
+        /// Start of the bucket parsed from the "yyyy-MM-dd" key
+        var start: Date {
+            let parts = date.split(separator: "-")
+            guard parts.count == 3,
+                  let year = Int(parts[0]), let month = Int(parts[1]), let day = Int(parts[2]) else {
                 return .distantPast
             }
             var components = DateComponents()
             components.year = year
-            components.month = monthValue
-            components.day = 1
+            components.month = month
+            components.day = day
             return Calendar(identifier: .gregorian).date(from: components) ?? .distantPast
         }
     }

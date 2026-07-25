@@ -210,19 +210,62 @@ private struct TimeSlice: Identifiable {
 
 struct StatisticsView: View {
     @Environment(\.apiClient) private var apiClient
-    @State private var stats: AccountStats?
+    @State private var loaded: [StatsPeriod: AccountStats] = [:]
+    @State private var lastShown: AccountStats?
+    @State private var period: StatsPeriod = .week
+
+    /// Falls back to whatever was on screen so a period being fetched never blanks the page
+    private var stats: AccountStats? { loaded[period] ?? lastShown }
+
+    /// True while the numbers on screen belong to some other period
+    private var isStale: Bool { loaded[period] == nil }
 
     var body: some View {
         ModalScaffold(title: "Statistics") {
-            if let stats {
-                content(stats)
-            } else {
-                ProgressView().tint(Color.biingeLoader)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 40)
+            VStack(alignment: .leading, spacing: 28) {
+                periodChips
+                if let stats {
+                    content(stats)
+                        .opacity(isStale ? 0.5 : 1)
+                } else {
+                    ProgressView().tint(Color.biingeLoader)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 40)
+                }
             }
         }
-        .task { stats = try? await apiClient?.stats() }
+        .task(id: period) { await load() }
+    }
+
+    /// Renders an already fetched period straight away and refreshes it behind the
+    /// scenes, so coming back to a chip costs nothing
+    private func load() async {
+        guard let apiClient else { return }
+
+        if let result = try? await apiClient.stats(period: period) {
+            loaded[period] = result
+            lastShown = result
+        }
+    }
+
+    private var periodChips: some View {
+        HStack(spacing: 8) {
+            ForEach(StatsPeriod.allCases, id: \.self) { option in
+                let isActive = option == period
+                Button {
+                    period = option
+                } label: {
+                    Text(option.title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(isActive ? Color.biingeBackground : Color.biingeGrayDark)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(isActive ? Color.biingeText : .clear, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .animation(.easeOut(duration: 0.15), value: period)
     }
 
     @ViewBuilder
@@ -238,7 +281,7 @@ struct StatisticsView: View {
                     StatBar(label: "Want", count: stats.movies.want, color: StatPalette.want),
                     StatBar(label: "Watched", count: stats.movies.watched, color: StatPalette.watched),
                 ],
-                caption: "\(formatMinutes(stats.movies.minutes)) watched"
+                caption: "\(formatMinutes(stats.movies.minutes)) watched \(period.phrase)"
             )
             breakdown(
                 "TV Shows",
@@ -247,26 +290,33 @@ struct StatisticsView: View {
                     StatBar(label: "Watching", count: stats.series.watching, color: StatPalette.watching),
                     StatBar(label: "Watched", count: stats.series.watched, color: StatPalette.watched),
                 ],
-                caption: "\(stats.episodes.watched) episodes · \(formatMinutes(stats.episodes.minutes)) watched"
+                caption: "\(stats.episodes.watched) episodes · \(formatMinutes(stats.episodes.minutes)) watched \(period.phrase)"
             )
+            if period != .all {
+                Text("Want and watching counts are always all-time")
+                    .font(.biingeFootnote)
+                    .foregroundStyle(Color.biingeGraniteGray)
+            }
         }
     }
 
     @ViewBuilder
-    private func watchActivity(_ months: [AccountStats.Monthly]) -> some View {
-        let total = months.reduce(0) { $0 + $1.totalMinutes }
+    private func watchActivity(_ buckets: [AccountStats.Bucket]) -> some View {
+        let total = buckets.reduce(0) { $0 + $1.totalMinutes }
+        // Short windows peak well under an hour, where hour labels would all read "0h"
+        let hourly = (buckets.map(\.totalMinutes).max() ?? 0) >= 120
         VStack(alignment: .leading, spacing: 16) {
             sectionHeading("Watch activity")
             if total > 0 {
-                Chart(months) { month in
+                Chart(buckets) { bucket in
                     BarMark(
-                        x: .value("Month", month.date, unit: .month),
-                        y: .value("Minutes", month.movieMinutes)
+                        x: .value("Date", bucket.start, unit: period.unit),
+                        y: .value("Minutes", bucket.movieMinutes)
                     )
                     .foregroundStyle(by: .value("Kind", "Movies"))
                     BarMark(
-                        x: .value("Month", month.date, unit: .month),
-                        y: .value("Minutes", month.tvMinutes)
+                        x: .value("Date", bucket.start, unit: period.unit),
+                        y: .value("Minutes", bucket.tvMinutes)
                     )
                     .foregroundStyle(by: .value("Kind", "TV"))
                 }
@@ -280,27 +330,50 @@ struct StatisticsView: View {
                         AxisGridLine()
                         AxisValueLabel {
                             if let minutes = value.as(Int.self) {
-                                Text("\(minutes / 60)h")
+                                Text(hourly ? "\(minutes / 60)h" : "\(minutes)m")
                             }
                         }
                     }
                 }
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .month, count: 2)) { _ in
-                        AxisTick()
-                        AxisValueLabel(format: .dateTime.month(.narrow))
+                    switch period {
+                    case .week:
+                        AxisMarks(values: .stride(by: .day)) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.weekday(.narrow))
+                        }
+                    case .month:
+                        AxisMarks(values: .stride(by: .day, count: 7)) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.day())
+                        }
+                    case .year:
+                        AxisMarks(values: .stride(by: .month)) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.month(.narrow))
+                        }
+                    case .all:
+                        AxisMarks(values: .stride(by: .year, count: labelStride(buckets.count))) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.year())
+                        }
                     }
                 }
                 .frame(height: 180)
-                Text("\(formatMinutes(total)) in the last 12 months")
+                Text("\(formatMinutes(total)) \(period.phrase)")
                     .font(.biingeFootnote)
                     .foregroundStyle(Color.biingeGraniteGray)
             } else {
-                Text("No watch activity yet")
+                Text(period == .all ? "No watch activity yet" : "No watch activity \(period.phrase)")
                     .font(.biingeCallout)
                     .foregroundStyle(Color.biingeGraniteGray)
             }
         }
+    }
+
+    /// Thins labels to roughly six, so an all-time chart spanning many years stays readable
+    private func labelStride(_ count: Int) -> Int {
+        max(1, Int((Double(count) / 6.0).rounded(.up)))
     }
 
     @ViewBuilder

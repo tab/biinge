@@ -38,8 +38,10 @@ actor APIClient {
         try await get("/accounts/me")
     }
 
-    func stats() async throws -> AccountStats {
-        try await get("/accounts/stats")
+    func stats(period: StatsPeriod = .week) async throws -> AccountStats {
+        try await get("/accounts/stats", query: [
+            URLQueryItem(name: "period", value: period.rawValue),
+        ])
     }
 
     func updateAccount(_ body: UpdateAccountBody) async throws -> User {

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9F1A0BE8050014A037F24A33 /* SeriesDetailsCountsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */; };
+		9F1A0BE8050014A037F24A34 /* StatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E133E92B21DD737238466E94 /* StatsTests.swift */; };
 		AA0000000000000000000013 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000012 /* Sentry */; };
 		B4FC64E474064EEB6EE1DAD1 /* WatchProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */; };
 		DC7601986612F3D072689188 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC77ED4BCBCD9C6813A11A00 /* Foundation.framework */; };
@@ -27,6 +28,7 @@
 		7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchProgressTests.swift; sourceTree = "<group>"; };
 		AA0000000000000000000004 /* Biinge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Biinge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SeriesDetailsCountsTests.swift; sourceTree = "<group>"; };
+		E133E92B21DD737238466E94 /* StatsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsTests.swift; sourceTree = "<group>"; };
 		ECFE9D5EA252E309865D9818 /* BiingeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BiingeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC77ED4BCBCD9C6813A11A00 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
@@ -105,6 +107,7 @@
 			children = (
 				E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */,
 				7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */,
+				E133E92B21DD737238466E94 /* StatsTests.swift */,
 			);
 			name = BiingeTests;
 			path = BiingeTests;
@@ -241,6 +244,7 @@
 			files = (
 				9F1A0BE8050014A037F24A33 /* SeriesDetailsCountsTests.swift in Sources */,
 				B4FC64E474064EEB6EE1DAD1 /* WatchProgressTests.swift in Sources */,
+				9F1A0BE8050014A037F24A34 /* StatsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

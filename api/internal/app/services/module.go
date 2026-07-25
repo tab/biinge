@@ -9,6 +9,7 @@ var Module = fx.Options(
 	fx.Provide(NewMovies),
 	fx.Provide(NewSeries),
 	fx.Provide(NewProgress),
+	fx.Provide(NewStatsCache),
 	fx.Provide(NewStats),
 	fx.Provide(NewUsers),
 )

@@ -20,7 +20,7 @@ func Test_Stats_Get(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockStatsRepository(ctrl)
-	service := NewStats(repository, newTestLogger())
+	service := NewStats(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -101,4 +101,59 @@ func Test_Stats_Get(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_Stats_Get_ReadsThroughTheCache(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	userId := uuid.New()
+
+	t.Run("A cached period never reaches the repository", func(t *testing.T) {
+		repository := repositories.NewMockStatsRepository(ctrl)
+		service := NewStats(repository, NewStatsCache(newMemoryCache(), newTestLogger()), newTestLogger())
+
+		repository.EXPECT().Get(ctx, userId, models.StatsPeriodWeek).Return(&models.Stats{MoviesWatched: 4}, nil).Times(1)
+
+		first, err := service.Get(ctx, userId, models.StatsPeriodWeek)
+		require.NoError(t, err)
+
+		second, err := service.Get(ctx, userId, models.StatsPeriodWeek)
+		require.NoError(t, err)
+
+		assert.Equal(t, first, second)
+	})
+
+	t.Run("Each period is computed on its own", func(t *testing.T) {
+		repository := repositories.NewMockStatsRepository(ctrl)
+		service := NewStats(repository, NewStatsCache(newMemoryCache(), newTestLogger()), newTestLogger())
+
+		for _, period := range models.StatsPeriods {
+			repository.EXPECT().Get(ctx, userId, period).Return(&models.Stats{Period: period}, nil).Times(1)
+		}
+
+		for _, period := range models.StatsPeriods {
+			result, err := service.Get(ctx, userId, period)
+
+			require.NoError(t, err)
+			assert.Equal(t, period, result.Period)
+		}
+	})
+
+	t.Run("A repository failure is not cached", func(t *testing.T) {
+		repository := repositories.NewMockStatsRepository(ctrl)
+		service := NewStats(repository, NewStatsCache(newMemoryCache(), newTestLogger()), newTestLogger())
+
+		repository.EXPECT().Get(ctx, userId, models.StatsPeriodAll).Return(nil, assert.AnError)
+		repository.EXPECT().Get(ctx, userId, models.StatsPeriodAll).Return(&models.Stats{MoviesWatched: 9}, nil)
+
+		_, err := service.Get(ctx, userId, models.StatsPeriodAll)
+		require.ErrorIs(t, err, errors.ErrFailedToFetchStats)
+
+		result, err := service.Get(ctx, userId, models.StatsPeriodAll)
+
+		require.NoError(t, err)
+		assert.Equal(t, uint64(9), result.MoviesWatched)
+	})
 }

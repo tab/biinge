@@ -20,7 +20,7 @@ func Test_Progress_MarkShow(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesProgressRepository(ctrl)
-	service := NewProgress(repository, newTestLogger())
+	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	show := models.ShowInput{
@@ -82,7 +82,7 @@ func Test_Progress_UnmarkShow(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesProgressRepository(ctrl)
-	service := NewProgress(repository, newTestLogger())
+	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -140,7 +140,7 @@ func Test_Progress_MarkSeason(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesProgressRepository(ctrl)
-	service := NewProgress(repository, newTestLogger())
+	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	seriesInput := models.SeriesInput{TmdbId: 300, Title: "Breaking Bad", SeasonsCount: 5, EpisodesCount: 62}
@@ -200,7 +200,7 @@ func Test_Progress_UnmarkSeason(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesProgressRepository(ctrl)
-	service := NewProgress(repository, newTestLogger())
+	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -256,7 +256,7 @@ func Test_Progress_MarkEpisode(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesProgressRepository(ctrl)
-	service := NewProgress(repository, newTestLogger())
+	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	seriesInput := models.SeriesInput{TmdbId: 300, Title: "Breaking Bad", SeasonsCount: 5, EpisodesCount: 62}
@@ -317,7 +317,7 @@ func Test_Progress_UnmarkEpisode(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesProgressRepository(ctrl)
-	service := NewProgress(repository, newTestLogger())
+	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -373,7 +373,7 @@ func Test_Progress_Get(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesProgressRepository(ctrl)
-	service := NewProgress(repository, newTestLogger())
+	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 

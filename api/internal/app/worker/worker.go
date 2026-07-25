@@ -8,6 +8,7 @@ import (
 
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/repositories"
+	"biinge-api/internal/app/services"
 	"biinge-api/internal/config"
 	"biinge-api/internal/config/logger"
 	"biinge-api/pkg/tmdb"
@@ -20,22 +21,24 @@ var activeSeriesStatuses = []string{"Returning Series", "In Production", "Planne
 // Worker periodically refreshes stored movies and series from TMDB so derived state
 // (a revived show, a released film) tracks reality without a user opening the title
 type Worker struct {
-	cfg  *config.Config
-	repo repositories.SyncRepository
-	tmdb tmdb.Client
-	log  *logger.Logger
+	cfg   *config.Config
+	repo  repositories.SyncRepository
+	tmdb  tmdb.Client
+	stats services.StatsCache
+	log   *logger.Logger
 
 	cancel context.CancelFunc
 	done   chan struct{}
 }
 
-func NewWorker(lifecycle fx.Lifecycle, cfg *config.Config, repo repositories.SyncRepository, client tmdb.Client, log *logger.Logger) *Worker {
+func NewWorker(lifecycle fx.Lifecycle, cfg *config.Config, repo repositories.SyncRepository, client tmdb.Client, stats services.StatsCache, log *logger.Logger) *Worker {
 	w := &Worker{
-		cfg:  cfg,
-		repo: repo,
-		tmdb: client,
-		log:  log.WithComponent("SyncWorker"),
-		done: make(chan struct{}),
+		cfg:   cfg,
+		repo:  repo,
+		tmdb:  client,
+		stats: stats,
+		log:   log.WithComponent("SyncWorker"),
+		done:  make(chan struct{}),
 	}
 
 	lifecycle.Append(fx.Hook{
@@ -149,6 +152,12 @@ func (w *Worker) syncMovie(ctx context.Context, movie models.Movie) {
 		w.log.Error().Err(err).Uint64("tmdbId", movie.TmdbId).Msg("Failed to sync movie")
 
 		return
+	}
+
+	// A corrected runtime moves the watched minutes, and this is the one write to a
+	// user's library that does not go through the services that drop their statistics
+	if in.Runtime != movie.Runtime {
+		w.stats.Invalidate(ctx, movie.UserId)
 	}
 
 	w.log.Info().

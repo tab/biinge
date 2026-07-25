@@ -13,6 +13,7 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/repositories"
 	"biinge-api/internal/config"
+	"biinge-api/internal/config/cache"
 	"biinge-api/internal/config/logger"
 )
 
@@ -25,13 +26,19 @@ func newTestLogger() *logger.Logger {
 	})
 }
 
+// newTestStatsCache builds a stats cache that never stores anything, for the tests
+// that are not about caching
+func newTestStatsCache() StatsCache {
+	return NewStatsCache(cache.NewNoopCache(), newTestLogger())
+}
+
 func Test_Movies_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	pagination := &Pagination{Page: 1, PerPage: 24}
@@ -91,7 +98,7 @@ func Test_Movies_Create(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	id := uuid.New()
@@ -167,7 +174,7 @@ func Test_Movies_Update(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	id := uuid.New()
 
@@ -234,7 +241,7 @@ func Test_Movies_UpdateByTmdbId(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -301,7 +308,7 @@ func Test_Movies_Delete(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	id := uuid.New()
 
@@ -346,7 +353,7 @@ func Test_Movies_DeleteByTmdbId(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -391,7 +398,7 @@ func Test_Movies_FindById(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	id := uuid.New()
 
@@ -449,7 +456,7 @@ func Test_Movies_FindByTmdbId(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -507,7 +514,7 @@ func Test_Movies_FindMoviesByTmdbIds(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestLogger())
+	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	tmdbIds := []uint64{100, 200}

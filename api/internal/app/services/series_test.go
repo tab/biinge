@@ -20,7 +20,7 @@ func Test_Series_List(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	pagination := &Pagination{Page: 1, PerPage: 24}
@@ -80,7 +80,7 @@ func Test_Series_Create(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	id := uuid.New()
@@ -162,7 +162,7 @@ func Test_Series_Update(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	id := uuid.New()
 
@@ -235,7 +235,7 @@ func Test_Series_UpdateByTmdbId(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -302,7 +302,7 @@ func Test_Series_Delete(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	id := uuid.New()
 
@@ -347,7 +347,7 @@ func Test_Series_DeleteByTmdbId(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -392,7 +392,7 @@ func Test_Series_FindById(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	id := uuid.New()
 
@@ -450,7 +450,7 @@ func Test_Series_FindByTmdbId(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -508,7 +508,7 @@ func Test_Series_FindSeriesByTmdbIds(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestLogger())
+	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
 	tmdbIds := []uint64{300, 400}

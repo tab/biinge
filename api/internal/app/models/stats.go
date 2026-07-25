@@ -12,6 +12,9 @@ const (
 	StatsPeriodAll   StatsPeriod = "all"
 )
 
+// StatsPeriods lists every period a user's statistics can be cached under
+var StatsPeriods = []StatsPeriod{StatsPeriodWeek, StatsPeriodMonth, StatsPeriodYear, StatsPeriodAll}
+
 // String returns the period's wire value
 func (p StatsPeriod) String() string {
 	return string(p)

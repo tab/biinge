@@ -25,12 +25,14 @@ type Movies interface {
 
 type movies struct {
 	repository repositories.MovieRepository
+	stats      StatsCache
 	log        *logger.Logger
 }
 
-func NewMovies(repository repositories.MovieRepository, log *logger.Logger) Movies {
+func NewMovies(repository repositories.MovieRepository, stats StatsCache, log *logger.Logger) Movies {
 	return &movies{
 		repository: repository,
+		stats:      stats,
 		log:        log.WithComponent("MoviesService"),
 	}
 }
@@ -58,6 +60,8 @@ func (m *movies) Create(ctx context.Context, params *models.Movie) (*models.Movi
 		m.log.Error().Err(err).Msg("Failed to create movie")
 		return nil, errors.ErrFailedToCreateMovie
 	}
+
+	m.stats.Invalidate(ctx, params.UserId)
 
 	return item, nil
 }
@@ -89,6 +93,8 @@ func (m *movies) UpdateByTmdbId(ctx context.Context, params *models.Movie) (*mod
 		return nil, errors.ErrFailedToUpdateMovie
 	}
 
+	m.stats.Invalidate(ctx, params.UserId)
+
 	return item, nil
 }
 
@@ -108,6 +114,8 @@ func (m *movies) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.
 		m.log.Error().Err(err).Msg("Failed to delete movie by TMDB Id")
 		return errors.ErrFailedToDeleteMovie
 	}
+
+	m.stats.Invalidate(ctx, userId)
 
 	return nil
 }

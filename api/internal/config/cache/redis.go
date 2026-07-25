@@ -70,3 +70,12 @@ func (c *redisCache) Get(ctx context.Context, key string) ([]byte, bool, error) 
 func (c *redisCache) Set(ctx context.Context, key string, value []byte, ttl time.Duration) error {
 	return c.client.Set(ctx, key, value, ttl).Err()
 }
+
+// Delete drops the keys that exist and ignores the rest
+func (c *redisCache) Delete(ctx context.Context, keys ...string) error {
+	if len(keys) == 0 {
+		return nil
+	}
+
+	return c.client.Del(ctx, keys...).Err()
+}

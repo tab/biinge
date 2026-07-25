@@ -25,12 +25,14 @@ type Series interface {
 
 type series struct {
 	repository repositories.SeriesRepository
+	stats      StatsCache
 	log        *logger.Logger
 }
 
-func NewSeries(repository repositories.SeriesRepository, log *logger.Logger) Series {
+func NewSeries(repository repositories.SeriesRepository, stats StatsCache, log *logger.Logger) Series {
 	return &series{
 		repository: repository,
+		stats:      stats,
 		log:        log.WithComponent("SeriesService"),
 	}
 }
@@ -60,6 +62,8 @@ func (s *series) Create(ctx context.Context, params *models.Series) (*models.Ser
 		s.log.Error().Err(err).Msg("Failed to create series")
 		return nil, errors.ErrFailedToCreateSeries
 	}
+
+	s.stats.Invalidate(ctx, params.UserId)
 
 	return item, nil
 }
@@ -93,6 +97,8 @@ func (s *series) UpdateByTmdbId(ctx context.Context, params *models.Series) (*mo
 		return nil, errors.ErrFailedToUpdateSeries
 	}
 
+	s.stats.Invalidate(ctx, params.UserId)
+
 	return item, nil
 }
 
@@ -112,6 +118,8 @@ func (s *series) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.
 		s.log.Error().Err(err).Msg("Failed to delete series by TMDB Id")
 		return errors.ErrFailedToDeleteSeries
 	}
+
+	s.stats.Invalidate(ctx, userId)
 
 	return nil
 }

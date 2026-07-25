@@ -8,17 +8,28 @@ import (
 	"biinge-api/internal/config/logger"
 )
 
-// TTLs for the classes of cached TMDB responses
+// TTLs for the classes of cached TMDB responses. Nothing a user does changes TMDB's
+// answers, so these are a straight freshness-against-API-calls trade rather than
+// something invalidation can shorten.
+//
+// Details stays the tightest of the three: an episode that has just aired only shows
+// up in a season list, and therefore in up-next, once the entry expires.
 const (
 	DetailsTTL  = 12 * time.Hour
-	SearchTTL   = time.Hour
-	TrendingTTL = 3 * time.Hour
+	SearchTTL   = 6 * time.Hour
+	TrendingTTL = 6 * time.Hour
 )
+
+// StatsTTL only has to cover the drift that invalidation cannot see, since every write
+// that moves a count drops the entry. What is left is a calendar period rolling over
+// mid-entry, so it stays well under an hour
+const StatsTTL = 30 * time.Minute
 
 // Cache is a byte-oriented key/value store with per-entry expiry
 type Cache interface {
 	Get(ctx context.Context, key string) ([]byte, bool, error)
 	Set(ctx context.Context, key string, value []byte, ttl time.Duration) error
+	Delete(ctx context.Context, keys ...string) error
 }
 
 // Fetch returns the cached value for key, otherwise calls source and caches its result
@@ -65,5 +76,9 @@ func (noopCache) Get(context.Context, string) ([]byte, bool, error) {
 }
 
 func (noopCache) Set(context.Context, string, []byte, time.Duration) error {
+	return nil
+}
+
+func (noopCache) Delete(context.Context, ...string) error {
 	return nil
 }

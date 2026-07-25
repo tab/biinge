@@ -19,10 +19,12 @@ type payload struct {
 
 // fakeCache is an in-memory Cache with injectable errors for testing Fetch
 type fakeCache struct {
-	store    map[string][]byte
-	getErr   error
-	setErr   error
-	setCalls int
+	store       map[string][]byte
+	getErr      error
+	setErr      error
+	deleteErr   error
+	setCalls    int
+	deletedKeys []string
 }
 
 func newFakeCache() *fakeCache {
@@ -50,6 +52,19 @@ func (c *fakeCache) Set(_ context.Context, key string, value []byte, _ time.Dura
 	return nil
 }
 
+func (c *fakeCache) Delete(_ context.Context, keys ...string) error {
+	c.deletedKeys = append(c.deletedKeys, keys...)
+	if c.deleteErr != nil {
+		return c.deleteErr
+	}
+
+	for _, key := range keys {
+		delete(c.store, key)
+	}
+
+	return nil
+}
+
 func testLogger() *logger.Logger {
 	return logger.NewLogger(&config.Config{AppEnv: "test", LogLevel: "info"})
 }
@@ -63,6 +78,7 @@ func Test_NoopCache(t *testing.T) {
 	assert.Nil(t, data)
 
 	assert.NoError(t, c.Set(context.Background(), "key", []byte("value"), time.Minute))
+	assert.NoError(t, c.Delete(context.Background(), "key"))
 }
 
 func Test_Fetch(t *testing.T) {

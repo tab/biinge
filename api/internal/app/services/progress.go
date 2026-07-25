@@ -24,12 +24,14 @@ type Progress interface {
 
 type progress struct {
 	repository repositories.SeriesProgressRepository
+	stats      StatsCache
 	log        *logger.Logger
 }
 
-func NewProgress(repository repositories.SeriesProgressRepository, log *logger.Logger) Progress {
+func NewProgress(repository repositories.SeriesProgressRepository, stats StatsCache, log *logger.Logger) Progress {
 	return &progress{
 		repository: repository,
+		stats:      stats,
 		log:        log.WithComponent("ProgressService"),
 	}
 }
@@ -41,6 +43,8 @@ func (p *progress) MarkShow(ctx context.Context, userId uuid.UUID, show models.S
 		return nil, errors.ErrFailedToUpdateProgress
 	}
 
+	p.stats.Invalidate(ctx, userId)
+
 	return result, nil
 }
 
@@ -50,6 +54,8 @@ func (p *progress) UnmarkShow(ctx context.Context, userId uuid.UUID, seriesTmdbI
 		p.log.Error().Err(err).Msg("Failed to unmark show watched")
 		return nil, errors.ErrFailedToUpdateProgress
 	}
+
+	p.stats.Invalidate(ctx, userId)
 
 	return result, nil
 }
@@ -61,6 +67,8 @@ func (p *progress) MarkSeason(ctx context.Context, userId uuid.UUID, series mode
 		return nil, errors.ErrFailedToUpdateProgress
 	}
 
+	p.stats.Invalidate(ctx, userId)
+
 	return result, nil
 }
 
@@ -70,6 +78,8 @@ func (p *progress) UnmarkSeason(ctx context.Context, userId uuid.UUID, seriesTmd
 		p.log.Error().Err(err).Msg("Failed to unmark season watched")
 		return nil, errors.ErrFailedToUpdateProgress
 	}
+
+	p.stats.Invalidate(ctx, userId)
 
 	return result, nil
 }
@@ -81,6 +91,8 @@ func (p *progress) MarkEpisode(ctx context.Context, userId uuid.UUID, series mod
 		return nil, errors.ErrFailedToUpdateProgress
 	}
 
+	p.stats.Invalidate(ctx, userId)
+
 	return result, nil
 }
 
@@ -90,6 +102,8 @@ func (p *progress) UnmarkEpisode(ctx context.Context, userId uuid.UUID, seriesTm
 		p.log.Error().Err(err).Msg("Failed to unmark episode watched")
 		return nil, errors.ErrFailedToUpdateProgress
 	}
+
+	p.stats.Invalidate(ctx, userId)
 
 	return result, nil
 }

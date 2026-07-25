@@ -1,0 +1,27 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+import PosterBand from "../components/PosterBand.astro";
+import Features from "../components/Features.astro";
+import SelfHostCTA from "../components/SelfHostCTA.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout
+  title="biinge - Self-hosted movie & TV tracker"
+  description="biinge is a self-hosted tracker for movies and TV shows. Separate want / watching / watched lists, episode-level progress, and an Up Next queue - a Go API you run and a native iOS app."
+>
+  <Header />
+  <main>
+    <Hero>
+      <DeviceFrame name="tv-shows" alt="biinge TV Shows library" eager />
+      <DeviceFrame name="movies" alt="biinge Movies library" eager />
+    </Hero>
+    <PosterBand />
+    <Features />
+    <SelfHostCTA />
+  </main>
+  <Footer />
+</Layout>

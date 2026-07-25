@@ -1,0 +1,70 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span>Biinge &middot; Made in Estonia</span>
+    <div class="links">
+      <a href={`${base}about/`}>About</a>
+      <span class="sep">&middot;</span>
+      <a href={`${base}self-hosting/`}>Self-host</a>
+      <span class="sep">&middot;</span>
+      <a href={`${base}docs/api/`}>API</a>
+      <span class="sep">&middot;</span>
+      <a href="https://github.com/tab/biinge" target="_blank" rel="noopener">GitHub</a>
+      <span class="sep">&middot;</span>
+      <a href="https://github.com/tab/biinge/blob/master/api/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: #050506;
+  }
+
+  .footer-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 40px 56px;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: #8a8a8a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .links a {
+    color: #8a8a8a;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .links a:hover {
+    color: #fafafa;
+    text-decoration: none;
+  }
+
+  .sep {
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .footer-inner {
+      padding: 24px;
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>

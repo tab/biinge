@@ -1,0 +1,54 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yaml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - name: Install dependencies
+        working-directory: docs
+        run: npm ci
+      - name: Build
+        working-directory: docs
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          PUBLIC_API_BASE_URL: ${{ vars.PUBLIC_API_BASE_URL }}
+        run: npm run build
+      # Pages needs the bare host in the artifact; derive it so the domain stays in one variable
+      - name: Write the custom domain
+        if: vars.SITE_URL != ''
+        working-directory: docs
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: echo "${SITE_URL#*://}" > dist/CNAME
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

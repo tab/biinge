@@ -1,0 +1,299 @@
+---
+import DeviceFrame from "./DeviceFrame.astro";
+
+const base = import.meta.env.BASE_URL;
+
+const features = [
+  {
+    title: "Movies and TV, apart",
+    desc: "Dedicated tabs and lists for each. Want and watched for films; shows add a watching state as you go.",
+    name: "movies",
+    alt: "Movies library, Want tab",
+  },
+  {
+    title: "Track every episode",
+    desc: "Mark individual episodes and whole seasons. A show moves itself to watched as you catch up, and a background sync brings renewed shows back to watching.",
+    name: "tv-shows",
+    alt: "TV Shows library with per-show progress",
+  },
+  {
+    title: "Details, ratings, trailers",
+    desc: "Rating, runtime, the trailer and the synopsis on one screen, then track it with a single tap.",
+    name: "movie-details",
+    alt: "Movie detail view",
+  },
+  {
+    title: "Pin what matters",
+    desc: "On a title you've added, tap its state button for quick actions - pin a favorite to the top of the list, or move it between want and watched.",
+    name: "movie-actions",
+    alt: "Quick actions menu with Pin option",
+  },
+  {
+    title: "An Up Next queue",
+    desc: "Aired-but-unwatched episodes and freshly released films from the titles you pin, gathered into one queue.",
+    name: "next",
+    alt: "Up Next queue",
+  },
+  {
+    title: "Search all of TMDB",
+    desc: "Trending out of the box, plus full-catalog search across movies, shows, and people.",
+    name: "search",
+    alt: "Search and trending",
+  },
+  {
+    title: "See your watch stats",
+    desc: "Watch-time totals split by movies and TV, a monthly activity chart, and a per-status library breakdown.",
+    name: "stats",
+    alt: "Statistics",
+  },
+];
+---
+
+<section class="feat">
+  <div class="container">
+    <div class="feat-head">
+      <div class="eyebrow-label">Features</div>
+      <h2 class="feat-title">Everything a tracker should do.</h2>
+      <p class="feat-sub">Seven screens, one native app. Scroll through.</p>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-steps">
+        {features.map((f, i) => (
+          <article class:list={["feat-step", { active: i === 0 }]} data-index={i}>
+            <div class="feat-num">{String(i + 1).padStart(2, "0")}</div>
+            <h3>{f.title}</h3>
+            <p>{f.desc}</p>
+            <div class="feat-inline"><DeviceFrame name={f.name} alt={f.alt} /></div>
+          </article>
+        ))}
+      </div>
+
+      <div class="feat-visual">
+        <div class="feat-phone">
+          <div class="feat-screen">
+            {features.map((f, i) => (
+              <>
+                <img
+                  class:list={["feat-img is-light", { active: i === 0 }]}
+                  data-index={i}
+                  src={`${base}screens/${f.name}-light.jpg`}
+                  alt={f.alt}
+                  width="1206"
+                  height="2622"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <img
+                  class:list={["feat-img is-dark", { active: i === 0 }]}
+                  data-index={i}
+                  src={`${base}screens/${f.name}-dark.jpg`}
+                  alt=""
+                  aria-hidden="true"
+                  width="1206"
+                  height="2622"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const steps = Array.from(document.querySelectorAll<HTMLElement>(".feat-step"));
+  const imgs = Array.from(document.querySelectorAll<HTMLElement>(".feat-img"));
+
+  function activate(idx: number) {
+    steps.forEach((s) => s.classList.toggle("active", Number(s.dataset.index) === idx));
+    imgs.forEach((im) => im.classList.toggle("active", Number(im.dataset.index) === idx));
+  }
+
+  const obs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) activate(Number((e.target as HTMLElement).dataset.index));
+      });
+    },
+    { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+  );
+
+  steps.forEach((s) => obs.observe(s));
+</script>
+
+<style>
+  .feat {
+    padding: 100px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .feat-head {
+    max-width: 640px;
+    margin-bottom: 32px;
+  }
+
+  .feat-title {
+    font-family: var(--heading);
+    font-size: 2.75rem;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--text);
+  }
+
+  .feat-sub {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .feat-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.82fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  /* left: scrolling steps */
+  .feat-steps { display: flex; flex-direction: column; }
+
+  .feat-step {
+    min-height: 44vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 28px;
+    border-left: 2px solid var(--border);
+    opacity: 0.4;
+    transition: opacity 0.4s ease, border-color 0.4s ease;
+  }
+
+  .feat-step.active {
+    opacity: 1;
+    border-left-color: var(--accent);
+  }
+
+  .feat-num {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .feat-step h3 {
+    font-family: var(--heading);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0 0 12px;
+  }
+
+  .feat-step p {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 460px;
+    margin: 0;
+  }
+
+  .feat-inline { display: none; }
+
+  /* right: sticky phone that crossfades */
+  .feat-visual {
+    position: sticky;
+    top: 92px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .feat-phone {
+    position: relative;
+    width: 300px;
+    max-width: 100%;
+    padding: 10px; /* room for the bezel box-shadow */
+  }
+
+  /* screen holds the exact screenshot aspect ratio so nothing is cropped */
+  .feat-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1206 / 2622;
+    border-radius: 12% / 5.5%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+      0 0 0 9px #0a0a0c,
+      0 0 0 10px rgba(214, 214, 220, 0.6),
+      var(--shadow-lg);
+  }
+
+  :global(html[data-theme="light"]) .feat-screen {
+    border-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .feat-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.04);
+    transition: opacity 0.5s ease, transform 0.6s ease;
+  }
+
+  /* show only the active step's image for the current site theme */
+  :global(html[data-theme="light"]) .feat-img.is-light.active,
+  :global(html[data-theme="dark"]) .feat-img.is-dark.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .feat-img { transition: opacity 0.2s; transform: none; }
+    .feat-img.active { transform: none; }
+  }
+
+  @media (max-width: 900px) {
+    .feat { padding: 64px 0; }
+
+    .feat-title { font-size: 2rem; }
+
+    .feat-grid { grid-template-columns: 1fr; gap: 0; }
+
+    .feat-visual { display: none; }
+
+    .feat-step {
+      min-height: 0;
+      padding: 40px 0;
+      opacity: 1;
+      border-left: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .feat-steps .feat-step:first-child {
+      border-top: none;
+      padding-top: 4px;
+    }
+
+    .feat-step h3 { font-size: 1.4rem; }
+
+    .feat-num { margin-bottom: 10px; }
+
+    .feat-inline {
+      display: block;
+      width: 250px;
+      max-width: 68%;
+      margin: 24px auto 0;
+    }
+  }
+</style>

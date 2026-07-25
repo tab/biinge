@@ -1,0 +1,731 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+
+// What the playground points at out of the box: the hosted API in a deployed build,
+// a local server otherwise. Origin only, the endpoint paths carry their own /api/v1
+const apiBaseURL = import.meta.env.PUBLIC_API_BASE_URL || "http://localhost:8080";
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+const tokenJson = esc(`{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+}`);
+const liveJson = esc(`{ "result": "alive" }`);
+const readyJson = esc(`{ "result": "ready" }`);
+const movieListJson = esc(`{
+  "data": [
+    {
+      "id": 693134,
+      "tmdbId": 693134,
+      "title": "Dune: Part Two",
+      "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
+      "pinned": true,
+      "status": "Released",
+      "state": "watched"
+    }
+  ],
+  "meta": { "page": 1, "per": 30, "total": 1 }
+}`);
+const upNextJson = esc(`{
+  "episodes": [
+    {
+      "seriesId": 125988,
+      "seriesTitle": "Silo",
+      "seasonNumber": 3,
+      "number": 1,
+      "title": "Who Are You?",
+      "airDate": "2026-07-02"
+    }
+  ],
+  "movies": [
+    { "id": 786892, "title": "Furiosa", "rating": 7.4, "releaseDate": "2024-05-22" }
+  ]
+}`);
+const statsJson = esc(`{
+  "movies": { "want": 131, "watched": 895, "minutes": 104760 },
+  "series": { "want": 16, "watching": 75, "watched": 96 },
+  "episodes": { "watched": 4213, "minutes": 168520 }
+}`);
+
+interface Endpoint {
+  id: string;
+  group: string;
+  method: "GET" | "POST" | "PATCH" | "DELETE";
+  path: string;
+  desc: string;
+  query?: string;
+  body?: string;
+  resp?: string;
+}
+
+const endpoints: Endpoint[] = [
+  { id: "get-live", group: "Health", method: "GET", path: "/live", desc: "Liveness probe. No authentication required.", resp: liveJson },
+  { id: "get-ready", group: "Health", method: "GET", path: "/ready", desc: "Readiness probe - 503 until Postgres and the TMDB proxy are reachable. No authentication required.", resp: readyJson },
+
+  { id: "register", group: "Users", method: "POST", path: "/api/v1/users/registrations", desc: "Create a new account.", body: `{
+  "login": "cinephile",
+  "email": "you@example.com",
+  "password": "your-password",
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "appearance": "dark"
+}` },
+  { id: "login", group: "Users", method: "POST", path: "/api/v1/users/sessions", desc: "Log in. On success the returned access token is dropped into the Token field above automatically.", body: `{
+  "email": "you@example.com",
+  "password": "your-password"
+}`, resp: tokenJson },
+  { id: "refresh", group: "Users", method: "POST", path: "/api/v1/users/tokens", desc: "Exchange a refresh token for a fresh access token.", body: `{
+  "refresh_token": "<paste refresh token>"
+}` },
+
+  { id: "me", group: "Account", method: "GET", path: "/api/v1/accounts/me", desc: "The authenticated user." },
+  { id: "update-account", group: "Account", method: "PATCH", path: "/api/v1/accounts", desc: "Update profile and appearance preference.", body: `{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "appearance": "dark"
+}` },
+  { id: "stats", group: "Account", method: "GET", path: "/api/v1/accounts/stats", desc: "Watch-time totals and library breakdown.", resp: statsJson },
+
+  { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library (want & watched).", resp: movieListJson },
+  { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library.", body: `{
+  "tmdbId": 693134,
+  "title": "Dune: Part Two",
+  "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
+  "state": "want"
+}` },
+  { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations." },
+  { id: "movie-update", group: "Movies", method: "PATCH", path: "/api/v1/movies/{id}", desc: "Change state or pin the movie.", body: `{
+  "state": "watched",
+  "pinned": true
+}` },
+  { id: "movie-delete", group: "Movies", method: "DELETE", path: "/api/v1/movies/{id}", desc: "Remove the movie from the library." },
+
+  { id: "series-list", group: "TV Series", method: "GET", path: "/api/v1/series", desc: "Your series library (want, watching, watched)." },
+  { id: "series-create", group: "TV Series", method: "POST", path: "/api/v1/series", desc: "Add a show to the library.", body: `{
+  "tmdbId": 95396,
+  "title": "Severance",
+  "posterPath": "/lFf6LLrQjYldcZItzOkGmMMigP7.jpg",
+  "state": "want"
+}` },
+  { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons." },
+  { id: "series-update", group: "TV Series", method: "PATCH", path: "/api/v1/series/{id}", desc: "Change state or pin the show.", body: `{
+  "state": "watching",
+  "pinned": true
+}` },
+  { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library." },
+  { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and its episodes." },
+  { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details." },
+
+  { id: "progress-get", group: "Progress", method: "GET", path: "/api/v1/series/{id}/progress", desc: "Watched seasons and episodes for a show." },
+  { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark the whole show watched. The series id is taken from the URL; the body carries the metadata to persist the row.", body: `{
+  "series": {
+    "title": "Severance",
+    "posterPath": "/lFf6LLrQjYldcZItzOkGmMMigP7.jpg",
+    "seasonsCount": 2,
+    "episodesCount": 19,
+    "status": "Returning Series"
+  }
+}` },
+  { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show." },
+  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", body: `{
+  "series": { "title": "Severance" },
+  "season": { "title": "Season 1", "number": 1, "episodesCount": 9 }
+}` },
+  { id: "season-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Unmark a season." },
+  { id: "episode-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Mark an episode watched.", body: `{
+  "series": { "title": "Severance" },
+  "season": { "number": 1 },
+  "episode": { "title": "Good News About Hell", "runtime": 57, "airDate": "2022-02-18" }
+}` },
+  { id: "episode-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Unmark an episode." },
+
+  { id: "search-movies", group: "Search & Trending", method: "GET", path: "/api/v1/search/movies", desc: "Search movies.", query: "dune" },
+  { id: "search-series", group: "Search & Trending", method: "GET", path: "/api/v1/search/series", desc: "Search TV shows.", query: "silo" },
+  { id: "search-people", group: "Search & Trending", method: "GET", path: "/api/v1/search/people", desc: "Search people.", query: "villeneuve" },
+  { id: "trending-movies", group: "Search & Trending", method: "GET", path: "/api/v1/trending/movies", desc: "Trending movies." },
+  { id: "trending-series", group: "Search & Trending", method: "GET", path: "/api/v1/trending/series", desc: "Trending TV shows." },
+  { id: "trending-people", group: "Search & Trending", method: "GET", path: "/api/v1/trending/people", desc: "Trending people." },
+
+  { id: "up-next", group: "Up Next", method: "GET", path: "/api/v1/up-next", desc: "Aired-but-unwatched episodes and released movies from pinned titles.", resp: upNextJson },
+
+  { id: "person-get", group: "People", method: "GET", path: "/api/v1/people/{id}", desc: "Person details and known-for credits." },
+];
+
+const groups = [...new Set(endpoints.map((e) => e.group))];
+const paramDefaults: Record<string, string> = { seasonNumber: "1", episodeNumber: "1" };
+const paramPlaceholders: Record<string, string> = {
+  id: "tmdb id", seasonId: "season tmdb id", episodeId: "episode tmdb id",
+  seasonNumber: "season #", episodeNumber: "episode #",
+};
+const paramsOf = (path: string) => [...path.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
+const short = (path: string) => path.replace("/api/v1", "") || "/";
+---
+
+<Layout
+  title="API Reference - biinge"
+  description="Interactive REST API reference for the biinge backend: JWT auth, movie and TV library, episode-level progress, search, trending, and the Up Next queue. Try every endpoint live against your own server."
+>
+  <Header section="api" wide />
+  <div class="api-layout">
+    <aside class="api-sidebar">
+      <div class="sb-title">API Reference</div>
+      <nav class="api-nav">
+        <a href="#overview" class="api-link"><span class="path">Overview</span></a>
+        {groups.map((g) => (
+          <>
+            <div class="nav-section">{g}</div>
+            {endpoints.filter((e) => e.group === g).map((e) => (
+              <a href={`#${e.id}`} class="api-link">
+                <span class:list={["mb", e.method.toLowerCase()]}>{e.method}</span>
+                <span class="path">{short(e.path)}</span>
+              </a>
+            ))}
+          </>
+        ))}
+        <div class="nav-section">Reference</div>
+        <a href="#errors" class="api-link"><span class="path">Errors</span></a>
+      </nav>
+      <div class="sb-foot">
+        <a href="https://github.com/tab/biinge/blob/master/api/api/swagger.yaml" target="_blank" rel="noopener" class="spec-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          OpenAPI spec
+        </a>
+      </div>
+    </aside>
+
+    <main class="api-main">
+      <section class="api-intro" id="overview">
+        <div class="eyebrow-label">REST API</div>
+        <h1>API Reference</h1>
+        <p class="intro-lead">
+          biinge's backend is a small JSON REST API - the iOS app is just one
+          client. Point the playground at your own server and try every endpoint
+          live.
+        </p>
+
+        <div class="conn">
+          <div class="conn-doc">
+            <p>
+              Every <code>/api/v1</code> call needs an <code>Authorization: Bearer</code>
+              token. Run <a href="#login">Login</a> below and the access token
+              lands in the field here automatically.
+            </p>
+            <p class="conn-note">
+              Requests fire from your browser. <code>http://localhost</code> is
+              exempt from mixed-content blocking, but your server's CORS policy
+              (<code>CLIENT_URL</code>) must allow this origin.
+            </p>
+          </div>
+          <div class="conn-fields">
+            <div class="pg-row">
+              <label class="pg-label">Base URL</label>
+              <input type="text" id="pg-base" value={apiBaseURL} class="pg-input" />
+            </div>
+            <div class="pg-row">
+              <label class="pg-label">Token</label>
+              <input type="text" id="pg-token" value="" placeholder="access_token" class="pg-input" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {endpoints.map((ep, i) => {
+        const params = paramsOf(ep.path);
+        return (
+          <>
+            {(i === 0 || endpoints[i - 1].group !== ep.group) && (
+              <h2 class="group-heading">{ep.group}</h2>
+            )}
+            <section class="endpoint" id={ep.id}>
+              <div class="ep-head">
+                <span class:list={["mb", ep.method.toLowerCase()]}>{ep.method}</span>
+                <code class="ep-path">{ep.path}</code>
+              </div>
+              <div class="two-col">
+                <div class="col-doc">
+                  <p>{ep.desc}</p>
+                  {ep.resp && (
+                    <div class="resp-block">
+                      <div class="resp-label">Example response <span class="ok">200</span></div>
+                      <pre><code set:html={ep.resp} /></pre>
+                    </div>
+                  )}
+                </div>
+                <div class="col-play">
+                  <div class="pg" data-method={ep.method} data-path={ep.path}>
+                    {params.map((p) => (
+                      <div class="pg-row">
+                        <label class="pg-label">{p}</label>
+                        <input type="text" class="pg-input pg-param" data-param={p} value={paramDefaults[p] ?? ""} placeholder={paramPlaceholders[p] ?? p} />
+                      </div>
+                    ))}
+                    {ep.query !== undefined && (
+                      <div class="pg-row">
+                        <label class="pg-label">query</label>
+                        <input type="text" class="pg-input pg-query" value={ep.query} placeholder="search terms" />
+                      </div>
+                    )}
+                    {ep.body && (
+                      <textarea class="pg-input pg-body" spellcheck="false" rows="5">{ep.body}</textarea>
+                    )}
+                    <button class="pg-send">
+                      <span class:list={["mt", ep.method.toLowerCase()]}>{ep.method}</span>
+                      Send
+                    </button>
+                    <div class="pg-result" style="display:none">
+                      <div class="pg-rhead">
+                        <span class="pg-status"></span>
+                        <span class="pg-time"></span>
+                      </div>
+                      <pre><code class="pg-out"></code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
+        );
+      })}
+
+      <h2 class="group-heading">Reference</h2>
+      <section class="endpoint" id="errors">
+        <div class="ep-head">
+          <span class="mb err">ERR</span>
+          <code class="ep-path">Common errors</code>
+        </div>
+        <div class="two-col">
+          <div class="col-doc col-full">
+            <p>Failures return a JSON body with an <code>error</code> message and one of these status codes.</p>
+            <table>
+              <thead><tr><th>Status</th><th>Meaning</th><th>When</th></tr></thead>
+              <tbody>
+                <tr><td><code>400</code></td><td>Bad Request</td><td>Malformed JSON or missing required fields</td></tr>
+                <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid, or expired access token</td></tr>
+                <tr><td><code>404</code></td><td>Not Found</td><td>The movie, series, or resource does not exist</td></tr>
+                <tr><td><code>409</code></td><td>Conflict</td><td>The title is already in your library</td></tr>
+                <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>Validation failed on a well-formed request</td></tr>
+                <tr><td><code>429</code></td><td>Too Many Requests</td><td>Auth endpoints are rate-limited</td></tr>
+                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable - see <code>/ready</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <Footer />
+</Layout>
+
+<script>
+  // --- interactive playground ---
+  document.querySelectorAll(".pg-send").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const pg = btn.closest(".pg") as HTMLElement;
+      const base = (document.getElementById("pg-base") as HTMLInputElement).value.replace(/\/$/, "");
+      const token = (document.getElementById("pg-token") as HTMLInputElement).value.trim();
+      const method = pg.dataset.method!;
+
+      let path = pg.dataset.path!;
+      pg.querySelectorAll(".pg-param").forEach((el) => {
+        const inp = el as HTMLInputElement;
+        const val = inp.value.trim();
+        if (val) path = path.replace(`{${inp.dataset.param}}`, encodeURIComponent(val));
+      });
+
+      let qs = "";
+      const q = pg.querySelector(".pg-query") as HTMLInputElement | null;
+      if (q && q.value.trim()) qs = "?query=" + encodeURIComponent(q.value.trim());
+
+      const url = base + path + qs;
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      let body: string | undefined;
+      const bodyEl = pg.querySelector(".pg-body") as HTMLTextAreaElement | null;
+      if (bodyEl && bodyEl.value.trim()) {
+        headers["Content-Type"] = "application/json";
+        body = bodyEl.value;
+      }
+
+      const resultEl = pg.querySelector(".pg-result") as HTMLElement;
+      const statusEl = pg.querySelector(".pg-status") as HTMLElement;
+      const timeEl = pg.querySelector(".pg-time") as HTMLElement;
+      const outEl = pg.querySelector(".pg-out") as HTMLElement;
+
+      resultEl.style.display = "";
+      statusEl.textContent = "Sending…";
+      statusEl.className = "pg-status";
+      timeEl.textContent = "";
+      outEl.textContent = "";
+
+      const start = performance.now();
+      try {
+        const res = await fetch(url, { method, headers, body });
+        const elapsed = Math.round(performance.now() - start);
+        const text = await res.text();
+        let parsed: any = null;
+        let pretty = text;
+        try { parsed = JSON.parse(text); pretty = JSON.stringify(parsed, null, 2); } catch (_) {}
+
+        statusEl.textContent = `${res.status} ${res.statusText}`;
+        statusEl.className = `pg-status ${res.ok ? "ok" : "err"}`;
+        timeEl.textContent = `${elapsed}ms`;
+        outEl.textContent = pretty;
+
+        // convenience: capture the token from a successful login
+        if (res.ok && parsed && parsed.access_token) {
+          (document.getElementById("pg-token") as HTMLInputElement).value = parsed.access_token;
+        }
+      } catch (err: any) {
+        const elapsed = Math.round(performance.now() - start);
+        statusEl.textContent = "Network error";
+        statusEl.className = "pg-status err";
+        timeEl.textContent = `${elapsed}ms`;
+        outEl.textContent = (err && err.message ? err.message : "Request failed") +
+          "\n\nIf your server is running, this is usually CORS or a wrong Base URL.";
+      }
+    });
+  });
+
+  // --- sidebar scrollspy ---
+  const links = document.querySelectorAll(".api-link");
+  const spy = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          links.forEach((l) => l.classList.toggle("active", l.getAttribute("href") === `#${id}`));
+        }
+      });
+    },
+    { rootMargin: "-70px 0px -70% 0px" }
+  );
+  document.querySelectorAll(".endpoint, .api-intro").forEach((s) => spy.observe(s));
+</script>
+
+<style>
+  .api-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    align-items: start;
+  }
+
+  /* sidebar */
+  .api-sidebar {
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    padding: 22px 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  .sb-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    padding: 0 22px 12px;
+  }
+
+  .api-nav { flex: 1; }
+
+  .nav-section {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    padding: 18px 22px 6px;
+  }
+
+  .api-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 5px 22px;
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .api-link:hover,
+  .api-link.active {
+    background: var(--nav-hover-bg);
+    border-left-color: var(--accent);
+    text-decoration: none;
+  }
+
+  .api-link .path {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sb-foot {
+    padding: 16px 22px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+
+  .spec-link {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .spec-link:hover { color: var(--text); text-decoration: none; }
+
+  /* method badges */
+  .mb, .mt {
+    font-family: var(--mono);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .mb {
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+    min-width: 44px;
+    text-align: center;
+  }
+
+  .mb.get { color: #2ecc71; background: color-mix(in srgb, #27ae60 15%, transparent); }
+  .mb.post { color: #34c7dc; background: color-mix(in srgb, #22b8cf 16%, transparent); }
+  .mb.patch { color: #a78bfa; background: color-mix(in srgb, #8b5cf6 18%, transparent); }
+  .mb.delete { color: #f0656a; background: color-mix(in srgb, #e5484d 15%, transparent); }
+  .mb.err { color: #f0656a; background: color-mix(in srgb, #e5484d 15%, transparent); }
+
+  /* main */
+  .api-main {
+    min-width: 0;
+    padding: 32px 48px 90px;
+    max-width: 1080px;
+  }
+
+  h1 {
+    font-family: var(--heading);
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 6px 0 12px;
+    color: var(--text);
+  }
+
+  .intro-lead {
+    font-size: 1.1rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    max-width: 640px;
+    margin: 0 0 28px;
+  }
+
+  .api-intro { scroll-margin-top: 70px; }
+
+  .group-heading {
+    font-family: var(--heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 44px 0 4px;
+  }
+
+  /* connection panel */
+  .conn {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: center;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-elevated);
+  }
+
+  .conn-doc p { font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 10px; }
+  .conn-doc p:last-child { margin-bottom: 0; }
+  .conn-note { font-size: 0.82rem !important; }
+  .conn-fields { display: flex; flex-direction: column; gap: 10px; }
+
+  /* endpoints */
+  .endpoint {
+    border-top: 1px solid var(--border);
+    padding: 22px 0;
+    scroll-margin-top: 70px;
+  }
+
+  .ep-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .ep-path { font-family: var(--mono); font-size: 0.9rem; color: var(--text); word-break: break-word; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .two-col > * { min-width: 0; }
+  .col-full { grid-column: 1 / -1; }
+
+  .col-doc p { font-size: 0.92rem; line-height: 1.65; color: var(--text-muted); margin: 0 0 14px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    color: var(--text);
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 5px;
+    padding: 1px 6px;
+  }
+
+  /* dark code panels */
+  .resp-block, .pg-result {
+    background: #14111a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .resp-label {
+    font-size: 0.72rem;
+    color: #a89ba6;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .resp-label .ok { font-family: var(--mono); font-weight: 700; color: #2ecc71; margin-left: 4px; }
+
+  .resp-block pre, .pg-result pre { margin: 0; padding: 13px 14px; overflow-x: auto; }
+  .resp-block code, .pg-out {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #e8dfe6;
+    background: none;
+    border: none;
+    padding: 0;
+    white-space: pre;
+  }
+
+  /* playground */
+  .pg {
+    position: sticky;
+    top: 74px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .pg-row { display: flex; align-items: center; gap: 10px; }
+
+  .pg-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    width: 76px;
+    flex-shrink: 0;
+  }
+
+  .pg-input {
+    flex: 1;
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    outline: none;
+  }
+
+  .pg-input:focus { border-color: var(--accent); }
+
+  textarea.pg-body { resize: vertical; line-height: 1.5; white-space: pre; }
+
+  .pg-send {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .pg-send:hover { opacity: 0.9; }
+  .pg-send .mt { font-size: 0.62rem; color: rgba(255, 255, 255, 0.85); }
+
+  .pg-result { margin-top: 2px; }
+  .pg-rhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .pg-status { font-family: var(--mono); font-size: 0.76rem; font-weight: 600; color: #a89ba6; }
+  .pg-status.ok { color: #2ecc71; }
+  .pg-status.err { color: #f0656a; }
+  .pg-time { font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted); }
+  .pg-result pre { max-height: 320px; overflow-y: auto; }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th { text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+  td:first-child code { color: var(--text); }
+
+  @media (max-width: 1024px) {
+    .two-col, .conn { grid-template-columns: 1fr; gap: 16px; }
+    .pg { position: static; }
+  }
+
+  @media (max-width: 860px) {
+    .api-layout { grid-template-columns: 1fr; }
+    .api-sidebar {
+      position: static;
+      height: auto;
+      flex-direction: column;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .api-nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px; }
+    .nav-section { width: 100%; padding: 10px 0 2px; }
+    .api-link { border-left: none; border-radius: 12px; border: 1px solid var(--border); padding: 5px 11px; max-width: 100%; }
+    .api-link .path { font-size: 0.72rem; white-space: normal; overflow-wrap: anywhere; }
+    .sb-foot { border-top: none; padding: 14px 16px 0; }
+    .api-main { padding: 28px 22px 64px; }
+  }
+</style>

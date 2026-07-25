@@ -1,0 +1,22 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1c1c1c"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- progress-pie mark, echoing the app icon -->
+  <g transform="translate(300 315)">
+    <circle r="150" fill="none" stroke="#ffffff" stroke-width="15"/>
+    <circle r="116" fill="#ffffff"/>
+    <path d="M0 0 L0 -116 L40 -109 Z" fill="#000000"/>
+  </g>
+
+  <text x="520" y="300" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-size="130" font-weight="700" letter-spacing="-5" fill="#ffffff">biinge</text>
+  <g transform="translate(524 370)">
+    <circle cx="8" cy="8" r="8" fill="#eec01e"/>
+    <text x="28" y="18" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif" font-size="33" font-weight="500" fill="#9a9a9a">Self-hosted movie &amp; TV tracker</text>
+  </g>
+</svg>

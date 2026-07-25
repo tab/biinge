@@ -1,0 +1,63 @@
+---
+interface Props {
+  name: string;
+  alt: string;
+  eager?: boolean;
+}
+
+const { name, alt, eager = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const loading = eager ? "eager" : "lazy";
+---
+
+<div class="device">
+  <div class="device-screen">
+    <img class="d-light" src={`${base}screens/${name}-light.jpg`} alt={alt} width="1206" height="2622" loading={loading} decoding="async" />
+    <img class="d-dark" src={`${base}screens/${name}-dark.jpg`} alt="" aria-hidden="true" width="1206" height="2622" loading={loading} decoding="async" />
+  </div>
+</div>
+
+<style>
+  .device {
+    position: relative;
+    width: 100%;
+    padding: 7px; /* room for the bezel box-shadow */
+  }
+
+  /*
+   * the screen carries the exact screenshot aspect ratio so object-fit never
+   * crops the app's side margins; black bezel + titanium rail via box-shadow
+   */
+  .device-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1206 / 2622;
+    border-radius: 12% / 5.5%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+      0 0 0 6px #0a0a0c,
+      0 0 0 7px rgba(214, 214, 220, 0.6),
+      var(--shadow-lg);
+  }
+
+  /* the hair-thin inner screen edge: faint light on dark UI, faint dark on light UI */
+  :global(html[data-theme="light"]) .device-screen {
+    border-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .device-screen img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .device-screen .d-dark { display: none; }
+
+  :global(html[data-theme="dark"]) .device-screen .d-light { display: none; }
+  :global(html[data-theme="dark"]) .device-screen .d-dark { display: block; }
+</style>

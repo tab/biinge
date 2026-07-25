@@ -1,0 +1,223 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const base = import.meta.env.BASE_URL;
+
+const stack = [
+  "Go",
+  "Fx",
+  "chi",
+  "PostgreSQL",
+  "sqlc",
+  "goose",
+  "Redis",
+  "TMDB",
+  "SwiftUI",
+  "iOS 26",
+];
+---
+
+<Layout
+  title="About - biinge"
+  description="Why biinge exists: a self-hosted movie and TV tracker that keeps your watch history on hardware you control, with a Go API and a native iOS app."
+>
+  <Header section="about" />
+  <main class="page">
+    <div class="container">
+      <div class="page-head">
+        <div class="eyebrow-label">About</div>
+        <h1>Own what you watch.</h1>
+        <p class="lead">
+          biinge is a movie and TV tracker you run yourself. No account on
+          someone else's cloud - your lists, progress, and stats live in a
+          database you control.
+        </p>
+      </div>
+
+      <div class="prose">
+        <h2>The idea</h2>
+        <p>
+          Most watch-trackers are someone else's service. Your history sits on
+          their servers, wrapped in ads and analytics, and it disappears the day
+          they shut down or change their pricing. biinge takes the same stance
+          as self-hosting your photos or your notes: your viewing history is
+          yours, kept on hardware you own, for as long as you want it.
+        </p>
+
+        <h2>What it is</h2>
+        <p>
+          Two decoupled pieces, joined only by an HTTP contract. A
+          <strong>Go REST API</strong> is the backend - it owns your library,
+          episode progress, the Up Next queue, and statistics, and proxies
+          <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a>
+          for movie and TV metadata so your keys never leave the server. A
+          <strong>native iOS app</strong> in SwiftUI is the client: library
+          lists come straight from your API, and search and detail views proxy
+          TMDB through it.
+        </p>
+
+        <h2>It keeps itself honest</h2>
+        <p>
+          Watch state drifts from reality over time. A show you finished a year
+          ago gets renewed; a film you saved in pre-production finally releases.
+          A background worker periodically reconciles your library with TMDB, so
+          a revived show quietly moves back to <em>watching</em> and a released
+          movie updates on its own - without you reopening every title to keep
+          its state true.
+        </p>
+
+        <h2>Under the hood</h2>
+        <p>
+          Small, boring, and dependable by design. The API leans on sqlc and
+          goose over Postgres, an optional Redis cache in front of TMDB, and Fx
+          for wiring. The app is plain SwiftUI targeting the latest iOS.
+        </p>
+        <ul class="stack">
+          {stack.map((s) => (
+            <li>{s}</li>
+          ))}
+        </ul>
+
+        <h2>Open source</h2>
+        <p>
+          biinge is a single monorepo, MIT licensed, with the API and app each
+          owning their own build and tests. It's built to be forked, run, and
+          changed to fit how you watch.
+        </p>
+      </div>
+
+      <div class="actions">
+        <a href={`${base}self-hosting/`} class="btn btn-primary">Self-host it <span>&rarr;</span></a>
+        <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .page {
+    padding: 72px 0 96px;
+  }
+
+  .page-head {
+    max-width: 720px;
+    margin-bottom: 56px;
+  }
+
+  .page-head h1 {
+    font-family: var(--heading);
+    font-size: 3rem;
+    line-height: 1.03;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    margin: 0 0 20px;
+    color: var(--text);
+  }
+
+  .lead {
+    font-size: 1.2rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .prose {
+    max-width: 720px;
+  }
+
+  .prose h2 {
+    font-family: var(--heading);
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 40px 0 12px;
+  }
+
+  .prose p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .prose strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .prose em {
+    color: var(--text);
+    font-style: italic;
+  }
+
+  .stack {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .stack li {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 14px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 56px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+
+  @media (max-width: 768px) {
+    .page {
+      padding: 48px 0 64px;
+    }
+
+    .page-head h1 {
+      font-size: 2.25rem;
+    }
+
+    .lead {
+      font-size: 1.05rem;
+    }
+  }
+</style>

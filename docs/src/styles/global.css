@@ -1,0 +1,180 @@
+:root,
+[data-theme="dark"] {
+  --bg: #000000;
+  --bg-elevated: #0b0b0b;
+  --bg-card: #181818;
+  --bg-secondary: #282828;
+  --border: #262626;
+  --text: #fafafa;
+  --text-secondary: #d4d7ca;
+  --text-muted: #8a8a8a;
+
+  /* app accents: red for actions, gold for ratings/progress */
+  --accent: #e5484d;
+  --gold: #eec01e;
+  --green: #27ae60;
+  --violet: #8b5cf6;
+  --cyan: #22b8cf;
+
+  --card-bg: #141414;
+  --card-border: #262626;
+  --card-hover-bg: #191919;
+  --card-hover-border: #3a3a3a;
+  --code-bg: rgba(255, 255, 255, 0.06);
+  --code-border: rgba(255, 255, 255, 0.1);
+  --header-bg: rgba(0, 0, 0, 0.72);
+  --nav-hover-bg: rgba(255, 255, 255, 0.06);
+  --shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.7);
+
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --heading: var(--sans);
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, monospace;
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-elevated: #fafafa;
+  --bg-card: #fafafa;
+  --bg-secondary: #eaeaea;
+  --border: #e6e6e6;
+  --text: #181818;
+  --text-secondary: #2b2835;
+  --text-muted: #6e6969;
+
+  --card-bg: #fafafa;
+  --card-border: #ececec;
+  --card-hover-bg: #f4f4f4;
+  --card-hover-border: #dcdcdc;
+  --code-bg: rgba(0, 0, 0, 0.05);
+  --code-border: rgba(0, 0, 0, 0.1);
+  --header-bg: rgba(255, 255, 255, 0.75);
+  --nav-hover-bg: rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.16);
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--heading);
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 56px;
+}
+
+.eyebrow-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.eyebrow-label::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--gold);
+}
+
+/* Pill buttons mirror the app's capsule action buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s, opacity 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  opacity: 0.88;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+
+.btn-ghost:hover {
+  border-color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .btn:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 22px;
+  }
+}

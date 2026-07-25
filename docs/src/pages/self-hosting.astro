@@ -1,0 +1,347 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+
+const clone = `git clone https://github.com/tab/biinge.git
+cd biinge`;
+
+const env = `# api/.env.development - replace the SECRET placeholders
+TMDB_API_READ_ACCESS_TOKEN=<your TMDB v4 read token>
+JWT_SECRET_KEY=<a long random string>
+SECRET_KEY_BASE=<a long random string>`;
+
+const stack = `# 1. datastores first
+docker compose up -d database redis
+
+# 2. apply migrations (needs goose installed)
+make -C api db:migrate
+
+# 3. then the API, on :8080
+docker compose up -d api`;
+
+const app = `# build and run the iOS app against your API
+make -C ios build     # or open ios/Biinge.xcodeproj in Xcode 26`;
+
+const config = [
+  { name: "TMDB_API_READ_ACCESS_TOKEN", purpose: "TMDB v4 read token - required for search, detail, and trending" },
+  { name: "DATABASE_DSN", purpose: "Postgres connection string" },
+  { name: "REDIS_URL", purpose: "Redis URL for the TMDB cache - leave unset to serve uncached" },
+  { name: "JWT_SECRET_KEY / SECRET_KEY_BASE", purpose: "Token signing secrets - replace the SECRET placeholders" },
+  { name: "WORKER_SYNC_ENABLED", purpose: "Turn the background TMDB sync worker on or off" },
+  { name: "SENTRY_DSN", purpose: "Error reporting (optional)" },
+];
+---
+
+<Layout
+  title="Self-host biinge"
+  description="Run biinge on your own machine: bring up Postgres, Redis, and the Go API with Docker Compose, apply migrations, and point the iOS app at your server."
+>
+  <Header section="self-hosting" />
+  <main class="page">
+    <div class="container">
+      <div class="page-head">
+        <div class="eyebrow-label">Self-host</div>
+        <h1>Self-host biinge.</h1>
+        <p class="lead">
+          The backend runs anywhere Docker does. Bring up Postgres, Redis, and
+          the API, apply migrations, and point the app at your server.
+        </p>
+      </div>
+
+      <div class="prereq">
+        <h2>Before you start</h2>
+        <ul>
+          <li><strong>Docker</strong> - runs Postgres, Redis, and the API</li>
+          <li>
+            A free <a href="https://developer.themoviedb.org" target="_blank" rel="noopener">TMDB</a>
+            v4 read access token - powers search, detail, and trending
+          </li>
+          <li>
+            <a href="https://github.com/pressly/goose" target="_blank" rel="noopener">goose</a>
+            - applies database migrations
+          </li>
+          <li><strong>Xcode 26</strong> - to build the iOS app</li>
+        </ul>
+      </div>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="step-head"><span class="num">1</span><h3>Clone the repo</h3></div>
+          <CodeBlock code={clone} label="bash" />
+        </li>
+
+        <li class="step">
+          <div class="step-head"><span class="num">2</span><h3>Add your TMDB token</h3></div>
+          <p>
+            The API reads env from <code>api/.env.development</code>, committed
+            with <code>SECRET</code> placeholders. Drop in your token and a pair
+            of signing secrets - or keep them in a gitignored
+            <code>api/.env.development.local</code> override.
+          </p>
+          <CodeBlock code={env} label="env" />
+        </li>
+
+        <li class="step">
+          <div class="step-head"><span class="num">3</span><h3>Bring up the stack</h3></div>
+          <CodeBlock code={stack} label="bash" />
+          <p class="note">
+            Prefer to run it directly? <code>cd api && GO_ENV=development go run ./cmd/biinge</code>,
+            or <code>fuku up</code> to wait on <code>/ready</code>. Health lives
+            at <code>GET /health</code>, readiness at <code>GET /ready</code>.
+          </p>
+        </li>
+
+        <li class="step">
+          <div class="step-head"><span class="num">4</span><h3>Run the app</h3></div>
+          <CodeBlock code={app} label="bash" />
+          <p class="note">
+            The app targets <code>http://localhost:8080/api/v1</code> by default
+            - change the base URL to point at your host.
+          </p>
+        </li>
+      </ol>
+
+      <div class="config">
+        <h2>Configuration</h2>
+        <p class="config-lead">
+          The variables you'll most likely touch. The rest ship with sensible
+          defaults in <code>api/.env.development</code>.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Variable</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              {config.map((row) => (
+                <tr>
+                  <td><code>{row.name}</code></td>
+                  <td>{row.purpose}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .page {
+    padding: 72px 0 96px;
+  }
+
+  .page-head {
+    max-width: 720px;
+    margin-bottom: 48px;
+  }
+
+  .page-head h1 {
+    font-family: var(--heading);
+    font-size: 3rem;
+    line-height: 1.03;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    margin: 0 0 20px;
+    color: var(--text);
+  }
+
+  .lead {
+    font-size: 1.2rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .prereq {
+    max-width: 760px;
+    padding: 24px 28px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg-elevated);
+    margin-bottom: 56px;
+  }
+
+  .prereq h2 {
+    font-family: var(--heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .prereq ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .prereq li {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    padding-left: 20px;
+    position: relative;
+  }
+
+  .prereq li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--accent);
+  }
+
+  .prereq strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .steps {
+    list-style: none;
+    max-width: 760px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+  }
+
+  .step h3 {
+    font-family: var(--heading);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .step p {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .step .note {
+    margin-top: 14px;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+  }
+
+  .step code,
+  .config code {
+    font-family: var(--mono);
+    font-size: 0.82em;
+    color: var(--text);
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 5px;
+    padding: 1px 6px;
+  }
+
+  .config {
+    max-width: 760px;
+    margin-top: 72px;
+  }
+
+  .config h2 {
+    font-family: var(--heading);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .config-lead {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  td {
+    color: var(--text-muted);
+  }
+
+  td code {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    .page {
+      padding: 48px 0 64px;
+    }
+
+    .page-head h1 {
+      font-size: 2.25rem;
+    }
+
+    .lead {
+      font-size: 1.05rem;
+    }
+
+    td code {
+      white-space: normal;
+    }
+  }
+</style>

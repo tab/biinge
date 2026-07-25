@@ -514,27 +514,46 @@ private struct SeasonsView: View {
     @State private var loadTask: Task<Void, Never>?
     /// Episodes already fetched this visit, keyed by season id, so switching back is instant
     @State private var episodesBySeason: [Int: [EpisodeSummary]] = [:]
+    /// Once the user picks or marks a season, stop auto-selecting so the view never jumps
+    @State private var didUserSelect = false
+    /// Set on auto-select to scroll the strip so the chosen season pill is revealed
+    @State private var scrollTarget: Int?
+
+    /// The season to open by default: the earliest not-fully-watched season, or the last when all are watched
+    private var defaultSeason: SeasonSummary? {
+        let regular = seasons.filter { $0.number > 0 }
+        let ordered = (regular.isEmpty ? seasons : regular).sorted { $0.number < $1.number }
+        return ordered.first { !watchedSeasonIds.contains($0.id) } ?? ordered.last
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(seasons) { season in
-                        let isActive = selected?.id == season.id
-                        Button {
-                            select(season)
-                        } label: {
-                            Text(season.title)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(isActive ? Color.biingeBackground : Color.biingeGrayDark)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 5)
-                                .background(isActive ? Color.biingeText : .clear, in: Capsule())
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(seasons) { season in
+                            let isActive = selected?.id == season.id
+                            Button {
+                                didUserSelect = true
+                                select(season)
+                            } label: {
+                                Text(season.title)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(isActive ? Color.biingeBackground : Color.biingeGrayDark)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 5)
+                                    .background(isActive ? Color.biingeText : .clear, in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .id(season.id)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.horizontal, 15)
                 }
-                .padding(.horizontal, 15)
+                .onChange(of: scrollTarget) { _, target in
+                    guard let target else { return }
+                    withAnimation { proxy.scrollTo(target, anchor: .center) }
+                }
             }
 
             if isLoading {
@@ -553,6 +572,7 @@ private struct SeasonsView: View {
                             episode: episode,
                             isWatched: watchedEpisodeIds.contains(episode.id)
                         ) { watched in
+                            didUserSelect = true
                             if let season = selected {
                                 await onMarkEpisode(season, episodes, episode, watched)
                             }
@@ -567,6 +587,7 @@ private struct SeasonsView: View {
                 if let season = selected, !episodes.isEmpty {
                     let seasonWatched = watchedSeasonIds.contains(season.id)
                     Button {
+                        didUserSelect = true
                         Task { await onMarkSeason(season, episodes, !seasonWatched) }
                     } label: {
                         Text(seasonWatched ? "Remove Watched" : "Watched")
@@ -581,11 +602,15 @@ private struct SeasonsView: View {
                 }
             }
         }
-        .task {
-            if selected == nil, let first = seasons.first {
-                select(first)
-            }
-        }
+        .task { autoSelect() }
+        .onChange(of: watchedSeasonIds) { autoSelect() }
+    }
+
+    /// Land on the current season, re-running once progress arrives, until the user takes over
+    private func autoSelect() {
+        guard !didUserSelect, let season = defaultSeason, season.id != selected?.id else { return }
+        select(season)
+        scrollTarget = season.id
     }
 
     private func select(_ season: SeasonSummary) {

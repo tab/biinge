@@ -12,7 +12,7 @@ RUN go mod download
 COPY . ./
 RUN go build -o /app/biinge /app/cmd/biinge/main.go
 
-FROM alpine:3.21
+FROM alpine:3.24
 
 WORKDIR /app
 

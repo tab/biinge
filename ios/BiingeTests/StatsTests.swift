@@ -62,8 +62,8 @@ struct StatsTests {
         let json = """
         {
           "period": "week",
-          "movies": { "want": 12, "watched": 3, "minutes": 340 },
-          "series": { "want": 4, "watching": 2, "watched": 9 },
+          "movies": { "want": 2, "watched": 3, "minutes": 340 },
+          "series": { "want": 1, "watched": 9 },
           "episodes": { "watched": 11, "minutes": 460 },
           "activity": [
             { "date": "2026-07-19", "movieMinutes": 120, "tvMinutes": 42 },
@@ -79,6 +79,31 @@ struct StatsTests {
         #expect(stats.activity?.count == 2)
         #expect(stats.activity?.first?.movieMinutes == 120)
         #expect(components(stats.activity?.first?.start ?? .distantPast).day == 19)
+    }
+
+    @Test func aBoundedPeriodCarriesNoWatchingCount() throws {
+        let json = """
+        {
+          "period": "week",
+          "movies": { "want": 1, "watched": 3, "minutes": 340 },
+          "series": { "want": 0, "watched": 9 },
+          "episodes": { "watched": 11, "minutes": 460 }
+        }
+        """
+
+        let stats = try JSONDecoder().decode(AccountStats.self, from: Data(json.utf8))
+
+        #expect(stats.series.watching == nil)
+        #expect(stats.movies.want == 1)
+        #expect(stats.series.want == 0)
+        #expect(stats.series.watched == 9)
+    }
+
+    @Test func theWantBarCountsAdditionsOnABoundedPeriod() {
+        #expect(StatsPeriod.week.wantLabel == "Added")
+        #expect(StatsPeriod.month.wantLabel == "Added")
+        #expect(StatsPeriod.year.wantLabel == "Added")
+        #expect(StatsPeriod.all.wantLabel == "Want")
     }
 
     @Test func decodesAPayloadWithoutActivity() throws {

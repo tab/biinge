@@ -23,6 +23,11 @@ enum StatsPeriod: String, Sendable, CaseIterable {
         }
     }
 
+    /// Label for the want bar, which counts additions rather than the whole list on a bounded period
+    var wantLabel: String {
+        self == .all ? "Want" : "Added"
+    }
+
     /// Trailing phrase naming the period in captions
     var phrase: String {
         switch self {
@@ -41,15 +46,18 @@ struct AccountStats: Decodable, Sendable {
     // optional so a stats payload without activity (older API) still decodes
     let activity: [Bucket]?
 
+    /// want is the whole list all-time, and what was added to it inside a bounded period
     struct Movies: Decodable, Sendable {
         let want: Int
         let watched: Int
         let minutes: Int
     }
 
+    /// watched is finished shows all-time, and shows with an episode watched inside a bounded period
     struct Series: Decodable, Sendable {
         let want: Int
-        let watching: Int
+        // a show is being watched now, so no bounded period carries this
+        let watching: Int?
         let watched: Int
     }
 

@@ -211,22 +211,17 @@ private struct TimeSlice: Identifiable {
 struct StatisticsView: View {
     @Environment(\.apiClient) private var apiClient
     @State private var loaded: [StatsPeriod: AccountStats] = [:]
-    @State private var lastShown: AccountStats?
     @State private var period: StatsPeriod = .week
-
-    /// Falls back to whatever was on screen so a period being fetched never blanks the page
-    private var stats: AccountStats? { loaded[period] ?? lastShown }
-
-    /// True while the numbers on screen belong to some other period
-    private var isStale: Bool { loaded[period] == nil }
 
     var body: some View {
         ModalScaffold(title: "Statistics") {
             VStack(alignment: .leading, spacing: 28) {
                 periodChips
-                if let stats {
+
+                // A period is only ever drawn from its own numbers, so switching chips
+                // spins rather than showing another window's figures under the new label
+                if let stats = loaded[period] {
                     content(stats)
-                        .opacity(isStale ? 0.5 : 1)
                 } else {
                     ProgressView().tint(Color.biingeLoader)
                         .frame(maxWidth: .infinity)
@@ -244,7 +239,6 @@ struct StatisticsView: View {
 
         if let result = try? await apiClient.stats(period: period) {
             loaded[period] = result
-            lastShown = result
         }
     }
 
@@ -278,7 +272,7 @@ struct StatisticsView: View {
             breakdown(
                 "Movies",
                 bars: [
-                    StatBar(label: "Want", count: stats.movies.want, color: StatPalette.want),
+                    StatBar(label: period.wantLabel, count: stats.movies.want, color: StatPalette.want),
                     StatBar(label: "Watched", count: stats.movies.watched, color: StatPalette.watched),
                 ],
                 caption: "\(formatMinutes(stats.movies.minutes)) watched \(period.phrase)"
@@ -286,25 +280,19 @@ struct StatisticsView: View {
             breakdown(
                 "TV Shows",
                 bars: [
-                    StatBar(label: "Want", count: stats.series.want, color: StatPalette.want),
-                    StatBar(label: "Watching", count: stats.series.watching, color: StatPalette.watching),
+                    StatBar(label: period.wantLabel, count: stats.series.want, color: StatPalette.want),
+                    stats.series.watching.map { StatBar(label: "Watching", count: $0, color: StatPalette.watching) },
                     StatBar(label: "Watched", count: stats.series.watched, color: StatPalette.watched),
-                ],
+                ].compactMap { $0 },
                 caption: "\(stats.episodes.watched) episodes · \(formatMinutes(stats.episodes.minutes)) watched \(period.phrase)"
             )
-            if period != .all {
-                Text("Want and watching counts are always all-time")
-                    .font(.biingeFootnote)
-                    .foregroundStyle(Color.biingeGraniteGray)
-            }
         }
     }
 
     @ViewBuilder
     private func watchActivity(_ buckets: [AccountStats.Bucket]) -> some View {
         let total = buckets.reduce(0) { $0 + $1.totalMinutes }
-        // Short windows peak well under an hour, where hour labels would all read "0h"
-        let hourly = (buckets.map(\.totalMinutes).max() ?? 0) >= 120
+        let step = axisStride(buckets.map(\.totalMinutes).max() ?? 0)
         VStack(alignment: .leading, spacing: 16) {
             sectionHeading("Watch activity")
             if total > 0 {
@@ -326,11 +314,11 @@ struct StatisticsView: View {
                 )
                 .chartLegend(position: .bottom, spacing: 12)
                 .chartYAxis {
-                    AxisMarks { value in
+                    AxisMarks(values: .stride(by: Double(step))) { value in
                         AxisGridLine()
                         AxisValueLabel {
                             if let minutes = value.as(Int.self) {
-                                Text(hourly ? "\(minutes / 60)h" : "\(minutes)m")
+                                Text(axisLabel(minutes, step: step))
                             }
                         }
                     }
@@ -365,10 +353,31 @@ struct StatisticsView: View {
                     .foregroundStyle(Color.biingeGraniteGray)
             } else {
                 Text(period == .all ? "No watch activity yet" : "No watch activity \(period.phrase)")
-                    .font(.biingeCallout)
+                    .font(.biingeFootnote)
                     .foregroundStyle(Color.biingeGraniteGray)
             }
         }
+    }
+
+    /// Y-axis step in minutes, scaled to the tallest bar so the axis carries about four marks
+    ///
+    /// The step has to come from the data: a fixed one draws a gridline per hour, which is
+    /// three marks across a week and thousands across a whole history. Every candidate past
+    /// an hour is a whole number of hours, and every candidate past a day a whole number of
+    /// days, so a mark never lands mid-unit where two labels would round to the same text.
+    private func axisStride(_ maxMinutes: Int) -> Int {
+        let candidates = [15, 30, 60, 120, 360, 720, 1440, 4320, 10080, 20160, 43200, 86400]
+        let target = max(15, maxMinutes / 4)
+
+        return candidates.first { $0 >= target } ?? candidates[candidates.count - 1]
+    }
+
+    /// Names an axis mark in the coarsest unit its step lands on exactly
+    private func axisLabel(_ minutes: Int, step: Int) -> String {
+        if step >= 1440 { return "\(minutes / 1440)d" }
+        if step >= 60 { return "\(minutes / 60)h" }
+
+        return "\(minutes)m"
     }
 
     /// Thins labels to roughly six, so an all-time chart spanning many years stays readable
@@ -397,7 +406,7 @@ struct StatisticsView: View {
                 }
             } else {
                 Text("No watch time yet")
-                    .font(.biingeCallout)
+                    .font(.biingeFootnote)
                     .foregroundStyle(Color.biingeGraniteGray)
             }
         }
@@ -417,7 +426,7 @@ struct StatisticsView: View {
         .overlay {
             VStack(spacing: 1) {
                 Text(formatMinutes(total))
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .font(.system(size: 19, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
@@ -445,7 +454,7 @@ struct StatisticsView: View {
             }
             Spacer(minLength: 8)
             Text("\(pct)%")
-                .font(.biingeCaption1)
+                .font(.biingeCaption2)
                 .monospacedDigit()
                 .foregroundStyle(slice.color)
         }
@@ -465,7 +474,7 @@ struct StatisticsView: View {
                     .foregroundStyle(Color.biingeGraniteGray)
             } else {
                 Text("Nothing tracked yet")
-                    .font(.biingeCallout)
+                    .font(.biingeFootnote)
                     .foregroundStyle(Color.biingeGraniteGray)
             }
         }
@@ -476,8 +485,8 @@ struct StatisticsView: View {
         let fraction = total > 0 ? Double(bar.count) / Double(total) : 0
         return HStack(spacing: 12) {
             Text(bar.label)
-                .font(.biingeCaption2)
-                .foregroundStyle(Color.biingeText)
+                .font(.biingeFootnote)
+                .foregroundStyle(Color.biingeGraniteGray)
                 .frame(width: 80, alignment: .leading)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
@@ -500,13 +509,15 @@ struct StatisticsView: View {
         Text(title).font(.biingeSubhead).foregroundStyle(Color.biingeGraniteGray)
     }
 
+    /// Renders a runtime down to the minute below a day, where whole hours alone would round a film away
     private func formatMinutes(_ minutes: Int) -> String {
         let hours = minutes / 60
         let days = hours / 24
         let weeks = days / 7
         if weeks > 0 { return "\(weeks)w \(days % 7)d \(hours % 24)h" }
         if days > 0 { return "\(days)d \(hours % 24)h" }
-        return "\(hours)h"
+        if hours > 0 { return "\(hours)h \(minutes % 60)m" }
+        return "\(minutes)m"
     }
 }
 

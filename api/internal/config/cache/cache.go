@@ -8,21 +8,15 @@ import (
 	"biinge-api/internal/config/logger"
 )
 
-// TTLs for the classes of cached TMDB responses. Nothing a user does changes TMDB's
-// answers, so these are a straight freshness-against-API-calls trade rather than
-// something invalidation can shorten.
-//
-// Details stays the tightest of the three: an episode that has just aired only shows
-// up in a season list, and therefore in up-next, once the entry expires.
+// TTLs for cached TMDB responses, a pure freshness-against-API-calls trade since no user action changes what TMDB answers
 const (
+	// tightest of the three: a just-aired episode reaches a season list, and so up-next, only once this expires
 	DetailsTTL  = 12 * time.Hour
 	SearchTTL   = 6 * time.Hour
 	TrendingTTL = 6 * time.Hour
 )
 
-// StatsTTL only has to cover the drift that invalidation cannot see, since every write
-// that moves a count drops the entry. What is left is a calendar period rolling over
-// mid-entry, so it stays well under an hour
+// StatsTTL covers only the drift invalidation cannot see (a calendar period rolling over mid-entry), since every write that moves a count drops the entry
 const StatsTTL = 30 * time.Minute
 
 // Cache is a byte-oriented key/value store with per-entry expiry
@@ -34,9 +28,10 @@ type Cache interface {
 
 // Fetch returns the cached value for key, otherwise calls source and caches its result
 func Fetch[T any](ctx context.Context, cache Cache, log *logger.Logger, key string, ttl time.Duration, source func() (T, error)) (T, error) {
-	if data, ok, err := cache.Get(ctx, key); err != nil {
+	switch data, ok, err := cache.Get(ctx, key); {
+	case err != nil:
 		log.Debug().Err(err).Str("key", key).Msg("Cache read failed")
-	} else if ok {
+	case ok:
 		var cached T
 		if err := json.Unmarshal(data, &cached); err == nil {
 			return cached, nil

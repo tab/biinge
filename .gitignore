@@ -10,7 +10,9 @@ Thumbs.db
 *.sw?
 
 # === AI ===
-.claude/
+# Skills are shared; local settings are not
+.claude/*
+!.claude/skills/
 
 # === Env (repo-wide local overrides) ===
 .env

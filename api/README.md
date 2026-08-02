@@ -79,7 +79,7 @@ Individual targets: `make fmt`, `make lint`, `make vet`, `make staticcheck`,
 
 ## Contributing
 
-1. Branch off `main`
+1. Branch off `master`
 2. Make your change with tests and keep `make check` green
 3. Open a pull request
 

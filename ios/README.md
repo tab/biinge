@@ -1,8 +1,8 @@
 # Biinge iOS
 
-SwiftUI client for [biinge](../README.md) (iOS 26, Swift 6, no third-party
-dependencies): login, library, movie/TV detail, search, Up Next, and a profile
-with statistics.
+SwiftUI client for [biinge](../README.md) (iOS 26, Swift 6, one dependency —
+sentry-cocoa, for crash reporting): login, library, movie/TV detail, search, Up
+Next, and a profile with statistics.
 
 ## Requirements
 

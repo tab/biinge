@@ -68,7 +68,7 @@ type UpsertEpisodeParams struct {
 	PosterPath string
 	Runtime    uint64
 	State      StateTypes
-	AirAt      pgtype.Timestamp
+	AirAt      pgtype.Timestamptz
 }
 
 func (q *Queries) UpsertEpisode(ctx context.Context, arg UpsertEpisodeParams) (Episode, error) {

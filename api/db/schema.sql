@@ -24,14 +24,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: -
 --
 
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
 
 
 --
--- Name: appearance_type; Type: TYPE; Schema: public; Owner: postgres
+-- Name: appearance_type; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.appearance_type AS ENUM (
@@ -41,10 +41,8 @@ CREATE TYPE public.appearance_type AS ENUM (
 );
 
 
-ALTER TYPE public.appearance_type OWNER TO postgres;
-
 --
--- Name: state_types; Type: TYPE; Schema: public; Owner: postgres
+-- Name: state_types; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.state_types AS ENUM (
@@ -55,14 +53,12 @@ CREATE TYPE public.state_types AS ENUM (
 );
 
 
-ALTER TYPE public.state_types OWNER TO postgres;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: episodes; Type: TABLE; Schema: public; Owner: postgres
+-- Name: episodes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.episodes (
@@ -73,17 +69,16 @@ CREATE TABLE public.episodes (
     poster_path character varying(255) DEFAULT ''::character varying NOT NULL,
     runtime integer DEFAULT 0 NOT NULL,
     state public.state_types NOT NULL,
-    air_at timestamp without time zone,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    watched_at timestamp without time zone
+    air_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    watched_at timestamp with time zone,
+    CONSTRAINT episodes_runtime_non_negative CHECK ((runtime >= 0))
 );
 
 
-ALTER TABLE public.episodes OWNER TO postgres;
-
 --
--- Name: movies; Type: TABLE; Schema: public; Owner: postgres
+-- Name: movies; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.movies (
@@ -95,18 +90,17 @@ CREATE TABLE public.movies (
     runtime integer DEFAULT 0 NOT NULL,
     state public.state_types NOT NULL,
     pinned boolean DEFAULT false NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    watched_at timestamp without time zone,
-    synced_at timestamp without time zone,
-    released_at timestamp without time zone
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    watched_at timestamp with time zone,
+    synced_at timestamp with time zone,
+    released_at timestamp with time zone,
+    CONSTRAINT movies_runtime_non_negative CHECK ((runtime >= 0))
 );
 
 
-ALTER TABLE public.movies OWNER TO postgres;
-
 --
--- Name: seasons; Type: TABLE; Schema: public; Owner: postgres
+-- Name: seasons; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.seasons (
@@ -117,16 +111,16 @@ CREATE TABLE public.seasons (
     number integer DEFAULT 0 NOT NULL,
     episodes_count integer DEFAULT 0 NOT NULL,
     state public.state_types NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    watched_at timestamp without time zone
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    watched_at timestamp with time zone,
+    CONSTRAINT seasons_episodes_count_non_negative CHECK ((episodes_count >= 0)),
+    CONSTRAINT seasons_number_non_negative CHECK ((number >= 0))
 );
 
 
-ALTER TABLE public.seasons OWNER TO postgres;
-
 --
--- Name: series; Type: TABLE; Schema: public; Owner: postgres
+-- Name: series; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.series (
@@ -140,18 +134,32 @@ CREATE TABLE public.series (
     status character varying(255) DEFAULT ''::character varying NOT NULL,
     state public.state_types NOT NULL,
     pinned boolean DEFAULT false NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     tracked_state public.state_types,
-    synced_at timestamp without time zone,
-    last_air_at timestamp without time zone
+    synced_at timestamp with time zone,
+    last_air_at timestamp with time zone,
+    CONSTRAINT series_episodes_count_non_negative CHECK ((episodes_count >= 0)),
+    CONSTRAINT series_seasons_count_non_negative CHECK ((seasons_count >= 0))
 );
 
 
-ALTER TABLE public.series OWNER TO postgres;
+--
+-- Name: COLUMN series.state; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.series.state IS 'the show''s effective state, derived from watched seasons when the user has not chosen one';
+
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
+-- Name: COLUMN series.tracked_state; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.series.tracked_state IS 'the state the user explicitly chose; NULL when the row was created by marking an episode';
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.users (
@@ -159,19 +167,17 @@ CREATE TABLE public.users (
     login character varying(20) NOT NULL,
     email character varying(255) NOT NULL,
     encrypted_password character varying(255) NOT NULL,
-    first_name character varying(20) NOT NULL,
-    last_name character varying(20) NOT NULL,
+    first_name character varying(50) NOT NULL,
+    last_name character varying(50) NOT NULL,
     appearance public.appearance_type DEFAULT 'system'::public.appearance_type NOT NULL,
-    deleted_at timestamp without time zone,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    deleted_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
-ALTER TABLE public.users OWNER TO postgres;
-
 --
--- Name: episodes episodes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: episodes episodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.episodes
@@ -179,7 +185,7 @@ ALTER TABLE ONLY public.episodes
 
 
 --
--- Name: movies movies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: movies movies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.movies
@@ -187,7 +193,7 @@ ALTER TABLE ONLY public.movies
 
 
 --
--- Name: seasons seasons_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: seasons seasons_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.seasons
@@ -195,7 +201,7 @@ ALTER TABLE ONLY public.seasons
 
 
 --
--- Name: series series_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: series series_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.series
@@ -203,23 +209,7 @@ ALTER TABLE ONLY public.series
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_email_key UNIQUE (email);
-
-
---
--- Name: users users_login_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_login_key UNIQUE (login);
-
-
---
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
@@ -227,147 +217,98 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: episodes_season_id_air_at_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: episodes_season_id_air_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX episodes_season_id_air_at_idx ON public.episodes USING btree (season_id, air_at DESC);
 
 
 --
--- Name: episodes_season_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX episodes_season_id_idx ON public.episodes USING btree (season_id);
-
-
---
--- Name: episodes_season_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: postgres
+-- Name: episodes_season_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX episodes_season_id_tmdb_id_unique ON public.episodes USING btree (season_id, tmdb_id);
 
 
 --
--- Name: episodes_tmdb_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX episodes_tmdb_id_idx ON public.episodes USING btree (tmdb_id);
-
-
---
--- Name: episodes_watched_at_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: episodes_watched_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX episodes_watched_at_idx ON public.episodes USING btree (watched_at) WHERE (watched_at IS NOT NULL);
 
 
 --
--- Name: movies_synced_at_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: movies_synced_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX movies_synced_at_idx ON public.movies USING btree (synced_at NULLS FIRST);
 
 
 --
--- Name: movies_tmdb_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX movies_tmdb_id_idx ON public.movies USING btree (tmdb_id);
-
-
---
--- Name: movies_user_id_state_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX movies_user_id_state_idx ON public.movies USING btree (user_id, state);
-
-
---
--- Name: movies_user_id_state_pinned_created_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: movies_user_id_state_pinned_created_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX movies_user_id_state_pinned_created_idx ON public.movies USING btree (user_id, state, pinned DESC, created_at DESC);
 
 
 --
--- Name: movies_user_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: postgres
+-- Name: movies_user_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX movies_user_id_tmdb_id_unique ON public.movies USING btree (user_id, tmdb_id);
 
 
 --
--- Name: movies_user_id_watched_at_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: movies_user_id_watched_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX movies_user_id_watched_at_idx ON public.movies USING btree (user_id, watched_at) WHERE (watched_at IS NOT NULL);
 
 
 --
--- Name: seasons_series_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX seasons_series_id_idx ON public.seasons USING btree (series_id);
-
-
---
--- Name: seasons_series_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: postgres
+-- Name: seasons_series_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX seasons_series_id_tmdb_id_unique ON public.seasons USING btree (series_id, tmdb_id);
 
 
 --
--- Name: seasons_tmdb_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX seasons_tmdb_id_idx ON public.seasons USING btree (tmdb_id);
-
-
---
--- Name: series_synced_at_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: series_synced_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX series_synced_at_idx ON public.series USING btree (synced_at NULLS FIRST);
 
 
 --
--- Name: series_tmdb_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX series_tmdb_id_idx ON public.series USING btree (tmdb_id);
-
-
---
--- Name: series_user_id_state_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX series_user_id_state_idx ON public.series USING btree (user_id, state);
-
-
---
--- Name: series_user_id_state_pinned_created_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: series_user_id_state_pinned_created_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX series_user_id_state_pinned_created_idx ON public.series USING btree (user_id, state, pinned DESC, created_at DESC);
 
 
 --
--- Name: series_user_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: postgres
+-- Name: series_user_id_tmdb_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX series_user_id_tmdb_id_unique ON public.series USING btree (user_id, tmdb_id);
 
 
 --
--- Name: users_created_at_not_deleted_idx; Type: INDEX; Schema: public; Owner: postgres
+-- Name: users_email_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX users_created_at_not_deleted_idx ON public.users USING btree (created_at DESC) WHERE (deleted_at IS NULL);
+CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email) WHERE (deleted_at IS NULL);
 
 
 --
--- Name: episodes episodes_season_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users_login_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX users_login_key ON public.users USING btree (login) WHERE (deleted_at IS NULL);
+
+
+--
+-- Name: episodes episodes_season_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.episodes
@@ -375,7 +316,7 @@ ALTER TABLE ONLY public.episodes
 
 
 --
--- Name: movies movies_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: movies movies_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.movies
@@ -383,7 +324,7 @@ ALTER TABLE ONLY public.movies
 
 
 --
--- Name: seasons seasons_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: seasons seasons_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.seasons
@@ -391,7 +332,7 @@ ALTER TABLE ONLY public.seasons
 
 
 --
--- Name: series series_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: series series_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.series

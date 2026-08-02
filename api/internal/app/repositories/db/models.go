@@ -107,10 +107,10 @@ type Episode struct {
 	PosterPath string
 	Runtime    uint64
 	State      StateTypes
-	AirAt      pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
-	WatchedAt  pgtype.Timestamp
+	AirAt      pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	WatchedAt  pgtype.Timestamptz
 }
 
 type Movie struct {
@@ -122,11 +122,11 @@ type Movie struct {
 	Runtime    uint64
 	State      StateTypes
 	Pinned     bool
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
-	WatchedAt  pgtype.Timestamp
-	SyncedAt   pgtype.Timestamp
-	ReleasedAt pgtype.Timestamp
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	WatchedAt  pgtype.Timestamptz
+	SyncedAt   pgtype.Timestamptz
+	ReleasedAt pgtype.Timestamptz
 }
 
 type Season struct {
@@ -137,9 +137,9 @@ type Season struct {
 	Number        uint64
 	EpisodesCount uint64
 	State         StateTypes
-	CreatedAt     pgtype.Timestamp
-	UpdatedAt     pgtype.Timestamp
-	WatchedAt     pgtype.Timestamp
+	CreatedAt     pgtype.Timestamptz
+	UpdatedAt     pgtype.Timestamptz
+	WatchedAt     pgtype.Timestamptz
 }
 
 type Series struct {
@@ -151,13 +151,15 @@ type Series struct {
 	SeasonsCount  uint64
 	EpisodesCount uint64
 	Status        string
-	State         StateTypes
-	Pinned        bool
-	CreatedAt     pgtype.Timestamp
-	UpdatedAt     pgtype.Timestamp
-	TrackedState  NullStateTypes
-	SyncedAt      pgtype.Timestamp
-	LastAirAt     pgtype.Timestamp
+	// the show's effective state, derived from watched seasons when the user has not chosen one
+	State     StateTypes
+	Pinned    bool
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	// the state the user explicitly chose; NULL when the row was created by marking an episode
+	TrackedState NullStateTypes
+	SyncedAt     pgtype.Timestamptz
+	LastAirAt    pgtype.Timestamptz
 }
 
 type User struct {
@@ -168,7 +170,7 @@ type User struct {
 	FirstName         string
 	LastName          string
 	Appearance        AppearanceType
-	DeletedAt         pgtype.Timestamp
-	CreatedAt         pgtype.Timestamp
-	UpdatedAt         pgtype.Timestamp
+	DeletedAt         pgtype.Timestamptz
+	CreatedAt         pgtype.Timestamptz
+	UpdatedAt         pgtype.Timestamptz
 }

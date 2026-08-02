@@ -69,7 +69,7 @@ WITH bound AS (
   SELECT date_trunc($2::text, NOW()) AS since
 )
 SELECT
-  COUNT(*) FILTER (WHERE state = 'want')::bigint AS want_count,
+  COUNT(*) FILTER (WHERE state = 'want' AND created_at >= (SELECT since FROM bound))::bigint AS want_count,
   COUNT(*) FILTER (WHERE state = 'watched' AND watched_at >= (SELECT since FROM bound))::bigint AS watched_count,
   COALESCE(SUM(runtime) FILTER (WHERE state = 'watched' AND watched_at >= (SELECT since FROM bound)), 0)::bigint AS watched_minutes
 FROM movies
@@ -90,8 +90,8 @@ type MovieStatsRow struct {
 // Watched stats come in pairs: a bounded query for the current calendar period and
 // an all-time one. Serving both from a single statement with a nullable bound makes
 // postgres settle on a generic plan that never uses the watched_at indexes.
-// Want is all-time; watched counts and minutes cover the current period. The bound
-// lives in a CTE so it is computed once rather than per row
+// Everything is scoped to the period: want counts what was added to the list inside it,
+// dated by created_at since a row carries no record of when it entered a state
 func (q *Queries) MovieStats(ctx context.Context, arg MovieStatsParams) (MovieStatsRow, error) {
 	row := q.db.QueryRow(ctx, movieStats, arg.UserID, arg.PeriodUnit)
 	var i MovieStatsRow
@@ -114,6 +114,7 @@ type MovieStatsAllRow struct {
 	WatchedMinutes int64
 }
 
+// Want is a backlog rather than an event, so it only exists all-time
 func (q *Queries) MovieStatsAll(ctx context.Context, userID uuid.UUID) (MovieStatsAllRow, error) {
 	row := q.db.QueryRow(ctx, movieStatsAll, userID)
 	var i MovieStatsAllRow
@@ -122,6 +123,48 @@ func (q *Queries) MovieStatsAll(ctx context.Context, userID uuid.UUID) (MovieSta
 }
 
 const seriesStats = `-- name: SeriesStats :one
+WITH bound AS (
+  SELECT date_trunc($2::text, NOW()) AS since
+)
+SELECT
+  (
+    SELECT COUNT(*)
+    FROM series w
+    WHERE w.user_id = $1
+      AND w.state = 'want'
+      AND w.created_at >= (SELECT since FROM bound)
+  )::bigint AS want_count,
+  (
+    SELECT COUNT(DISTINCT t.id)
+    FROM episodes e
+      JOIN seasons s ON e.season_id = s.id
+      JOIN series t ON s.series_id = t.id
+    WHERE t.user_id = $1
+      AND e.watched_at >= (SELECT since FROM bound)
+  )::bigint AS watched_count
+`
+
+type SeriesStatsParams struct {
+	UserID     uuid.UUID
+	PeriodUnit string
+}
+
+type SeriesStatsRow struct {
+	WantCount    int64
+	WatchedCount int64
+}
+
+// A show counts as watched in the period when any of its episodes was ticked inside it.
+// series carries no watched_at of its own, so the episodes are what date a show.
+// There is no watching count: a show is being watched now, which no window can bound
+func (q *Queries) SeriesStats(ctx context.Context, arg SeriesStatsParams) (SeriesStatsRow, error) {
+	row := q.db.QueryRow(ctx, seriesStats, arg.UserID, arg.PeriodUnit)
+	var i SeriesStatsRow
+	err := row.Scan(&i.WantCount, &i.WatchedCount)
+	return i, err
+}
+
+const seriesStatsAll = `-- name: SeriesStatsAll :one
 SELECT
   COUNT(*) FILTER (WHERE state = 'want')::bigint AS want_count,
   COUNT(*) FILTER (WHERE state = 'watching')::bigint AS watching_count,
@@ -130,15 +173,15 @@ FROM series
 WHERE user_id = $1
 `
 
-type SeriesStatsRow struct {
+type SeriesStatsAllRow struct {
 	WantCount     int64
 	WatchingCount int64
 	WatchedCount  int64
 }
 
-func (q *Queries) SeriesStats(ctx context.Context, userID uuid.UUID) (SeriesStatsRow, error) {
-	row := q.db.QueryRow(ctx, seriesStats, userID)
-	var i SeriesStatsRow
+func (q *Queries) SeriesStatsAll(ctx context.Context, userID uuid.UUID) (SeriesStatsAllRow, error) {
+	row := q.db.QueryRow(ctx, seriesStatsAll, userID)
+	var i SeriesStatsAllRow
 	err := row.Scan(&i.WantCount, &i.WatchingCount, &i.WatchedCount)
 	return i, err
 }

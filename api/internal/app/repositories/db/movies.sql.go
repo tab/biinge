@@ -56,9 +56,9 @@ type CreateMovieRow struct {
 	Runtime    uint64
 	State      StateTypes
 	Pinned     bool
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
-	WatchedAt  pgtype.Timestamp
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	WatchedAt  pgtype.Timestamptz
 }
 
 func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (CreateMovieRow, error) {
@@ -136,9 +136,9 @@ type FindMovieByIdRow struct {
 	Runtime    uint64
 	Pinned     bool
 	State      StateTypes
-	WatchedAt  pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
 }
 
 func (q *Queries) FindMovieById(ctx context.Context, id uuid.UUID) (FindMovieByIdRow, error) {
@@ -191,9 +191,9 @@ type FindMovieByTmdbIdRow struct {
 	Runtime    uint64
 	Pinned     bool
 	State      StateTypes
-	WatchedAt  pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
 }
 
 func (q *Queries) FindMovieByTmdbId(ctx context.Context, arg FindMovieByTmdbIdParams) (FindMovieByTmdbIdRow, error) {
@@ -255,9 +255,9 @@ type FindMoviesByStateRow struct {
 	Runtime    uint64
 	Pinned     bool
 	State      StateTypes
-	WatchedAt  pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
 	Total      int64
 }
 
@@ -330,9 +330,9 @@ type FindMoviesByTmdbIdsRow struct {
 	Runtime    uint64
 	Pinned     bool
 	State      StateTypes
-	WatchedAt  pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
+	WatchedAt  pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
 }
 
 func (q *Queries) FindMoviesByTmdbIds(ctx context.Context, arg FindMoviesByTmdbIdsParams) ([]FindMoviesByTmdbIdsRow, error) {
@@ -383,8 +383,8 @@ LIMIT $3
 `
 
 type FindMoviesToSyncParams struct {
-	StaleBefore   pgtype.Timestamp
-	ReleaseCutoff pgtype.Timestamp
+	StaleBefore   pgtype.Timestamptz
+	ReleaseCutoff pgtype.Timestamptz
 	BatchSize     int32
 }
 
@@ -439,7 +439,7 @@ type SyncMovieParams struct {
 	Title      string
 	PosterPath string
 	Runtime    uint64
-	ReleasedAt pgtype.Timestamp
+	ReleasedAt pgtype.Timestamptz
 	ID         uuid.UUID
 }
 
@@ -501,9 +501,9 @@ type UpdateMovieRow struct {
 	Runtime    uint64
 	State      StateTypes
 	Pinned     bool
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
-	WatchedAt  pgtype.Timestamp
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	WatchedAt  pgtype.Timestamptz
 }
 
 func (q *Queries) UpdateMovie(ctx context.Context, arg UpdateMovieParams) (UpdateMovieRow, error) {
@@ -568,9 +568,9 @@ type UpdateMovieByTmdbIdRow struct {
 	Runtime    uint64
 	State      StateTypes
 	Pinned     bool
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
-	WatchedAt  pgtype.Timestamp
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	WatchedAt  pgtype.Timestamptz
 }
 
 func (q *Queries) UpdateMovieByTmdbId(ctx context.Context, arg UpdateMovieByTmdbIdParams) (UpdateMovieByTmdbIdRow, error) {

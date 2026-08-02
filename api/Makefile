@@ -81,7 +81,7 @@ db\:rollback:
 .PHONY: db\:schema\:dump
 db\:schema\:dump:
 	@echo "Dumping database schema from $(DB_NAME) to db/schema.sql..."
-	docker-compose exec -T $(DB_SERVICE_NAME) pg_dump -U $(DB_USER) -d $(DB_NAME) --schema-only --exclude-table=goose_db_version > db/schema.sql
+	docker-compose exec -T $(DB_SERVICE_NAME) pg_dump -U $(DB_USER) -d $(DB_NAME) --schema-only --no-owner --no-privileges --exclude-table=goose_db_version > db/schema.sql
 
 .PHONY: db\:schema\:load
 db\:schema\:load:

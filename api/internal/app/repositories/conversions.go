@@ -16,11 +16,11 @@ func toInt32Slice(ids []uint64) []int32 {
 	return result
 }
 
-// timestampFromTime maps a time.Time into a nullable pgtype.Timestamp (zero time → SQL NULL)
-func timestampFromTime(t time.Time) pgtype.Timestamp {
+// timestampFromTime maps a time.Time into a nullable pgtype.Timestamptz (zero time → SQL NULL)
+func timestampFromTime(t time.Time) pgtype.Timestamptz {
 	if t.IsZero() {
-		return pgtype.Timestamp{Valid: false}
+		return pgtype.Timestamptz{Valid: false}
 	}
 
-	return pgtype.Timestamp{Time: t, Valid: true}
+	return pgtype.Timestamptz{Time: t, Valid: true}
 }

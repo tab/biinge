@@ -21,8 +21,8 @@ type UserSerializer struct {
 }
 
 type UpdateAccountRequestSerializer struct {
-	FirstName  string `json:"first_name" validate:"omitempty,min=2,max=20"`
-	LastName   string `json:"last_name" validate:"omitempty,min=2,max=20"`
+	FirstName  string `json:"first_name" validate:"omitempty,min=2,max=50"`
+	LastName   string `json:"last_name" validate:"omitempty,min=2,max=50"`
 	Appearance string `json:"appearance" validate:"omitempty,oneof=light dark system"`
 }
 

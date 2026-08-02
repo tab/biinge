@@ -12,8 +12,8 @@ type RegistrationRequestSerializer struct {
 	Login      string `json:"login" validate:"required,min=3,max=20"`
 	Email      string `json:"email" validate:"required,email"`
 	Password   string `json:"password" validate:"required,min=8,max=72"`
-	FirstName  string `json:"first_name" validate:"required,min=2,max=20"`
-	LastName   string `json:"last_name" validate:"required,min=2,max=20"`
+	FirstName  string `json:"first_name" validate:"required,min=2,max=50"`
+	LastName   string `json:"last_name" validate:"required,min=2,max=50"`
 	Appearance string `json:"appearance" validate:"omitempty,oneof=light dark system"`
 }
 

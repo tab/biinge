@@ -253,8 +253,8 @@ type FindSeriesByStateRow struct {
 	EpisodesCount        uint64
 	Pinned               bool
 	State                StateTypes
-	CreatedAt            pgtype.Timestamp
-	UpdatedAt            pgtype.Timestamp
+	CreatedAt            pgtype.Timestamptz
+	UpdatedAt            pgtype.Timestamptz
 	Total                int64
 	WatchedEpisodesCount int64
 }
@@ -480,8 +480,8 @@ LIMIT $4
 `
 
 type FindSeriesToSyncParams struct {
-	StaleBefore    pgtype.Timestamp
-	AirCutoff      pgtype.Timestamp
+	StaleBefore    pgtype.Timestamptz
+	AirCutoff      pgtype.Timestamptz
 	ActiveStatuses []string
 	BatchSize      int32
 }
@@ -604,7 +604,7 @@ type SyncSeriesParams struct {
 	SeasonsCount  uint64
 	EpisodesCount uint64
 	Status        string
-	LastAirAt     pgtype.Timestamp
+	LastAirAt     pgtype.Timestamptz
 	ID            uuid.UUID
 }
 

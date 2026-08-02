@@ -341,6 +341,8 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
 
+	seriesWatching := uint64(3)
+
 	type result struct {
 		response serializers.StatsSerializer
 		error    serializers.ErrorSerializer
@@ -365,7 +367,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					MoviesWatched:   5,
 					MoviesMinutes:   600,
 					SeriesWant:      1,
-					SeriesWatching:  3,
+					SeriesWatching:  &seriesWatching,
 					SeriesWatched:   4,
 					EpisodesWatched: 42,
 					EpisodesMinutes: 1800,
@@ -379,7 +381,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 				response: serializers.StatsSerializer{
 					Period:   "all",
 					Movies:   serializers.MovieStatsSerializer{Want: 2, Watched: 5, Minutes: 600},
-					Series:   serializers.SeriesStatsSerializer{Want: 1, Watching: 3, Watched: 4},
+					Series:   serializers.SeriesStatsSerializer{Want: 1, Watching: &seriesWatching, Watched: 4},
 					Episodes: serializers.EpisodeStatsSerializer{Watched: 42, Minutes: 1800},
 					Activity: []serializers.ActivityBucketSerializer{
 						{Date: "2026-01-01", MovieMinutes: 120, TvMinutes: 300},

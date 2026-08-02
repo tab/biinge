@@ -21,13 +21,18 @@ func (p StatsPeriod) String() string {
 }
 
 // Stats is a user's aggregate watch statistics. Minutes are summed runtimes
+//
+// Every count is scoped to the period. Want is the whole list all-time and what was
+// added to it inside a bounded period; SeriesWatched is shows finished all-time and
+// shows with a watched episode inside a bounded one. SeriesWatching is nil on a bounded
+// period, since a show is being watched now rather than during some past window.
 type Stats struct {
 	Period          StatsPeriod
 	MoviesWant      uint64
 	MoviesWatched   uint64
 	MoviesMinutes   uint64
 	SeriesWant      uint64
-	SeriesWatching  uint64
+	SeriesWatching  *uint64
 	SeriesWatched   uint64
 	EpisodesWatched uint64
 	EpisodesMinutes uint64

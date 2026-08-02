@@ -6,16 +6,20 @@ import (
 	"biinge-api/internal/app/models"
 )
 
+// MovieStatsSerializer counts a user's movies and their watched runtime (a bounded
+// period counts what was added to the want list inside it)
 type MovieStatsSerializer struct {
 	Want    uint64 `json:"want"`
 	Watched uint64 `json:"watched"`
 	Minutes uint64 `json:"minutes"`
 }
 
+// SeriesStatsSerializer counts a user's shows (a bounded period omits watching, which
+// describes a show now rather than during a past window)
 type SeriesStatsSerializer struct {
-	Want     uint64 `json:"want"`
-	Watching uint64 `json:"watching"`
-	Watched  uint64 `json:"watched"`
+	Want     uint64  `json:"want"`
+	Watching *uint64 `json:"watching,omitempty"`
+	Watched  uint64  `json:"watched"`
 }
 
 type EpisodeStatsSerializer struct {

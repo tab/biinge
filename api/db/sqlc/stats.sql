@@ -3,19 +3,20 @@
 -- postgres settle on a generic plan that never uses the watched_at indexes.
 
 -- name: MovieStats :one
--- Want is all-time; watched counts and minutes cover the current period. The bound
--- lives in a CTE so it is computed once rather than per row
+-- Everything is scoped to the period: want counts what was added to the list inside it,
+-- dated by created_at since a row carries no record of when it entered a state
 WITH bound AS (
   SELECT date_trunc(sqlc.arg(period_unit)::text, NOW()) AS since
 )
 SELECT
-  COUNT(*) FILTER (WHERE state = 'want')::bigint AS want_count,
+  COUNT(*) FILTER (WHERE state = 'want' AND created_at >= (SELECT since FROM bound))::bigint AS want_count,
   COUNT(*) FILTER (WHERE state = 'watched' AND watched_at >= (SELECT since FROM bound))::bigint AS watched_count,
   COALESCE(SUM(runtime) FILTER (WHERE state = 'watched' AND watched_at >= (SELECT since FROM bound)), 0)::bigint AS watched_minutes
 FROM movies
 WHERE user_id = sqlc.arg(user_id);
 
 -- name: MovieStatsAll :one
+-- Want is a backlog rather than an event, so it only exists all-time
 SELECT
   COUNT(*) FILTER (WHERE state = 'want')::bigint AS want_count,
   COUNT(*) FILTER (WHERE state = 'watched')::bigint AS watched_count,
@@ -24,6 +25,30 @@ FROM movies
 WHERE user_id = $1;
 
 -- name: SeriesStats :one
+-- A show counts as watched in the period when any of its episodes was ticked inside it.
+-- series carries no watched_at of its own, so the episodes are what date a show.
+-- There is no watching count: a show is being watched now, which no window can bound
+WITH bound AS (
+  SELECT date_trunc(sqlc.arg(period_unit)::text, NOW()) AS since
+)
+SELECT
+  (
+    SELECT COUNT(*)
+    FROM series w
+    WHERE w.user_id = sqlc.arg(user_id)
+      AND w.state = 'want'
+      AND w.created_at >= (SELECT since FROM bound)
+  )::bigint AS want_count,
+  (
+    SELECT COUNT(DISTINCT t.id)
+    FROM episodes e
+      JOIN seasons s ON e.season_id = s.id
+      JOIN series t ON s.series_id = t.id
+    WHERE t.user_id = sqlc.arg(user_id)
+      AND e.watched_at >= (SELECT since FROM bound)
+  )::bigint AS watched_count;
+
+-- name: SeriesStatsAll :one
 SELECT
   COUNT(*) FILTER (WHERE state = 'want')::bigint AS want_count,
   COUNT(*) FILTER (WHERE state = 'watching')::bigint AS watching_count,

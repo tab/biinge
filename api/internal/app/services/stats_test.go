@@ -23,6 +23,7 @@ func Test_Stats_Get(t *testing.T) {
 	service := NewStats(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
+	seriesWatching := uint64(1)
 
 	tests := []struct {
 		name     string
@@ -41,7 +42,7 @@ func Test_Stats_Get(t *testing.T) {
 					MoviesWatched:   10,
 					MoviesMinutes:   1200,
 					SeriesWant:      2,
-					SeriesWatching:  1,
+					SeriesWatching:  &seriesWatching,
 					SeriesWatched:   4,
 					EpisodesWatched: 100,
 					EpisodesMinutes: 4200,
@@ -53,7 +54,7 @@ func Test_Stats_Get(t *testing.T) {
 				MoviesWatched:   10,
 				MoviesMinutes:   1200,
 				SeriesWant:      2,
-				SeriesWatching:  1,
+				SeriesWatching:  &seriesWatching,
 				SeriesWatched:   4,
 				EpisodesWatched: 100,
 				EpisodesMinutes: 4200,

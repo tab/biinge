@@ -171,8 +171,9 @@ func Test_StatsRepository_Get(t *testing.T) {
 		assert.Equal(t, uint64(3), result.MoviesWatched)
 		assert.Equal(t, uint64(310), result.MoviesMinutes)
 
+		require.NotNil(t, result.SeriesWatching)
 		assert.Equal(t, uint64(1), result.SeriesWant)
-		assert.Equal(t, uint64(1), result.SeriesWatching)
+		assert.Equal(t, uint64(1), *result.SeriesWatching)
 		assert.Equal(t, uint64(1), result.SeriesWatched)
 
 		assert.Equal(t, uint64(3), result.EpisodesWatched)
@@ -209,16 +210,18 @@ func Test_StatsRepository_Get_Periods(t *testing.T) {
 		period          models.StatsPeriod
 		moviesWatched   uint64
 		moviesMinutes   uint64
+		seriesWatched   uint64
 		episodesWatched uint64
 		episodesMinutes uint64
 		buckets         int
 		firstBucket     time.Time
 		lastBucket      time.Time
 	}{
-		{models.StatsPeriodWeek, 1, 100, 2, 84, 7, weekStart, weekStart.AddDate(0, 0, 6)},
-		{models.StatsPeriodMonth, 1, 100, 2, 84, monthEnd.Day(), monthStart, monthEnd},
-		{models.StatsPeriodYear, 1, 100, 2, 84, 12, yearStart, yearStart.AddDate(0, 11, 0)},
-		{models.StatsPeriodAll, 3, 220, 3, 114, 4, yearStart.AddDate(-3, 0, 0), yearStart},
+		{models.StatsPeriodWeek, 1, 100, 1, 2, 84, 7, weekStart, weekStart.AddDate(0, 0, 6)},
+		{models.StatsPeriodMonth, 1, 100, 1, 2, 84, monthEnd.Day(), monthStart, monthEnd},
+		{models.StatsPeriodYear, 1, 100, 1, 2, 84, 12, yearStart, yearStart.AddDate(0, 11, 0)},
+		// the only series is still watching, so all-time counts no finished show
+		{models.StatsPeriodAll, 3, 220, 0, 3, 114, 4, yearStart.AddDate(-3, 0, 0), yearStart},
 	}
 
 	for _, tt := range tests {
@@ -229,12 +232,21 @@ func Test_StatsRepository_Get_Periods(t *testing.T) {
 			assert.Equal(t, tt.period, result.Period)
 			assert.Equal(t, tt.moviesWatched, result.MoviesWatched)
 			assert.Equal(t, tt.moviesMinutes, result.MoviesMinutes)
+			assert.Equal(t, tt.seriesWatched, result.SeriesWatched)
 			assert.Equal(t, tt.episodesWatched, result.EpisodesWatched)
 			assert.Equal(t, tt.episodesMinutes, result.EpisodesMinutes)
 
-			// Backlog counts stay all-time whatever the window
+			// The one want movie was seeded just now, so it lands in every window
 			assert.Equal(t, uint64(1), result.MoviesWant)
-			assert.Equal(t, uint64(1), result.SeriesWatching)
+			assert.Equal(t, uint64(0), result.SeriesWant)
+
+			// A show is being watched now, so only all-time carries that count
+			if tt.period == models.StatsPeriodAll {
+				require.NotNil(t, result.SeriesWatching)
+				assert.Equal(t, uint64(1), *result.SeriesWatching)
+			} else {
+				assert.Nil(t, result.SeriesWatching)
+			}
 
 			// The chart covers the whole calendar period, including days still to come
 			dates := bucketDates(result.Activity)
@@ -318,6 +330,58 @@ func Test_StatsRepository_Get_MonthStartsOnTheFirst(t *testing.T) {
 	})
 }
 
+func Test_StatsRepository_Get_CountsAShowOncePerPeriod(t *testing.T) {
+	ctx := context.Background()
+	client := newRepoTestClient(t)
+	repository := NewStatsRepository(client)
+	userID := newProgressTestUser(t, client, "stats.shows")
+
+	binged := seedStatsSeries(t, client, userID, 930101, models.StateTypeWatching)
+	dipped := seedStatsSeries(t, client, userID, 930102, models.StateTypeWatching)
+	dormant := seedStatsSeries(t, client, userID, 930103, models.StateTypeWatching)
+
+	seedStatsEpisodes(t, client, binged, 930201, 42, 42, 42)
+	seedStatsEpisodes(t, client, dipped, 930202, 55)
+	seedStatsEpisodes(t, client, dormant, 930203, 60)
+
+	backdateStatsEpisode(t, client, 93020300, "18 months")
+
+	result, err := repository.Get(ctx, userID, models.StatsPeriodWeek)
+	require.NoError(t, err)
+
+	// Three episodes of one show plus one of another is two shows watched, not four
+	assert.Equal(t, uint64(2), result.SeriesWatched)
+	assert.Equal(t, uint64(4), result.EpisodesWatched)
+	assert.Equal(t, uint64(181), result.EpisodesMinutes)
+}
+
+func Test_StatsRepository_Get_CountsWantAddedInThePeriod(t *testing.T) {
+	ctx := context.Background()
+	client := newRepoTestClient(t)
+	repository := NewStatsRepository(client)
+	userID := newProgressTestUser(t, client, "stats.wantadded")
+
+	seedStatsMovie(t, client, userID, 940001, 90, models.StateTypeWant)
+	seedStatsMovie(t, client, userID, 940002, 95, models.StateTypeWant)
+	seedStatsMovie(t, client, userID, 940003, 100, models.StateTypeWant)
+
+	// Two of them were added long enough ago to fall outside the current week
+	_, err := client.Db().Exec(
+		ctx,
+		`UPDATE movies SET created_at = NOW() - INTERVAL '18 months' WHERE user_id = $1 AND tmdb_id = ANY($2::integer[])`,
+		userID, []int32{940002, 940003},
+	)
+	require.NoError(t, err)
+
+	week, err := repository.Get(ctx, userID, models.StatsPeriodWeek)
+	require.NoError(t, err)
+	assert.Equal(t, uint64(1), week.MoviesWant)
+
+	all, err := repository.Get(ctx, userID, models.StatsPeriodAll)
+	require.NoError(t, err)
+	assert.Equal(t, uint64(3), all.MoviesWant)
+}
+
 func Test_StatsRepository_Get_Empty(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
@@ -331,11 +395,12 @@ func Test_StatsRepository_Get_Empty(t *testing.T) {
 	require.Len(t, result.Activity, 1)
 	assert.Equal(t, statsAnchor(t, client, "year").Format(time.DateOnly), result.Activity[0].Date.Format(time.DateOnly))
 
+	require.NotNil(t, result.SeriesWatching)
 	assert.Equal(t, uint64(0), result.MoviesWant)
 	assert.Equal(t, uint64(0), result.MoviesWatched)
 	assert.Equal(t, uint64(0), result.MoviesMinutes)
 	assert.Equal(t, uint64(0), result.SeriesWant)
-	assert.Equal(t, uint64(0), result.SeriesWatching)
+	assert.Equal(t, uint64(0), *result.SeriesWatching)
 	assert.Equal(t, uint64(0), result.SeriesWatched)
 	assert.Equal(t, uint64(0), result.EpisodesWatched)
 	assert.Equal(t, uint64(0), result.EpisodesMinutes)

@@ -42,6 +42,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /health:
+    get:
+      summary: "Heartbeat"
+      description: "Plain-text heartbeat answered by middleware ahead of the router, for load balancers and uptime checks. Responds to HEAD as well as GET"
+      tags:
+        - health
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "."
+
   /api/v1/users/registrations:
     post:
       summary: "Register a new user"
@@ -161,7 +176,7 @@ paths:
   /api/v1/accounts/stats:
     get:
       summary: "Account statistics"
-      description: "Aggregate watch stats for the current user: counts by list plus total watched runtime in minutes. Watched counts, minutes and activity cover the requested period; want and watching counts are always all-time"
+      description: "Aggregate watch stats for the current user: counts by list plus total watched runtime in minutes. Every count is scoped to the requested period. Want is the whole list all-time and what was added to it inside a bounded period; the series watched count means finished shows all-time and shows with at least one episode watched inside a bounded period. The series watching count is all-time only and absent otherwise"
       tags:
         - accounts
       parameters:
@@ -1641,12 +1656,12 @@ components:
           type: string
           description: "User's first name"
           minLength: 2
-          maxLength: 20
+          maxLength: 50
         last_name:
           type: string
           description: "User's last name"
           minLength: 2
-          maxLength: 20
+          maxLength: 50
         appearance:
           type: string
           description: "User's preferred appearance theme"
@@ -1697,6 +1712,7 @@ components:
             want:
               type: integer
               format: int64
+              description: "The whole want list all-time, or the movies added to it inside a bounded period"
             watched:
               type: integer
               format: int64
@@ -1714,15 +1730,17 @@ components:
             want:
               type: integer
               format: int64
+              description: "The whole want list all-time, or the shows added to it inside a bounded period"
             watching:
               type: integer
               format: int64
+              description: "Shows currently being watched. Absent when period is week, month or year, since a show is being watched now rather than during a past window"
             watched:
               type: integer
               format: int64
+              description: "Finished shows all-time, or shows with at least one episode watched inside a bounded period"
           required:
             - want
-            - watching
             - watched
         episodes:
           type: object
@@ -1774,12 +1792,12 @@ components:
           type: string
           description: "User's first name"
           minLength: 2
-          maxLength: 20
+          maxLength: 50
         last_name:
           type: string
           description: "User's last name"
           minLength: 2
-          maxLength: 20
+          maxLength: 50
         appearance:
           type: string
           description: "User's preferred appearance theme"

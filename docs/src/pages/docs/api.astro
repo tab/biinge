@@ -89,7 +89,7 @@ const endpoints: Endpoint[] = [
   "last_name": "Doe",
   "appearance": "dark"
 }` },
-  { id: "stats", group: "Account", method: "GET", path: "/api/v1/accounts/stats", desc: "Watch-time totals and library breakdown.", resp: statsJson },
+  { id: "stats", group: "Account", method: "GET", path: "/api/v1/accounts/stats", desc: "Watch-time totals and library breakdown. Add ?period=week|month|year for a bounded window, where every count covers that window alone: want becomes what was added inside it, and the watching count is dropped.", resp: statsJson },
 
   { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library (want & watched).", resp: movieListJson },
   { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library.", body: `{

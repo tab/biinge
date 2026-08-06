@@ -35,11 +35,12 @@ struct RootView: View {
             Tab("Up Next", systemImage: "calendar", value: 2) {
                 UpNextView().presentsDetails()
             }
-            Tab("Search", systemImage: "magnifyingglass", value: 3) {
-                SearchView().presentsDetails()
-            }
-            Tab("Profile", systemImage: "person.crop.circle", value: 4) {
+            Tab("Profile", systemImage: "person.crop.circle", value: 3) {
                 ProfileView(authManager: authManager)
+            }
+            // the search role, so the tab bar itself becomes the field
+            Tab("Search", systemImage: "magnifyingglass", value: 4, role: .search) {
+                SearchView().presentsDetails()
             }
         }
         .tint(Color.biingeText)

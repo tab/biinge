@@ -317,9 +317,15 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 			withUser: true,
 			body:     strings.NewReader(`{ "id": 550, "title": "Fight Club", "posterPath": "/f.jpg", "runtime": 139, "state": "want" }`),
 			expected: result{
-				response: serializers.MovieDetailsSerializer{Id: 550, State: "want"},
-				status:   "200 OK",
-				code:     http.StatusOK,
+				response: serializers.MovieDetailsSerializer{
+					Id:              550,
+					State:           "want",
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
 			},
 		},
 		{
@@ -442,9 +448,16 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 			param:    "550",
 			body:     strings.NewReader(`{ "state": "watched", "pinned": true }`),
 			expected: result{
-				response: serializers.MovieDetailsSerializer{Id: 550, State: "watched", Pinned: true},
-				status:   "200 OK",
-				code:     http.StatusOK,
+				response: serializers.MovieDetailsSerializer{
+					Id:              550,
+					State:           "watched",
+					Pinned:          true,
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
 			},
 		},
 		{

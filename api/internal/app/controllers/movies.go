@@ -149,10 +149,15 @@ func (c *moviesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// the write acknowledges state only, but the spec marks these arrays required, and a nil slice
+	// encodes as null, which no client can decode into an array
 	response := serializers.MovieDetailsSerializer{
-		Id:     row.TmdbId,
-		Pinned: row.Pinned,
-		State:  row.State,
+		Id:              row.TmdbId,
+		Pinned:          row.Pinned,
+		State:           row.State,
+		Credits:         make([]serializers.PersonSerializer, 0),
+		Recommendations: make([]serializers.RecommendationSerializer, 0),
+		Videos:          make([]serializers.VideoSerializer, 0),
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -199,10 +204,15 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// the write acknowledges state only, but the spec marks these arrays required, and a nil slice
+	// encodes as null, which no client can decode into an array
 	response := serializers.MovieDetailsSerializer{
-		Id:     row.TmdbId,
-		Pinned: row.Pinned,
-		State:  row.State,
+		Id:              row.TmdbId,
+		Pinned:          row.Pinned,
+		State:           row.State,
+		Credits:         make([]serializers.PersonSerializer, 0),
+		Recommendations: make([]serializers.RecommendationSerializer, 0),
+		Videos:          make([]serializers.VideoSerializer, 0),
 	}
 
 	w.WriteHeader(http.StatusOK)

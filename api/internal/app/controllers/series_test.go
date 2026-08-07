@@ -619,9 +619,16 @@ func Test_SeriesController_HandleCreate(t *testing.T) {
 			withUser: true,
 			body:     strings.NewReader(`{ "id": 1399, "title": "Game of Thrones", "posterPath": "/g.jpg", "seasonsCount": 8, "episodesCount": 73, "status": "Ended", "state": "watching" }`),
 			expected: result{
-				response: serializers.SeriesDetailsSerializer{Id: 1399, State: "watching"},
-				status:   "200 OK",
-				code:     http.StatusOK,
+				response: serializers.SeriesDetailsSerializer{
+					Id:              1399,
+					State:           "watching",
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+					Seasons:         []serializers.SeasonSummarySerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
 			},
 		},
 		{
@@ -741,9 +748,17 @@ func Test_SeriesController_HandleUpdate(t *testing.T) {
 			param:    "1399",
 			body:     strings.NewReader(`{ "state": "watched", "pinned": true }`),
 			expected: result{
-				response: serializers.SeriesDetailsSerializer{Id: 1399, State: "watched", Pinned: true},
-				status:   "200 OK",
-				code:     http.StatusOK,
+				response: serializers.SeriesDetailsSerializer{
+					Id:              1399,
+					State:           "watched",
+					Pinned:          true,
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+					Seasons:         []serializers.SeasonSummarySerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
 			},
 		},
 		{

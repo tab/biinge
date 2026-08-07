@@ -1,12 +1,18 @@
 import SwiftUI
 
+/// Fill drawn past the bottom of the card content, enough to cover the home indicator inset on any device
+private let detailCardBottomBleed: CGFloat = 120
+
 extension View {
     /// Rounded-top card backing for detail sheets; bleeds card color through the bottom safe area
     func detailCardBackground() -> some View {
+        // The card scrolls, and the enclosing ScrollView has already taken the safe area as a content
+        // inset, so ignoresSafeArea has nothing left to expand into. Drawing the fill past its own
+        // frame instead reaches the screen edge, and the ScrollView clips whatever overshoots
         background(
             UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20, style: .continuous)
                 .fill(Color.biingeCard)
-                .ignoresSafeArea(edges: .bottom)
+                .padding(.bottom, -detailCardBottomBleed)
         )
     }
 }

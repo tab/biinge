@@ -155,7 +155,7 @@ struct TvDetailView: View {
                         Button {
                             presentSeries(item.id)
                         } label: {
-                            PosterImage(path: item.posterPath, title: item.title, size: "w185").frame(width: 120)
+                            PosterImage(path: item.posterPath, title: item.title, size: "w342").frame(width: 120)
                                 .overlay(alignment: .topLeading) {
                                     if isTracked(item) { WatchedBadge() }
                                 }

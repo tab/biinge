@@ -67,7 +67,7 @@ struct SearchView: View {
                     Button {
                         presentMovie(movie.id)
                     } label: {
-                        PosterImage(path: movie.posterPath, title: movie.title, size: "w185")
+                        PosterImage(path: movie.posterPath, title: movie.title, size: "w342")
                             .frame(width: 120)
                             .overlay(alignment: .topLeading) {
                                 if isTrackedMovie(movie.id, snapshot: movie.state) { WatchedBadge() }
@@ -87,7 +87,7 @@ struct SearchView: View {
                     Button {
                         presentSeries(show.id)
                     } label: {
-                        PosterImage(path: show.posterPath, title: show.title, size: "w185")
+                        PosterImage(path: show.posterPath, title: show.title, size: "w342")
                             .frame(width: 120)
                             .overlay(alignment: .topLeading) {
                                 if isTrackedSeries(show.id, snapshot: show.state) { WatchedBadge() }

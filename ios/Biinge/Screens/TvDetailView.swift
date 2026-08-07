@@ -4,7 +4,6 @@ struct TvDetailView: View {
     let seriesId: Int
     @Environment(\.apiClient) private var apiClient
     @Environment(TvStore.self) private var store
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Environment(\.presentSeries) private var presentSeries
 
@@ -52,7 +51,7 @@ struct TvDetailView: View {
                 }
             }
 
-            closeButton
+            CloseButton()
         }
         .background(Color.biingeBackground)
         .toolbar(.hidden, for: .navigationBar)
@@ -185,19 +184,6 @@ struct TvDetailView: View {
                 .frame(width: 40, height: 40)
                 .background(.black.opacity(0.5), in: Circle())
         }
-    }
-
-    private var closeButton: some View {
-        Button { dismiss() } label: {
-            Image(systemName: "xmark")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 32, height: 32)
-                .background(.black.opacity(0.5), in: Circle())
-        }
-        .accessibilityLabel("Close")
-        .padding(.leading, 16)
-        .padding(.top, 16)
     }
 
     @ViewBuilder

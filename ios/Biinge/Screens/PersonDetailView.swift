@@ -7,7 +7,6 @@ struct PersonDetailView: View {
     @Environment(TvStore.self) private var tvStore
     @Environment(\.presentMovie) private var presentMovie
     @Environment(\.presentSeries) private var presentSeries
-    @Environment(\.dismiss) private var dismiss
 
     @State private var details: PersonDetails?
     @State private var isLoading = true
@@ -27,7 +26,7 @@ struct PersonDetailView: View {
             .scrollIndicators(.hidden)
             .ignoresSafeArea(edges: .top)
 
-            closeButton
+            CloseButton()
         }
         .background(Color.biingeBackground)
         .toolbar(.hidden, for: .navigationBar)
@@ -145,19 +144,6 @@ struct PersonDetailView: View {
             }
             .padding(.horizontal, 5)
         }
-    }
-
-    private var closeButton: some View {
-        Button { dismiss() } label: {
-            Image(systemName: "xmark")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 32, height: 32)
-                .background(.black.opacity(0.5), in: Circle())
-        }
-        .accessibilityLabel("Close")
-        .padding(.leading, 16)
-        .padding(.top, 16)
     }
 
     private func formatDate(_ raw: String) -> String {

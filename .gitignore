@@ -18,6 +18,11 @@ Thumbs.db
 .env
 .env.*.local
 
+# === Scratch ===
+# working notes and the screenshot sources behind the README's uploaded images
+FIX.md
+assets/
+
 # === iOS / Xcode (ios/) ===
 build/
 DerivedData/

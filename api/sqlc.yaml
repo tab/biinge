@@ -5,6 +5,7 @@ sql:
     schema: db/schema.sql
     queries:
       - db/sqlc/health.sql
+      - db/sqlc/games.sql
       - db/sqlc/movies.sql
       - db/sqlc/series.sql
       - db/sqlc/seasons.sql
@@ -27,6 +28,14 @@ sql:
               type: "UUID"
               pointer: false
             nullable: true
+
+          - column: "games.igdb_id"
+            go_type: "uint64"
+          - column: "games.poster_path"
+            go_type: "string"
+            nullable: true
+          - column: "games.runtime"
+            go_type: "uint64"
 
           - column: "movies.tmdb_id"
             go_type: "uint64"

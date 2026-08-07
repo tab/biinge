@@ -62,6 +62,8 @@ const (
 	StateTypesWatching StateTypes = "watching"
 	StateTypesWatched  StateTypes = "watched"
 	StateTypesNone     StateTypes = "none"
+	StateTypesPlaying  StateTypes = "playing"
+	StateTypesPlayed   StateTypes = "played"
 )
 
 func (e *StateTypes) Scan(src interface{}) error {
@@ -111,6 +113,22 @@ type Episode struct {
 	CreatedAt  pgtype.Timestamptz
 	UpdatedAt  pgtype.Timestamptz
 	WatchedAt  pgtype.Timestamptz
+}
+
+type Game struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	IgdbID     uint64
+	Title      string
+	PosterPath string
+	Runtime    uint64
+	State      StateTypes
+	Pinned     bool
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	PlayedAt   pgtype.Timestamptz
+	SyncedAt   pgtype.Timestamptz
+	ReleasedAt pgtype.Timestamptz
 }
 
 type Movie struct {

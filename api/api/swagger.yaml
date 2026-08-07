@@ -176,7 +176,7 @@ paths:
   /api/v1/accounts/stats:
     get:
       summary: "Account statistics"
-      description: "Aggregate watch stats for the current user: counts by list plus total watched runtime in minutes. Every count is scoped to the requested period. Want is the whole list all-time and what was added to it inside a bounded period; the series watched count means finished shows all-time and shows with at least one episode watched inside a bounded period. The series watching count is all-time only and absent otherwise"
+      description: "Aggregate watch stats for the current user: counts by list plus total watched runtime in minutes. Every count is scoped to the requested period. Want is the whole list all-time and what was added to it inside a bounded period; the series watched count means finished shows all-time and shows with at least one episode watched inside a bounded period. The series watching and games playing counts are all-time only and absent otherwise"
       tags:
         - accounts
       parameters:
@@ -550,6 +550,277 @@ paths:
           schema:
             type: string
           description: "Movie ID from TMDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: "No Content"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/games:
+    get:
+      summary: "Games list"
+      description: "Retrieves a paginated list of games the user wants to play, is playing or played"
+      tags:
+        - games
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+        - name: type
+          in: query
+          schema:
+            type: string
+            default: "want"
+            enum: [want, playing, played]
+          description: "List type: 'want' for want to play, 'playing' for in progress, 'played' for finished games"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: "Page number for pagination"
+        - name: per
+          in: query
+          schema:
+            type: integer
+            default: 24
+          description: "Number of items per page"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameListResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    post:
+      summary: "Create game"
+      description: "Adds a game to the user's list"
+      tags:
+        - games
+      parameters:
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGameRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+  /api/v1/games/{id}:
+    get:
+      summary: "Get game details"
+      description: "Retrieves details for a specific game from IGDB, merged with the user's tracking state"
+      tags:
+        - games
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Game ID from IGDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    patch:
+      summary: "Update game"
+      description: "Updates a game state and pinned flag"
+      tags:
+        - games
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Game ID from IGDB"
+        - name: X-Request-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique request identifier"
+        - name: X-Trace-ID
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: "Unique trace identifier"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGameRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameDetailsSerializer"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
+    delete:
+      summary: "Delete game"
+      description: "Deletes a game from the user's lists"
+      tags:
+        - games
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Game ID from IGDB"
         - name: X-Request-ID
           in: header
           schema:
@@ -1450,6 +1721,54 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/search/games:
+    get:
+      summary: "Search games"
+      description: "Searches PlayStation 5 and PlayStation 4 games on IGDB; results carry the user's tracking state"
+      tags:
+        - search
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Search term"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: "Page number"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchGamesResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
   /api/v1/search/people:
     get:
       summary: "Search people"
@@ -1554,6 +1873,34 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/trending/games:
+    get:
+      summary: "Trending games"
+      description: "The most-visited PlayStation games on IGDB; results carry the user's tracking state"
+      tags:
+        - trending
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchGamesResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
   /api/v1/trending/people:
     get:
       summary: "Trending people"
@@ -1585,7 +1932,7 @@ paths:
   /api/v1/up-next:
     get:
       summary: "Up next"
-      description: "Upcoming and recently aired episodes across the current user's watching shows"
+      description: "The current user's ready-to-watch queue: the next aired episode of each pinned watching show, plus released titles from their pinned want lists of movies and games"
       tags:
         - series
       security:
@@ -1755,6 +2102,29 @@ components:
           required:
             - watched
             - minutes
+        games:
+          type: object
+          properties:
+            want:
+              type: integer
+              format: int64
+              description: "The whole want list all-time, or the games added to it inside a bounded period"
+            playing:
+              type: integer
+              format: int64
+              description: "Games currently being played. Absent when period is week, month or year, since a game is being played now rather than during a past window"
+            played:
+              type: integer
+              format: int64
+              description: "Games finished all-time, or games finished inside a bounded period"
+            minutes:
+              type: integer
+              format: int64
+              description: "IGDB's time to beat the played games normally, summed. An estimate of the games rather than a record of time the user spent, and excluded from the activity chart because one game outweighs a month of watching"
+          required:
+            - want
+            - played
+            - minutes
         activity:
           type: array
           description: "Watched runtime per bucket over the period, split by media kind. Buckets are dense, ordered oldest first and span the whole calendar period, so the rest of an unfinished period comes back as zeroes: 7 days for week, every day of the month for month, 12 months for year, and one bucket per year since the first watch for all"
@@ -1783,6 +2153,7 @@ components:
         - movies
         - series
         - episodes
+        - games
         - activity
 
     UpdateAccountRequest:
@@ -1839,6 +2210,45 @@ components:
         pinned:
           type: boolean
           description: "Whether the movie is pinned"
+      required:
+        - state
+        - pinned
+
+    CreateGameRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "IGDB ID of the game"
+          format: int64
+        title:
+          type: string
+          description: "Game title"
+        posterPath:
+          type: string
+          description: "IGDB cover image_id"
+        runtime:
+          type: integer
+          description: "Minutes to beat the game normally"
+        state:
+          type: string
+          description: "Tracking state of the game"
+          enum: [want, playing, played]
+      required:
+        - id
+        - title
+        - state
+
+    UpdateGameRequest:
+      type: object
+      properties:
+        state:
+          type: string
+          description: "Tracking state of the game"
+          enum: [want, playing, played]
+        pinned:
+          type: boolean
+          description: "Whether the game is pinned"
       required:
         - state
         - pinned
@@ -2012,6 +2422,112 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/MovieSerializer"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+      required:
+        - data
+        - meta
+
+    GameSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "IGDB ID"
+        title:
+          type: string
+          description: "Game title"
+        posterPath:
+          type: string
+          description: "IGDB cover image_id; the client builds {IGDB_BASE_IMAGE_URL}/t_{size}/{posterPath}.jpg"
+        pinned:
+          type: boolean
+          description: "Whether the game is pinned"
+        state:
+          type: string
+          description: "Tracking state of the game"
+          enum: [want, playing, played]
+      required:
+        - id
+        - title
+        - posterPath
+        - pinned
+        - state
+
+    GameDetailsSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "IGDB ID"
+        title:
+          type: string
+          description: "Game title"
+        posterPath:
+          type: string
+          description: "IGDB cover image_id; the client builds {IGDB_BASE_IMAGE_URL}/t_{size}/{posterPath}.jpg"
+        pinned:
+          type: boolean
+          description: "Whether the game is pinned"
+        state:
+          type: string
+          description: "Tracking state of the game"
+          enum: [want, playing, played, none]
+        overview:
+          type: string
+          description: "Game summary"
+        status:
+          type: string
+          description: "IGDB release status where it records one (Early Access, Delisted, Cancelled), otherwise derived from the release date as Released or Upcoming; empty when the game has no date at all"
+        releaseDate:
+          type: string
+          format: date
+          description: "Earliest PlayStation release, falling back to the first release on any platform"
+        runtime:
+          type: integer
+          description: "Minutes to beat the game normally; omitted when too few submissions back it"
+        runtimeCompleted:
+          type: integer
+          description: "Minutes to beat the game to 100% completion; omitted when too few submissions back it"
+        rating:
+          type: number
+          format: float
+          description: "IGDB aggregate rating rescaled to ten points; omitted when too few votes back it"
+        genres:
+          type: array
+          items:
+            type: string
+          description: "Genre names, shortened where IGDB's own wording doesn't read as a genre: bracketed acronyms reduce to the acronym (RPG, RTS, TBS), and a few are reworded (Simulator to Simulation, Sport to Sports, Platform to Platformer, Quiz/Trivia to Trivia). The rest pass through unchanged"
+        platforms:
+          type: array
+          items:
+            type: string
+          description: "Platforms the game released on, shortened: PlayStation keeps its generation (PS4, PS5), other families collapse to the family name (Xbox, Nintendo, PC)"
+        recommendations:
+          type: array
+          description: "IGDB similar games, kept to those playable on a PlayStation and ordered by how widely rated they are"
+          items:
+            type: object
+      required:
+        - id
+        - title
+        - posterPath
+        - pinned
+        - state
+        - overview
+        - genres
+        - platforms
+        - recommendations
+
+    GameListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/GameSerializer"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
       required:
@@ -2596,6 +3112,39 @@ components:
         - title
         - releaseDate
 
+    UpNextGameSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Game IGDB ID"
+        title:
+          type: string
+          description: "Game title"
+        posterPath:
+          type: string
+          description: "IGDB cover image ID"
+        overview:
+          type: string
+          description: "Game summary"
+        runtime:
+          type: integer
+          format: int64
+          description: "Time to beat the game normally, in minutes"
+        rating:
+          type: number
+          format: float
+          description: "Average rating"
+        releaseDate:
+          type: string
+          format: date
+          description: "Release date (earliest PlayStation release, falling back to the first release anywhere)"
+      required:
+        - id
+        - title
+        - releaseDate
+
     UpNextSerializer:
       type: object
       properties:
@@ -2609,9 +3158,15 @@ components:
           description: "Released but unwatched movies from the user's pinned want list"
           items:
             $ref: "#/components/schemas/UpNextMovieSerializer"
+        games:
+          type: array
+          description: "Released but unplayed games from the user's pinned want list (Early Access and delisted games are excluded)"
+          items:
+            $ref: "#/components/schemas/UpNextGameSerializer"
       required:
         - episodes
         - movies
+        - games
 
     SearchMovieSerializer:
       type: object
@@ -2673,6 +3228,36 @@ components:
         - title
         - posterPath
 
+    SearchGameSerializer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Game IGDB ID"
+        title:
+          type: string
+          description: "Game title"
+        posterPath:
+          type: string
+          description: "IGDB cover image_id; the client builds {IGDB_BASE_IMAGE_URL}/t_{size}/{posterPath}.jpg"
+        releaseDate:
+          type: string
+          format: date
+          description: "Earliest PlayStation release, falling back to the first release on any platform"
+        rating:
+          type: number
+          format: float
+          description: "IGDB aggregate rating rescaled to ten points"
+        state:
+          type: string
+          description: "The current user's tracking state"
+          enum: [want, playing, played, none]
+      required:
+        - id
+        - title
+        - posterPath
+
     SearchPersonSerializer:
       type: object
       properties:
@@ -2713,6 +3298,20 @@ components:
             $ref: "#/components/schemas/SearchSeriesSerializer"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
+      required:
+        - data
+        - meta
+
+    SearchGamesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchGameSerializer"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+          description: "IGDB reports no result count for a search, so total covers the returned page only"
       required:
         - data
         - meta

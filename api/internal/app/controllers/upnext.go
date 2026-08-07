@@ -17,12 +17,14 @@ type UpNextController interface {
 
 type upNextController struct {
 	provider services.TmdbProvider
+	games    services.IgdbProvider
 	log      *logger.Logger
 }
 
-func NewUpNextController(provider services.TmdbProvider, log *logger.Logger) UpNextController {
+func NewUpNextController(provider services.TmdbProvider, games services.IgdbProvider, log *logger.Logger) UpNextController {
 	return &upNextController{
 		provider: provider,
+		games:    games,
 		log:      log.WithComponent("UpNextController"),
 	}
 }
@@ -45,6 +47,17 @@ func (c *upNextController) HandleUpNext(w http.ResponseWriter, r *http.Request) 
 
 		return
 	}
+
+	// the queue spans two providers, so the controller merges them the way the catalog handlers split them
+	games, err := c.games.FetchUpNextGames(r.Context(), user.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
+		return
+	}
+
+	response.Games = games
 
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(response)

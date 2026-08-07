@@ -16,20 +16,24 @@ import (
 type CatalogController interface {
 	HandleSearchMovies(w http.ResponseWriter, r *http.Request)
 	HandleSearchSeries(w http.ResponseWriter, r *http.Request)
+	HandleSearchGames(w http.ResponseWriter, r *http.Request)
 	HandleSearchPeople(w http.ResponseWriter, r *http.Request)
 	HandleTrendingMovies(w http.ResponseWriter, r *http.Request)
 	HandleTrendingSeries(w http.ResponseWriter, r *http.Request)
+	HandleTrendingGames(w http.ResponseWriter, r *http.Request)
 	HandleTrendingPeople(w http.ResponseWriter, r *http.Request)
 }
 
 type catalogController struct {
 	provider services.TmdbProvider
+	games    services.IgdbProvider
 	log      *logger.Logger
 }
 
-func NewCatalogController(provider services.TmdbProvider, log *logger.Logger) CatalogController {
+func NewCatalogController(provider services.TmdbProvider, games services.IgdbProvider, log *logger.Logger) CatalogController {
 	return &catalogController{
 		provider: provider,
+		games:    games,
 		log:      log.WithComponent("CatalogController"),
 	}
 }
@@ -79,6 +83,34 @@ func (c *catalogController) HandleSearchSeries(w http.ResponseWriter, r *http.Re
 	}
 
 	response, err := c.provider.SearchSeries(r.Context(), query, pageParam(r), user.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(response)
+}
+
+func (c *catalogController) HandleSearchGames(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	user, ok := middlewares.CurrentUserFromContext(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
+		return
+	}
+
+	query, ok := searchQuery(w, r)
+	if !ok {
+		return
+	}
+
+	response, err := c.games.SearchGames(r.Context(), query, pageParam(r), user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
@@ -145,6 +177,29 @@ func (c *catalogController) HandleTrendingSeries(w http.ResponseWriter, r *http.
 	}
 
 	response, err := c.provider.FetchTrendingSeries(r.Context(), user.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(response)
+}
+
+func (c *catalogController) HandleTrendingGames(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	user, ok := middlewares.CurrentUserFromContext(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrUnauthorized.Error()})
+
+		return
+	}
+
+	response, err := c.games.FetchTrendingGames(r.Context(), user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})

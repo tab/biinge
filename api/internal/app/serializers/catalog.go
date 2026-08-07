@@ -22,6 +22,16 @@ type SearchSeriesSerializer struct {
 	State       models.StateType `json:"state,omitempty"`
 }
 
+// SearchGameSerializer is a game search or trending row (PosterPath is an IGDB cover image_id, see game.go)
+type SearchGameSerializer struct {
+	Id          uint64           `json:"id"`
+	Title       string           `json:"title"`
+	PosterPath  string           `json:"posterPath"`
+	ReleaseDate string           `json:"releaseDate,omitempty"`
+	Rating      float64          `json:"rating,omitempty"`
+	State       models.StateType `json:"state,omitempty"`
+}
+
 type SearchPersonSerializer struct {
 	Id          uint64 `json:"id"`
 	Name        string `json:"name"`

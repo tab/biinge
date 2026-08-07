@@ -38,6 +38,12 @@ var (
 	ErrFailedToUpdateMovie  = errors.New("failed to update movie")
 	ErrFailedToDeleteMovie  = errors.New("failed to delete movie")
 
+	ErrFailedToFetchGames = errors.New("failed to fetch games")
+	ErrFailedToFetchGame  = errors.New("failed to fetch game")
+	ErrFailedToCreateGame = errors.New("failed to create game")
+	ErrFailedToUpdateGame = errors.New("failed to update game")
+	ErrFailedToDeleteGame = errors.New("failed to delete game")
+
 	ErrFailedToFetchSeriesList = errors.New("failed to fetch series list")
 	ErrFailedToFetchSeries     = errors.New("failed to fetch series")
 	ErrFailedToCreateSeries    = errors.New("failed to create series")
@@ -60,6 +66,7 @@ var (
 
 	ErrFailedToFetchStats = errors.New("failed to fetch stats")
 
+	ErrGameNotFound    = errors.New("game not found")
 	ErrMovieNotFound   = errors.New("movie not found")
 	ErrSeriesNotFound  = errors.New("series not found")
 	ErrSeasonNotFound  = errors.New("season not found")

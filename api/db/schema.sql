@@ -49,7 +49,9 @@ CREATE TYPE public.state_types AS ENUM (
     'want',
     'watching',
     'watched',
-    'none'
+    'none',
+    'playing',
+    'played'
 );
 
 
@@ -74,6 +76,28 @@ CREATE TABLE public.episodes (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     watched_at timestamp with time zone,
     CONSTRAINT episodes_runtime_non_negative CHECK ((runtime >= 0))
+);
+
+
+--
+-- Name: games; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.games (
+    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    user_id uuid NOT NULL,
+    igdb_id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    poster_path character varying(255) DEFAULT ''::character varying NOT NULL,
+    runtime integer DEFAULT 0 NOT NULL,
+    state public.state_types NOT NULL,
+    pinned boolean DEFAULT false NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    played_at timestamp with time zone,
+    synced_at timestamp with time zone,
+    released_at timestamp with time zone,
+    CONSTRAINT games_runtime_non_negative CHECK ((runtime >= 0))
 );
 
 
@@ -185,6 +209,14 @@ ALTER TABLE ONLY public.episodes
 
 
 --
+-- Name: games games_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT games_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: movies movies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -235,6 +267,34 @@ CREATE UNIQUE INDEX episodes_season_id_tmdb_id_unique ON public.episodes USING b
 --
 
 CREATE INDEX episodes_watched_at_idx ON public.episodes USING btree (watched_at) WHERE (watched_at IS NOT NULL);
+
+
+--
+-- Name: games_synced_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX games_synced_at_idx ON public.games USING btree (synced_at NULLS FIRST);
+
+
+--
+-- Name: games_user_id_igdb_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX games_user_id_igdb_id_unique ON public.games USING btree (user_id, igdb_id);
+
+
+--
+-- Name: games_user_id_played_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX games_user_id_played_at_idx ON public.games USING btree (user_id, played_at) WHERE (played_at IS NOT NULL);
+
+
+--
+-- Name: games_user_id_state_pinned_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX games_user_id_state_pinned_created_idx ON public.games USING btree (user_id, state, pinned DESC, created_at DESC);
 
 
 --
@@ -313,6 +373,14 @@ CREATE UNIQUE INDEX users_login_key ON public.users USING btree (login) WHERE (d
 
 ALTER TABLE ONLY public.episodes
     ADD CONSTRAINT episodes_season_id_fkey FOREIGN KEY (season_id) REFERENCES public.seasons(id) ON DELETE CASCADE;
+
+
+--
+-- Name: games games_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT games_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --

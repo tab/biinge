@@ -9,6 +9,7 @@ import (
 var Module = fx.Options(
 	fx.Provide(postgres.NewPostgresClient),
 	fx.Provide(NewHealthRepository),
+	fx.Provide(NewGameRepository),
 	fx.Provide(NewMovieRepository),
 	fx.Provide(NewSeriesRepository),
 	fx.Provide(NewSeriesProgressRepository),

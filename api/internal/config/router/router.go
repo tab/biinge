@@ -25,6 +25,7 @@ func NewRouter(
 	accounts controllers.AccountsController,
 	movies controllers.MoviesController,
 	series controllers.SeriesController,
+	games controllers.GamesController,
 	people controllers.PeopleController,
 	catalog controllers.CatalogController,
 	upNext controllers.UpNextController,
@@ -108,6 +109,14 @@ func NewRouter(
 				r.Delete("/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", series.HandleUnmarkEpisodeWatched)
 			})
 
+			r.Route("/games", func(r chi.Router) {
+				r.Get("/", games.HandleList)
+				r.Get("/{id}", games.HandleDetails)
+				r.Post("/", games.HandleCreate)
+				r.Patch("/{id}", games.HandleUpdate)
+				r.Delete("/{id}", games.HandleDelete)
+			})
+
 			r.Route("/people", func(r chi.Router) {
 				r.Get("/{id}", people.HandleDetails)
 			})
@@ -115,12 +124,14 @@ func NewRouter(
 			r.Route("/search", func(r chi.Router) {
 				r.Get("/movies", catalog.HandleSearchMovies)
 				r.Get("/series", catalog.HandleSearchSeries)
+				r.Get("/games", catalog.HandleSearchGames)
 				r.Get("/people", catalog.HandleSearchPeople)
 			})
 
 			r.Route("/trending", func(r chi.Router) {
 				r.Get("/movies", catalog.HandleTrendingMovies)
 				r.Get("/series", catalog.HandleTrendingSeries)
+				r.Get("/games", catalog.HandleTrendingGames)
 				r.Get("/people", catalog.HandleTrendingPeople)
 			})
 

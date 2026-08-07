@@ -40,6 +40,16 @@ type TMDBConfig struct {
 	Timeout time.Duration
 }
 
+// IGDBConfig holds the IGDB game database credentials and endpoints (Twitch issues the token)
+type IGDBConfig struct {
+	BaseURL      string
+	TokenURL     string
+	BaseImageURL string
+
+	ClientID     string
+	ClientSecret string
+}
+
 // WorkerConfig tunes the background TMDB sync worker
 type WorkerConfig struct {
 	SyncEnabled          bool
@@ -66,6 +76,9 @@ type Config struct {
 
 	TMDBConfig
 	WorkerConfig
+
+	// named rather than embedded: BaseURL and BaseImageURL would collide with TMDBConfig
+	IGDB IGDBConfig
 }
 
 func LoadConfig() *Config {
@@ -104,6 +117,14 @@ func LoadConfig() *Config {
 			Locale:             getEnvString("TMDB_LOCALE"),
 		},
 
+		IGDB: IGDBConfig{
+			BaseURL:      getEnvString("IGDB_BASE_URL"),
+			TokenURL:     getEnvString("IGDB_TOKEN_URL"),
+			BaseImageURL: getEnvString("IGDB_BASE_IMAGE_URL"),
+			ClientID:     getEnvString("IGDB_CLIENT_ID"),
+			ClientSecret: getEnvString("IGDB_CLIENT_SECRET"),
+		},
+
 		WorkerConfig: WorkerConfig{
 			SyncEnabled:          getEnvBool("WORKER_SYNC_ENABLED", true),
 			SyncInterval:         getEnvDuration("WORKER_SYNC_INTERVAL", defaultSyncInterval),
@@ -129,6 +150,22 @@ func (c *Config) Validate() error {
 
 	if c.JWTSecretKey == "" {
 		missing = append(missing, "JWT_SECRET_KEY")
+	}
+
+	// IGDB only gates a deployed build: locally the games endpoints degrade to stored library data. An
+	// empty endpoint fails as quietly as an empty credential — the detail screen just serves stored data —
+	// so the URLs are checked too, not only the secrets
+	if !c.isLocalEnv() {
+		for _, required := range []struct{ name, value string }{
+			{"IGDB_BASE_URL", c.IGDB.BaseURL},
+			{"IGDB_TOKEN_URL", c.IGDB.TokenURL},
+			{"IGDB_CLIENT_ID", c.IGDB.ClientID},
+			{"IGDB_CLIENT_SECRET", c.IGDB.ClientSecret},
+		} {
+			if required.value == "" {
+				missing = append(missing, required.name)
+			}
+		}
 	}
 
 	if len(missing) > 0 {

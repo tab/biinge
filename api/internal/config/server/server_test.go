@@ -34,6 +34,7 @@ func Test_NewServer(t *testing.T) {
 	mockAccountsController := controllers.NewMockAccountsController(ctrl)
 	mockMoviesController := controllers.NewMockMoviesController(ctrl)
 	mockSeriesController := controllers.NewMockSeriesController(ctrl)
+	mockGamesController := controllers.NewMockGamesController(ctrl)
 	mockPeopleController := controllers.NewMockPeopleController(ctrl)
 	mockCatalogController := controllers.NewMockCatalogController(ctrl)
 	mockUpNextController := controllers.NewMockUpNextController(ctrl)
@@ -67,6 +68,7 @@ func Test_NewServer(t *testing.T) {
 		mockAccountsController,
 		mockMoviesController,
 		mockSeriesController,
+		mockGamesController,
 		mockPeopleController,
 		mockCatalogController,
 		mockUpNextController,

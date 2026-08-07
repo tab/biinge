@@ -25,8 +25,9 @@ func Test_UpNextController_HandleUpNext(t *testing.T) {
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
+	games := services.NewMockIgdbProvider(ctrl)
 	log := logger.NewLogger(testConfig())
-	controller := NewUpNextController(provider, log)
+	controller := NewUpNextController(provider, games, log)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -56,6 +57,9 @@ func Test_UpNextController_HandleUpNext(t *testing.T) {
 						{Id: 500, Title: "Dune", ReleaseDate: "2021-10-22"},
 					},
 				}, nil)
+				games.EXPECT().FetchUpNextGames(gomock.Any(), id).Return([]serializers.UpNextGameSerializer{
+					{Id: 1942, Title: "The Witcher 3", ReleaseDate: "2015-05-19"},
+				}, nil)
 			},
 			withUser: true,
 			expected: result{
@@ -65,6 +69,9 @@ func Test_UpNextController_HandleUpNext(t *testing.T) {
 					},
 					Movies: []serializers.UpNextMovieSerializer{
 						{Id: 500, Title: "Dune", ReleaseDate: "2021-10-22"},
+					},
+					Games: []serializers.UpNextGameSerializer{
+						{Id: 1942, Title: "The Witcher 3", ReleaseDate: "2015-05-19"},
 					},
 				},
 				status: "200 OK",
@@ -86,6 +93,23 @@ func Test_UpNextController_HandleUpNext(t *testing.T) {
 			name: "Provider Error",
 			before: func() {
 				provider.EXPECT().FetchUpNext(gomock.Any(), id).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
+			name: "Games Provider Error",
+			before: func() {
+				provider.EXPECT().FetchUpNext(gomock.Any(), id).Return(&serializers.UpNextSerializer{
+					Episodes: []serializers.UpNextEpisodeSerializer{},
+					Movies:   []serializers.UpNextMovieSerializer{},
+				}, nil)
+				games.EXPECT().FetchUpNextGames(gomock.Any(), id).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			expected: result{

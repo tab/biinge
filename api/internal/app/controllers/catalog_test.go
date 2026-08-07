@@ -35,7 +35,7 @@ func Test_CatalogController_HandleSearchMovies(t *testing.T) {
 
 	provider := services.NewMockTmdbProvider(ctrl)
 	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -178,7 +178,7 @@ func Test_CatalogController_HandleSearchSeries(t *testing.T) {
 
 	provider := services.NewMockTmdbProvider(ctrl)
 	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -302,7 +302,7 @@ func Test_CatalogController_HandleSearchPeople(t *testing.T) {
 
 	provider := services.NewMockTmdbProvider(ctrl)
 	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
 
 	type result struct {
 		response serializers.PaginationResponse[serializers.SearchPersonSerializer]
@@ -402,7 +402,7 @@ func Test_CatalogController_HandleTrendingMovies(t *testing.T) {
 
 	provider := services.NewMockTmdbProvider(ctrl)
 	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -510,7 +510,7 @@ func Test_CatalogController_HandleTrendingSeries(t *testing.T) {
 
 	provider := services.NewMockTmdbProvider(ctrl)
 	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -618,7 +618,7 @@ func Test_CatalogController_HandleTrendingPeople(t *testing.T) {
 
 	provider := services.NewMockTmdbProvider(ctrl)
 	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
 
 	type result struct {
 		response serializers.PaginationResponse[serializers.SearchPersonSerializer]
@@ -696,4 +696,144 @@ func Test_CatalogController_HandleTrendingPeople(t *testing.T) {
 			assert.Equal(t, tt.expected.status, resp.Status)
 		})
 	}
+}
+
+func Test_CatalogController_HandleSearchGames(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	games := services.NewMockIgdbProvider(ctrl)
+	controller := NewCatalogController(services.NewMockTmdbProvider(ctrl), games, logger.NewLogger(testConfig()))
+
+	id, err := uuid.NewRandom()
+	require.NoError(t, err)
+
+	serve := func(target string, withUser bool) *http.Response {
+		req := httptest.NewRequest(http.MethodGet, target, nil)
+		if withUser {
+			req = req.WithContext(context.WithValue(req.Context(), middlewares.CurrentUser{}, &models.User{ID: id}))
+		}
+
+		w := httptest.NewRecorder()
+
+		r := chi.NewRouter()
+		r.Get("/search/games", controller.HandleSearchGames)
+		r.ServeHTTP(w, req)
+
+		return w.Result()
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		games.EXPECT().SearchGames(gomock.Any(), "witcher", uint64(1), id).Return(&serializers.PaginationResponse[serializers.SearchGameSerializer]{
+			Data: []serializers.SearchGameSerializer{{Id: 1942, Title: "The Witcher 3", PosterPath: "co1wyy"}},
+			Meta: serializers.PaginationMeta{Page: 1, Per: 1, Total: 1},
+		}, nil)
+
+		resp := serve("/search/games?query=witcher", true)
+		defer resp.Body.Close()
+
+		var response serializers.PaginationResponse[serializers.SearchGameSerializer]
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&response))
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		require.Len(t, response.Data, 1)
+		assert.Equal(t, "The Witcher 3", response.Data[0].Title)
+	})
+
+	t.Run("Page parameter", func(t *testing.T) {
+		games.EXPECT().SearchGames(gomock.Any(), "witcher", uint64(3), id).Return(&serializers.PaginationResponse[serializers.SearchGameSerializer]{
+			Data: []serializers.SearchGameSerializer{},
+			Meta: serializers.PaginationMeta{Page: 3},
+		}, nil)
+
+		resp := serve("/search/games?query=witcher&page=3", true)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		resp := serve("/search/games?query=witcher", false)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	})
+
+	t.Run("Empty query", func(t *testing.T) {
+		resp := serve("/search/games?query=%20", true)
+		defer resp.Body.Close()
+
+		var response serializers.ErrorSerializer
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&response))
+
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		assert.Equal(t, "empty query", response.Error)
+	})
+
+	t.Run("Provider error", func(t *testing.T) {
+		games.EXPECT().SearchGames(gomock.Any(), "witcher", uint64(1), id).Return(nil, assert.AnError)
+
+		resp := serve("/search/games?query=witcher", true)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
+}
+
+func Test_CatalogController_HandleTrendingGames(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	games := services.NewMockIgdbProvider(ctrl)
+	controller := NewCatalogController(services.NewMockTmdbProvider(ctrl), games, logger.NewLogger(testConfig()))
+
+	id, err := uuid.NewRandom()
+	require.NoError(t, err)
+
+	serve := func(withUser bool) *http.Response {
+		req := httptest.NewRequest(http.MethodGet, "/trending/games", nil)
+		if withUser {
+			req = req.WithContext(context.WithValue(req.Context(), middlewares.CurrentUser{}, &models.User{ID: id}))
+		}
+
+		w := httptest.NewRecorder()
+
+		r := chi.NewRouter()
+		r.Get("/trending/games", controller.HandleTrendingGames)
+		r.ServeHTTP(w, req)
+
+		return w.Result()
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		games.EXPECT().FetchTrendingGames(gomock.Any(), id).Return(&serializers.PaginationResponse[serializers.SearchGameSerializer]{
+			Data: []serializers.SearchGameSerializer{{Id: 1942, Title: "The Witcher 3", PosterPath: "co1wyy"}},
+			Meta: serializers.PaginationMeta{Page: 1, Per: 1, Total: 1},
+		}, nil)
+
+		resp := serve(true)
+		defer resp.Body.Close()
+
+		var response serializers.PaginationResponse[serializers.SearchGameSerializer]
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&response))
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		require.Len(t, response.Data, 1)
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		resp := serve(false)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	})
+
+	t.Run("Provider error", func(t *testing.T) {
+		games.EXPECT().FetchTrendingGames(gomock.Any(), id).Return(nil, assert.AnError)
+
+		resp := serve(true)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.StatusCode)
+	})
 }

@@ -1,12 +1,14 @@
 package models
 
-// StateType is the watch state a movie, series, season or episode is tracked in
+// StateType is the state a movie, series, season, episode or game is tracked in
 type StateType string
 
 const (
 	StateTypeWant     StateType = "want"
 	StateTypeWatched  StateType = "watched"
 	StateTypeWatching StateType = "watching"
+	StateTypePlaying  StateType = "playing"
+	StateTypePlayed   StateType = "played"
 	StateTypeNone     StateType = "none"
 )
 
@@ -19,6 +21,16 @@ func (s StateType) String() string {
 func NewMovieListState(value string) StateType {
 	switch state := StateType(value); state {
 	case StateTypeWatched:
+		return state
+	default:
+		return StateTypeWant
+	}
+}
+
+// NewGameListState maps a raw list filter to a browsable game state, defaulting to want
+func NewGameListState(value string) StateType {
+	switch state := StateType(value); state {
+	case StateTypePlaying, StateTypePlayed:
 		return state
 	default:
 		return StateTypeWant

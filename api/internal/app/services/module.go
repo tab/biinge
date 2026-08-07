@@ -6,6 +6,8 @@ var Module = fx.Options(
 	fx.Provide(NewAuthentication),
 	fx.Provide(NewHealthChecker),
 	fx.Provide(NewTmdbProvider),
+	fx.Provide(NewIgdbProvider),
+	fx.Provide(NewGames),
 	fx.Provide(NewMovies),
 	fx.Provide(NewSeries),
 	fx.Provide(NewProgress),

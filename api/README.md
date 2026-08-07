@@ -23,13 +23,14 @@ Env files live in this directory. `.env.development` is committed with `SECRET`
 placeholders; put real secrets in `.env.development.local` (gitignored), which
 overrides it.
 
-| Variable                            | Purpose                                                        |
-| ----------------------------------- | ------------------------------------------------------------- |
-| `DATABASE_DSN`                      | Postgres connection string                                    |
-| `REDIS_URL`                         | Redis URL for the TMDB cache — leave unset to serve uncached  |
-| `TMDB_API_READ_ACCESS_TOKEN`        | TMDB v4 read token (required for detail/search/trending)      |
-| `JWT_SECRET_KEY` / `SECRET_KEY_BASE`| token signing secrets                                         |
-| `SENTRY_DSN`                        | error reporting (optional)                                    |
+| Variable                                | Purpose                                                      |
+| --------------------------------------- | ------------------------------------------------------------ |
+| `DATABASE_DSN`                          | Postgres connection string                                   |
+| `REDIS_URL`                             | Redis URL for the TMDB cache — leave unset to serve uncached |
+| `TMDB_API_READ_ACCESS_TOKEN`            | TMDB v4 read token (required for detail/search/trending)     |
+| `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | Twitch app credentials for IGDB (required outside dev)       |
+| `JWT_SECRET_KEY` / `SECRET_KEY_BASE`    | token signing secrets                                        |
+| `SENTRY_DSN`                            | error reporting (optional)                                   |
 
 ## Database
 

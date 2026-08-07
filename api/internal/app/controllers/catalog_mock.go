@@ -40,6 +40,18 @@ func (m *MockCatalogController) EXPECT() *MockCatalogControllerMockRecorder {
 	return m.recorder
 }
 
+// HandleSearchGames mocks base method.
+func (m *MockCatalogController) HandleSearchGames(w http.ResponseWriter, r *http.Request) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "HandleSearchGames", w, r)
+}
+
+// HandleSearchGames indicates an expected call of HandleSearchGames.
+func (mr *MockCatalogControllerMockRecorder) HandleSearchGames(w, r any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleSearchGames", reflect.TypeOf((*MockCatalogController)(nil).HandleSearchGames), w, r)
+}
+
 // HandleSearchMovies mocks base method.
 func (m *MockCatalogController) HandleSearchMovies(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()
@@ -74,6 +86,18 @@ func (m *MockCatalogController) HandleSearchSeries(w http.ResponseWriter, r *htt
 func (mr *MockCatalogControllerMockRecorder) HandleSearchSeries(w, r any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleSearchSeries", reflect.TypeOf((*MockCatalogController)(nil).HandleSearchSeries), w, r)
+}
+
+// HandleTrendingGames mocks base method.
+func (m *MockCatalogController) HandleTrendingGames(w http.ResponseWriter, r *http.Request) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "HandleTrendingGames", w, r)
+}
+
+// HandleTrendingGames indicates an expected call of HandleTrendingGames.
+func (mr *MockCatalogControllerMockRecorder) HandleTrendingGames(w, r any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleTrendingGames", reflect.TypeOf((*MockCatalogController)(nil).HandleTrendingGames), w, r)
 }
 
 // HandleTrendingMovies mocks base method.

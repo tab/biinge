@@ -91,6 +91,12 @@ func Test_Config_Validate(t *testing.T) {
 			TMDBConfig: TMDBConfig{
 				APIReadAccessToken: "tmdb-token",
 			},
+			IGDB: IGDBConfig{
+				BaseURL:      "https://api.igdb.com/v4",
+				TokenURL:     "https://id.twitch.tv/oauth2/token",
+				ClientID:     "igdb-client-id",
+				ClientSecret: "igdb-client-secret",
+			},
 		}
 	}
 
@@ -117,6 +123,20 @@ func Test_Config_Validate(t *testing.T) {
 			name:    "Missing JWT secret",
 			mutate:  func(c *Config) { c.JWTSecretKey = "" },
 			wantErr: "JWT_SECRET_KEY",
+		},
+		{
+			name:    "Missing IGDB credentials in production",
+			mutate:  func(c *Config) { c.IGDB.ClientID = ""; c.IGDB.ClientSecret = "" },
+			wantErr: "IGDB_CLIENT_ID, IGDB_CLIENT_SECRET",
+		},
+		{
+			name:    "Missing IGDB endpoints in production",
+			mutate:  func(c *Config) { c.IGDB.BaseURL = ""; c.IGDB.TokenURL = "" },
+			wantErr: "IGDB_BASE_URL, IGDB_TOKEN_URL",
+		},
+		{
+			name:   "Missing IGDB configuration allowed in development",
+			mutate: func(c *Config) { c.AppEnv = DevelopmentEnv; c.IGDB = IGDBConfig{} },
 		},
 		{
 			name:    "JWT secret too short in production",

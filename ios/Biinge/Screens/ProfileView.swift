@@ -272,6 +272,19 @@ struct StatisticsView: View {
                 ].compactMap { $0 },
                 caption: "\(stats.episodes.watched) episodes · \(formatMinutes(stats.episodes.minutes)) watched \(period.phrase)"
             )
+            if let games = stats.games {
+                breakdown(
+                    "Games",
+                    bars: [
+                        StatBar(label: period.wantLabel, count: games.want, color: StatPalette.want),
+                        games.playing.map { StatBar(label: "Playing", count: $0, color: StatPalette.watching) },
+                        StatBar(label: "Played", count: games.played, color: StatPalette.watched),
+                    ].compactMap { $0 },
+                    // "to beat" rather than "played": the minutes are IGDB's estimate for the games
+                    // finished in the period, not time this user spent
+                    caption: "\(formatMinutes(games.minutes)) to beat · finished \(period.phrase)"
+                )
+            }
         }
     }
 

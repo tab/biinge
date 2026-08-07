@@ -34,6 +34,7 @@ struct TvView: View {
                 content
             }
             .navigationTitle("TV Shows")
+            .upNextToolbar()
         }
         .task {
             await store.loadIfNeeded()

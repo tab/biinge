@@ -65,6 +65,7 @@ struct StatsTests {
           "movies": { "want": 2, "watched": 3, "minutes": 340 },
           "series": { "want": 1, "watched": 9 },
           "episodes": { "watched": 11, "minutes": 460 },
+          "games": { "want": 4, "played": 2, "minutes": 3600 },
           "activity": [
             { "date": "2026-07-19", "movieMinutes": 120, "tvMinutes": 42 },
             { "date": "2026-07-20", "movieMinutes": 0, "tvMinutes": 90 }
@@ -78,6 +79,11 @@ struct StatsTests {
         #expect(stats.episodes.minutes == 460)
         #expect(stats.activity?.count == 2)
         #expect(stats.activity?.first?.movieMinutes == 120)
+        #expect(stats.games?.want == 4)
+        #expect(stats.games?.played == 2)
+        #expect(stats.games?.minutes == 3600)
+        // a bounded period carries no playing count, the same way series carries no watching
+        #expect(stats.games?.playing == nil)
         #expect(components(stats.activity?.first?.start ?? .distantPast).day == 19)
     }
 
@@ -97,6 +103,23 @@ struct StatsTests {
         #expect(stats.movies.want == 1)
         #expect(stats.series.want == 0)
         #expect(stats.series.watched == 9)
+    }
+
+    // an API deployed before games reached statistics omits the key entirely
+    @Test func decodesAPayloadWithoutGames() throws {
+        let json = """
+        {
+          "period": "all",
+          "movies": { "want": 1, "watched": 2, "minutes": 3 },
+          "series": { "want": 4, "watching": 5, "watched": 6 },
+          "episodes": { "watched": 7, "minutes": 8 }
+        }
+        """
+
+        let stats = try JSONDecoder().decode(AccountStats.self, from: Data(json.utf8))
+
+        #expect(stats.games == nil)
+        #expect(stats.movies.watched == 2)
     }
 
     @Test func theWantBarCountsAdditionsOnABoundedPeriod() {

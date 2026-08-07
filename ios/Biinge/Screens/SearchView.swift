@@ -4,19 +4,22 @@ struct SearchView: View {
     @Environment(\.apiClient) private var apiClient
     @Environment(MovieStore.self) private var movieStore
     @Environment(TvStore.self) private var tvStore
+    @Environment(GameStore.self) private var gameStore
 
     @State private var query = ""
     @State private var movies: [SearchMovie] = []
     @State private var series: [SearchSeries] = []
+    @State private var games: [SearchGame] = []
     @State private var people: [SearchPerson] = []
     @State private var isLoading = false
     @State private var didDeepLink = false
     @Environment(\.presentMovie) private var presentMovie
     @Environment(\.presentSeries) private var presentSeries
+    @Environment(\.presentGame) private var presentGame
     @Environment(\.presentPerson) private var presentPerson
 
     private var isTrending: Bool { query.trimmingCharacters(in: .whitespaces).isEmpty }
-    private var isEmpty: Bool { movies.isEmpty && series.isEmpty && people.isEmpty }
+    private var isEmpty: Bool { movies.isEmpty && series.isEmpty && games.isEmpty && people.isEmpty }
 
     var body: some View {
         NavigationStack {
@@ -27,6 +30,9 @@ struct SearchView: View {
                     }
                     if !series.isEmpty {
                         DetailSection(title: "TV Shows") { seriesRow }
+                    }
+                    if !games.isEmpty {
+                        DetailSection(title: "Games") { gamesRow }
                     }
                     if !people.isEmpty {
                         DetailSection(title: "People") { peopleRow }
@@ -47,7 +53,7 @@ struct SearchView: View {
             }
             .background(Color.biingeBackground)
             .navigationTitle(isTrending ? "Trending" : "Search")
-            .searchable(text: $query, prompt: "Movies, shows, people")
+            .searchable(text: $query, prompt: "Movies, shows, games, people")
         }
         .task(id: query) { await run() }
         .task {
@@ -100,6 +106,26 @@ struct SearchView: View {
         }
     }
 
+    private var gamesRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 10) {
+                ForEach(games) { game in
+                    Button {
+                        presentGame(game.id)
+                    } label: {
+                        PosterImage(path: game.posterPath, title: game.title, source: .igdb, size: "cover_big_2x")
+                            .frame(width: 120)
+                            .overlay(alignment: .topLeading) {
+                                if isTrackedGame(game.id, snapshot: game.state) { WatchedBadge() }
+                            }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
     private var peopleRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(alignment: .top, spacing: 12) {
@@ -132,6 +158,11 @@ struct SearchView: View {
             || (!tvStore.hasLoaded && (snapshot ?? WatchState.none) != WatchState.none)
     }
 
+    private func isTrackedGame(_ id: Int, snapshot: WatchState?) -> Bool {
+        gameStore.currentState(id: id) != nil
+            || (!gameStore.hasLoaded && (snapshot ?? WatchState.none) != WatchState.none)
+    }
+
     private func run() async {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty {
@@ -148,12 +179,14 @@ struct SearchView: View {
         isLoading = true
         async let m = try? await apiClient.trendingMovies().data
         async let s = try? await apiClient.trendingSeries().data
+        async let g = try? await apiClient.trendingGames().data
         async let p = try? await apiClient.trendingPeople().data
-        let (loadedMovies, loadedSeries, loadedPeople) = await (m, s, p)
+        let (loadedMovies, loadedSeries, loadedGames, loadedPeople) = await (m, s, g, p)
         // a cancelled task (typing) must not wipe the visible results with empties
         guard !Task.isCancelled else { return }
         movies = loadedMovies ?? []
         series = loadedSeries ?? []
+        games = loadedGames ?? []
         people = loadedPeople ?? []
         isLoading = false
     }
@@ -163,11 +196,13 @@ struct SearchView: View {
         isLoading = true
         async let m = try? await apiClient.searchMovies(query: term).data
         async let s = try? await apiClient.searchSeries(query: term).data
+        async let g = try? await apiClient.searchGames(query: term).data
         async let p = try? await apiClient.searchPeople(query: term).data
-        let (loadedMovies, loadedSeries, loadedPeople) = await (m, s, p)
+        let (loadedMovies, loadedSeries, loadedGames, loadedPeople) = await (m, s, g, p)
         guard !Task.isCancelled else { return }
         movies = loadedMovies ?? []
         series = loadedSeries ?? []
+        games = loadedGames ?? []
         people = loadedPeople ?? []
         isLoading = false
     }

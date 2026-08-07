@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Movies, series, people, and episodes are presented as modal sheets via the present* actions
+/// Movies, series, games, people, and episodes are presented as modal sheets via the present* actions
 
 private struct APIClientKey: EnvironmentKey {
     static let defaultValue: APIClient? = nil
@@ -11,6 +11,10 @@ private struct PresentMovieKey: EnvironmentKey {
 }
 
 private struct PresentSeriesKey: EnvironmentKey {
+    static let defaultValue: @MainActor (Int) -> Void = { _ in }
+}
+
+private struct PresentGameKey: EnvironmentKey {
     static let defaultValue: @MainActor (Int) -> Void = { _ in }
 }
 
@@ -36,6 +40,11 @@ extension EnvironmentValues {
     var presentSeries: @MainActor (Int) -> Void {
         get { self[PresentSeriesKey.self] }
         set { self[PresentSeriesKey.self] = newValue }
+    }
+
+    var presentGame: @MainActor (Int) -> Void {
+        get { self[PresentGameKey.self] }
+        set { self[PresentGameKey.self] = newValue }
     }
 
     var presentPerson: @MainActor (Int) -> Void {
@@ -72,6 +81,7 @@ private struct PresentsDetailsModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     @State private var movie: DetailSheetItem?
     @State private var series: DetailSheetItem?
+    @State private var game: DetailSheetItem?
     @State private var person: DetailSheetItem?
     @State private var episode: EpisodeSheetItem?
 
@@ -79,6 +89,7 @@ private struct PresentsDetailsModifier: ViewModifier {
         content
             .environment(\.presentMovie) { movie = DetailSheetItem(id: $0) }
             .environment(\.presentSeries) { series = DetailSheetItem(id: $0) }
+            .environment(\.presentGame) { game = DetailSheetItem(id: $0) }
             .environment(\.presentPerson) { person = DetailSheetItem(id: $0) }
             .environment(\.presentEpisode) { showId, seasonNumber, episodeNumber in
                 episode = EpisodeSheetItem(showId: showId, seasonNumber: seasonNumber, episodeNumber: episodeNumber)
@@ -88,6 +99,9 @@ private struct PresentsDetailsModifier: ViewModifier {
             }
             .sheet(item: $series) { item in
                 sheet { TvDetailView(seriesId: item.id) }.id(item.id)
+            }
+            .sheet(item: $game) { item in
+                sheet { GameDetailView(gameId: item.id) }.id(item.id)
             }
             .sheet(item: $person) { item in
                 sheet { PersonDetailView(personId: item.id) }.id(item.id)

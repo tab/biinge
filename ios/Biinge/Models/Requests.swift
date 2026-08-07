@@ -30,6 +30,19 @@ struct UpdateSeriesBody: Encodable, Sendable {
     let pinned: Bool
 }
 
+struct CreateGameBody: Encodable, Sendable {
+    let id: Int
+    let title: String
+    let posterPath: String
+    let runtime: Int
+    let state: String
+}
+
+struct UpdateGameBody: Encodable, Sendable {
+    let state: String
+    let pinned: Bool
+}
+
 struct UpdateAccountBody: Encodable, Sendable {
     let firstName: String
     let lastName: String

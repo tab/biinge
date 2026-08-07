@@ -43,8 +43,9 @@ struct AccountStats: Decodable, Sendable {
     let movies: Movies
     let series: Series
     let episodes: Episodes
-    // optional so a stats payload without activity (older API) still decodes
+    // optional so a stats payload without activity or games (older API) still decodes
     let activity: [Bucket]?
+    let games: Games?
 
     /// want is the whole list all-time, and what was added to it inside a bounded period
     struct Movies: Decodable, Sendable {
@@ -63,6 +64,16 @@ struct AccountStats: Decodable, Sendable {
 
     struct Episodes: Decodable, Sendable {
         let watched: Int
+        let minutes: Int
+    }
+
+    /// played is games finished all-time, and games finished inside a bounded period.
+    /// minutes is IGDB's time to beat those games, not time the user actually played
+    struct Games: Decodable, Sendable {
+        let want: Int
+        // a game is being played now, so no bounded period carries this
+        let playing: Int?
+        let played: Int
         let minutes: Int
     }
 

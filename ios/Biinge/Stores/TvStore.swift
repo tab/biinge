@@ -156,7 +156,7 @@ final class TvStore {
         case .want: wantShows.insert(show, at: 0)
         case .watching: watchingShows.insert(show, at: 0)
         case .watched: watchedShows.insert(show, at: 0)
-        case .none: break
+        default: break
         }
     }
 

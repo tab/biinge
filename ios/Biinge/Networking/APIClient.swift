@@ -64,6 +64,13 @@ actor APIClient {
         ])
     }
 
+    func searchGames(query: String, page: Int = 1) async throws -> Paginated<SearchGame> {
+        try await get("/search/games", query: [
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "page", value: String(page)),
+        ])
+    }
+
     func searchPeople(query: String, page: Int = 1) async throws -> Paginated<SearchPerson> {
         try await get("/search/people", query: [
             URLQueryItem(name: "query", value: query),
@@ -77,6 +84,10 @@ actor APIClient {
 
     func trendingSeries() async throws -> Paginated<SearchSeries> {
         try await get("/trending/series")
+    }
+
+    func trendingGames() async throws -> Paginated<SearchGame> {
+        try await get("/trending/games")
     }
 
     func trendingPeople() async throws -> Paginated<SearchPerson> {
@@ -105,6 +116,13 @@ actor APIClient {
         ])
     }
 
+    func games(type: String) async throws -> Paginated<LibraryGame> {
+        try await get("/games", query: [
+            URLQueryItem(name: "type", value: type),
+            URLQueryItem(name: "per", value: "10000"),
+        ])
+    }
+
     // MARK: - Details (TMDB-backed)
 
     func movieDetails(id: Int) async throws -> MovieDetails {
@@ -121,6 +139,10 @@ actor APIClient {
 
     func episodeDetails(showId: Int, season: Int, episode: Int) async throws -> EpisodeDetails {
         try await get("/series/\(showId)/season/\(season)/episode/\(episode)")
+    }
+
+    func gameDetails(id: Int) async throws -> GameDetails {
+        try await get("/games/\(id)")
     }
 
     func personDetails(id: Int) async throws -> PersonDetails {
@@ -153,6 +175,20 @@ actor APIClient {
 
     func deleteSeries(id: Int) async throws {
         try await delete("/series/\(id)")
+    }
+
+    // MARK: - Game mutations
+
+    func createGame(_ body: CreateGameBody) async throws -> GameDetails {
+        try await send("POST", "/games", body: body)
+    }
+
+    func updateGame(id: Int, _ body: UpdateGameBody) async throws -> GameDetails {
+        try await send("PATCH", "/games/\(id)", body: body)
+    }
+
+    func deleteGame(id: Int) async throws {
+        try await delete("/games/\(id)")
     }
 
     // MARK: - Progress

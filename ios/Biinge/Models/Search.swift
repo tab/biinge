@@ -20,6 +20,16 @@ struct SearchSeries: Decodable, Sendable, Identifiable {
     let state: WatchState?
 }
 
+/// posterPath is an IGDB cover image_id, not a path
+struct SearchGame: Decodable, Sendable, Identifiable {
+    let id: Int
+    let title: String
+    let posterPath: String
+    let releaseDate: String?
+    let rating: Double?
+    let state: WatchState?
+}
+
 struct SearchPerson: Decodable, Sendable, Identifiable {
     let id: Int
     let name: String

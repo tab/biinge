@@ -1,22 +1,24 @@
 import Foundation
 
-/// The user's ready-to-watch queue: aired episodes and released movies from pinned library items
+/// The user's ready-to-watch queue: aired episodes, released movies and released games from pinned library items
 struct UpNext: Decodable, Sendable {
     let episodes: [UpNextEpisode]
     let movies: [UpNextMovie]
+    let games: [UpNextGame]
 
     private enum CodingKeys: String, CodingKey {
-        case episodes, movies
+        case episodes, movies, games
     }
 
-    // both lists default to empty so an API that predates the endpoint still decodes
+    // every list defaults to empty so an API that predates the endpoint, or the games in it, still decodes
     init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         episodes = try c.decodeIfPresent([UpNextEpisode].self, forKey: .episodes) ?? []
         movies = try c.decodeIfPresent([UpNextMovie].self, forKey: .movies) ?? []
+        games = try c.decodeIfPresent([UpNextGame].self, forKey: .games) ?? []
     }
 
-    var isEmpty: Bool { episodes.isEmpty && movies.isEmpty }
+    var isEmpty: Bool { episodes.isEmpty && movies.isEmpty && games.isEmpty }
 }
 
 /// One aired episode carrying the show context needed to open its detail sheet
@@ -53,6 +55,32 @@ struct UpNextEpisode: Decodable, Sendable, Identifiable {
         runtime = try c.decodeIfPresent(Int.self, forKey: .runtime) ?? 0
         rating = try c.decodeIfPresent(Double.self, forKey: .rating)
         airDate = try c.decodeIfPresent(String.self, forKey: .airDate) ?? ""
+    }
+}
+
+/// One released game from the user's pinned want list (posterPath is an IGDB cover id, runtime the time to beat)
+struct UpNextGame: Decodable, Sendable, Identifiable {
+    let id: Int
+    let title: String
+    let posterPath: String
+    let overview: String
+    let runtime: Int
+    let rating: Double?
+    let releaseDate: String
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, posterPath, overview, runtime, rating, releaseDate
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
+        posterPath = try c.decodeIfPresent(String.self, forKey: .posterPath) ?? ""
+        overview = try c.decodeIfPresent(String.self, forKey: .overview) ?? ""
+        runtime = try c.decodeIfPresent(Int.self, forKey: .runtime) ?? 0
+        rating = try c.decodeIfPresent(Double.self, forKey: .rating)
+        releaseDate = try c.decodeIfPresent(String.self, forKey: .releaseDate) ?? ""
     }
 }
 

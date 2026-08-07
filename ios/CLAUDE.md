@@ -8,9 +8,10 @@ SwiftUI client, iOS 26 and Swift 6. See `README.md` for setup and commands.
 `Screens/`, `Components/`, `Navigation/`, `Theme/`. The entry point is
 `BiingeApp.swift`.
 
-- `Stores/` (`MovieStore`, `TvStore`) are `@MainActor @Observable` classes
-  holding the user's library — want, watching, watched. Anything that changes
-  library state goes through a store so every screen sees it
+- `Stores/` (`MovieStore`, `TvStore`, `GameStore`) are `@MainActor @Observable`
+  classes holding the user's library — want, watching, watched for screen media,
+  want, playing, played for games. Anything that changes library state goes
+  through a store so every screen sees it
 - Screens call `APIClient` directly for read-through data the library doesn't
   own: TMDB detail, search, trending, Up Next
 - `Networking/APIClient.swift` is the single seam to the API

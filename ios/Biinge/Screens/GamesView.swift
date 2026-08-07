@@ -1,18 +1,23 @@
 import SwiftUI
 
-struct MoviesView: View {
-    let store: MovieStore
-    @State private var selection: Segment = .want
+struct GamesView: View {
+    let store: GameStore
+    @State private var selection: Segment = .playing
     @State private var didDeepLink = false
-    @Environment(\.presentMovie) private var presentMovie
+    @Environment(\.presentGame) private var presentGame
 
     enum Segment: String, CaseIterable {
         case want = "Want"
-        case watched = "Watched"
+        case playing = "Playing"
+        case played = "Played"
     }
 
-    private var movies: [LibraryMovie] {
-        selection == .want ? store.wantMovies : store.watchedMovies
+    private var games: [LibraryGame] {
+        switch selection {
+        case .want: return store.wantGames
+        case .playing: return store.playingGames
+        case .played: return store.playedGames
+        }
     }
 
     var body: some View {
@@ -27,15 +32,15 @@ struct MoviesView: View {
 
                 content
             }
-            .navigationTitle("Movies")
+            .navigationTitle("Games")
             .upNextToolbar()
         }
         .task {
             await store.loadIfNeeded()
             #if DEBUG
-            if !didDeepLink, let raw = ProcessInfo.processInfo.environment["DEBUG_MOVIE_ID"], let id = Int(raw) {
+            if !didDeepLink, let raw = ProcessInfo.processInfo.environment["DEBUG_GAME_ID"], let id = Int(raw) {
                 didDeepLink = true
-                presentMovie(id)
+                presentGame(id)
             }
             #endif
         }
@@ -46,21 +51,21 @@ struct MoviesView: View {
         if store.isLoading && !store.hasLoaded {
             ProgressView().tint(Color.biingeLoader)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if movies.isEmpty {
+        } else if games.isEmpty {
             ContentUnavailableView(
                 "Nothing here yet",
-                systemImage: "film",
-                description: Text("Movies you add will appear here.")
+                systemImage: "gamecontroller",
+                description: Text("Games you add will appear here.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            PosterGrid(items: movies) { movie in
+            PosterGrid(items: games) { game in
                 Button {
-                    presentMovie(movie.id)
+                    presentGame(game.id)
                 } label: {
-                    PosterImage(path: movie.posterPath, title: movie.title)
+                    PosterImage(path: game.posterPath, title: game.title, source: .igdb, size: "cover_big_2x")
                         .overlay(alignment: .topTrailing) {
-                            if movie.pinned { PinBadge() }
+                            if game.pinned { PinBadge() }
                         }
                 }
                 .buttonStyle(.plain)

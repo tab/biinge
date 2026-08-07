@@ -37,6 +37,48 @@ struct MovieDetails: Decodable, Sendable {
     let videos: [Video]
 }
 
+/// IGDB-sourced game detail; runtime is minutes to beat normally, runtimeCompleted minutes to reach 100%
+struct GameDetails: Decodable, Sendable {
+    let id: Int
+    let title: String
+    let posterPath: String
+    let pinned: Bool
+    let state: WatchState
+    let overview: String
+    let status: String?
+    let releaseDate: String?
+    let runtime: Int?
+    let runtimeCompleted: Int?
+    let rating: Double?
+    let genres: [String]
+    let platforms: [String]
+    let recommendations: [Recommendation]
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, posterPath, pinned, state, overview, status, releaseDate
+        case runtime, runtimeCompleted, rating, genres, platforms, recommendations
+    }
+
+    // recommendations default to empty so an API that predates the field still decodes
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        posterPath = try c.decode(String.self, forKey: .posterPath)
+        pinned = try c.decode(Bool.self, forKey: .pinned)
+        state = try c.decode(WatchState.self, forKey: .state)
+        overview = try c.decode(String.self, forKey: .overview)
+        status = try c.decodeIfPresent(String.self, forKey: .status)
+        releaseDate = try c.decodeIfPresent(String.self, forKey: .releaseDate)
+        runtime = try c.decodeIfPresent(Int.self, forKey: .runtime)
+        runtimeCompleted = try c.decodeIfPresent(Int.self, forKey: .runtimeCompleted)
+        rating = try c.decodeIfPresent(Double.self, forKey: .rating)
+        genres = try c.decode([String].self, forKey: .genres)
+        platforms = try c.decode([String].self, forKey: .platforms)
+        recommendations = try c.decodeIfPresent([Recommendation].self, forKey: .recommendations) ?? []
+    }
+}
+
 struct SeasonSummary: Decodable, Sendable, Identifiable {
     let id: Int
     let title: String

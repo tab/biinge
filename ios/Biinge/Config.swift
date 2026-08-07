@@ -45,6 +45,12 @@ enum Config {
         return URL(string: "https://image.tmdb.org/t/p/\(size)\(path)")
     }
 
+    /// Builds an IGDB cover URL from a cover image_id (public CDN, no token)
+    static func igdbImageURL(imageId: String, size: String = "cover_big_2x") -> URL? {
+        guard !imageId.isEmpty else { return nil }
+        return URL(string: "https://images.igdb.com/igdb/image/upload/t_\(size)/\(imageId).jpg")
+    }
+
     private static func boolValue(_ raw: String) -> Bool {
         switch raw.lowercased() {
         case "1", "true", "yes":

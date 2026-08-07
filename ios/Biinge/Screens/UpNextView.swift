@@ -1,31 +1,36 @@
 import SwiftUI
 
-/// The user's ready-to-watch queue: aired episodes and released movies from the shows and films they've pinned
+/// The user's ready-to-watch queue: aired episodes, released movies and released games from what they've pinned
 struct UpNextView: View {
-    @Environment(\.apiClient) private var apiClient
+    @Environment(UpNextStore.self) private var store
     @Environment(\.presentSeries) private var presentSeries
     @Environment(\.presentMovie) private var presentMovie
-
-    @State private var upNext: UpNext?
-    @State private var isLoading = false
-    @State private var failed = false
+    @Environment(\.presentGame) private var presentGame
 
     var body: some View {
-        NavigationStack {
+        ZStack(alignment: .topLeading) {
             content
-                .navigationTitle("Up Next")
+
+            CloseButton()
         }
-        .task { await load() }
+        .background(Color.biingeBackground)
+        // the queue turns over as episodes air and the user watches them, so every open refreshes;
+        // the previous queue stays on screen meanwhile
+        .task { await store.load() }
     }
 
     @ViewBuilder
     private var content: some View {
-        if isLoading && upNext == nil {
+        if store.isLoading && store.upNext == nil {
             ProgressView().tint(Color.biingeLoader)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let upNext, !upNext.isEmpty {
+        } else if let upNext = store.upNext, !upNext.isEmpty {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 28) {
+                    Text("Up Next")
+                        .font(.biingeTitle1)
+                        .foregroundStyle(.primary)
+
                     if !upNext.episodes.isEmpty {
                         section("New Episodes") {
                             ForEach(upNext.episodes) { episode in
@@ -61,24 +66,46 @@ struct UpNextView: View {
                             }
                         }
                     }
+
+                    if !upNext.games.isEmpty {
+                        section("Games") {
+                            ForEach(upNext.games) { game in
+                                Button {
+                                    presentGame(game.id)
+                                } label: {
+                                    UpNextRow(
+                                        posterPath: game.posterPath,
+                                        title: game.title,
+                                        detail: ratingText(game.rating),
+                                        date: UpNextDate.format(game.releaseDate),
+                                        source: .igdb
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
                 }
-                .padding()
+                .padding(.horizontal)
+                // clears the floating close button, the way every other modal seats its title
+                .padding(.top, 64)
+                .padding(.bottom, 40)
             }
-            .refreshable { await load() }
-        } else if failed {
+            .refreshable { await store.load() }
+        } else if store.failed {
             ContentUnavailableView {
                 Label("Couldn't load Up Next", systemImage: "wifi.exclamationmark")
             } description: {
                 Text("Check your connection and try again.")
             } actions: {
-                Button("Try Again") { Task { await load() } }
+                Button("Try Again") { Task { await store.load() } }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ContentUnavailableView(
                 "Nothing on deck",
                 systemImage: "calendar",
-                description: Text("Pin a show you're watching or a movie you want, and its next episode or release shows up here.")
+                description: Text("Pin a show you're watching, or a movie or game you want, and its next episode or release shows up here.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -103,31 +130,26 @@ struct UpNextView: View {
         guard let rating, rating > 0 else { return "" }
         return String(format: "★ %.1f", rating)
     }
-
-    private func load() async {
-        guard let apiClient else { return }
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            upNext = try await apiClient.upNext()
-            failed = false
-        } catch {
-            failed = true
-        }
-    }
 }
 
-/// A shared Up Next row so shows and movies look identical: poster, title, a detail line, and a date
+/// A shared Up Next row so shows, movies and games look identical: poster, title, a detail line, and a date
 private struct UpNextRow: View {
     let posterPath: String
     let title: String
     let detail: String
     let date: String
+    var source: PosterImage.Source = .tmdb
 
     var body: some View {
         HStack(spacing: 12) {
-            PosterImage(path: posterPath, title: title, size: "w185", cornerRadius: 10)
-                .frame(width: 72)
+            PosterImage(
+                path: posterPath,
+                title: title,
+                source: source,
+                size: source == .igdb ? "cover_big" : "w185",
+                cornerRadius: 10
+            )
+            .frame(width: 72)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)

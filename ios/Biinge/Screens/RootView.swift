@@ -7,6 +7,8 @@ struct RootView: View {
 
     @State private var movieStore: MovieStore
     @State private var tvStore: TvStore
+    @State private var gameStore: GameStore
+    @State private var upNextStore: UpNextStore
     @State private var selection: Int
 
     init(authManager: AuthManager, apiClient: APIClient) {
@@ -14,6 +16,8 @@ struct RootView: View {
         self.apiClient = apiClient
         _movieStore = State(initialValue: MovieStore(apiClient: apiClient))
         _tvStore = State(initialValue: TvStore(apiClient: apiClient))
+        _gameStore = State(initialValue: GameStore(apiClient: apiClient))
+        _upNextStore = State(initialValue: UpNextStore(apiClient: apiClient))
 
         var initialTab = 0
         #if DEBUG
@@ -32,8 +36,10 @@ struct RootView: View {
             Tab("TV", systemImage: "tv", value: 1) {
                 TvView(store: tvStore).presentsDetails()
             }
-            Tab("Up Next", systemImage: "calendar", value: 2) {
-                UpNextView().presentsDetails()
+            // Games took the slot Up Next held; the queue spans movies and shows, so it hangs off every
+            // library screen's toolbar instead of one tab
+            Tab("Games", systemImage: "gamecontroller", value: 2) {
+                GamesView(store: gameStore).presentsDetails()
             }
             Tab("Profile", systemImage: "person.crop.circle", value: 3) {
                 ProfileView(authManager: authManager)
@@ -46,6 +52,8 @@ struct RootView: View {
         .tint(Color.biingeText)
         .environment(movieStore)
         .environment(tvStore)
+        .environment(gameStore)
+        .environment(upNextStore)
         .environment(\.apiClient, apiClient)
     }
 }

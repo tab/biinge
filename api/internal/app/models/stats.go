@@ -24,8 +24,9 @@ func (p StatsPeriod) String() string {
 //
 // Every count is scoped to the period. Want is the whole list all-time and what was
 // added to it inside a bounded period; SeriesWatched is shows finished all-time and
-// shows with a watched episode inside a bounded one. SeriesWatching is nil on a bounded
-// period, since a show is being watched now rather than during some past window.
+// shows with a watched episode inside a bounded one. SeriesWatching and GamesPlaying are
+// nil on a bounded period, since a show or game is in progress now rather than during
+// some past window. GamesMinutes is IGDB's time to beat, not time actually played.
 type Stats struct {
 	Period          StatsPeriod
 	MoviesWant      uint64
@@ -36,6 +37,10 @@ type Stats struct {
 	SeriesWatched   uint64
 	EpisodesWatched uint64
 	EpisodesMinutes uint64
+	GamesWant       uint64
+	GamesPlaying    *uint64
+	GamesPlayed     uint64
+	GamesMinutes    uint64
 	Activity        []WatchBucket
 }
 

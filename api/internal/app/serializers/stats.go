@@ -27,6 +27,15 @@ type EpisodeStatsSerializer struct {
 	Minutes uint64 `json:"minutes"`
 }
 
+// GameStatsSerializer counts a user's games (a bounded period omits playing, which describes
+// a game now rather than during a past window). Minutes are IGDB's time to beat, not played time
+type GameStatsSerializer struct {
+	Want    uint64  `json:"want"`
+	Playing *uint64 `json:"playing,omitempty"`
+	Played  uint64  `json:"played"`
+	Minutes uint64  `json:"minutes"`
+}
+
 type ActivityBucketSerializer struct {
 	Date         string `json:"date"`
 	MovieMinutes uint64 `json:"movieMinutes"`
@@ -38,6 +47,7 @@ type StatsSerializer struct {
 	Movies   MovieStatsSerializer       `json:"movies"`
 	Series   SeriesStatsSerializer      `json:"series"`
 	Episodes EpisodeStatsSerializer     `json:"episodes"`
+	Games    GameStatsSerializer        `json:"games"`
 	Activity []ActivityBucketSerializer `json:"activity"`
 }
 
@@ -66,6 +76,12 @@ func NewStatsSerializer(stats *models.Stats) StatsSerializer {
 		Episodes: EpisodeStatsSerializer{
 			Watched: stats.EpisodesWatched,
 			Minutes: stats.EpisodesMinutes,
+		},
+		Games: GameStatsSerializer{
+			Want:    stats.GamesWant,
+			Playing: stats.GamesPlaying,
+			Played:  stats.GamesPlayed,
+			Minutes: stats.GamesMinutes,
 		},
 		Activity: activity,
 	}

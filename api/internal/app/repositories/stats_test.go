@@ -29,6 +29,21 @@ func seedStatsMovie(t *testing.T, client postgres.Postgres, userID uuid.UUID, tm
 	require.NoError(t, err)
 }
 
+// seedStatsGame inserts a game in the given state
+func seedStatsGame(t *testing.T, client postgres.Postgres, userID uuid.UUID, igdbID uint64, runtime uint64, state models.StateType) {
+	t.Helper()
+
+	_, err := client.Queries().CreateGame(context.Background(), db.CreateGameParams{
+		UserID:     userID,
+		IgdbID:     igdbID,
+		Title:      "Stats Game",
+		PosterPath: "co1wyy",
+		Runtime:    runtime,
+		State:      db.StateTypes(state),
+	})
+	require.NoError(t, err)
+}
+
 // seedStatsSeries inserts a series in the given state and returns its id
 func seedStatsSeries(t *testing.T, client postgres.Postgres, userID uuid.UUID, tmdbID uint64, state models.StateType) uuid.UUID {
 	t.Helper()
@@ -161,6 +176,11 @@ func Test_StatsRepository_Get(t *testing.T) {
 
 	seedStatsEpisodes(t, client, watchingSeries, 900201, 42, 42, 30)
 
+	seedStatsGame(t, client, userID, 900301, 1200, models.StateTypeWant)
+	seedStatsGame(t, client, userID, 900302, 3000, models.StateTypePlaying)
+	seedStatsGame(t, client, userID, 900303, 1800, models.StateTypePlayed)
+	seedStatsGame(t, client, userID, 900304, 600, models.StateTypePlayed)
+
 	t.Run("Aggregates counts and minutes across domains", func(t *testing.T) {
 		result, err := repository.Get(ctx, userID, models.StatsPeriodAll)
 		require.NoError(t, err)
@@ -178,6 +198,23 @@ func Test_StatsRepository_Get(t *testing.T) {
 
 		assert.Equal(t, uint64(3), result.EpisodesWatched)
 		assert.Equal(t, uint64(114), result.EpisodesMinutes)
+
+		require.NotNil(t, result.GamesPlaying)
+		assert.Equal(t, uint64(1), result.GamesWant)
+		assert.Equal(t, uint64(1), *result.GamesPlaying)
+		assert.Equal(t, uint64(2), result.GamesPlayed)
+		// only the played games count toward minutes, so the 3000 in progress stays out
+		assert.Equal(t, uint64(2400), result.GamesMinutes)
+	})
+
+	t.Run("A bounded period omits the playing count", func(t *testing.T) {
+		result, err := repository.Get(ctx, userID, models.StatsPeriodYear)
+		require.NoError(t, err)
+
+		assert.Nil(t, result.GamesPlaying)
+		// CreateGame stamps played_at now, so both played games land in the current year
+		assert.Equal(t, uint64(2), result.GamesPlayed)
+		assert.Equal(t, uint64(2400), result.GamesMinutes)
 	})
 }
 

@@ -52,5 +52,5 @@ func (c *statsCache) Invalidate(ctx context.Context, userId uuid.UUID) {
 
 // statsCacheKey namespaces an entry by user and period
 func statsCacheKey(userId uuid.UUID, period models.StatsPeriod) string {
-	return fmt.Sprintf("stats:v2:%s:%s", userId, period)
+	return fmt.Sprintf("stats:v1:%s:%s", userId, period)
 }

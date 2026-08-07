@@ -62,6 +62,11 @@ func (s *stats) allTime(ctx context.Context, userId uuid.UUID) (*models.Stats, e
 		return nil, err
 	}
 
+	games, err := s.client.Queries().GameStatsAll(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
 	activity, err := s.client.Queries().WatchActivityAll(ctx, userId)
 	if err != nil {
 		return nil, err
@@ -77,6 +82,7 @@ func (s *stats) allTime(ctx context.Context, userId uuid.UUID) (*models.Stats, e
 	}
 
 	seriesWatching := uint64(series.WatchingCount)
+	gamesPlaying := uint64(games.PlayingCount)
 
 	return &models.Stats{
 		Period:          models.StatsPeriodAll,
@@ -88,6 +94,10 @@ func (s *stats) allTime(ctx context.Context, userId uuid.UUID) (*models.Stats, e
 		SeriesWatched:   uint64(series.WatchedCount),
 		EpisodesWatched: uint64(episodes.WatchedCount),
 		EpisodesMinutes: uint64(episodes.WatchedMinutes),
+		GamesWant:       uint64(games.WantCount),
+		GamesPlaying:    &gamesPlaying,
+		GamesPlayed:     uint64(games.PlayedCount),
+		GamesMinutes:    uint64(games.PlayedMinutes),
 		Activity:        buckets,
 	}, nil
 }
@@ -114,6 +124,14 @@ func (s *stats) forPeriod(ctx context.Context, userId uuid.UUID, period models.S
 	}
 
 	episodes, err := s.client.Queries().EpisodeStats(ctx, db.EpisodeStatsParams{
+		UserID:     userId,
+		PeriodUnit: periodUnit.String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	games, err := s.client.Queries().GameStats(ctx, db.GameStatsParams{
 		UserID:     userId,
 		PeriodUnit: periodUnit.String(),
 	})
@@ -148,6 +166,9 @@ func (s *stats) forPeriod(ctx context.Context, userId uuid.UUID, period models.S
 		SeriesWatched:   uint64(series.WatchedCount),
 		EpisodesWatched: uint64(episodes.WatchedCount),
 		EpisodesMinutes: uint64(episodes.WatchedMinutes),
+		GamesWant:       uint64(games.WantCount),
+		GamesPlayed:     uint64(games.PlayedCount),
+		GamesMinutes:    uint64(games.PlayedMinutes),
 		Activity:        buckets,
 	}, nil
 }

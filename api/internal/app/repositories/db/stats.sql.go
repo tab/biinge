@@ -63,6 +63,69 @@ func (q *Queries) EpisodeStatsAll(ctx context.Context, userID uuid.UUID) (Episod
 	return i, err
 }
 
+const gameStats = `-- name: GameStats :one
+WITH bound AS (
+  SELECT date_trunc($2::text, NOW()) AS since
+)
+SELECT
+  COUNT(*) FILTER (WHERE state = 'want' AND created_at >= (SELECT since FROM bound))::bigint AS want_count,
+  COUNT(*) FILTER (WHERE state = 'played' AND played_at >= (SELECT since FROM bound))::bigint AS played_count,
+  COALESCE(SUM(runtime) FILTER (WHERE state = 'played' AND played_at >= (SELECT since FROM bound)), 0)::bigint AS played_minutes
+FROM games
+WHERE user_id = $1
+`
+
+type GameStatsParams struct {
+	UserID     uuid.UUID
+	PeriodUnit string
+}
+
+type GameStatsRow struct {
+	WantCount     int64
+	PlayedCount   int64
+	PlayedMinutes int64
+}
+
+// Scoped to the period the way movies are: want counts what was added inside it, played
+// what was finished inside it. There is no playing count -- a game is being played now,
+// which no window can bound
+func (q *Queries) GameStats(ctx context.Context, arg GameStatsParams) (GameStatsRow, error) {
+	row := q.db.QueryRow(ctx, gameStats, arg.UserID, arg.PeriodUnit)
+	var i GameStatsRow
+	err := row.Scan(&i.WantCount, &i.PlayedCount, &i.PlayedMinutes)
+	return i, err
+}
+
+const gameStatsAll = `-- name: GameStatsAll :one
+SELECT
+  COUNT(*) FILTER (WHERE state = 'want')::bigint AS want_count,
+  COUNT(*) FILTER (WHERE state = 'playing')::bigint AS playing_count,
+  COUNT(*) FILTER (WHERE state = 'played')::bigint AS played_count,
+  COALESCE(SUM(runtime) FILTER (WHERE state = 'played'), 0)::bigint AS played_minutes
+FROM games
+WHERE user_id = $1
+`
+
+type GameStatsAllRow struct {
+	WantCount     int64
+	PlayingCount  int64
+	PlayedCount   int64
+	PlayedMinutes int64
+}
+
+// Minutes are IGDB's time to beat the game normally, not time the user actually played
+func (q *Queries) GameStatsAll(ctx context.Context, userID uuid.UUID) (GameStatsAllRow, error) {
+	row := q.db.QueryRow(ctx, gameStatsAll, userID)
+	var i GameStatsAllRow
+	err := row.Scan(
+		&i.WantCount,
+		&i.PlayingCount,
+		&i.PlayedCount,
+		&i.PlayedMinutes,
+	)
+	return i, err
+}
+
 const movieStats = `-- name: MovieStats :one
 
 WITH bound AS (

@@ -193,6 +193,6 @@ func Test_StatsCache_Invalidate(t *testing.T) {
 func Test_StatsCacheKey(t *testing.T) {
 	userId := uuid.MustParse("11111111-2222-3333-4444-555555555555")
 
-	assert.Equal(t, "stats:v2:11111111-2222-3333-4444-555555555555:week", statsCacheKey(userId, models.StatsPeriodWeek))
-	assert.Equal(t, "stats:v2:11111111-2222-3333-4444-555555555555:all", statsCacheKey(userId, models.StatsPeriodAll))
+	assert.Equal(t, "stats:v1:11111111-2222-3333-4444-555555555555:week", statsCacheKey(userId, models.StatsPeriodWeek))
+	assert.Equal(t, "stats:v1:11111111-2222-3333-4444-555555555555:all", statsCacheKey(userId, models.StatsPeriodAll))
 }

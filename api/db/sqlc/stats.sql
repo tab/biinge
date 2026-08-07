@@ -76,6 +76,30 @@ FROM episodes e
   JOIN series t ON s.series_id = t.id
 WHERE t.user_id = $1;
 
+-- name: GameStats :one
+-- Scoped to the period the way movies are: want counts what was added inside it, played
+-- what was finished inside it. There is no playing count -- a game is being played now,
+-- which no window can bound
+WITH bound AS (
+  SELECT date_trunc(sqlc.arg(period_unit)::text, NOW()) AS since
+)
+SELECT
+  COUNT(*) FILTER (WHERE state = 'want' AND created_at >= (SELECT since FROM bound))::bigint AS want_count,
+  COUNT(*) FILTER (WHERE state = 'played' AND played_at >= (SELECT since FROM bound))::bigint AS played_count,
+  COALESCE(SUM(runtime) FILTER (WHERE state = 'played' AND played_at >= (SELECT since FROM bound)), 0)::bigint AS played_minutes
+FROM games
+WHERE user_id = sqlc.arg(user_id);
+
+-- name: GameStatsAll :one
+-- Minutes are IGDB's time to beat the game normally, not time the user actually played
+SELECT
+  COUNT(*) FILTER (WHERE state = 'want')::bigint AS want_count,
+  COUNT(*) FILTER (WHERE state = 'playing')::bigint AS playing_count,
+  COUNT(*) FILTER (WHERE state = 'played')::bigint AS played_count,
+  COALESCE(SUM(runtime) FILTER (WHERE state = 'played'), 0)::bigint AS played_minutes
+FROM games
+WHERE user_id = $1;
+
 -- name: WatchActivity :many
 -- Watched minutes per bucket, split into movie and TV runtime and dense (buckets
 -- with no activity return zero). Buckets span the whole current calendar period --

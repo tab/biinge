@@ -13,6 +13,7 @@ import (
 
 func Test_NewStatsSerializer(t *testing.T) {
 	seriesWatching := uint64(5)
+	gamesPlaying := uint64(3)
 
 	stats := &models.Stats{
 		Period:          models.StatsPeriodAll,
@@ -24,6 +25,10 @@ func Test_NewStatsSerializer(t *testing.T) {
 		SeriesWatched:   6,
 		EpisodesWatched: 7,
 		EpisodesMinutes: 800,
+		GamesWant:       9,
+		GamesPlaying:    &gamesPlaying,
+		GamesPlayed:     10,
+		GamesMinutes:    4200,
 		Activity: []models.WatchBucket{
 			{Date: time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 240},
 			{Date: time.Date(2026, time.March, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 0, TvMinutes: 90},
@@ -45,6 +50,12 @@ func Test_NewStatsSerializer(t *testing.T) {
 		Episodes: EpisodeStatsSerializer{
 			Watched: 7,
 			Minutes: 800,
+		},
+		Games: GameStatsSerializer{
+			Want:    9,
+			Playing: &gamesPlaying,
+			Played:  10,
+			Minutes: 4200,
 		},
 		Activity: []ActivityBucketSerializer{
 			{Date: "2026-02-01", MovieMinutes: 120, TvMinutes: 240},
@@ -72,6 +83,7 @@ func Test_NewStatsSerializer_OmitsWatchingOnABoundedPeriod(t *testing.T) {
 
 	// A client reading a bounded period must not find a number that silently means all-time
 	assert.NotContains(t, string(payload), `"watching"`)
+	assert.NotContains(t, string(payload), `"playing"`)
 
 	// Want is scoped to the period rather than dropped, so a zero still has to reach the client
 	assert.Contains(t, string(payload), `"want":1`)

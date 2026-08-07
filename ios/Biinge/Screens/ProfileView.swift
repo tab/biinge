@@ -70,6 +70,13 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Profile")
+            .task {
+                #if DEBUG
+                if ProcessInfo.processInfo.environment["DEBUG_STATISTICS"] == "1" {
+                    sheet = .statistics
+                }
+                #endif
+            }
             .sheet(item: $sheet) { route in
                 Group {
                     switch route {
@@ -197,7 +204,17 @@ private struct TimeSlice: Identifiable {
 struct StatisticsView: View {
     @Environment(\.apiClient) private var apiClient
     @State private var loaded: [StatsPeriod: AccountStats] = [:]
-    @State private var period: StatsPeriod = .week
+    @State private var period: StatsPeriod = Self.initialPeriod
+
+    private static var initialPeriod: StatsPeriod {
+        #if DEBUG
+        if let raw = ProcessInfo.processInfo.environment["DEBUG_STATS_PERIOD"],
+           let period = StatsPeriod(rawValue: raw) {
+            return period
+        }
+        #endif
+        return .week
+    }
 
     var body: some View {
         ModalScaffold(title: "Statistics") {

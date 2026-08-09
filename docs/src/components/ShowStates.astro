@@ -1,0 +1,151 @@
+---
+import StateRing from "./StateRing.astro";
+import DeviceFrame from "./DeviceFrame.astro";
+
+/*
+ * The TV tab in each of its three states, in order. It follows the TV chapter
+ * because that is where the states are earned - one screen per state, so the
+ * progression is something you look at rather than something you take on trust
+ */
+const steps = [
+  {
+    state: "want" as const,
+    word: "Want",
+    screen: "tv-want",
+    alt: "The TV library filtered to Want",
+    note: "On the list, not started. Nothing has been ticked yet.",
+  },
+  {
+    state: "watching" as const,
+    word: "Watching",
+    screen: "tv-watching",
+    alt: "The TV library filtered to Watching, each poster carrying a progress badge",
+    note: "The first ticked episode moves it here. The badge on the poster counts how far in you are.",
+  },
+  {
+    state: "watched" as const,
+    word: "Watched",
+    screen: "tv-watched",
+    alt: "The TV library filtered to Watched",
+    note: "Tick the last episode and it crosses over on its own.",
+  },
+];
+---
+
+<section class="states tint" id="states">
+  <div class="container">
+    <div class="head" data-reveal>
+      <p class="eyebrow-label">Three states</p>
+      <h2 class="title display-soft">One show, all three states.</h2>
+      <p class="lead">
+        The same TV tab, filtered to each state in turn. Tick an episode and the
+        show moves itself between them.
+      </p>
+    </div>
+
+    <ol class="steps">
+      {steps.map((step, i) => (
+        <li class="step" data-reveal style={`--reveal-delay: ${i * 130}ms`}>
+          <p class="step-label">
+            <StateRing state={step.state} size={17} animate delay={i * 220} />
+            {step.word}
+          </p>
+          <div class="step-phone">
+            <DeviceFrame name={step.screen} alt={step.alt} />
+          </div>
+          <p class="step-note">{step.note}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .states {
+    padding: 120px 0 128px;
+  }
+
+  .head {
+    max-width: 720px;
+    margin-bottom: 60px;
+  }
+
+  .title {
+    font-size: clamp(2rem, 3.9vw, 3.1rem);
+    margin-bottom: 18px;
+  }
+
+  .lead {
+    font-size: 1.15rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 56ch;
+  }
+
+  .steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+  }
+
+  .step-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+
+  .step-phone {
+    width: 100%;
+    max-width: 218px;
+    margin-bottom: 20px;
+  }
+
+  .step-note {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 34ch;
+  }
+
+  @media (max-width: 900px) {
+    .states {
+      padding: 72px 0 76px;
+    }
+
+    .head {
+      margin-bottom: 34px;
+    }
+
+    /* the three screens stack, each with its label and note alongside */
+    .steps {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      column-gap: 24px;
+      align-items: center;
+    }
+
+    .step-phone {
+      grid-row: 1 / span 2;
+      margin-bottom: 0;
+    }
+
+    .step-label {
+      align-self: end;
+      margin-bottom: 6px;
+    }
+
+    .step-note {
+      align-self: start;
+    }
+  }
+</style>

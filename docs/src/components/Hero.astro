@@ -2,139 +2,182 @@
 const base = import.meta.env.BASE_URL;
 ---
 
-<section class="hero">
+<section class="hero focus">
+  <div class="wall" style={`background-image: url(${base}screens/poster-wall.jpg)`}></div>
+  <div class="veil"></div>
+
   <div class="hero-inner">
-    <div class="hero-text">
-      <div class="eyebrow-label">Self-hosted movie &amp; TV tracker</div>
-      <h1 class="title">
-        Everything you watch,<br />
-        <span class="title-accent">on your own server.</span>
-      </h1>
-      <p class="description">
-        Keep separate want, watching, and watched lists across movies and TV.
-        Episode-level progress, an Up&nbsp;Next queue, and watch stats - in a
-        native iOS app backed by an API you run and a database you own.
-      </p>
-      <div class="actions">
-        <a href={`${base}self-hosting/`} class="btn btn-primary">Self-host it</a>
-        <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
-      </div>
-      <div class="hint">Go + Postgres API &middot; native iOS app &middot; MIT licensed</div>
-    </div>
-    <div class="hero-visual">
-      <div class="phone-duo">
-        <slot />
-      </div>
+    <p class="kicker">Open source &middot; self-hosted &middot; for iOS</p>
+
+    <h1 class="headline display">Track movies, TV shows and games.</h1>
+
+    <p class="lead">
+      Biinge is a native iOS app that keeps track of what you want to watch or
+      play, what you've started, and what you've finished — backed by a server
+      you run.
+    </p>
+
+    <div class="actions">
+      <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-primary">
+        Get it on GitHub
+      </a>
+      <a href="#search" class="btn-text">
+        See how it works
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </a>
     </div>
   </div>
 </section>
 
 <style>
+  /*
+   * The sticky bar holds 61px of flow above this, so the wall is pulled up
+   * underneath it and the padding puts that height back
+   */
   .hero {
-    padding: 84px 56px 72px;
-    max-width: 1160px;
-    margin: 0 auto;
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    /* svh, not dvh: the height shouldn't reflow as mobile browser chrome hides */
+    min-height: 100svh;
+    display: flex;
+    align-items: flex-end;
+    margin-top: -61px;
+    padding: 221px 0 96px;
+    overflow: hidden;
+  }
+
+  /* the app's own poster grid, drifting slowly enough to read as atmosphere */
+  .wall {
+    position: absolute;
+    inset: -3%;
+    z-index: -2;
+    background-size: cover;
+    background-position: center center;
+    animation: drift 72s ease-in-out infinite alternate;
+  }
+
+  /* barely zoomed: the wall earns its keep by showing titles, not by filling */
+  @keyframes drift {
+    from { transform: scale(1) translate3d(0, 0, 0); }
+    to { transform: scale(1.06) translate3d(-1.5%, -2%, 0); }
+  }
+
+  /*
+   * two jobs: a scrim heavy enough to hold the headline over any poster, and a
+   * bottom fade that hands the page off to the section below
+   */
+  .veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      /* the bar rides on this band, so it has to hold over a bright poster */
+      linear-gradient(
+        to bottom,
+        rgba(16, 16, 20, 0.82) 0%,
+        rgba(16, 16, 20, 0.45) 9%,
+        rgba(16, 16, 20, 0) 24%
+      ),
+      linear-gradient(
+        to top,
+        var(--bg) 0%,
+        rgba(16, 16, 20, 0.93) 13%,
+        rgba(16, 16, 20, 0.74) 40%,
+        rgba(16, 16, 20, 0.16) 76%
+      );
   }
 
   .hero-inner {
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 56px;
-    align-items: center;
-  }
-
-  .hero-visual {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .phone-duo {
     position: relative;
-    width: 342px;
-    max-width: 100%;
-    aspect-ratio: 342 / 466;
+    max-width: 1320px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 64px;
   }
 
-  .phone-duo :global(.device) {
-    position: absolute;
+  /* The hero copy rises in a short sequence once the page is ready. */
+  .hero-inner > * {
+    animation: rise 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
   }
 
-  /* back phone */
-  .phone-duo :global(.device):first-child {
-    left: 0;
-    top: 30px;
-    width: 54.5%;
-    z-index: 1;
+  .kicker { animation-delay: 0.06s; }
+  .headline { animation-delay: 0.16s; }
+  .lead { animation-delay: 0.32s; }
+  .actions { animation-delay: 0.44s; }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
   }
 
-  /* front phone */
-  .phone-duo :global(.device):last-child {
-    right: 0;
-    top: 0;
-    width: 59%;
-    z-index: 2;
+  .kicker {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.66);
+    margin-bottom: 22px;
   }
 
-  .title {
-    font-family: var(--heading);
-    font-weight: 700;
-    font-size: 3.3rem;
-    line-height: 1.02;
-    letter-spacing: -0.04em;
-    margin: 0 0 22px;
-    color: var(--text);
+  .headline {
+    max-width: 18ch;
+    font-size: clamp(3rem, 6.6vw, 5.8rem);
+    margin-bottom: 28px;
+    text-shadow: 0 2px 36px rgba(0, 0, 0, 0.5);
   }
 
-  .title-accent {
-    text-decoration: underline;
-    text-decoration-color: var(--gold);
-    text-decoration-thickness: 4px;
-    text-underline-offset: 7px;
-  }
-
-  .description {
-    font-size: 1.15rem;
+  .lead {
+    max-width: 58ch;
+    font-size: 1.25rem;
     line-height: 1.55;
-    color: var(--text-muted);
-    max-width: 500px;
-    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 36px;
   }
 
   .actions {
     display: flex;
-    gap: 12px;
-    margin-top: 34px;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 28px;
   }
 
-  .hint {
-    margin-top: 24px;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-
-  @media (max-width: 1024px) {
-    .hero-inner {
-      grid-template-columns: 1fr;
-      gap: 48px;
+  @media (prefers-reduced-motion: reduce) {
+    .wall {
+      animation: none;
+      transform: scale(1.06);
     }
 
-    .hero-visual {
-      justify-content: center;
+    .hero-inner > * {
+      animation: none;
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     .hero {
-      padding: 48px 22px;
+      padding: 181px 0 76px;
     }
 
-    .title {
-      font-size: 2.3rem;
+    .hero-inner {
+      padding: 0 24px;
     }
 
-    .description {
-      font-size: 1.05rem;
+    /* the hero is shorter here, so the copy sits where the wide scrim is thin */
+    .veil {
+      background:
+        linear-gradient(to bottom, rgba(16, 16, 20, 0.6) 0%, rgba(16, 16, 20, 0) 16%),
+        linear-gradient(
+          to top,
+          var(--bg) 0%,
+          rgba(16, 16, 20, 0.94) 18%,
+          rgba(16, 16, 20, 0.82) 60%,
+          rgba(16, 16, 20, 0.42) 100%
+        );
+    }
+
+    .lead {
+      max-width: 52ch;
+      font-size: 1.1rem;
     }
   }
 </style>

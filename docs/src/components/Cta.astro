@@ -1,0 +1,128 @@
+---
+const base = import.meta.env.BASE_URL;
+
+const tags = ["Go", "PostgreSQL", "Redis", "SwiftUI"];
+---
+
+<section class="cta focus">
+  <div class="wall" style={`background-image: url(${base}screens/poster-wall.jpg)`}></div>
+  <div class="veil"></div>
+
+  <div class="cta-inner" data-reveal>
+    <p class="kicker">Open source</p>
+    <h2 class="title display">Run it on your own server.</h2>
+    <p class="lead">
+      The Go API and SwiftUI app live in one repository. Follow the setup guide
+      to run Biinge on your server, then make it your own.
+    </p>
+
+    <div class="actions">
+      <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-primary">
+        Get it on GitHub
+      </a>
+      <a href={`${base}self-hosting/`} class="btn-text">
+        Read the setup guide
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <ul class="tags">
+      {tags.map((t) => <li>{t}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* bookends the hero: the same wall, closing the page where it opened */
+  .cta {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 128px 0 136px;
+  }
+
+  .wall {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-size: cover;
+    background-position: center 18%;
+    transform: scale(1.04);
+  }
+
+  .veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      110deg,
+      rgba(16, 16, 20, 0.95) 0%,
+      rgba(16, 16, 20, 0.86) 52%,
+      rgba(16, 16, 20, 0.6) 100%
+    );
+  }
+
+  .cta-inner {
+    position: relative;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 64px;
+  }
+
+  .kicker {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+  }
+
+  .title {
+    font-size: clamp(2.2rem, 5vw, 3.9rem);
+    margin-bottom: 20px;
+  }
+
+  .lead {
+    font-size: 1.18rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 60ch;
+    margin-bottom: 38px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 28px;
+    margin-bottom: 44px;
+  }
+
+  .tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tags li {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 15px;
+  }
+
+  @media (max-width: 768px) {
+    .cta {
+      padding: 80px 0 88px;
+    }
+
+    .cta-inner {
+      padding: 0 24px;
+    }
+
+    .lead {
+      font-size: 1.05rem;
+    }
+  }
+</style>

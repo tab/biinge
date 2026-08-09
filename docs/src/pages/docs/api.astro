@@ -21,36 +21,72 @@ const movieListJson = esc(`{
   "data": [
     {
       "id": 693134,
-      "tmdbId": 693134,
       "title": "Dune: Part Two",
       "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
       "pinned": true,
-      "status": "Released",
-      "state": "watched"
+      "state": "want"
     }
   ],
-  "meta": { "page": 1, "per": 30, "total": 1 }
+  "meta": { "page": 1, "per": 24, "total": 1 }
 }`);
 const upNextJson = esc(`{
   "episodes": [
     {
       "seriesId": 125988,
       "seriesTitle": "Silo",
+      "seriesPosterPath": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+      "id": 7173957,
+      "title": "Who Are You?",
       "seasonNumber": 3,
       "number": 1,
-      "title": "Who Are You?",
+      "posterPath": "/nIvrv95n7gukebcCEUeZJDy9iEp.jpg",
+      "overview": "Juliette wakes somewhere she was never meant to reach…",
+      "runtime": 56,
+      "rating": 6.6,
       "airDate": "2026-07-02"
     }
   ],
   "movies": [
-    { "id": 786892, "title": "Furiosa", "rating": 7.4, "releaseDate": "2024-05-22" }
+    {
+      "id": 786892,
+      "title": "Furiosa: A Mad Max Saga",
+      "posterPath": "/iADOJ8Zymht2JPMoy3R7xceZprc.jpg",
+      "overview": "As the world falls, young Furiosa is snatched from the Green Place…",
+      "runtime": 149,
+      "rating": 7.4,
+      "releaseDate": "2024-05-22"
+    }
+  ],
+  "games": [
+    {
+      "id": 1942,
+      "title": "The Witcher 3: Wild Hunt",
+      "posterPath": "co1wyy",
+      "overview": "A story-driven open world RPG set in a fantasy universe…",
+      "runtime": 3000,
+      "rating": 9.5,
+      "releaseDate": "2015-05-19"
+    }
   ]
 }`);
 const statsJson = esc(`{
+  "period": "all",
   "movies": { "want": 131, "watched": 895, "minutes": 104760 },
   "series": { "want": 16, "watching": 75, "watched": 96 },
-  "episodes": { "watched": 4213, "minutes": 168520 }
+  "episodes": { "watched": 4213, "minutes": 168520 },
+  "games": { "want": 12, "playing": 2, "played": 34, "minutes": 61200 },
+  "activity": [
+    { "date": "2025-01-01", "movieMinutes": 12480, "tvMinutes": 41320 },
+    { "date": "2026-01-01", "movieMinutes": 9260, "tvMinutes": 33970 }
+  ]
 }`);
+
+interface QueryParam {
+  name: string;
+  // prefilled when the endpoint needs a value to answer at all, empty otherwise
+  value?: string;
+  hint: string;
+}
 
 interface Endpoint {
   id: string;
@@ -58,14 +94,22 @@ interface Endpoint {
   method: "GET" | "POST" | "PATCH" | "DELETE";
   path: string;
   desc: string;
-  query?: string;
+  // a second paragraph, for the endpoints whose parameters need more than a clause
+  note?: string;
+  params?: QueryParam[];
   body?: string;
   resp?: string;
 }
 
+const paging: QueryParam[] = [
+  { name: "page", hint: "1" },
+  { name: "per", hint: "24" },
+];
+
 const endpoints: Endpoint[] = [
   { id: "get-live", group: "Health", method: "GET", path: "/live", desc: "Liveness probe. No authentication required.", resp: liveJson },
-  { id: "get-ready", group: "Health", method: "GET", path: "/ready", desc: "Readiness probe - 503 until Postgres and the TMDB proxy are reachable. No authentication required.", resp: readyJson },
+  { id: "get-ready", group: "Health", method: "GET", path: "/ready", desc: "Readiness probe — 503 until Postgres answers. No authentication required.", resp: readyJson },
+  { id: "get-health", group: "Health", method: "GET", path: "/health", desc: "Plain-text heartbeat, answered by middleware ahead of the router. Accepts HEAD as well as GET. No authentication required.", resp: esc(".") },
 
   { id: "register", group: "Users", method: "POST", path: "/api/v1/users/registrations", desc: "Create a new account.", body: `{
   "login": "cinephile",
@@ -75,13 +119,13 @@ const endpoints: Endpoint[] = [
   "last_name": "Doe",
   "appearance": "dark"
 }` },
-  { id: "login", group: "Users", method: "POST", path: "/api/v1/users/sessions", desc: "Log in. On success the returned access token is dropped into the Token field above automatically.", body: `{
+  { id: "login", group: "Users", method: "POST", path: "/api/v1/users/sessions", desc: "Log in. After a successful login the playground copies the access token into the Token field above.", body: `{
   "email": "you@example.com",
   "password": "your-password"
 }`, resp: tokenJson },
-  { id: "refresh", group: "Users", method: "POST", path: "/api/v1/users/tokens", desc: "Exchange a refresh token for a fresh access token.", body: `{
+  { id: "refresh", group: "Users", method: "POST", path: "/api/v1/users/tokens", desc: "Exchange a refresh token for a new token pair.", body: `{
   "refresh_token": "<paste refresh token>"
-}` },
+}`, resp: tokenJson },
 
   { id: "me", group: "Account", method: "GET", path: "/api/v1/accounts/me", desc: "The authenticated user." },
   { id: "update-account", group: "Account", method: "PATCH", path: "/api/v1/accounts", desc: "Update profile and appearance preference.", body: `{
@@ -89,13 +133,14 @@ const endpoints: Endpoint[] = [
   "last_name": "Doe",
   "appearance": "dark"
 }` },
-  { id: "stats", group: "Account", method: "GET", path: "/api/v1/accounts/stats", desc: "Watch-time totals and library breakdown. Add ?period=week|month|year for a bounded window, where every count covers that window alone: want becomes what was added inside it, and the watching count is dropped.", resp: statsJson },
+  { id: "stats", group: "Account", method: "GET", path: "/api/v1/accounts/stats", desc: "Library counts, watch-time totals and watch activity for the selected period.", note: "week, month and year mean the current calendar week, month and year, not a rolling window. Inside one of them, want counts what was added rather than the whole list, and the watching and playing counts are omitted. Defaults to all.", params: [{ name: "period", hint: "week | month | year | all" }], resp: statsJson },
 
-  { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library (want & watched).", resp: movieListJson },
-  { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library.", body: `{
-  "tmdbId": 693134,
+  { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | watched" }, ...paging], resp: movieListJson },
+  { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library. id is the TMDB movie id.", body: `{
+  "id": 693134,
   "title": "Dune: Part Two",
   "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
+  "runtime": 167,
   "state": "want"
 }` },
   { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations." },
@@ -105,11 +150,29 @@ const endpoints: Endpoint[] = [
 }` },
   { id: "movie-delete", group: "Movies", method: "DELETE", path: "/api/v1/movies/{id}", desc: "Remove the movie from the library." },
 
-  { id: "series-list", group: "TV Series", method: "GET", path: "/api/v1/series", desc: "Your series library (want, watching, watched)." },
-  { id: "series-create", group: "TV Series", method: "POST", path: "/api/v1/series", desc: "Add a show to the library.", body: `{
-  "tmdbId": 95396,
+  { id: "games-list", group: "Games", method: "GET", path: "/api/v1/games", desc: "Your game library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | playing | played" }, ...paging] },
+  { id: "games-create", group: "Games", method: "POST", path: "/api/v1/games", desc: "Add a game to the library. id is the IGDB game id, and posterPath is an IGDB cover image_id rather than a path.", body: `{
+  "id": 1942,
+  "title": "The Witcher 3: Wild Hunt",
+  "posterPath": "co1wyy",
+  "runtime": 3000,
+  "state": "want"
+}` },
+  { id: "game-get", group: "Games", method: "GET", path: "/api/v1/games/{id}", desc: "Game details from IGDB, with similar games and IGDB's estimated time for a main playthrough and for 100% completion, both in minutes." },
+  { id: "game-update", group: "Games", method: "PATCH", path: "/api/v1/games/{id}", desc: "Change state or pin the game.", body: `{
+  "state": "played",
+  "pinned": true
+}` },
+  { id: "game-delete", group: "Games", method: "DELETE", path: "/api/v1/games/{id}", desc: "Remove the game from the library." },
+
+  { id: "series-list", group: "TV Series", method: "GET", path: "/api/v1/series", desc: "Your series library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | watching | watched" }, ...paging] },
+  { id: "series-create", group: "TV Series", method: "POST", path: "/api/v1/series", desc: "Add a show to the library. id is the TMDB series id.", note: "status is TMDB's own, and it matters: a show left at Returning Series never derives to watched, however many episodes are ticked.", body: `{
+  "id": 95396,
   "title": "Severance",
-  "posterPath": "/lFf6LLrQjYldcZItzOkGmMMigP7.jpg",
+  "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
+  "seasonsCount": 3,
+  "episodesCount": 19,
+  "status": "Returning Series",
   "state": "want"
 }` },
   { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons." },
@@ -118,59 +181,107 @@ const endpoints: Endpoint[] = [
   "pinned": true
 }` },
   { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library." },
-  { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and its episodes." },
+  { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and episodes." },
   { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details." },
 
   { id: "progress-get", group: "Progress", method: "GET", path: "/api/v1/series/{id}/progress", desc: "Watched seasons and episodes for a show." },
-  { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark the whole show watched. The series id is taken from the URL; the body carries the metadata to persist the row.", body: `{
+  { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark a show watched. Ids come from the URL, and the body carries the rows to write.", note: "Only the seasons and episodes you list are recorded, so a body without them marks nothing. The example lists two episodes of season one; a real client sends all nine, and every other season too.", body: `{
   "series": {
     "title": "Severance",
-    "posterPath": "/lFf6LLrQjYldcZItzOkGmMMigP7.jpg",
-    "seasonsCount": 2,
+    "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
+    "seasonsCount": 3,
     "episodesCount": 19,
     "status": "Returning Series"
+  },
+  "seasons": [
+    {
+      "id": 135726,
+      "title": "Season 1",
+      "number": 1,
+      "episodesCount": 9,
+      "episodes": [
+        { "id": 1982925, "title": "Good News About Hell", "posterPath": "/sP3GZe9j7BY3CAyZGFuZxxnGpN1.jpg", "runtime": 57, "airDate": "2022-02-17" },
+        { "id": 3396429, "title": "Half Loop", "posterPath": "/wIQP0P2tyE7VRIN3xR8Efq7UgKt.jpg", "runtime": 53, "airDate": "2022-02-17" }
+      ]
+    }
+  ]
+}` },
+  { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show, dropping every season and episode recorded for it." },
+  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", note: "The episodes array is what actually gets recorded. Send the season's episodes in it — without them the show ends up with no watched episodes, and nothing is tracked.", body: `{
+  "series": {
+    "title": "Severance",
+    "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
+    "seasonsCount": 3,
+    "episodesCount": 19,
+    "status": "Returning Series"
+  },
+  "season": { "title": "Season 1", "number": 1, "episodesCount": 9 },
+  "episodes": [
+    { "id": 1982925, "title": "Good News About Hell", "posterPath": "/sP3GZe9j7BY3CAyZGFuZxxnGpN1.jpg", "runtime": 57, "airDate": "2022-02-17" },
+    { "id": 3396429, "title": "Half Loop", "posterPath": "/wIQP0P2tyE7VRIN3xR8Efq7UgKt.jpg", "runtime": 53, "airDate": "2022-02-17" }
+  ]
+}` },
+  { id: "season-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Unmark a season and its episodes." },
+  { id: "episode-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Mark an episode as watched.", note: "The show and season rows are created from this body if they don't exist yet, so send their metadata alongside the episode.", body: `{
+  "series": {
+    "title": "Severance",
+    "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
+    "seasonsCount": 3,
+    "episodesCount": 19,
+    "status": "Returning Series"
+  },
+  "season": { "title": "Season 1", "number": 1, "episodesCount": 9 },
+  "episode": {
+    "title": "Good News About Hell",
+    "posterPath": "/sP3GZe9j7BY3CAyZGFuZxxnGpN1.jpg",
+    "runtime": 57,
+    "airDate": "2022-02-17"
   }
-}` },
-  { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show." },
-  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", body: `{
-  "series": { "title": "Severance" },
-  "season": { "title": "Season 1", "number": 1, "episodesCount": 9 }
-}` },
-  { id: "season-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Unmark a season." },
-  { id: "episode-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Mark an episode watched.", body: `{
-  "series": { "title": "Severance" },
-  "season": { "number": 1 },
-  "episode": { "title": "Good News About Hell", "runtime": 57, "airDate": "2022-02-18" }
 }` },
   { id: "episode-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Unmark an episode." },
 
-  { id: "search-movies", group: "Search & Trending", method: "GET", path: "/api/v1/search/movies", desc: "Search movies.", query: "dune" },
-  { id: "search-series", group: "Search & Trending", method: "GET", path: "/api/v1/search/series", desc: "Search TV shows.", query: "silo" },
-  { id: "search-people", group: "Search & Trending", method: "GET", path: "/api/v1/search/people", desc: "Search people.", query: "villeneuve" },
-  { id: "trending-movies", group: "Search & Trending", method: "GET", path: "/api/v1/trending/movies", desc: "Trending movies." },
-  { id: "trending-series", group: "Search & Trending", method: "GET", path: "/api/v1/trending/series", desc: "Trending TV shows." },
-  { id: "trending-people", group: "Search & Trending", method: "GET", path: "/api/v1/trending/people", desc: "Trending people." },
+  { id: "search-movies", group: "Search & Trending", method: "GET", path: "/api/v1/search/movies", desc: "Search movies. query is required.", params: [{ name: "query", value: "dune", hint: "search terms" }, { name: "page", hint: "1" }] },
+  { id: "search-series", group: "Search & Trending", method: "GET", path: "/api/v1/search/series", desc: "Search TV shows. query is required.", params: [{ name: "query", value: "silo", hint: "search terms" }, { name: "page", hint: "1" }] },
+  { id: "search-games", group: "Search & Trending", method: "GET", path: "/api/v1/search/games", desc: "Search PlayStation 5 and PlayStation 4 games. query is required.", params: [{ name: "query", value: "witcher", hint: "search terms" }, { name: "page", hint: "1" }] },
+  { id: "search-people", group: "Search & Trending", method: "GET", path: "/api/v1/search/people", desc: "Search people. query is required.", params: [{ name: "query", value: "villeneuve", hint: "search terms" }, { name: "page", hint: "1" }] },
+  { id: "trending-movies", group: "Search & Trending", method: "GET", path: "/api/v1/trending/movies", desc: "Trending movies.", params: [{ name: "page", hint: "1" }] },
+  { id: "trending-series", group: "Search & Trending", method: "GET", path: "/api/v1/trending/series", desc: "Trending TV shows.", params: [{ name: "page", hint: "1" }] },
+  { id: "trending-games", group: "Search & Trending", method: "GET", path: "/api/v1/trending/games", desc: "Trending PlayStation games.", params: [{ name: "page", hint: "1" }] },
+  { id: "trending-people", group: "Search & Trending", method: "GET", path: "/api/v1/trending/people", desc: "Trending people.", params: [{ name: "page", hint: "1" }] },
 
-  { id: "up-next", group: "Up Next", method: "GET", path: "/api/v1/up-next", desc: "Aired-but-unwatched episodes and released movies from pinned titles.", resp: upNextJson },
+  { id: "up-next", group: "Up Next", method: "GET", path: "/api/v1/up-next", desc: "The next aired episode you haven't watched of each pinned show you're watching, plus released movies and games from your pinned want lists.", resp: upNextJson },
 
-  { id: "person-get", group: "People", method: "GET", path: "/api/v1/people/{id}", desc: "Person details and known-for credits." },
+  { id: "person-get", group: "People", method: "GET", path: "/api/v1/people/{id}", desc: "Person details and notable credits." },
 ];
 
 const groups = [...new Set(endpoints.map((e) => e.group))];
-const paramDefaults: Record<string, string> = { seasonNumber: "1", episodeNumber: "1" };
-const paramPlaceholders: Record<string, string> = {
-  id: "tmdb id", seasonId: "season tmdb id", episodeId: "episode tmdb id",
-  seasonNumber: "season #", episodeNumber: "episode #",
+const pathDefaults: Record<string, string> = { seasonNumber: "1", episodeNumber: "1" };
+
+// {id} is a different provider's id depending on the route, and a generic hint is
+// how you end up sending a TMDB id to a game endpoint
+const idHints: Record<string, string> = {
+  Movies: "TMDB movie id",
+  "TV Series": "TMDB series id",
+  Progress: "TMDB series id",
+  Games: "IGDB game id",
+  People: "TMDB person id",
 };
-const paramsOf = (path: string) => [...path.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
+const pathHints: Record<string, string> = {
+  seasonId: "TMDB season id", episodeId: "TMDB episode id",
+  seasonNumber: "season number", episodeNumber: "episode number",
+};
+const hintFor = (group: string, param: string) =>
+  param === "id" ? (idHints[group] ?? "id") : (pathHints[param] ?? param);
+
+const pathParamsOf = (path: string) => [...path.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
 const short = (path: string) => path.replace("/api/v1", "") || "/";
 ---
 
 <Layout
   title="API Reference - biinge"
-  description="Interactive REST API reference for the biinge backend: JWT auth, movie and TV library, episode-level progress, search, trending, and the Up Next queue. Try every endpoint live against your own server."
+  description="Interactive REST API reference for the biinge backend, with a playground that sends every request to your own server."
 >
-  <Header section="api" wide />
+  <Header wide />
   <div class="api-layout">
     <aside class="api-sidebar">
       <div class="sb-title">API Reference</div>
@@ -203,22 +314,26 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
         <div class="eyebrow-label">REST API</div>
         <h1>API Reference</h1>
         <p class="intro-lead">
-          biinge's backend is a small JSON REST API - the iOS app is just one
-          client. Point the playground at your own server and try every endpoint
-          live.
+          The iOS app runs on this JSON API, and so can anything else you write.
+          Point the playground at your own server to send a real request to every
+          endpoint below.
         </p>
 
         <div class="conn">
           <div class="conn-doc">
             <p>
-              Every <code>/api/v1</code> call needs an <code>Authorization: Bearer</code>
-              token. Run <a href="#login">Login</a> below and the access token
-              lands in the field here automatically.
+              Registration, login and token refresh are public. Every other
+              <code>/api/v1</code> endpoint needs an
+              <code>Authorization: Bearer</code> token — run
+              <a href="#login">Login</a> below and the playground copies the
+              access token into the field here.
             </p>
             <p class="conn-note">
-              Requests fire from your browser. <code>http://localhost</code> is
-              exempt from mixed-content blocking, but your server's CORS policy
-              (<code>CLIENT_URL</code>) must allow this origin.
+              Requests go straight from your browser, so your server's CORS
+              policy (<code>CLIENT_URL</code>) has to allow this origin. Use
+              HTTPS for a remote server: this page is served over HTTPS, and
+              browsers block plain HTTP requests from it. Loopback addresses are
+              the exception, though the details vary by browser.
             </p>
           </div>
           <div class="conn-fields">
@@ -235,7 +350,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
       </section>
 
       {endpoints.map((ep, i) => {
-        const params = paramsOf(ep.path);
+        const pathParams = pathParamsOf(ep.path);
         return (
           <>
             {(i === 0 || endpoints[i - 1].group !== ep.group) && (
@@ -249,6 +364,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
               <div class="two-col">
                 <div class="col-doc">
                   <p>{ep.desc}</p>
+                  {ep.note && <p>{ep.note}</p>}
                   {ep.resp && (
                     <div class="resp-block">
                       <div class="resp-label">Example response <span class="ok">200</span></div>
@@ -258,18 +374,18 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
                 </div>
                 <div class="col-play">
                   <div class="pg" data-method={ep.method} data-path={ep.path}>
-                    {params.map((p) => (
+                    {pathParams.map((p) => (
                       <div class="pg-row">
                         <label class="pg-label">{p}</label>
-                        <input type="text" class="pg-input pg-param" data-param={p} value={paramDefaults[p] ?? ""} placeholder={paramPlaceholders[p] ?? p} />
+                        <input type="text" class="pg-input pg-param" data-param={p} value={pathDefaults[p] ?? ""} placeholder={hintFor(ep.group, p)} />
                       </div>
                     ))}
-                    {ep.query !== undefined && (
+                    {(ep.params ?? []).map((p) => (
                       <div class="pg-row">
-                        <label class="pg-label">query</label>
-                        <input type="text" class="pg-input pg-query" value={ep.query} placeholder="search terms" />
+                        <label class="pg-label">{p.name}</label>
+                        <input type="text" class="pg-input pg-query" data-query={p.name} value={p.value ?? ""} placeholder={p.hint} />
                       </div>
-                    )}
+                    ))}
                     {ep.body && (
                       <textarea class="pg-input pg-body" spellcheck="false" rows="5">{ep.body}</textarea>
                     )}
@@ -300,19 +416,28 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
         </div>
         <div class="two-col">
           <div class="col-doc col-full">
-            <p>Failures return a JSON body with an <code>error</code> message and one of these status codes.</p>
+            <p>
+              A failure inside a controller returns a JSON body with an
+              <code>error</code> message and one of these status codes. Responses
+              from the middleware around it — rate limiting, an unmatched route —
+              are plain text.
+            </p>
             <table>
               <thead><tr><th>Status</th><th>Meaning</th><th>When</th></tr></thead>
               <tbody>
-                <tr><td><code>400</code></td><td>Bad Request</td><td>Malformed JSON or missing required fields</td></tr>
-                <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid, or expired access token</td></tr>
-                <tr><td><code>404</code></td><td>Not Found</td><td>The movie, series, or resource does not exist</td></tr>
-                <tr><td><code>409</code></td><td>Conflict</td><td>The title is already in your library</td></tr>
-                <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>Validation failed on a well-formed request</td></tr>
-                <tr><td><code>429</code></td><td>Too Many Requests</td><td>Auth endpoints are rate-limited</td></tr>
-                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable - see <code>/ready</code></td></tr>
+                <tr><td><code>400</code></td><td>Bad Request</td><td>Malformed JSON, an unparseable id, or a body that fails validation</td></tr>
+                <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid or expired access token, or wrong login credentials</td></tr>
+                <tr><td><code>409</code></td><td>Conflict</td><td>Registering a login or email that is already taken</td></tr>
+                <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>The request was well formed but the work failed — including a title the upstream provider doesn't have</td></tr>
+                <tr><td><code>429</code></td><td>Too Many Requests</td><td>More than 5 requests a minute per IP to the public <code>/users</code> routes, or 120 a minute per user everywhere else</td></tr>
+                <tr><td><code>500</code></td><td>Internal Server Error</td><td>Registration failed for a reason the API won't detail</td></tr>
+                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable, from <code>/ready</code> or from the auth middleware</td></tr>
               </tbody>
             </table>
+            <p class="errors-note">
+              There is no <code>404</code>: a title that isn't in your library, or
+              that TMDB and IGDB can't resolve, comes back as <code>422</code>.
+            </p>
           </div>
         </div>
       </section>
@@ -337,11 +462,15 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
         if (val) path = path.replace(`{${inp.dataset.param}}`, encodeURIComponent(val));
       });
 
-      let qs = "";
-      const q = pg.querySelector(".pg-query") as HTMLInputElement | null;
-      if (q && q.value.trim()) qs = "?query=" + encodeURIComponent(q.value.trim());
+      const query = new URLSearchParams();
+      pg.querySelectorAll(".pg-query").forEach((el) => {
+        const inp = el as HTMLInputElement;
+        const val = inp.value.trim();
+        if (val) query.set(inp.dataset.query!, val);
+      });
 
-      const url = base + path + qs;
+      const qs = query.toString();
+      const url = base + path + (qs ? `?${qs}` : "");
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -387,7 +516,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
         statusEl.className = "pg-status err";
         timeEl.textContent = `${elapsed}ms`;
         outEl.textContent = (err && err.message ? err.message : "Request failed") +
-          "\n\nIf your server is running, this is usually CORS or a wrong Base URL.";
+          "\n\nIf the server is running, check the Base URL and its CORS settings.";
       }
     });
   });
@@ -520,7 +649,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
   }
 
   h1 {
-    font-family: var(--heading);
+    font-family: var(--display);
     font-size: 2.4rem;
     font-weight: 700;
     letter-spacing: -0.03em;
@@ -539,7 +668,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
   .api-intro { scroll-margin-top: 70px; }
 
   .group-heading {
-    font-family: var(--heading);
+    font-family: var(--display);
     font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -586,6 +715,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
   .col-full { grid-column: 1 / -1; }
 
   .col-doc p { font-size: 0.92rem; line-height: 1.65; color: var(--text-muted); margin: 0 0 14px; }
+  .errors-note { margin-top: 14px; }
 
   code {
     font-family: var(--mono);
@@ -632,7 +762,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
     position: sticky;
     top: 74px;
     background: var(--card-bg);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 14px;
     display: flex;

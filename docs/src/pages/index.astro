@@ -2,26 +2,170 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Hero from "../components/Hero.astro";
-import DeviceFrame from "../components/DeviceFrame.astro";
-import PosterBand from "../components/PosterBand.astro";
-import Features from "../components/Features.astro";
-import SelfHostCTA from "../components/SelfHostCTA.astro";
+import Search from "../components/Search.astro";
+import ShowStates from "../components/ShowStates.astro";
+import Chapter from "../components/Chapter.astro";
+import Pin from "../components/Pin.astro";
+import UpNext from "../components/UpNext.astro";
+import Cta from "../components/Cta.astro";
 import Footer from "../components/Footer.astro";
+
+// Search comes first because nothing reaches a library without it, then the
+// chapters run in the order the tabs sit in the app. Grounds alternate so no two
+// sections touch on the same tone - in dark theme `plain` and `focus` resolve to
+// the same colour, so those two may never end up adjacent. With a dark hero at
+// one end and a dark CTA at the other, an even section count can't alternate all
+// the way through: Search and Movies share the tint, and read as one band -
+// find it, then track it
+const movies = {
+  id: "movies",
+  state: "watched" as const,
+  label: "Movies",
+  tone: "tint" as const,
+  title: "Save movies for later. Mark what you've seen.",
+  thesis:
+    "Movies have two clear states: Want and Watched. Add one when it catches your eye, then move it to Watched when the credits roll.",
+  features: [
+    {
+      title: "Find your next movie",
+      desc: "Search by title, or open Search to browse the movies that are trending now.",
+    },
+    {
+      title: "Check the details",
+      desc: "See the rating, release date, runtime and synopsis together, with the trailer one tap away.",
+    },
+    {
+      title: "Keep your lists current",
+      desc: "Move a movie between Want and Watched, pin it to the top, or remove it from your library from the same menu.",
+    },
+  ],
+  // Movies is a state machine, so the taps explain it faster than the copy
+  // beside them can. The captions are the accessible version of the sequence
+  flow: [
+    { name: "flow-1-library", caption: "Your Want list, as you left it." },
+    { name: "flow-2-untracked", caption: "A movie you haven't added yet." },
+    { name: "flow-3-want", caption: "Tap Want, and it joins the list." },
+    { name: "flow-4-actions", caption: "Tap it again for the rest of the options." },
+    { name: "flow-5-pinned", caption: "Pin it to keep it at the top." },
+    { name: "flow-6-watched", caption: "Mark it Watched when you're done." },
+  ],
+};
+
+const tv = {
+  id: "tv",
+  state: "watching" as const,
+  label: "TV",
+  tone: "focus" as const,
+  flip: true,
+  title: "Tick an episode. The show keeps up.",
+  thesis:
+    "Mark an episode and Biinge moves the show to Watching. Finish an ended series and it moves to Watched. You record what you've seen; Biinge keeps the show's state in sync.",
+  features: [
+    {
+      title: "Mark progress at any level",
+      desc: "Tick one episode, a whole season, or the entire show. Its progress and state update to match.",
+    },
+    {
+      title: "Correct progress anytime",
+      desc: "Untick an episode and Biinge recalculates the show, moving it back to Watching when needed.",
+    },
+    {
+      title: "Stay ready for new episodes",
+      desc: "A returning series stays in Watching when you're caught up, ready for the next season.",
+    },
+  ],
+  // the cascade is the hardest thing on the page to describe, so this one runs
+  // library to library - out of Want, through both granularities of marking, and
+  // back into Watching. Nine frames, so it runs a shorter beat than Movies
+  step: "2s",
+  flow: [
+    { name: "tvflow-1-library", caption: "Shows you mean to get to." },
+    { name: "tvflow-2-details", caption: "Open one you haven't started." },
+    { name: "tvflow-3-season", caption: "Season one, nothing ticked yet." },
+    { name: "tvflow-4-episode", caption: "Open a single episode and mark it." },
+    { name: "tvflow-5-marked", caption: "Only that one is ticked." },
+    { name: "tvflow-6-state", caption: "The show is now Watching." },
+    { name: "tvflow-7-filled", caption: "Or take a whole season in one tap." },
+    { name: "tvflow-8-next", caption: "Still airing, so it stays at Watching, with season two next." },
+    { name: "tvflow-9-watching", caption: "Back to the library, alongside everything else you've started." },
+  ],
+};
+
+const games = {
+  id: "games",
+  state: "watching" as const,
+  label: "Games",
+  tone: "plain" as const,
+  title: "Plan what to play next.",
+  thesis:
+    "Keep games in Want, Playing or Played, and check the estimated time to beat before you begin. You control every move between the three lists.",
+  features: [
+    {
+      title: "Move between three lists",
+      desc: "Set a game to Want, Playing or Played from the same menu, whenever you like.",
+    },
+    {
+      title: "Time to beat",
+      desc: "IGDB's estimate for a main playthrough, with the 100% run beside it when that one is longer.",
+    },
+    {
+      title: "Remember upcoming releases",
+      desc: "Pin a game you're waiting for and it appears in Up Next on release day.",
+    },
+  ],
+  screen: {
+    name: "games",
+    alt: "The Games library, with Want, Playing and Played tabs",
+  },
+};
+
+// the last chapter: what the three libraries add up to
+const statistics = {
+  id: "stats",
+  state: "watched" as const,
+  label: "Statistics",
+  tone: "tint" as const,
+  flip: true,
+  title: "See your watch time add up.",
+  thesis:
+    "Every movie and episode contributes its runtime when you mark it, so your watch totals build automatically. There is no timer to start and nothing extra to log.",
+  features: [
+    {
+      title: "Choose a time range",
+      desc: "Review this week, this month, this year, or everything you've tracked.",
+    },
+    {
+      title: "Compare movies and TV",
+      desc: "See each share of your total watch time and how both change across the selected period.",
+    },
+    {
+      title: "Count every list",
+      desc: "See how many movies, shows and games are waiting, in progress or finished. Game estimates are never counted as time played.",
+    },
+  ],
+  screen: {
+    name: "stats",
+    alt: "Statistics: the watch activity chart and the watch-time split",
+  },
+};
 ---
 
 <Layout
-  title="biinge - Self-hosted movie & TV tracker"
-  description="biinge is a self-hosted tracker for movies and TV shows. Separate want / watching / watched lists, episode-level progress, and an Up Next queue - a Go API you run and a native iOS app."
+  title="biinge — a self-hosted tracker for movies, TV shows and games"
+  description="Track movies, TV shows and games in a native iOS app, backed by a server you run yourself."
 >
-  <Header />
+  <Header over />
   <main>
-    <Hero>
-      <DeviceFrame name="tv-shows" alt="biinge TV Shows library" eager />
-      <DeviceFrame name="movies" alt="biinge Movies library" eager />
-    </Hero>
-    <PosterBand />
-    <Features />
-    <SelfHostCTA />
+    <Hero />
+    <Search />
+    <Chapter {...movies} />
+    <Chapter {...tv} />
+    <ShowStates />
+    <Chapter {...games} />
+    <Pin />
+    <UpNext />
+    <Chapter {...statistics} />
+    <Cta />
   </main>
   <Footer />
 </Layout>

@@ -1,0 +1,181 @@
+---
+import StateRing from "./StateRing.astro";
+import DeviceFrame from "./DeviceFrame.astro";
+import DeviceFlow from "./DeviceFlow.astro";
+
+interface Feature {
+  title: string;
+  desc: string;
+}
+
+interface Props {
+  id: string;
+  state: "want" | "watching" | "watched";
+  label: string;
+  title: string;
+  thesis: string;
+  features: Feature[];
+  // a chapter holds one screenshot, or a flow the phone plays on a loop
+  screen?: { name: string; alt: string };
+  flow?: { name: string; caption: string }[];
+  // seconds a flow frame holds, when the default beat is wrong for its length
+  step?: string;
+  tone?: "plain" | "tint" | "focus";
+  flip?: boolean;
+}
+
+const {
+  id,
+  state,
+  label,
+  title,
+  thesis,
+  features,
+  screen,
+  flow,
+  step,
+  tone = "plain",
+  flip = false,
+} = Astro.props;
+---
+
+<section class:list={["chapter", tone === "tint" && "tint", tone === "focus" && "focus"]} id={id}>
+  <div class="container">
+    <div class:list={["body", { flip }]}>
+      <div class="copy" data-reveal>
+        <p class="label">
+          <StateRing state={state} size={15} animate />
+          {label}
+        </p>
+
+        <h2 class="title display-soft">{title}</h2>
+        <p class="thesis">{thesis}</p>
+
+        <ul class="features">
+          {features.map((f) => (
+            <li>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="screen" data-reveal style="--reveal-delay: 140ms">
+        {flow ? <DeviceFlow frames={flow} step={step} /> : screen && <DeviceFrame name={screen.name} alt={screen.alt} />}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding: 120px 0 128px;
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.58fr);
+    gap: clamp(64px, 7vw, 104px);
+    align-items: center;
+  }
+
+  /* Flipped chapters keep the same generous copy width after the phone moves left. */
+  .body.flip {
+    grid-template-columns: minmax(260px, 0.58fr) minmax(0, 1fr);
+  }
+
+  .body.flip .copy {
+    order: 2;
+  }
+
+  .copy {
+    max-width: 680px;
+  }
+
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: clamp(2rem, 3.9vw, 3.1rem);
+    margin-bottom: 20px;
+    max-width: 18ch;
+  }
+
+  .thesis {
+    font-size: 1.15rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 56ch;
+    margin-bottom: 48px;
+  }
+
+  .features {
+    list-style: none;
+    display: grid;
+    gap: 26px;
+    max-width: 58ch;
+  }
+
+  .features h3 {
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .features p {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+  }
+
+  .screen {
+    width: 100%;
+    max-width: 300px;
+    justify-self: center;
+  }
+
+  @media (max-width: 900px) {
+    .body {
+      grid-template-columns: 1fr;
+      gap: 52px;
+    }
+
+    .body.flip {
+      grid-template-columns: 1fr;
+    }
+
+    .body.flip .copy {
+      order: 0;
+    }
+
+    .screen {
+      justify-self: start;
+      max-width: 240px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .chapter {
+      padding: 72px 0 76px;
+    }
+
+    .thesis {
+      font-size: 1.05rem;
+      margin-bottom: 34px;
+    }
+
+    .screen {
+      max-width: 200px;
+    }
+  }
+</style>

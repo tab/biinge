@@ -1,0 +1,129 @@
+---
+import StateRing from "./StateRing.astro";
+import DeviceFrame from "./DeviceFrame.astro";
+
+// the three groups the queue is built from, named the way the app names them
+const feeds = [
+  {
+    state: "watching" as const,
+    title: "New Episodes",
+    desc: "The next aired episode from every pinned show in Watching.",
+  },
+  {
+    state: "want" as const,
+    title: "Movies",
+    desc: "Released movies from your pinned Want list.",
+  },
+  {
+    state: "want" as const,
+    title: "Games",
+    desc: "Released games from your pinned Want list.",
+  },
+];
+---
+
+<section class="upnext" id="up-next">
+  <div class="container">
+    <div class="stage">
+      <div class="phone" data-reveal>
+        <DeviceFrame name="next" alt="The Up Next queue, showing new episodes and newly released movies" />
+      </div>
+
+      <div class="copy" data-reveal style="--reveal-delay: 120ms">
+        <p class="eyebrow-label">Up Next</p>
+        <h2 class="title display-soft">Everything ready to start, in one list.</h2>
+        <p class="lead">
+          Up Next turns your pins into a short queue of aired episodes and
+          released movies or games. Upcoming titles appear on release day.
+        </p>
+
+        <ul class="feeds">
+          {feeds.map((f) => (
+            <li>
+              <StateRing state={f.state} size={15} />
+              <div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .upnext {
+    padding: 120px 0 128px;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 88px;
+    align-items: center;
+  }
+
+  .title {
+    font-size: clamp(2rem, 3.9vw, 3.1rem);
+    margin-bottom: 18px;
+    max-width: 18ch;
+  }
+
+  .lead {
+    font-size: 1.15rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 56ch;
+    margin-bottom: 40px;
+  }
+
+  .feeds {
+    list-style: none;
+    display: grid;
+    gap: 28px;
+    max-width: 58ch;
+  }
+
+  .feeds li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .feeds li :global(.ring) {
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .feeds h3 {
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .feeds p {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 960px) {
+    .upnext {
+      padding: 72px 0 76px;
+    }
+
+    .stage {
+      grid-template-columns: 1fr;
+      gap: 44px;
+      justify-items: start;
+    }
+
+    .phone {
+      width: 200px;
+    }
+  }
+</style>

@@ -1,0 +1,178 @@
+---
+import DeviceFrame from "./DeviceFrame.astro";
+
+/*
+ * Search fans one query out to four endpoints at once, so the groups are laid
+ * out as a grid rather than a list - they arrive together, not in order. The
+ * mark beside each is the shape the app draws that kind of result in: a poster
+ * for the three media, a circle for people
+ */
+const groups = [
+  {
+    name: "Movies",
+    shape: "poster",
+    desc: "Movies from TMDB. Open one to set Want or Watched.",
+  },
+  {
+    name: "TV Shows",
+    shape: "poster",
+    desc: "TV shows from TMDB. Open one and start ticking episodes.",
+  },
+  {
+    name: "Games",
+    shape: "poster",
+    desc: "Games from IGDB. Open one to set Want, Playing or Played.",
+  },
+  {
+    name: "People",
+    shape: "circle",
+    desc: "Actors and directors. Open one to browse everything they've been in.",
+  },
+];
+---
+
+<section class="search tint" id="search">
+  <div class="container">
+    <div class="stage">
+      <div class="phone" data-reveal>
+        <DeviceFrame
+          name="search"
+          alt="Search open on Trending, with rows of movies, TV shows and games"
+        />
+      </div>
+
+      <div class="copy" data-reveal style="--reveal-delay: 120ms">
+        <p class="eyebrow-label">Search</p>
+        <h2 class="title display-soft">Everything starts with a search.</h2>
+        <p class="lead">
+          Type a title and Biinge searches movies, TV shows, games and people at
+          the same time, returning each as its own row. Anything already in your
+          library carries a check.
+        </p>
+
+        <ul class="groups">
+          {groups.map((g) => (
+            <li>
+              <span class:list={["mark", g.shape]} aria-hidden="true"></span>
+              <div>
+                <h3>{g.name}</h3>
+                <p>{g.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <p class="note">With the field empty, Search opens on what's trending now.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .search {
+    padding: 120px 0 128px;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 88px;
+    align-items: center;
+  }
+
+  .title {
+    font-size: clamp(2rem, 3.9vw, 3.1rem);
+    margin-bottom: 18px;
+    max-width: 20ch;
+  }
+
+  .lead {
+    font-size: 1.15rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 56ch;
+    margin-bottom: 40px;
+  }
+
+  .groups {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 40px;
+    max-width: 62ch;
+  }
+
+  .groups li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  /*
+   * the app's own result shapes, drawn small: a poster for the three media, the
+   * grayscale circle it draws people in. Solid, because an outlined box this
+   * size reads as a checkbox
+   */
+  .mark {
+    flex-shrink: 0;
+    margin-top: 5px;
+    width: 14px;
+    height: 21px;
+    background: var(--text-faint);
+    border-radius: 3px;
+  }
+
+  .mark.circle {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    margin-top: 7px;
+  }
+
+  .groups h3 {
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .groups p {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+  }
+
+  .note {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: var(--text-faint);
+    margin-top: 34px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    max-width: 62ch;
+  }
+
+  @media (max-width: 960px) {
+    .search {
+      padding: 72px 0 76px;
+    }
+
+    .stage {
+      grid-template-columns: 1fr;
+      gap: 44px;
+      justify-items: start;
+    }
+
+    .phone {
+      width: 200px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .groups {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+</style>

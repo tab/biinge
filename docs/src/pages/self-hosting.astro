@@ -7,10 +7,11 @@ import CodeBlock from "../components/CodeBlock.astro";
 const clone = `git clone https://github.com/tab/biinge.git
 cd biinge`;
 
-const env = `# api/.env.development - replace the SECRET placeholders
+const env = `# api/.env.development.local — gitignored, never commit it
 TMDB_API_READ_ACCESS_TOKEN=<your TMDB v4 read token>
-JWT_SECRET_KEY=<a long random string>
-SECRET_KEY_BASE=<a long random string>`;
+IGDB_CLIENT_ID=<your Twitch app client id>
+IGDB_CLIENT_SECRET=<your Twitch app client secret>
+JWT_SECRET_KEY=<32+ random bytes>`;
 
 const stack = `# 1. datastores first
 docker compose up -d database redis
@@ -21,48 +22,60 @@ make -C api db:migrate
 # 3. then the API, on :8080
 docker compose up -d api`;
 
-const app = `# build and run the iOS app against your API
-make -C ios build     # or open ios/Biinge.xcodeproj in Xcode 26`;
+const app = `# compile the app against your API
+make -C ios build`;
 
 const config = [
-  { name: "TMDB_API_READ_ACCESS_TOKEN", purpose: "TMDB v4 read token - required for search, detail, and trending" },
+  { name: "GO_ENV", purpose: "Selects the environment file and validation rules; defaults to development" },
+  { name: "APP_ADDRESS", purpose: "Address and port the API listens on, such as 0.0.0.0:8080" },
+  { name: "TMDB_API_READ_ACCESS_TOKEN", purpose: "TMDB v4 read token for movie and TV search, details and trending" },
+  { name: "IGDB_CLIENT_ID / IGDB_CLIENT_SECRET", purpose: "Twitch application credentials used to access IGDB game data; required outside development" },
   { name: "DATABASE_DSN", purpose: "Postgres connection string" },
-  { name: "REDIS_URL", purpose: "Redis URL for the TMDB cache - leave unset to serve uncached" },
-  { name: "JWT_SECRET_KEY / SECRET_KEY_BASE", purpose: "Token signing secrets - replace the SECRET placeholders" },
-  { name: "WORKER_SYNC_ENABLED", purpose: "Turn the background TMDB sync worker on or off" },
+  { name: "REDIS_URL", purpose: "Redis URL for the metadata cache; leave it unset to run without caching" },
+  { name: "JWT_SECRET_KEY", purpose: "Signs and verifies access tokens; must be at least 32 bytes outside development" },
+  { name: "CLIENT_URL", purpose: "Adds an HTTPS client origin to the API's CORS allowlist" },
+  { name: "WORKER_SYNC_ENABLED / WORKER_SYNC_INTERVAL", purpose: "Controls the background TMDB refresh worker and how often it runs" },
   { name: "SENTRY_DSN", purpose: "Error reporting (optional)" },
 ];
 ---
 
 <Layout
-  title="Self-host biinge"
-  description="Run biinge on your own machine: bring up Postgres, Redis, and the Go API with Docker Compose, apply migrations, and point the iOS app at your server."
+  title="Self-hosting — biinge"
+  description="Run the biinge API with Docker and connect the native iOS app to your own server."
 >
-  <Header section="self-hosting" />
+  <Header />
   <main class="page">
     <div class="container">
       <div class="page-head">
-        <div class="eyebrow-label">Self-host</div>
-        <h1>Self-host biinge.</h1>
+        <p class="eyebrow-label">Self-hosting</p>
+        <h1>Run Biinge on your own server.</h1>
         <p class="lead">
-          The backend runs anywhere Docker does. Bring up Postgres, Redis, and
-          the API, apply migrations, and point the app at your server.
+          Run the Go API with PostgreSQL and Redis, then connect the native iOS
+          app. The steps below create a local development stack; review the
+          <a href="#production">production checklist</a> before exposing it to
+          the internet.
         </p>
       </div>
 
       <div class="prereq">
         <h2>Before you start</h2>
         <ul>
-          <li><strong>Docker</strong> - runs Postgres, Redis, and the API</li>
+          <li><strong>Docker with Compose</strong> — runs Postgres, Redis and the API</li>
           <li>
             A free <a href="https://developer.themoviedb.org" target="_blank" rel="noopener">TMDB</a>
-            v4 read access token - powers search, detail, and trending
+            v4 read access token — provides movie and TV search, details and trending
+          </li>
+          <li>
+            A <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener">Twitch application</a>
+            client ID and secret — gives the API access to
+            <a href="https://api-docs.igdb.com" target="_blank" rel="noopener">IGDB</a>
+            game data
           </li>
           <li>
             <a href="https://github.com/pressly/goose" target="_blank" rel="noopener">goose</a>
-            - applies database migrations
+            — applies database migrations
           </li>
-          <li><strong>Xcode 26</strong> - to build the iOS app</li>
+          <li><strong>Xcode 26</strong> — to build the iOS app</li>
         </ul>
       </div>
 
@@ -73,32 +86,45 @@ const config = [
         </li>
 
         <li class="step">
-          <div class="step-head"><span class="num">2</span><h3>Add your TMDB token</h3></div>
+          <div class="step-head"><span class="num">2</span><h3>Add your API keys</h3></div>
           <p>
-            The API reads env from <code>api/.env.development</code>, committed
-            with <code>SECRET</code> placeholders. Drop in your token and a pair
-            of signing secrets - or keep them in a gitignored
-            <code>api/.env.development.local</code> override.
+            Create <code>api/.env.development.local</code> for your credentials.
+            The file is gitignored and loaded after the committed development
+            defaults, whether the API runs in Docker or directly.
           </p>
           <CodeBlock code={env} label="env" />
+          <p class="note">
+            In development, missing IGDB credentials leave saved games available
+            but return no game search results. Other environments will not start
+            without them.
+          </p>
         </li>
 
         <li class="step">
           <div class="step-head"><span class="num">3</span><h3>Bring up the stack</h3></div>
           <CodeBlock code={stack} label="bash" />
           <p class="note">
-            Prefer to run it directly? <code>cd api && GO_ENV=development go run ./cmd/biinge</code>,
-            or <code>fuku up</code> to wait on <code>/ready</code>. Health lives
-            at <code>GET /health</code>, readiness at <code>GET /ready</code>.
+            To run only the API outside Docker, use
+            <code>cd api && GO_ENV=development go run ./cmd/biinge</code>. If you
+            have Fuku installed, <code>fuku up</code> starts it and waits on
+            <code>/ready</code>. The health endpoints are <code>GET /live</code>
+            for liveness and <code>GET /ready</code> for readiness.
           </p>
         </li>
 
         <li class="step">
-          <div class="step-head"><span class="num">4</span><h3>Run the app</h3></div>
+          <div class="step-head"><span class="num">4</span><h3>Connect and build the app</h3></div>
+          <p>
+            Open <code>ios/Biinge.xcodeproj</code> in Xcode 26 and run it on a
+            simulator or your own device. To check it compiles without leaving
+            the terminal:
+          </p>
           <CodeBlock code={app} label="bash" />
           <p class="note">
-            The app targets <code>http://localhost:8080/api/v1</code> by default
-            - change the base URL to point at your host.
+            The app targets <code>http://localhost:8080/api/v1</code> by default.
+            To point it somewhere else, copy <code>ios/.env.example</code> to
+            <code>ios/.env</code> and set <code>API_BASE_URL</code> — on a real
+            device that has to be a host the phone can reach, not localhost.
           </p>
         </li>
       </ol>
@@ -106,8 +132,8 @@ const config = [
       <div class="config">
         <h2>Configuration</h2>
         <p class="config-lead">
-          The variables you'll most likely touch. The rest ship with sensible
-          defaults in <code>api/.env.development</code>.
+          These are the settings you are most likely to change. The complete
+          development defaults live in <code>api/.env.development</code>.
         </p>
         <div class="table-wrap">
           <table>
@@ -125,6 +151,31 @@ const config = [
           </table>
         </div>
       </div>
+
+      <div class="config" id="production">
+        <h2>Before exposing the API</h2>
+        <p class="config-lead">
+          The Compose stack above is for local development. It uses default
+          database credentials, publishes the database and Redis ports, and
+          serves the API over plain HTTP. A public deployment needs at least:
+        </p>
+        <ul class="prod-list">
+          <li>
+            <code>GO_ENV=production</code>, complete production environment
+            values, a random <code>JWT_SECRET_KEY</code> of at least 32 bytes,
+            and a unique PostgreSQL password
+          </li>
+          <li>
+            A reverse proxy terminating TLS in front of the API; if a browser
+            client calls it, add that HTTPS origin to <code>CLIENT_URL</code>
+          </li>
+          <li>
+            The database and Redis ports unpublished, reachable only on the
+            Compose network
+          </li>
+          <li>Backups of the Postgres volume, and a plan for applying migrations on upgrade</li>
+        </ul>
+      </div>
     </div>
   </main>
   <Footer />
@@ -132,44 +183,29 @@ const config = [
 
 <style>
   .page {
-    padding: 72px 0 96px;
+    padding: 80px 0 120px;
   }
 
   .page-head {
-    max-width: 720px;
-    margin-bottom: 48px;
-  }
-
-  .page-head h1 {
-    font-family: var(--heading);
-    font-size: 3rem;
-    line-height: 1.03;
-    letter-spacing: -0.04em;
-    font-weight: 700;
-    margin: 0 0 20px;
-    color: var(--text);
-  }
-
-  .lead {
-    font-size: 1.2rem;
-    line-height: 1.55;
-    color: var(--text-muted);
-    margin: 0;
+    max-width: 880px;
+    margin-bottom: 64px;
   }
 
   .prereq {
-    max-width: 760px;
-    padding: 24px 28px;
+    max-width: 900px;
+    padding: 30px 34px;
     border: 1px solid var(--border);
     border-radius: 16px;
     background: var(--bg-elevated);
-    margin-bottom: 56px;
+    margin-bottom: 72px;
   }
 
   .prereq h2 {
-    font-family: var(--heading);
-    font-size: 1.05rem;
-    font-weight: 600;
+    font-family: var(--display);
+    font-variation-settings: "wdth" 100, "wght" 610;
+    font-weight: 610;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
     color: var(--text);
     margin-bottom: 14px;
   }
@@ -178,11 +214,12 @@ const config = [
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
 
   .prereq li {
-    font-size: 0.95rem;
+    font-size: 1rem;
+    line-height: 1.6;
     color: var(--text-muted);
     padding-left: 20px;
     position: relative;
@@ -206,10 +243,10 @@ const config = [
 
   .steps {
     list-style: none;
-    max-width: 760px;
+    max-width: 900px;
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 56px;
   }
 
   .step-head {
@@ -235,16 +272,18 @@ const config = [
   }
 
   .step h3 {
-    font-family: var(--heading);
-    font-size: 1.25rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-family: var(--display);
+    font-variation-settings: "wdth" 100, "wght" 610;
+    font-weight: 610;
+    font-size: 1.45rem;
+    letter-spacing: -0.025em;
     color: var(--text);
   }
 
   .step p {
-    font-size: 0.95rem;
-    line-height: 1.65;
+    max-width: 76ch;
+    font-size: 1.03rem;
+    line-height: 1.7;
     color: var(--text-muted);
     margin-bottom: 16px;
   }
@@ -252,7 +291,7 @@ const config = [
   .step .note {
     margin-top: 14px;
     margin-bottom: 0;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
   }
 
   .step code,
@@ -267,23 +306,52 @@ const config = [
   }
 
   .config {
-    max-width: 760px;
-    margin-top: 72px;
+    max-width: 900px;
+    margin-top: 96px;
   }
 
   .config h2 {
-    font-family: var(--heading);
-    font-size: 1.6rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-family: var(--display);
+    font-variation-settings: "wdth" 100, "wght" 620;
+    font-weight: 620;
+    font-size: 1.8rem;
+    letter-spacing: -0.03em;
     color: var(--text);
     margin-bottom: 10px;
   }
 
   .config-lead {
-    font-size: 0.95rem;
+    max-width: 76ch;
+    font-size: 1.03rem;
+    line-height: 1.7;
     color: var(--text-muted);
     margin-bottom: 24px;
+  }
+
+  .prod-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .prod-list li {
+    font-size: 1.02rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .prod-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--border-strong);
   }
 
   .table-wrap {
@@ -295,7 +363,7 @@ const config = [
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   th,
@@ -307,12 +375,9 @@ const config = [
   }
 
   th {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 0.85rem;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 550;
   }
 
   tbody tr:last-child td {
@@ -332,12 +397,13 @@ const config = [
       padding: 48px 0 64px;
     }
 
-    .page-head h1 {
-      font-size: 2.25rem;
+    .prereq {
+      padding: 24px;
+      margin-bottom: 56px;
     }
 
-    .lead {
-      font-size: 1.05rem;
+    .steps {
+      gap: 44px;
     }
 
     td code {

@@ -2,8 +2,27 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import StateRing from "../components/StateRing.astro";
 
 const base = import.meta.env.BASE_URL;
+
+const states = [
+  {
+    state: "want" as const,
+    name: "Want",
+    desc: "Movies, TV shows and games you plan to start. Each medium keeps its own list.",
+  },
+  {
+    state: "watching" as const,
+    name: "Watching",
+    desc: "TV shows move here after the first episode you mark. Games use Playing, which you set yourself.",
+  },
+  {
+    state: "watched" as const,
+    name: "Watched",
+    desc: "Finished movies and ended TV shows. Games use Played; completed movies and episodes contribute to watch-time totals.",
+  },
+];
 
 const stack = [
   "Go",
@@ -14,65 +33,78 @@ const stack = [
   "goose",
   "Redis",
   "TMDB",
+  "IGDB",
   "SwiftUI",
   "iOS 26",
 ];
 ---
 
 <Layout
-  title="About - biinge"
-  description="Why biinge exists: a self-hosted movie and TV tracker that keeps your watch history on hardware you control, with a Go API and a native iOS app."
+  title="About — biinge"
+  description="How biinge tracks movies, TV shows and games in a self-hosted iOS app."
 >
   <Header section="about" />
   <main class="page">
     <div class="container">
       <div class="page-head">
-        <div class="eyebrow-label">About</div>
-        <h1>Own what you watch.</h1>
+        <p class="eyebrow-label">About</p>
+        <h1>Built to keep your lists current.</h1>
         <p class="lead">
-          biinge is a movie and TV tracker you run yourself. No account on
-          someone else's cloud - your lists, progress, and stats live in a
-          database you control.
+          Biinge is an open-source, self-hosted iOS app for tracking movies, TV
+          shows and games. It organizes each medium in a way that fits, while
+          keeping your library in a database you control.
         </p>
       </div>
 
       <div class="prose">
-        <h2>The idea</h2>
+        <h2>Progress sets the state</h2>
         <p>
-          Most watch-trackers are someone else's service. Your history sits on
-          their servers, wrapped in ads and analytics, and it disappears the day
-          they shut down or change their pricing. biinge takes the same stance
-          as self-hosting your photos or your notes: your viewing history is
-          yours, kept on hardware you own, for as long as you want it.
+          Movies move from Want to Watched. TV shows add Watching in between,
+          and Biinge works out where a show belongs from the episodes you mark.
+          Games use Want, Playing and Played, with every state under your control.
         </p>
+      </div>
 
-        <h2>What it is</h2>
+      <ul class="states">
+        {states.map((s) => (
+          <li>
+            <StateRing state={s.state} size={20} />
+            <div>
+              <h3>{s.name}</h3>
+              <p>{s.desc}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <div class="prose">
+        <h2>Your library stays current</h2>
         <p>
-          Two decoupled pieces, joined only by an HTTP contract. A
-          <strong>Go REST API</strong> is the backend - it owns your library,
-          episode progress, the Up Next queue, and statistics, and proxies
+          Release dates change and finished shows sometimes return. A background
+          worker periodically refreshes eligible movies and TV shows from
           <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a>
-          for movie and TV metadata so your keys never leave the server. A
-          <strong>native iOS app</strong> in SwiftUI is the client: library
-          lists come straight from your API, and search and detail views proxy
-          TMDB through it.
+          so corrected details reach your library without you reopening every
+          title. If an ended show is renewed, it returns to <em>Watching</em>.
         </p>
 
-        <h2>It keeps itself honest</h2>
+        <h2>Your server, your database</h2>
         <p>
-          Watch state drifts from reality over time. A show you finished a year
-          ago gets renewed; a film you saved in pre-production finally releases.
-          A background worker periodically reconciles your library with TMDB, so
-          a revived show quietly moves back to <em>watching</em> and a released
-          movie updates on its own - without you reopening every title to keep
-          its state true.
+          There is no hosted Biinge service. You run the API, create an account
+          on it, and keep your library and watch history in your own PostgreSQL
+          database. There is no advertising and nothing to subscribe to.
+        </p>
+        <p>
+          Your server requests movie and TV metadata from TMDB and game metadata
+          from IGDB. Optional Sentry crash reporting remains off until you
+          configure it.
         </p>
 
-        <h2>Under the hood</h2>
+        <h2>How it's built</h2>
         <p>
-          Small, boring, and dependable by design. The API leans on sqlc and
-          goose over Postgres, an optional Redis cache in front of TMDB, and Fx
-          for wiring. The app is plain SwiftUI targeting the latest iOS.
+          A Go REST API owns the library, episode progress, Up Next and
+          statistics. It talks to TMDB and IGDB on the app's behalf, keeping
+          provider credentials on your server instead of inside the app. The
+          native client is built with SwiftUI for iOS 26.
         </p>
         <ul class="stack">
           {stack.map((s) => (
@@ -82,15 +114,19 @@ const stack = [
 
         <h2>Open source</h2>
         <p>
-          biinge is a single monorepo, MIT licensed, with the API and app each
-          owning their own build and tests. It's built to be forked, run, and
-          changed to fit how you watch.
+          The API and iOS app live in one repository, each with its own build and
+          tests. The project is
+          <a href="https://github.com/tab/biinge/blob/master/LICENSE" target="_blank" rel="noopener">MIT licensed</a>;
+          fork it, run it and make it your own.
         </p>
       </div>
 
       <div class="actions">
-        <a href={`${base}self-hosting/`} class="btn btn-primary">Self-host it <span>&rarr;</span></a>
-        <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
+        <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-primary">
+          View on GitHub
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </a>
+        <a href={`${base}self-hosting/`} class="btn btn-ghost">Read the setup guide</a>
       </div>
     </div>
   </main>
@@ -99,54 +135,40 @@ const stack = [
 
 <style>
   .page {
-    padding: 72px 0 96px;
+    padding: 80px 0 120px;
   }
 
   .page-head {
-    max-width: 720px;
-    margin-bottom: 56px;
-  }
-
-  .page-head h1 {
-    font-family: var(--heading);
-    font-size: 3rem;
-    line-height: 1.03;
-    letter-spacing: -0.04em;
-    font-weight: 700;
-    margin: 0 0 20px;
-    color: var(--text);
-  }
-
-  .lead {
-    font-size: 1.2rem;
-    line-height: 1.55;
-    color: var(--text-muted);
-    margin: 0;
+    max-width: 880px;
+    margin-bottom: 64px;
   }
 
   .prose {
-    max-width: 720px;
+    max-width: 800px;
   }
 
   .prose h2 {
-    font-family: var(--heading);
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-family: var(--display);
+    font-variation-settings: "wdth" 100, "wght" 610;
+    font-weight: 610;
+    font-size: 1.65rem;
+    letter-spacing: -0.025em;
     color: var(--text);
-    margin: 40px 0 12px;
+    margin: 56px 0 14px;
+  }
+
+  .prose > h2:first-child {
+    margin-top: 0;
   }
 
   .prose p {
-    font-size: 1rem;
-    line-height: 1.7;
+    font-size: 1.08rem;
+    line-height: 1.72;
     color: var(--text-muted);
-    margin: 0;
   }
 
-  .prose strong {
-    color: var(--text);
-    font-weight: 600;
+  .prose p + p {
+    margin-top: 18px;
   }
 
   .prose em {
@@ -154,70 +176,86 @@ const stack = [
     font-style: italic;
   }
 
+  .states {
+    list-style: none;
+    max-width: 1050px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 36px 0 72px;
+  }
+
+  .states li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 26px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--bg-elevated);
+  }
+
+  .states li :global(.ring) {
+    margin-top: 4px;
+  }
+
+  .states h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .states p {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+  }
+
   .stack {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 20px;
+    margin-top: 22px;
   }
 
   .stack li {
-    font-family: var(--sans);
-    font-size: 0.8rem;
-    font-weight: 500;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
     color: var(--text-secondary);
     border: 1px solid var(--border);
     border-radius: 999px;
-    padding: 5px 14px;
+    padding: 5px 13px;
   }
 
   .actions {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
-    margin-top: 56px;
+    margin-top: 64px;
   }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 13px 24px;
-    border-radius: 999px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: transform 0.15s;
-  }
-
-  .btn:hover {
-    transform: translateY(-1px);
-    text-decoration: none;
-  }
-
-  .btn-primary {
-    background: var(--text);
-    color: var(--bg);
-  }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text);
-    border: 1.5px solid var(--border);
+  @media (max-width: 860px) {
+    .states {
+      grid-template-columns: 1fr;
+      max-width: 800px;
+    }
   }
 
   @media (max-width: 768px) {
     .page {
-      padding: 48px 0 64px;
+      padding: 44px 0 64px;
     }
 
-    .page-head h1 {
-      font-size: 2.25rem;
+    .states {
+      margin-bottom: 56px;
     }
 
-    .lead {
-      font-size: 1.05rem;
+    .states li {
+      padding: 22px 20px;
     }
   }
 </style>

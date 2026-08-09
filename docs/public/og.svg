@@ -1,22 +1,39 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1c1c1c"/>
+    <radialGradient id="glow" cx="0.78" cy="0.12" r="0.9">
+      <stop stop-color="#241a1c"/>
       <stop offset="1" stop-color="#000000"/>
-    </linearGradient>
+    </radialGradient>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
 
-  <!-- progress-pie mark, echoing the app icon -->
-  <g transform="translate(300 315)">
-    <circle r="150" fill="none" stroke="#ffffff" stroke-width="15"/>
-    <circle r="116" fill="#ffffff"/>
-    <path d="M0 0 L0 -116 L40 -109 Z" fill="#000000"/>
-  </g>
+  <rect width="1200" height="630" fill="url(#glow)"/>
 
-  <text x="520" y="300" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-size="130" font-weight="700" letter-spacing="-5" fill="#ffffff">biinge</text>
-  <g transform="translate(524 370)">
-    <circle cx="8" cy="8" r="8" fill="#eec01e"/>
-    <text x="28" y="18" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif" font-size="33" font-weight="500" fill="#9a9a9a">Self-hosted movie &amp; TV tracker</text>
+  <!-- wordmark -->
+  <text x="80" y="108" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="34" font-weight="700" letter-spacing="-0.5" fill="#f4f4f2">biinge</text>
+
+  <!-- the three watch states, drawn as the badge the app puts on every poster -->
+  <g transform="translate(112 232)">
+    <circle r="28" fill="none" stroke="#b6b6be" stroke-width="7" opacity="0.85"/>
   </g>
+  <text x="176" y="256" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="74" font-weight="700" letter-spacing="-2" fill="#d8d8de">Want.</text>
+
+  <g transform="translate(112 342)">
+    <circle r="28" fill="none" stroke="#eec01e" stroke-width="7" opacity="0.28"/>
+    <circle r="28" fill="none" stroke="#eec01e" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="96.8 175.9" transform="rotate(-90)"/>
+  </g>
+  <text x="176" y="366" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="74" font-weight="700" letter-spacing="-2" fill="#eec01e">Watching.</text>
+
+  <g transform="translate(112 452)">
+    <circle r="28" fill="none" stroke="#34c46f" stroke-width="7"/>
+    <circle r="14" fill="#34c46f"/>
+  </g>
+  <text x="176" y="476" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="74" font-weight="700" letter-spacing="-2" fill="#34c46f">Watched.</text>
+
+  <text x="80" y="566" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="25" font-weight="400" fill="#8f8f96">A tracker for movies, TV shows and games on iOS, on a server you own</text>
 </svg>

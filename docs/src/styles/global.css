@@ -1,56 +1,79 @@
+/*
+ * Archivo carries both a weight and a width axis, but the page only uses the
+ * weight one - headings set at normal width, sentence case, so the type reads
+ * as calm rather than as a title card
+ */
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/archivo-latin-var.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root,
-[data-theme="dark"] {
-  --bg: #000000;
-  --bg-elevated: #0b0b0b;
-  --bg-card: #181818;
-  --bg-secondary: #282828;
-  --border: #262626;
-  --text: #fafafa;
-  --text-secondary: #d4d7ca;
-  --text-muted: #8a8a8a;
+[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-elevated: #f4f4f2;
+  --border: #e8e8e3;
+  --border-strong: #d4d4ce;
+  --text: #14141a;
+  --text-secondary: #3d3d45;
+  --text-muted: #6b6b75;
+  --text-faint: #9b9ba3;
 
-  /* app accents: red for actions, gold for ratings/progress */
-  --accent: #e5484d;
-  --gold: #eec01e;
-  --green: #27ae60;
-  --violet: #8b5cf6;
-  --cyan: #22b8cf;
+  /* the three watch states, taken from the status bars in the app's stats screen */
+  --want: #5f6672;
+  --watching: #a67c05;
+  --watched: #167c46;
 
-  --card-bg: #141414;
-  --card-border: #262626;
-  --card-hover-bg: #191919;
-  --card-hover-border: #3a3a3a;
-  --code-bg: rgba(255, 255, 255, 0.06);
-  --code-border: rgba(255, 255, 255, 0.1);
-  --header-bg: rgba(0, 0, 0, 0.72);
-  --nav-hover-bg: rgba(255, 255, 255, 0.06);
-  --shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.7);
+  /* the red the app puts on its actions */
+  --accent: #d93b41;
 
-  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+  /* white on the white page, but the elevated grey once the page goes dark */
+  --card-bg: #ffffff;
+  --code-bg: rgba(0, 0, 0, 0.045);
+  --code-border: rgba(0, 0, 0, 0.09);
+  --header-bg: rgba(255, 255, 255, 0.82);
+  --nav-hover-bg: rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 24px 60px rgba(20, 20, 26, 0.14);
+  --bezel: #16161a;
+  --bezel-rail: rgba(120, 120, 128, 0.4);
+  --screen-edge: rgba(0, 0, 0, 0.06);
+
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
-  --heading: var(--sans);
+  --display: "Archivo", var(--sans);
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, monospace;
 }
 
-[data-theme="light"] {
-  --bg: #ffffff;
-  --bg-elevated: #fafafa;
-  --bg-card: #fafafa;
-  --bg-secondary: #eaeaea;
-  --border: #e6e6e6;
-  --text: #181818;
-  --text-secondary: #2b2835;
-  --text-muted: #6e6969;
+[data-theme="dark"] {
+  --bg: #101014;
+  --bg-elevated: #17171d;
+  --border: #26262d;
+  --border-strong: #3a3a43;
+  --text: #f4f4f2;
+  --text-secondary: #c9c9c6;
+  --text-muted: #91919a;
+  --text-faint: #64646d;
 
-  --card-bg: #fafafa;
-  --card-border: #ececec;
-  --card-hover-bg: #f4f4f4;
-  --card-hover-border: #dcdcdc;
-  --code-bg: rgba(0, 0, 0, 0.05);
-  --code-border: rgba(0, 0, 0, 0.1);
-  --header-bg: rgba(255, 255, 255, 0.75);
-  --nav-hover-bg: rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.16);
+  /* brightened so the same three states hold up on a dark ground */
+  --want: #aab0bd;
+  --watching: #eec01e;
+  --watched: #34c46f;
+
+  --accent: #e5484d;
+
+  --card-bg: #17171d;
+  --code-bg: rgba(255, 255, 255, 0.06);
+  --code-border: rgba(255, 255, 255, 0.1);
+  --header-bg: rgba(16, 16, 20, 0.8);
+  --nav-hover-bg: rgba(255, 255, 255, 0.07);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
+  --bezel: #0a0a0c;
+  --bezel-rail: rgba(214, 214, 220, 0.4);
+  --screen-edge: rgba(255, 255, 255, 0.14);
 }
 
 *,
@@ -72,14 +95,19 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
+  font-kerning: normal;
   overflow-x: clip;
+}
+
+main p,
+main li {
+  text-wrap: pretty;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--heading);
-  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 a {
@@ -96,47 +124,112 @@ code {
   font-size: 0.9em;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 .container {
-  max-width: 1160px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 0 56px;
+  padding: 0 64px;
 }
 
-.eyebrow-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 0.78rem;
+/*
+ * Dark is a tool, not the ground: a section opts into it where the screenshot
+ * is the whole point, and stays dark in both site themes. Overriding the
+ * palette tokens here means everything inside follows without its own rules
+ */
+.focus {
+  --bg: #101014;
+  --bg-elevated: #17171d;
+  --text: #f4f4f2;
+  --text-secondary: #d4d4d0;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --text-faint: rgba(255, 255, 255, 0.42);
+  --border: rgba(255, 255, 255, 0.13);
+  --border-strong: rgba(255, 255, 255, 0.28);
+  --want: #aab0bd;
+  --watching: #eec01e;
+  --watched: #34c46f;
+  --accent: #e5484d;
+  --screen-edge: rgba(255, 255, 255, 0.14);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* The soft grey block that separates one section from the next without a rule */
+.tint {
+  background: var(--bg-elevated);
+}
+
+.display {
+  font-family: var(--display);
+  font-variation-settings: "wdth" 100, "wght" 660;
+  font-weight: 660;
+  line-height: 1.03;
+  letter-spacing: -0.032em;
+  color: var(--text);
+}
+
+.display-soft {
+  font-family: var(--display);
+  font-variation-settings: "wdth" 100, "wght" 600;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 16px;
+  line-height: 1.08;
+  letter-spacing: -0.026em;
+  color: var(--text);
 }
 
-.eyebrow-label::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--gold);
+/* Inner pages all open the same way: small label, display heading, one lead */
+.page-head {
+  max-width: 760px;
+  margin-bottom: 52px;
+}
+
+.page-head h1 {
+  font-family: var(--display);
+  font-variation-settings: "wdth" 100, "wght" 640;
+  font-weight: 640;
+  font-size: clamp(2.4rem, 5.4vw, 3.9rem);
+  line-height: 1.04;
+  letter-spacing: -0.033em;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.page-head .lead {
+  font-size: 1.18rem;
+  line-height: 1.58;
+  color: var(--text-muted);
+}
+
+/* A plain category label, the way a product page names its subject */
+.eyebrow-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 14px;
 }
 
 /* Pill buttons mirror the app's capsule action buttons */
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 13px 24px;
+  gap: 9px;
+  padding: 14px 28px;
   border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.97rem;
+  font-weight: 550;
   text-decoration: none;
-  transition: transform 0.15s, opacity 0.15s, background 0.15s, border-color 0.15s;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
   text-decoration: none;
 }
 
@@ -146,35 +239,76 @@ code {
 }
 
 .btn-primary:hover {
-  opacity: 0.88;
-}
-
-.btn-accent {
-  background: var(--accent);
-  color: #fff;
+  opacity: 0.86;
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--text);
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--border-strong);
 }
 
 .btn-ghost:hover {
   border-color: var(--text-muted);
 }
 
+/* The quiet secondary action: a text link that leans forward on hover */
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.97rem;
+  font-weight: 550;
+  color: var(--text);
+}
+
+.btn-text svg {
+  transition: transform 0.18s;
+}
+
+.btn-text:hover {
+  text-decoration: none;
+}
+
+.btn-text:hover svg {
+  transform: translateX(3px);
+}
+
+/*
+ * Sections lift into place as they arrive. Gated behind .js so the content is
+ * never left invisible when the observer doesn't run
+ */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+}
+
+.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .btn:hover {
+
+  .btn-text:hover svg {
     transform: none;
+  }
+
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 22px;
+    padding-inline: 24px;
   }
 }

@@ -8,7 +8,8 @@ const { title, description } = Astro.props;
 const base = import.meta.env.BASE_URL;
 // Empty without SITE_URL, which leaves canonical and og:url relative on a local build
 const site = import.meta.env.SITE ?? "";
-const ogImage = `${site}${base}og.svg`;
+// PNG, not the SVG source: the social platforms don't render SVG previews
+const ogImage = `${site}${base}og.png`;
 ---
 
 <!doctype html>
@@ -20,6 +21,13 @@ const ogImage = `${site}${base}og.svg`;
     <link rel="icon" type="image/png" href={`${base}icon.png`} />
     <link rel="apple-touch-icon" href={`${base}icon.png`} />
     <link rel="canonical" href={`${site}${Astro.url.pathname}`} />
+    <link
+      rel="preload"
+      href={`${base}fonts/archivo-latin-var.woff2`}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -43,10 +51,12 @@ const ogImage = `${site}${base}og.svg`;
         var saved = localStorage.getItem("theme");
         var theme =
           saved ||
-          (window.matchMedia("(prefers-color-scheme: light)").matches
-            ? "light"
-            : "dark");
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
         document.documentElement.setAttribute("data-theme", theme);
+        // the reveal styles only apply once this lands, so nothing hides without JS
+        document.documentElement.classList.add("js");
       })();
     </script>
   </head>
@@ -63,6 +73,67 @@ const ogImage = `${site}${base}og.svg`;
             localStorage.setItem("theme", next);
           } catch (_) {}
         });
+      }
+    </script>
+    <script>
+      // the state badges fill themselves once, as their section arrives
+      const rings = document.querySelectorAll(".ring.animate");
+
+      if (rings.length) {
+        const seen = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-in");
+              seen.unobserve(entry.target);
+            });
+          },
+          { rootMargin: "0px 0px -18% 0px", threshold: 0.5 },
+        );
+
+        rings.forEach((ring) => seen.observe(ring));
+      }
+    </script>
+    <script>
+      // sections lift into place once, as they arrive
+      const revealed = document.querySelectorAll("[data-reveal]");
+
+      if (revealed.length) {
+        const arriving = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-revealed");
+              arriving.unobserve(entry.target);
+            });
+          },
+          { rootMargin: "0px 0px -10% 0px" },
+        );
+
+        revealed.forEach((el) => arriving.observe(el));
+      }
+
+      // a looping phone only plays while it's on screen, so it costs nothing
+      // to scroll past
+      document.querySelectorAll("[data-loop]").forEach((loop) => {
+        const playing = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            loop.classList.toggle("is-playing", entry.isIntersecting);
+          });
+        }, { threshold: 0.25 });
+
+        playing.observe(loop);
+      });
+
+      // the bar is invisible over the hero, and turns solid once you leave it
+      const topbar = document.querySelector(".topbar");
+
+      if (topbar) {
+        const onScroll = () => {
+          topbar.classList.toggle("is-stuck", window.scrollY > 24);
+        };
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
       }
     </script>
     <script is:inline>

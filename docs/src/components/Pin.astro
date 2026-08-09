@@ -1,0 +1,109 @@
+---
+/*
+ * Pinning does exactly two things in the app, so the section says two things and
+ * stops. It carries no screenshot on purpose: it is the hinge between the
+ * libraries above and the Up Next queue below
+ */
+const effects = [
+  {
+    title: "Stay at the top of each list",
+    desc: "Pinned movies, shows and games sort above everything else in their current tab.",
+  },
+  {
+    title: "Feed Up Next",
+    desc: "Only pinned items are considered for Up Next, so the queue stays intentional.",
+  },
+];
+---
+
+<section class="pin tint" id="pin">
+  <div class="container">
+    <div class="stage">
+      <div class="copy" data-reveal>
+        <p class="eyebrow-label">Pin</p>
+        <h2 class="title display-soft">Pin what you want to start next.</h2>
+        <p class="lead">
+          Pin the movies, shows or games you want to start soon. They stay at
+          the top of their lists and become the source for Up Next.
+        </p>
+      </div>
+
+      <ul class="effects" data-reveal style="--reveal-delay: 120ms">
+        {effects.map((e) => (
+          <li>
+            <h3>{e.title}</h3>
+            <p>{e.desc}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pin {
+    padding: 112px 0 120px;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 0.85fr);
+    gap: 88px;
+    align-items: start;
+  }
+
+  .title {
+    font-size: clamp(1.9rem, 3.5vw, 2.85rem);
+    margin-bottom: 18px;
+    max-width: 18ch;
+  }
+
+  .lead {
+    font-size: 1.12rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 56ch;
+  }
+
+  .effects {
+    list-style: none;
+    display: grid;
+    gap: 30px;
+    padding-top: 6px;
+  }
+
+  .effects li {
+    padding-left: 22px;
+    border-left: 2px solid var(--border-strong);
+  }
+
+  .effects h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .effects p {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: var(--text-muted);
+    max-width: 48ch;
+  }
+
+  @media (max-width: 960px) {
+    .pin {
+      padding: 68px 0 72px;
+    }
+
+    .stage {
+      grid-template-columns: 1fr;
+      gap: 42px;
+    }
+
+    .lead {
+      font-size: 1.05rem;
+    }
+  }
+</style>

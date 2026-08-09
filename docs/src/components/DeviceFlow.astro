@@ -1,0 +1,176 @@
+---
+/*
+ * A phone that plays a short flow on a loop instead of holding one screen. The
+ * frames cross-fade on a timer, and the caption under the phone changes with
+ * them, so the sequence reads as a sequence rather than a slideshow
+ *
+ * The screens are decorative and the captions carry the steps: a caption changing
+ * on a timer is no use to a screen reader, so the list is in the DOM in order and
+ * read as one, whatever the animation is showing
+ */
+interface Frame {
+  name: string;
+  caption: string;
+}
+
+interface Props {
+  frames: Frame[];
+  step?: string;
+}
+
+const { frames, step } = Astro.props;
+const beat = step ?? "2.4s";
+const base = import.meta.env.BASE_URL;
+
+/*
+ * The slot percentages depend on how many frames there are, and CSS can't do
+ * that arithmetic in a keyframe selector - so each instance emits its own
+ * keyframes, named after its first frame and referenced through a custom
+ * property. The fade is a fixed slice of one slot, so hand-over looks the same
+ * whatever the count
+ */
+const slot = 100 / frames.length;
+const fade = +(slot * 0.14).toFixed(3);
+const keyframes = `flow-${frames[0].name.replace(/[^a-z0-9]/gi, "")}`;
+---
+
+<style
+  is:inline
+  set:html={`@keyframes ${keyframes}{0%{opacity:0}${fade}%{opacity:1}${+slot.toFixed(3)}%{opacity:1}${+(slot + fade).toFixed(3)}%{opacity:0}100%{opacity:0}}`}
+/>
+
+<div
+  class="flow-device"
+  data-loop
+  style={`--step: ${beat}; --count: ${frames.length}; --slot-name: ${keyframes}`}
+>
+  <div class="device" aria-hidden="true">
+    <div class="device-screen">
+      {frames.map((frame, i) => (
+        <div class="frame" style={`--i: ${i}`}>
+          <img
+            class="d-light"
+            src={`${base}screens/${frame.name}-light.jpg`}
+            alt=""
+            width="1206"
+            height="2622"
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
+          />
+          <img
+            class="d-dark"
+            src={`${base}screens/${frame.name}-dark.jpg`}
+            alt=""
+            width="1206"
+            height="2622"
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <ol class="captions">
+    {frames.map((frame, i) => (
+      <li class="caption" style={`--i: ${i}`}>{frame.caption}</li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .flow-device {
+    width: 100%;
+  }
+
+  .device {
+    position: relative;
+    width: 100%;
+    padding: 7px; /* room for the bezel box-shadow */
+  }
+
+  .device-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1206 / 2622;
+    border-radius: 12% / 5.5%;
+    border: 1px solid var(--screen-edge);
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+      0 0 0 5px var(--bezel),
+      0 0 0 6px var(--bezel-rail),
+      var(--shadow-lg);
+  }
+
+  .frame,
+  .frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .frame img {
+    object-fit: cover;
+    display: block;
+  }
+
+  .frame .d-dark { display: none; }
+
+  :global(html[data-theme="dark"]) .frame .d-light { display: none; }
+  :global(html[data-theme="dark"]) .frame .d-dark { display: block; }
+
+  :global(.focus) .frame .d-light { display: none; }
+  :global(.focus) .frame .d-dark { display: block; }
+
+  .captions {
+    position: relative;
+    list-style: none;
+    margin-top: 22px;
+    /* holds two lines, so the column never reflows as the caption changes */
+    min-height: 3.1em;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  .caption {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  /*
+   * Each frame owns one slot of the cycle and hands over with a short overlap:
+   * the outgoing fade and the next frame's fade-in run over the same window
+   */
+  .frame,
+  .caption {
+    animation-name: var(--slot-name);
+    animation-duration: calc(var(--step) * var(--count));
+    animation-iteration-count: infinite;
+    animation-fill-mode: backwards;
+    animation-delay: calc(var(--i) * var(--step));
+    animation-play-state: paused;
+  }
+
+  .flow-device.is-playing .frame,
+  .flow-device.is-playing .caption {
+    animation-play-state: running;
+  }
+
+  /* nothing moves: the flow collapses to its first screen and first caption */
+  @media (prefers-reduced-motion: reduce) {
+    .frame,
+    .caption {
+      animation-name: none;
+      opacity: 0;
+    }
+
+    .frame:first-child,
+    .caption:first-child {
+      opacity: 1;
+    }
+  }
+</style>

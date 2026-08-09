@@ -135,6 +135,9 @@ linters:
       - third_party$
       - builtin$
 formatters:
+  enable:
+    - gofmt
+    - goimports
   exclusions:
     generated: lax
     paths:

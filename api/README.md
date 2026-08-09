@@ -26,7 +26,7 @@ overrides it.
 | Variable                                | Purpose                                                      |
 | --------------------------------------- | ------------------------------------------------------------ |
 | `DATABASE_DSN`                          | Postgres connection string                                   |
-| `REDIS_URL`                             | Redis URL for the TMDB cache — leave unset to serve uncached |
+| `REDIS_URL`                             | Redis URL for the TMDB and IGDB cache                        |
 | `TMDB_API_READ_ACCESS_TOKEN`            | TMDB v4 read token (required for detail/search/trending)     |
 | `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | Twitch app credentials for IGDB (required outside dev)       |
 | `JWT_SECRET_KEY` / `SECRET_KEY_BASE`    | token signing secrets                                        |
@@ -71,12 +71,13 @@ contract is in [`api/swagger.yaml`](api/swagger.yaml).
 `make check` runs the full pre-commit loop — everything CI checks:
 
 ```sh
-make check    # fmt + vet + lint + staticcheck + test + test:race
+make check    # fmt + lint + test + test:race
 ```
 
-Individual targets: `make fmt`, `make lint`, `make vet`, `make staticcheck`,
-`make test`, `make test:race`, `make coverage`. Tests run against a live
-`biinge-test` database (`GO_ENV=test`).
+Individual targets: `make fmt`, `make lint`, `make test`, `make test:race`,
+`make coverage`. Tests run against a live `biinge-test` database (`GO_ENV=test`).
+`make vet` and `make staticcheck` also exist, but `make lint` covers both —
+`.golangci.yaml` enables govet and staticcheck as linters.
 
 ## Contributing
 

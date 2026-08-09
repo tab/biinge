@@ -17,7 +17,11 @@ test:
 
 .PHONY: lint
 lint:
-	@which swiftlint >/dev/null 2>&1 && swiftlint || echo "swiftlint not installed; skipping"
+	@if which swiftlint >/dev/null 2>&1; then \
+		swiftlint lint --strict; \
+	else \
+		echo "swiftlint not installed; skipping"; \
+	fi
 
 .PHONY: clean
 clean:

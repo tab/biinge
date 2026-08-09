@@ -65,8 +65,9 @@ Regenerate and commit alongside the change:
 
 ## Verification loop
 
-`make check` at the end of every change — it runs fmt, vet, lint, staticcheck,
-test and test:race, the same set CI runs. Fix and re-run until clean.
+`make check` at the end of every change — it runs fmt, lint, test and test:race,
+the same set CI runs. golangci-lint covers go vet and staticcheck, so neither
+runs separately. Fix and re-run until clean.
 
 Tests need a live `biinge-test` database and `GO_ENV=test`. If the database
 isn't reachable, say the suite didn't run rather than reporting success from the

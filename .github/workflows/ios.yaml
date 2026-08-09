@@ -1,0 +1,56 @@
+name: iOS
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yaml"
+  push:
+    branches:
+      - master
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yaml"
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ios
+
+jobs:
+  check:
+    # Lint and tests share one job: SwiftLint takes seconds, and a second macOS
+    # runner for it would cost a slot out of the concurrent-macOS budget.
+    name: Lint & tests
+    permissions:
+      contents: read
+    # NOTE: requires a runner image with Xcode 26 (iOS 26 SDK).
+    runs-on: macos-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # NOTE: https://github.com/realm/SwiftLint/releases/tag/0.65.0
+      # Pinned, and installed from the release rather than brew: an unpinned
+      # linter floats to whatever is current, so a rule that changes what it
+      # reports turns master red on a commit that touched no Swift at all.
+      # Keep this in step with the version developers run locally.
+      - name: Install SwiftLint
+        env:
+          SWIFTLINT_VERSION: "0.65.0"
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip"
+          unzip -q -o "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
+          sudo install "$RUNNER_TEMP/swiftlint/swiftlint" /usr/local/bin/swiftlint
+          swiftlint version
+
+      # Called directly rather than through `make lint`, for the annotations the
+      # reporter writes onto the diff
+      - name: Style & correctness (SwiftLint)
+        run: swiftlint lint --strict --reporter github-actions-logging
+
+      - name: Unit tests (iPhone 17 Pro simulator)
+        run: make test

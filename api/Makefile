@@ -149,9 +149,7 @@ coverage:
 .PHONY: check
 check:
 	@$(MAKE) fmt
-	@$(MAKE) vet
 	@$(MAKE) lint
-	@$(MAKE) staticcheck
 	@$(MAKE) test
 	@$(MAKE) test:race
 	@echo "✓ All checks passed"

@@ -16,17 +16,18 @@ cd api
 make check
 ```
 
-`make check` runs fmt → vet → lint → staticcheck → test → test:race, the same
-set CI runs. To iterate on one step:
+`make check` runs fmt → lint → test → test:race, the same set CI runs. To
+iterate on one step:
 
 ```bash
 make fmt          # gofmt
 make lint         # golangci-lint (make lint:fix applies what it can)
-make vet
-make staticcheck
 make test         # GO_ENV=test, needs a live biinge-test database
 make test:race
 ```
+
+`make vet` and `make staticcheck` stay available standalone, but `make lint`
+already covers both — .golangci.yaml enables govet and staticcheck as linters.
 
 Tests need Postgres running and the `biinge-test` database migrated:
 

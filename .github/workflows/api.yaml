@@ -1,63 +1,56 @@
-name: Checks
+name: API
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - "api/**"
+      - ".github/workflows/api.yaml"
   push:
     branches:
       - master
+    paths:
+      - "api/**"
+      - ".github/workflows/api.yaml"
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
+
+env:
+  GO_ENV: test
 
 defaults:
   run:
     working-directory: api
 
 jobs:
-  linter:
-    name: Golang CI
+  lint:
+    name: Format & lint
     permissions:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: 'api/go.mod'
           cache: true
           cache-dependency-path: api/go.sum
-      - name: golangci-lint
+      # Covers go vet and staticcheck too — .golangci.yaml enables govet and
+      # staticcheck as linters, and gofmt and goimports as formatters
+      - name: Format, style & correctness (golangci-lint)
         # NOTE: https://github.com/golangci/golangci-lint-action/releases/tag/v9.3.0
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
         with:
           version: v2.11.3
           working-directory: api
 
-  static-check:
-    name: Static check
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: 'api/go.mod'
-          cache: true
-          cache-dependency-path: api/go.sum
-      - name: Run static check
-        # NOTE: https://github.com/dominikh/staticcheck-action/releases/tag/v1.3.1
-        uses: dominikh/staticcheck-action@fe1dd0c3658873b46f8c9bb3291096a617310ca6
-        with:
-          working-directory: api
-
-  coverage:
-    name: Codecov
+  test:
+    name: Tests & coverage
     permissions:
       contents: read
       pull-requests: write
-    env:
-      GO_ENV: test
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -75,40 +68,26 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: 'api/go.mod'
           cache: true
           cache-dependency-path: api/go.sum
 
-      - name: Load schema.sql
+      - name: Load db/schema.sql into the test database
         env:
           PGPASSWORD: postgres
-        run: |
-          psql -h localhost -U postgres -d biinge-test -f db/schema.sql
+        run: psql -h localhost -U postgres -d biinge-test -f db/schema.sql
 
-      - name: Run tests
-        run: go test ./... -race -coverprofile=coverage.out -covermode=atomic
+      - name: Unit & integration tests (race detector, coverage)
+        run: make test:race
+
       - name: Upload coverage to Codecov
         # NOTE: https://github.com/codecov/codecov-action/tree/v5.4.3
         uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           working-directory: api
-
-  ios:
-    name: iOS test
-    # NOTE: requires a runner image with Xcode 26 (iOS 26 SDK).
-    runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: ios
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test
-        run: |
-          xcodebuild -project Biinge.xcodeproj -scheme Biinge \
-            -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-            -derivedDataPath build/dd \
-            CODE_SIGNING_ALLOWED=NO test -only-testing:BiingeTests

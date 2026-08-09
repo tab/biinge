@@ -52,4 +52,4 @@ The Go module is rooted inside `api/` (no `go.work`); CI in `.github/workflows/`
 
 ## License
 
-MIT — see [api/LICENSE](api/LICENSE).
+MIT — see [LICENSE](LICENSE).

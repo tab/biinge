@@ -86,4 +86,4 @@ Individual targets: `make fmt`, `make lint`, `make vet`, `make staticcheck`,
 
 ## License
 
-[MIT](LICENSE).
+[MIT](../LICENSE).

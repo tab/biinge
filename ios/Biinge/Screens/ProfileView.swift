@@ -99,21 +99,22 @@ struct ProfileView: View {
     }
 
     static let about: [InfoSection] = [
-        InfoSection(heading: nil, body: "Biinge helps you track the movies and TV shows you want to watch, are watching, "
-            + "and have watched — with your personal library synced across your devices."),
-        InfoSection(heading: nil, body: "Film and TV metadata and imagery are provided by The Movie Database (TMDB)."),
+        InfoSection(heading: nil, body: "Biinge helps you track the films, TV shows and games you mean to get to, the ones "
+            + "you're part-way through, and the ones you've finished — with your personal library synced across your devices."),
+        InfoSection(heading: nil, body: "Film and TV metadata and imagery are provided by The Movie Database (TMDB). "
+            + "Game metadata and imagery are provided by IGDB."),
     ]
 
     static let privacy: [InfoSection] = [
         InfoSection(heading: nil, body: "This policy explains what Biinge stores and how it is used. Biinge is a personal "
             + "watch-tracking app — it does not sell your data or show ads."),
         InfoSection(heading: "Information we store", body: "Your account details (email address and name), your appearance "
-            + "preference, and the movies, TV shows, and episodes you track together with their watched state."),
+            + "preference, and the films, TV shows, episodes and games you track together with their state."),
         InfoSection(heading: "How it is used", body: "Your data is used only to run the app — to sync your library and show "
             + "your statistics. It is never sold, rented, or shared with advertisers."),
         InfoSection(heading: "Third-party services", body: "Biinge fetches film and TV metadata and imagery from The Movie "
-            + "Database (TMDB). Anonymized crash and performance diagnostics may be collected to keep the app stable. "
-            + "Your library is never shared with these services."),
+            + "Database (TMDB), and game metadata and imagery from IGDB. Anonymized crash and performance diagnostics may "
+            + "be collected to keep the app stable. Your library is never shared with these services."),
         InfoSection(heading: "Data retention", body: "Your data is kept while your account is active. You can request "
             + "deletion of your account and its associated data at any time."),
     ]
@@ -124,8 +125,8 @@ struct ProfileView: View {
         InfoSection(heading: "Your account", body: "You are responsible for activity under your account and for keeping your "
             + "credentials secure. Do not misuse the service or attempt to disrupt it."),
         InfoSection(heading: "Content and attribution", body: "Film and TV metadata and imagery are provided by The Movie "
-            + "Database (TMDB) and remain the property of their respective owners. This product uses the TMDB API but "
-            + "is not endorsed or certified by TMDB."),
+            + "Database (TMDB), and game metadata and imagery by IGDB. Both remain the property of their respective "
+            + "owners. This product uses the TMDB and IGDB APIs but is not endorsed or certified by either."),
         InfoSection(heading: "Availability", body: "Biinge is provided \"as is\" and \"as available\", without warranties of "
             + "any kind. Features may change and the service may be unavailable from time to time."),
         InfoSection(heading: "Changes", body: "These terms may be updated over time. Continued use of Biinge means you accept "

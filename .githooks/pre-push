@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Runs the verification loop for each area the push touches, plus the contract
-# and schema drift check CI runs on the pull request
+# Runs each touched area's verification loop, then the schema and spec drift checks
 set -euo pipefail
 
 [ -n "${SKIP_VERIFY:-}" ] && { echo "pre-push: SKIP_VERIFY set, skipping"; exit 0; }

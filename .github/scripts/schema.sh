@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Fails when a change to the database leaves its committed artefact behind: the
-# schema dump and the sqlc output are both generated and both hand-committed
+# Fails when a database change leaves its committed artefact behind (schema dump, sqlc output)
 set -euo pipefail
 
 base="${1:-origin/master}"

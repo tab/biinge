@@ -47,8 +47,7 @@ jobs:
           working-directory: api
 
   drift:
-    # The spec, the schema dump and the sqlc output are hand-committed alongside
-    # the change, so nothing but a diff catches one of them being left behind
+    # All three artefacts are hand-committed, so only a diff catches one left behind
     name: Contract & schema drift
     if: github.event_name == 'pull_request'
     permissions:
@@ -70,9 +69,7 @@ jobs:
           NUMBER: ${{ github.event.pull_request.number }}
           BASE: ${{ github.event.pull_request.base.ref }}
         run: |
-          # Read the labels over the API, not out of the event payload: labelling
-          # a pull request fires no run of its own, and a re-run replays the
-          # payload it was triggered with, labels and all
+          # Read live: labelling fires no run, and a re-run replays the payload it started with
           labels="$(gh pr view "$NUMBER" --json labels --jq '.labels[].name')"
 
           if grep -qx contract-unchanged <<<"$labels"; then

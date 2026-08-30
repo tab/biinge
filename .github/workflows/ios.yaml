@@ -21,8 +21,7 @@ defaults:
 
 jobs:
   check:
-    # Lint and tests share one job: SwiftLint takes seconds, and a second macOS
-    # runner for it would cost a slot out of the concurrent-macOS budget.
+    # Lint and tests share one job: a second macOS runner would cost a concurrency slot
     name: Lint & tests
     permissions:
       contents: read
@@ -33,10 +32,7 @@ jobs:
         uses: actions/checkout@v6
 
       # NOTE: https://github.com/realm/SwiftLint/releases/tag/0.65.1
-      # Pinned, and installed from the release rather than brew: an unpinned
-      # linter floats to whatever is current, so a rule that changes what it
-      # reports turns master red on a commit that touched no Swift at all.
-      # Keep this in step with the version developers run locally.
+      # Pinned from the release, not brew, and must match the version developers run locally
       - name: Install SwiftLint
         env:
           SWIFTLINT_VERSION: "0.65.1"
@@ -47,8 +43,7 @@ jobs:
           sudo install "$RUNNER_TEMP/swiftlint/swiftlint" /usr/local/bin/swiftlint
           swiftlint version
 
-      # Called directly rather than through `make lint`, for the annotations the
-      # reporter writes onto the diff
+      # Called directly, not through make lint, for the annotations on the diff
       - name: Style & correctness (SwiftLint)
         run: swiftlint lint --strict --reporter github-actions-logging
 

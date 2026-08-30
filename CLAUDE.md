@@ -88,7 +88,7 @@ git config core.hooksPath .githooks
 
 `commit-msg` rejects a subject that isn't a scoped Conventional Commit and any
 AI attribution in the message. `pre-push` runs the verification loop for each
-area the push touches, then the contract and schema drift check. Push with
+area the push touches, then the schema and spec drift checks. Push with
 `--no-verify`, or set `SKIP_VERIFY=1`, when you mean to skip it.
 
 The `Title & commits` job repeats both checks on the pull request, so a clone

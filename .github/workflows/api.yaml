@@ -67,7 +67,9 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
           ALLOW_SPEC_DRIFT: ${{ contains(github.event.pull_request.labels.*.name, 'contract-unchanged') && '1' || '' }}
-        run: .github/scripts/contract-drift.sh "origin/$BASE"
+        run: |
+          .github/scripts/schema.sh "origin/$BASE"
+          .github/scripts/swagger.sh "origin/$BASE"
 
   test:
     name: Tests & coverage

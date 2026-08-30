@@ -69,8 +69,10 @@ absent — treat empty as unset when reading one.
 ## Commits
 
 Conventional Commits, always scoped: `feat(api):`, `fix(ios):`, `docs(readme):`.
-Imperative and capitalized, no trailing period. No `Co-Authored-By` trailer and
-no mention of AI tooling anywhere in the message.
+Imperative and capitalized, no trailing period. No AI attribution anywhere in
+the message: no `Co-Authored-By` or `Claude-Session` trailer, no "Generated
+with" line, no robot emoji. Naming a path is not attribution, so `docs(claude):`
+for a change under `.claude/` is fine.
 
 Commits are signed and made by hand. Write the message; never run `git commit`.
 

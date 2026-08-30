@@ -52,6 +52,11 @@ of the repo.
 the reference page and playground. It doesn't read the spec, so a contract
 change touches both.
 
+CI enforces this. The `Contract & schema drift` job fails a pull request that
+moves a controller, a serializer or `router.go` without `api/swagger.yaml`. When
+a change genuinely moves no contract, label the pull request
+`contract-unchanged`.
+
 ## Generated code is committed
 
 Regenerate and commit alongside the change:
@@ -60,6 +65,9 @@ Regenerate and commit alongside the change:
 - `make db:schema:dump` after adding a migration — `db/schema.sql` is the
   canonical dump, and CI loads it to create the test database
 - mockgen mocks live next to the interface they mock as `*_mock.go`
+
+The same job fails a pull request that edits `db/migrate/` without re-dumping
+`db/schema.sql`, or `db/sqlc/` without the regenerated output beside it.
 
 `vendor/` is gitignored. Don't commit it.
 

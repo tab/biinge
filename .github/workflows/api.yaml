@@ -46,6 +46,29 @@ jobs:
           version: v2.11.3
           working-directory: api
 
+  drift:
+    # The spec, the schema dump and the sqlc output are hand-committed alongside
+    # the change, so nothing but a diff catches one of them being left behind
+    name: Contract & schema drift
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Compare against the base branch
+        env:
+          BASE: ${{ github.event.pull_request.base.ref }}
+          ALLOW_SPEC_DRIFT: ${{ contains(github.event.pull_request.labels.*.name, 'contract-unchanged') && '1' || '' }}
+        run: .github/scripts/contract-drift.sh "origin/$BASE"
+
   test:
     name: Tests & coverage
     permissions:

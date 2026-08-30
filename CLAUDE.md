@@ -99,6 +99,6 @@ without the hooks installed still gets caught.
 - Use `gh` for anything on GitHub: pull requests, issues, checks, releases
 - PR descriptions carry no "Test plan" section
 - Before merging `master` into a working branch, pull both so neither is stale
-- Skills in `.claude/skills/` hold the procedural loops (`biinge-verify`,
-  `biinge-generate-mock`) and load on demand — reach for them rather than
-  reciting the steps
+- Skills in `.claude/skills/` hold the procedural loops (`verify`, `add-test`,
+  `generate-mock`) and load on demand. Reach for them rather than reciting the
+  steps

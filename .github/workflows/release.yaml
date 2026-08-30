@@ -124,7 +124,7 @@ jobs:
         run: |
           if ! command -v goose &> /dev/null; then
             echo "Installing goose..."
-            go install github.com/pressly/goose/v3/cmd/goose@latest
+            go install github.com/pressly/goose/v3/cmd/goose@v3.27.3
           else
             echo "goose is already installed"
           fi

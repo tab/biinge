@@ -69,6 +69,10 @@ Regenerate and commit alongside the change:
 the same set CI runs. golangci-lint covers go vet and staticcheck, so neither
 runs separately. Fix and re-run until clean.
 
+Tests run with `-p=1`. Every package shares the `biinge-test` database and
+`pkg/spec` truncates it, so packages running in parallel wipe each other's rows
+mid-test and fail on a foreign key.
+
 Tests need a live `biinge-test` database and `GO_ENV=test`. If the database
 isn't reachable, say the suite didn't run rather than reporting success from the
 steps that did.

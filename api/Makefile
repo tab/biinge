@@ -131,17 +131,17 @@ staticcheck:
 .PHONY: test
 test:
 	@echo "Running tests..."
-	GO_ENV=test go test -cover ./...
+	GO_ENV=test go test -p=1 -cover ./...
 
 .PHONY: test\:race
 test\:race:
 	@echo "Running tests with race detector..."
-	GO_ENV=test go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
+	GO_ENV=test go test -p=1 -race -cover -coverprofile=coverage.out -covermode=atomic ./...
 
 .PHONY: coverage
 coverage:
 	@echo "Generating test coverage report..."
-	GO_ENV=test go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+	GO_ENV=test go test -p=1 ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 # Full verification loop — run before committing to catch everything CI checks.
 # Steps are invoked via recursive $(MAKE) so the colon-named test:race target

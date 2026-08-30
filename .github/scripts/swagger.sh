@@ -17,7 +17,7 @@ contract="$(grep -E '^api/internal/(app/(controllers|serializers)/.*|config/rout
 if [ -n "$contract" ] && [ -z "${ALLOW_SPEC_DRIFT:-}" ] && ! touched '^api/api/swagger\.yaml$'; then
   echo "::error::a route or serializer changed without api/api/swagger.yaml"
   while IFS= read -r file; do echo "  $file"; done <<<"$contract"
-  echo "  no contract moved? label the pull request contract-unchanged"
+  echo "  no contract moved? label the pull request contract-unchanged, then re-run this job"
   status=1
 fi
 

@@ -55,7 +55,8 @@ change touches both.
 CI enforces this. The `Contract & schema drift` job fails a pull request that
 moves a controller, a serializer or `router.go` without `api/swagger.yaml`. When
 a change genuinely moves no contract, label the pull request
-`contract-unchanged`.
+`contract-unchanged`, then re-run the job: labelling fires no run of its own,
+and the job reads the labels live rather than from the event that started it.
 
 ## Generated code is committed
 

@@ -53,6 +53,7 @@ jobs:
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -65,9 +66,19 @@ jobs:
 
       - name: Compare against the base branch
         env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
           BASE: ${{ github.event.pull_request.base.ref }}
-          ALLOW_SPEC_DRIFT: ${{ contains(github.event.pull_request.labels.*.name, 'contract-unchanged') && '1' || '' }}
         run: |
+          # Read the labels over the API, not out of the event payload: labelling
+          # a pull request fires no run of its own, and a re-run replays the
+          # payload it was triggered with, labels and all
+          labels="$(gh pr view "$NUMBER" --json labels --jq '.labels[].name')"
+
+          if grep -qx contract-unchanged <<<"$labels"; then
+            export ALLOW_SPEC_DRIFT=1
+          fi
+
           .github/scripts/schema.sh "origin/$BASE"
           .github/scripts/swagger.sh "origin/$BASE"
 

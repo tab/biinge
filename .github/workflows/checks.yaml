@@ -1,7 +1,7 @@
 name: Checks
 on:
   pull_request:
-    types: [opened, reopened, edited, synchronize, ready_for_review]
+    types: [opened, reopened, synchronize, ready_for_review]
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.number }}'
   cancel-in-progress: true
@@ -15,6 +15,7 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     permissions:
       contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -24,14 +25,20 @@ jobs:
 
       - name: Title is a scoped Conventional Commit
         env:
-          TITLE: ${{ github.event.pull_request.title }}
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\([a-z0-9.-]+\): [A-Z]' <<<"$TITLE"; then
-            echo "::error::the title needs a scoped Conventional Commit, capitalized after the colon. Got: $TITLE"
+          # Read the title over the API, not out of the event payload: a re-run
+          # replays the payload it was triggered with, so a corrected title
+          # would never clear a failure here
+          title="$(gh pr view "$NUMBER" --json title --jq .title)"
+
+          if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\([a-z0-9.-]+\): [A-Z]' <<<"$title"; then
+            echo "::error::the title needs a scoped Conventional Commit, capitalized after the colon. Got: $title"
             exit 1
           fi
-          if grep -qE '\.$' <<<"$TITLE"; then
-            echo "::error::drop the trailing period from the title. Got: $TITLE"
+          if grep -qE '\.$' <<<"$title"; then
+            echo "::error::drop the trailing period from the title. Got: $title"
             exit 1
           fi
 

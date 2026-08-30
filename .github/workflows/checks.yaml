@@ -1,7 +1,11 @@
 name: Checks
 on:
+  # Title edits included: a title that passed can be edited into one that would
+  # not, and nothing else would re-check it. Keep this workflow free of code
+  # jobs so an edit cannot cancel one or publish a skipped status over its
+  # result, which branch protection counts as a pass
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+    types: [opened, reopened, edited, synchronize, ready_for_review]
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.number }}'
   cancel-in-progress: true

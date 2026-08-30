@@ -32,14 +32,14 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v6
 
-      # NOTE: https://github.com/realm/SwiftLint/releases/tag/0.65.0
+      # NOTE: https://github.com/realm/SwiftLint/releases/tag/0.65.1
       # Pinned, and installed from the release rather than brew: an unpinned
       # linter floats to whatever is current, so a rule that changes what it
       # reports turns master red on a commit that touched no Swift at all.
       # Keep this in step with the version developers run locally.
       - name: Install SwiftLint
         env:
-          SWIFTLINT_VERSION: "0.65.0"
+          SWIFTLINT_VERSION: "0.65.1"
         run: |
           curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
             "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip"

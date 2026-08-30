@@ -9,8 +9,10 @@ concurrency:
 jobs:
   conventions:
     # No path filter: these rules hold for every change, not just the api ones.
-    # The .githooks copies catch this before the push, when they are installed
+    # Dependabot writes its own titles and its own trailers, and neither is ours
+    # to reword. The .githooks copies catch this before the push, when installed
     name: Title & commits
+    if: github.actor != 'dependabot[bot]'
     permissions:
       contents: read
     runs-on: ubuntu-latest

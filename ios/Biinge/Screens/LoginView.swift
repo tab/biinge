@@ -59,7 +59,7 @@ struct LoginView: View {
                 .disabled(isSubmitting)
 
                 Text("API: \(Config.baseURL.absoluteString)")
-                    .font(.system(size: 11, design: .monospaced))
+                    .font(.system(.caption2, design: .monospaced))
                     .foregroundStyle(Color.biingeGray)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .textSelection(.enabled)
@@ -82,7 +82,7 @@ struct LoginView: View {
             }
         }
         .focused($focusedField, equals: field)
-        .font(.system(size: 16))
+        .font(.system(.callout))
         .foregroundStyle(Color.biingeText)
         .padding(12)
         .background(Color.biingeCard, in: RoundedRectangle(cornerRadius: 4, style: .continuous))

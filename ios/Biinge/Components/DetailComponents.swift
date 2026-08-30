@@ -53,13 +53,13 @@ struct CreditsRow: View {
                                 .foregroundStyle(.primary)
                                 .lineLimit(1)
                             Text(person.description)
-                                .font(.system(size: 11))
+                                .font(.caption2)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
                         .frame(width: 78)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                 }
             }
             .padding(.horizontal)

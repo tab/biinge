@@ -79,7 +79,8 @@ struct SearchView: View {
                                 if isTrackedMovie(movie.id, snapshot: movie.state) { WatchedBadge() }
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
+                    .detailTransitionSource("movie-\(movie.id)")
                 }
             }
             .padding(.horizontal)
@@ -99,7 +100,8 @@ struct SearchView: View {
                                 if isTrackedSeries(show.id, snapshot: show.state) { WatchedBadge() }
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
+                    .detailTransitionSource("series-\(show.id)")
                 }
             }
             .padding(.horizontal)
@@ -119,7 +121,8 @@ struct SearchView: View {
                                 if isTrackedGame(game.id, snapshot: game.state) { WatchedBadge() }
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
+                    .detailTransitionSource("game-\(game.id)")
                 }
             }
             .padding(.horizontal)
@@ -140,7 +143,7 @@ struct SearchView: View {
                                 .lineLimit(1).frame(width: 84)
                         }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                 }
             }
             .padding(.horizontal)

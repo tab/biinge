@@ -254,16 +254,16 @@ struct StatisticsView: View {
                     period = option
                 } label: {
                     Text(option.title)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.biingeCaption2)
                         .foregroundStyle(isActive ? Color.biingeBackground : Color.biingeGrayDark)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 5)
                         .background(isActive ? Color.biingeText : .clear, in: Capsule())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
             }
         }
-        .animation(.easeOut(duration: 0.15), value: period)
+        .animation(.spring(duration: 0.3, bounce: 0), value: period)
     }
 
     @ViewBuilder
@@ -443,7 +443,7 @@ struct StatisticsView: View {
         .overlay {
             VStack(spacing: 1) {
                 Text(formatMinutes(total))
-                    .font(.system(size: 19, weight: .bold, design: .rounded))
+                    .font(.system(.headline, design: .rounded, weight: .bold))
                     .foregroundStyle(.primary)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
@@ -561,7 +561,7 @@ struct AppearanceView: View {
                         .padding(.vertical, 14)
                         .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
 
                     if option != Appearance.allCases.last {
                         Divider()

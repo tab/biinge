@@ -68,7 +68,8 @@ struct GamesView: View {
                             if game.pinned { PinBadge() }
                         }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
+                .detailTransitionSource("game-\(game.id)")
             }
             .refreshable { await store.load() }
         }

@@ -44,7 +44,8 @@ struct UpNextView: View {
                                         date: UpNextDate.format(episode.airDate)
                                     )
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(.pressable)
+                                .detailTransitionSource("series-\(episode.seriesId)")
                             }
                         }
                     }
@@ -62,7 +63,8 @@ struct UpNextView: View {
                                         date: UpNextDate.format(movie.releaseDate)
                                     )
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(.pressable)
+                                .detailTransitionSource("movie-\(movie.id)")
                             }
                         }
                     }
@@ -81,7 +83,8 @@ struct UpNextView: View {
                                         source: .igdb
                                     )
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(.pressable)
+                                .detailTransitionSource("game-\(game.id)")
                             }
                         }
                     }

@@ -11,6 +11,10 @@ struct MovieDetailView: View {
     @State private var details: MovieDetails?
     @State private var isLoading = true
     @State private var showMenu = false
+    /// Bumped when a state change lands, so the haptic fires with the UI rather than on the tap
+    @State private var stateChanges = 0
+    /// Bumped on the lighter commit: pinning and unpinning
+    @State private var marks = 0
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -31,6 +35,8 @@ struct MovieDetailView: View {
         .background(Color.biingeBackground)
         .toolbar(.hidden, for: .navigationBar)
         .task { await load() }
+        .sensoryFeedback(.success, trigger: stateChanges)
+        .sensoryFeedback(.impact(weight: .light), trigger: marks)
         .overlay {
             if showMenu, let details {
                 MovieActionMenu(
@@ -38,7 +44,7 @@ struct MovieDetailView: View {
                     state: store.currentState(id: movieId),
                     pinned: store.isPinned(id: movieId),
                     onAction: { action in Task { await handleMenu(action, details) } },
-                    onCancel: { withAnimation(.easeOut(duration: 0.15)) { showMenu = false } }
+                    onCancel: { withAnimation(.spring(duration: 0.3, bounce: 0)) { showMenu = false } }
                 )
             }
         }
@@ -63,8 +69,8 @@ struct MovieDetailView: View {
                     Spacer(minLength: 12)
                     if let rating = movie.rating, rating > 0 {
                         HStack(spacing: 5) {
-                            Image(systemName: "star.fill").font(.system(size: 18)).foregroundStyle(Color.biingePrimary)
-                            Text(String(format: "%.1f", rating)).font(.system(size: 24, weight: .heavy)).foregroundStyle(.primary)
+                            Image(systemName: "star.fill").font(.biingeTitle3).foregroundStyle(Color.biingePrimary)
+                            Text(String(format: "%.1f", rating)).font(.biingeTitle2).fontWeight(.heavy).foregroundStyle(.primary)
                         }
                     }
                 }
@@ -118,11 +124,11 @@ struct MovieDetailView: View {
                                 ProfileCircle(path: person.profilePath, size: 72, grayscale: true)
                                 Text(person.name).font(.biingeCaption2).foregroundStyle(.primary)
                                     .lineLimit(2).multilineTextAlignment(.center)
-                                Text(person.description).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
+                                Text(person.description).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                             }
                             .frame(width: 88)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.pressable)
                     }
                 }
                 .padding(.horizontal, 15)
@@ -144,7 +150,8 @@ struct MovieDetailView: View {
                                     if isTracked(item) { WatchedBadge() }
                                 }
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.pressable)
+                        .detailTransitionSource("movie-\(item.id)")
                     }
                 }
                 .padding(.horizontal, 15)
@@ -174,7 +181,7 @@ struct MovieDetailView: View {
     private func statusPill(_ status: String?) -> some View {
         if let status, !status.isEmpty {
             Text(status)
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(.caption, weight: .bold))
                 .foregroundStyle(Color.biingeTextSecondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 3)
@@ -212,12 +219,16 @@ struct MovieDetailView: View {
         switch action {
         case .toggleWant:
             await store.toggle(id: movieId, title: movie.title, posterPath: movie.posterPath, runtime: movie.runtime ?? 0, target: .want)
+            stateChanges += 1
         case .toggleWatched:
             await store.toggle(id: movieId, title: movie.title, posterPath: movie.posterPath, runtime: movie.runtime ?? 0, target: .watched)
+            stateChanges += 1
         case .pin:
             await store.setPinned(id: movieId, pinned: true)
+            marks += 1
         case .unpin:
             await store.setPinned(id: movieId, pinned: false)
+            marks += 1
         }
     }
 }
@@ -228,13 +239,15 @@ struct MovieActionsView: View {
     let details: MovieDetails
     @Binding var showMenu: Bool
     @Environment(MovieStore.self) private var store
+    /// Bumped when a state change lands, so the haptic fires with the UI rather than on the tap
+    @State private var stateChanges = 0
 
     var body: some View {
         let state = store.currentState(id: movieId)
         Group {
             if state == .want || state == .watched {
                 Button {
-                    withAnimation(.easeOut(duration: 0.15)) { showMenu = true }
+                    withAnimation(.spring(duration: 0.3, bounce: 0)) { showMenu = true }
                 } label: {
                     Text(state == .want ? "Want" : "Watched")
                         .font(.biingeCallout).fontWeight(.semibold)
@@ -242,17 +255,24 @@ struct MovieActionsView: View {
                         .frame(maxWidth: .infinity).padding(.vertical, 15)
                         .background(Color.biingeAccent, in: Capsule())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
             } else {
                 HStack(spacing: 10) {
-                    actionPill("Want") {
-                        Task { await store.toggle(id: movieId, title: details.title, posterPath: details.posterPath, runtime: details.runtime ?? 0, target: .want) }
-                    }
-                    actionPill("Watched") {
-                        Task { await store.toggle(id: movieId, title: details.title, posterPath: details.posterPath, runtime: details.runtime ?? 0, target: .watched) }
-                    }
+                    actionPill("Want") { toggle(.want) }
+                    actionPill("Watched") { toggle(.watched) }
                 }
             }
+        }
+        .sensoryFeedback(.success, trigger: stateChanges)
+    }
+
+    private func toggle(_ target: WatchState) {
+        Task {
+            await store.toggle(
+                id: movieId, title: details.title, posterPath: details.posterPath,
+                runtime: details.runtime ?? 0, target: target
+            )
+            stateChanges += 1
         }
     }
 
@@ -263,7 +283,7 @@ struct MovieActionsView: View {
                 .frame(maxWidth: .infinity).padding(.vertical, 15)
                 .background(Color.biingeText, in: Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.pressable)
     }
 }
 
@@ -275,14 +295,22 @@ struct MovieActionMenu: View {
     let onAction: (MenuAction) -> Void
     let onCancel: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     enum MenuAction {
         case toggleWant, toggleWatched, pin, unpin
     }
 
     var body: some View {
         ZStack {
-            Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
-            Color.black.opacity(0.4).ignoresSafeArea()
+            // one solid scrim where the user asked for less transparency, the frosted pair otherwise
+            if reduceTransparency {
+                Color.black.opacity(0.82).ignoresSafeArea()
+            } else {
+                Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
+                Color.black.opacity(0.4).ignoresSafeArea()
+            }
 
             Button(action: onCancel) {
                 Color.clear.contentShape(Rectangle())
@@ -291,9 +319,12 @@ struct MovieActionMenu: View {
             .ignoresSafeArea()
 
             VStack(spacing: 28) {
-                PosterImage(path: posterPath, title: "", size: "w342", cornerRadius: 12)
-                    .containerRelativeFrame(.horizontal) { width, _ in width * 0.55 }
-                    .onTapGesture { onCancel() }
+                Button(action: onCancel) {
+                    PosterImage(path: posterPath, title: "", size: "w342", cornerRadius: 12)
+                        .containerRelativeFrame(.horizontal) { width, _ in width * 0.55 }
+                }
+                .buttonStyle(.pressable)
+                .accessibilityLabel("Close")
 
                 VStack(spacing: 2) {
                     ForEach(options, id: \.title) { option in
@@ -303,7 +334,7 @@ struct MovieActionMenu: View {
                                 .foregroundStyle(Color.biingeText.opacity(0.7))
                                 .padding(10)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.pressable)
                     }
                     Button(action: onCancel) {
                         Text("Cancel")
@@ -311,10 +342,12 @@ struct MovieActionMenu: View {
                             .foregroundStyle(Color.biingeText.opacity(0.7))
                             .padding(10)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                 }
             }
             .padding(.horizontal, 15)
+            // the menu materialises out of the scrim instead of fading flat onto it
+            .transition(reduceMotion ? .opacity : .scale(scale: 0.94).combined(with: .opacity))
         }
         .transition(.opacity)
     }

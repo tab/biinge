@@ -13,6 +13,10 @@ struct TvDetailView: View {
     /// Serializes progress writes and versions optimistic mutations so only the newest applies state
     @State private var progressWrites: Task<Void, Never>?
     @State private var progressGeneration = 0
+    /// Bumped when a state change lands, so the haptic fires with the UI rather than on the tap
+    @State private var stateChanges = 0
+    /// Bumped on the lighter commits: ticking one episode, pinning and unpinning
+    @State private var marks = 0
 
     /// Progress lives in the store so marks made in an episode sheet update this screen instantly
     private var progress: WatchProgress? {
@@ -56,6 +60,8 @@ struct TvDetailView: View {
         .background(Color.biingeBackground)
         .toolbar(.hidden, for: .navigationBar)
         .task { await load() }
+        .sensoryFeedback(.success, trigger: stateChanges)
+        .sensoryFeedback(.impact(weight: .light), trigger: marks)
         .overlay {
             if showMenu, let details {
                 TvActionMenu(
@@ -63,7 +69,7 @@ struct TvDetailView: View {
                     state: store.currentState(id: seriesId),
                     pinned: store.isPinned(id: seriesId),
                     onAction: { action in Task { await handleMenu(action, details) } },
-                    onCancel: { withAnimation(.easeOut(duration: 0.15)) { showMenu = false } }
+                    onCancel: { withAnimation(.spring(duration: 0.3, bounce: 0)) { showMenu = false } }
                 )
             }
         }
@@ -88,8 +94,8 @@ struct TvDetailView: View {
                     Spacer(minLength: 12)
                     if let rating = series.rating, rating > 0 {
                         HStack(spacing: 5) {
-                            Image(systemName: "star.fill").font(.system(size: 18)).foregroundStyle(Color.biingePrimary)
-                            Text(String(format: "%.1f", rating)).font(.system(size: 24, weight: .heavy)).foregroundStyle(.primary)
+                            Image(systemName: "star.fill").font(.biingeTitle3).foregroundStyle(Color.biingePrimary)
+                            Text(String(format: "%.1f", rating)).font(.biingeTitle2).fontWeight(.heavy).foregroundStyle(.primary)
                         }
                     }
                 }
@@ -160,7 +166,8 @@ struct TvDetailView: View {
                                     if isTracked(item) { WatchedBadge() }
                                 }
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.pressable)
+                        .detailTransitionSource("series-\(item.id)")
                     }
                 }
                 .padding(.horizontal, 15)
@@ -190,7 +197,7 @@ struct TvDetailView: View {
     private func statusPill(_ status: String?) -> some View {
         if let status, !status.isEmpty {
             Text(status)
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(.caption, weight: .bold))
                 .foregroundStyle(Color.biingeTextSecondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 3)
@@ -231,10 +238,13 @@ struct TvDetailView: View {
                 seasonsCount: series.regularSeasonsCount, episodesCount: series.totalEpisodesCount,
                 status: series.status ?? "", target: target
             )
+            stateChanges += 1
         case .pin:
             await store.setPinned(id: seriesId, pinned: true)
+            marks += 1
         case .unpin:
             await store.setPinned(id: seriesId, pinned: false)
+            marks += 1
         }
     }
 
@@ -258,6 +268,7 @@ struct TvDetailView: View {
                 return try await apiClient.unmarkEpisode(showId: seriesId, seasonId: season.id, episodeId: episode.id)
             }
         }
+        marks += 1
     }
 
     private func markSeason(_ season: SeasonSummary, _ episodes: [EpisodeSummary], _ watched: Bool) async {
@@ -282,6 +293,7 @@ struct TvDetailView: View {
                 return try await apiClient.unmarkSeason(showId: seriesId, seasonId: season.id)
             }
         }
+        stateChanges += 1
     }
 
     // MARK: - Optimistic progress plumbing
@@ -349,6 +361,8 @@ struct TvActionsView: View {
     let details: SeriesDetails
     @Binding var showMenu: Bool
     @Environment(TvStore.self) private var store
+    /// Bumped when a state change lands, so the haptic fires with the UI rather than on the tap
+    @State private var stateChanges = 0
 
     private var inProduction: Bool {
         switch details.status {
@@ -362,7 +376,7 @@ struct TvActionsView: View {
         Group {
             if let state, state != .none {
                 Button {
-                    withAnimation(.easeOut(duration: 0.15)) { showMenu = true }
+                    withAnimation(.spring(duration: 0.3, bounce: 0)) { showMenu = true }
                 } label: {
                     Text(state.rawValue.capitalized)
                         .font(.biingeCallout).fontWeight(.semibold)
@@ -370,7 +384,7 @@ struct TvActionsView: View {
                         .frame(maxWidth: .infinity).padding(.vertical, 15)
                         .background(Color.biingeAccent, in: Capsule())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
             } else {
                 HStack(spacing: 10) {
                     actionPill("Want") { toggle(.want) }
@@ -378,6 +392,7 @@ struct TvActionsView: View {
                 }
             }
         }
+        .sensoryFeedback(.success, trigger: stateChanges)
     }
 
     private func toggle(_ target: WatchState) {
@@ -387,6 +402,7 @@ struct TvActionsView: View {
                 seasonsCount: details.regularSeasonsCount, episodesCount: details.totalEpisodesCount,
                 status: details.status ?? "", target: target
             )
+            stateChanges += 1
         }
     }
 
@@ -397,7 +413,7 @@ struct TvActionsView: View {
                 .frame(maxWidth: .infinity).padding(.vertical, 15)
                 .background(Color.biingeText, in: Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.pressable)
     }
 }
 
@@ -409,6 +425,9 @@ struct TvActionMenu: View {
     let onAction: (MenuAction) -> Void
     let onCancel: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     enum MenuAction {
         case toggle(WatchState)
         case pin, unpin
@@ -416,8 +435,13 @@ struct TvActionMenu: View {
 
     var body: some View {
         ZStack {
-            Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
-            Color.black.opacity(0.4).ignoresSafeArea()
+            // one solid scrim where the user asked for less transparency, the frosted pair otherwise
+            if reduceTransparency {
+                Color.black.opacity(0.82).ignoresSafeArea()
+            } else {
+                Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
+                Color.black.opacity(0.4).ignoresSafeArea()
+            }
 
             Button(action: onCancel) {
                 Color.clear.contentShape(Rectangle())
@@ -426,9 +450,12 @@ struct TvActionMenu: View {
             .ignoresSafeArea()
 
             VStack(spacing: 28) {
-                PosterImage(path: posterPath, title: "", size: "w342", cornerRadius: 12)
-                    .containerRelativeFrame(.horizontal) { width, _ in width * 0.55 }
-                    .onTapGesture { onCancel() }
+                Button(action: onCancel) {
+                    PosterImage(path: posterPath, title: "", size: "w342", cornerRadius: 12)
+                        .containerRelativeFrame(.horizontal) { width, _ in width * 0.55 }
+                }
+                .buttonStyle(.pressable)
+                .accessibilityLabel("Close")
 
                 VStack(spacing: 2) {
                     ForEach(options, id: \.title) { option in
@@ -438,7 +465,7 @@ struct TvActionMenu: View {
                                 .foregroundStyle(Color.biingeText.opacity(0.7))
                                 .padding(10)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.pressable)
                     }
                     Button(action: onCancel) {
                         Text("Cancel")
@@ -446,10 +473,12 @@ struct TvActionMenu: View {
                             .foregroundStyle(Color.biingeText.opacity(0.7))
                             .padding(10)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                 }
             }
             .padding(.horizontal, 15)
+            // the menu materialises out of the scrim instead of fading flat onto it
+            .transition(reduceMotion ? .opacity : .scale(scale: 0.94).combined(with: .opacity))
         }
         .transition(.opacity)
     }
@@ -504,6 +533,8 @@ private struct SeasonsView: View {
     @State private var didUserSelect = false
     /// Set on auto-select to scroll the strip so the chosen season pill is revealed
     @State private var scrollTarget: Int?
+    /// Grows with the user's text size, so a row's two lines never clip
+    @ScaledMetric(relativeTo: .body) private var rowHeight: CGFloat = 58
 
     /// The season to open by default: the earliest not-fully-watched season, or the last when all are watched
     private var defaultSeason: SeasonSummary? {
@@ -524,13 +555,13 @@ private struct SeasonsView: View {
                                 select(season)
                             } label: {
                                 Text(season.title)
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.biingeCaption2)
                                     .foregroundStyle(isActive ? Color.biingeBackground : Color.biingeGrayDark)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 5)
                                     .background(isActive ? Color.biingeText : .clear, in: Capsule())
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.pressable)
                             .id(season.id)
                         }
                     }
@@ -553,6 +584,7 @@ private struct SeasonsView: View {
                 List {
                     ForEach(episodes) { episode in
                         EpisodeRow(
+                            height: rowHeight,
                             showId: showId,
                             seasonNumber: selected?.number ?? 0,
                             episode: episode,
@@ -568,7 +600,7 @@ private struct SeasonsView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .scrollDisabled(true)
-                .frame(height: CGFloat(episodes.count) * EpisodeRow.height)
+                .frame(height: CGFloat(episodes.count) * rowHeight)
 
                 if let season = selected, !episodes.isEmpty {
                     let seasonWatched = watchedSeasonIds.contains(season.id)
@@ -582,7 +614,7 @@ private struct SeasonsView: View {
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
                             .background(Color.biingeText, in: Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                     .padding(.horizontal, 15)
                     .padding(.top, 4)
                 }
@@ -625,8 +657,8 @@ private struct SeasonsView: View {
 }
 
 private struct EpisodeRow: View {
-    /// Fixed row height so the scroll-disabled List can be sized to its contents
-    static let height: CGFloat = 58
+    /// Row height, passed in so the scroll-disabled List can be sized to its contents at the same scale
+    let height: CGFloat
 
     let showId: Int
     let seasonNumber: Int
@@ -641,8 +673,8 @@ private struct EpisodeRow: View {
         } label: {
             rowContent
         }
-        .buttonStyle(.plain)
-        .frame(height: Self.height)
+        .buttonStyle(.pressable)
+        .frame(height: height)
         .listRowInsets(EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 15))
         .listRowBackground(Color.biingeCard)
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
@@ -678,8 +710,8 @@ private struct EpisodeRow: View {
 
             if let rating = episode.rating, rating > 0 {
                 HStack(spacing: 3) {
-                    Image(systemName: "star.fill").font(.system(size: 11)).foregroundStyle(Color.biingePrimary)
-                    Text(String(format: "%.1f", rating)).font(.system(size: 15, weight: .semibold)).foregroundStyle(.secondary)
+                    Image(systemName: "star.fill").font(.caption2).foregroundStyle(Color.biingePrimary)
+                    Text(String(format: "%.1f", rating)).font(.biingeFootnote).fontWeight(.semibold).foregroundStyle(.secondary)
                 }
             }
         }

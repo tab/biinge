@@ -77,7 +77,7 @@ struct PersonDetailView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(person.name)
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.biingeTitle1)
                     .foregroundStyle(.white)
                 if let birthday = person.birthday, !birthday.isEmpty {
                     Text(formatDate(birthday))
@@ -111,7 +111,7 @@ struct PersonDetailView: View {
                                 }
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                 }
             }
             .padding(.horizontal, 5)
@@ -139,7 +139,7 @@ struct PersonDetailView: View {
                                 }
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                 }
             }
             .padding(.horizontal, 5)

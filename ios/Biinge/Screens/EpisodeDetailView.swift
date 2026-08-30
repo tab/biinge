@@ -14,6 +14,8 @@ struct EpisodeDetailView: View {
     /// Serializes writes and versions optimistic mutations so only the newest applies state
     @State private var progressWrites: Task<Void, Never>?
     @State private var progressGeneration = 0
+    /// Bumped when a tick lands, so the haptic fires with the UI rather than on the tap
+    @State private var marks = 0
 
     /// Progress lives in the store, shared with the show detail underneath this sheet
     private var progress: WatchProgress? {
@@ -51,6 +53,7 @@ struct EpisodeDetailView: View {
         .background(Color.biingeBackground)
         .toolbar(.hidden, for: .navigationBar)
         .task { await load() }
+        .sensoryFeedback(.impact(weight: .light), trigger: marks)
     }
 
     private func content(_ ep: EpisodeDetails) -> some View {
@@ -76,8 +79,8 @@ struct EpisodeDetailView: View {
                     Spacer(minLength: 12)
                     if let rating = ep.rating, rating > 0 {
                         HStack(spacing: 5) {
-                            Image(systemName: "star.fill").font(.system(size: 18)).foregroundStyle(Color.biingePrimary)
-                            Text(String(format: "%.1f", rating)).font(.system(size: 24, weight: .heavy)).foregroundStyle(.primary)
+                            Image(systemName: "star.fill").font(.biingeTitle3).foregroundStyle(Color.biingePrimary)
+                            Text(String(format: "%.1f", rating)).font(.biingeTitle2).fontWeight(.heavy).foregroundStyle(.primary)
                         }
                     }
                 }
@@ -93,7 +96,7 @@ struct EpisodeDetailView: View {
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
                             .background(Color.biingeText, in: Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                     .padding(.horizontal, 15)
                 }
 
@@ -174,6 +177,7 @@ struct EpisodeDetailView: View {
         let generation = progressGeneration
         let snapshot = progress
         setProgress(optimistic)
+        marks += 1
 
         let prior = progressWrites
         progressWrites = Task {

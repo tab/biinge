@@ -63,7 +63,8 @@ struct MoviesView: View {
                             if movie.pinned { PinBadge() }
                         }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
+                .detailTransitionSource("movie-\(movie.id)")
             }
             .refreshable { await store.load() }
         }

@@ -80,7 +80,8 @@ struct TvView: View {
                             if show.pinned { PinBadge() }
                         }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
+                .detailTransitionSource("series-\(show.id)")
             }
             .refreshable { await store.load() }
         }

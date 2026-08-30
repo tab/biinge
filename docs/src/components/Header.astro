@@ -52,12 +52,15 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   </div>
 
   <div class="mobile-menu">
-    <nav>
-      {links.map((link) => (
-        <a href={link.href} class:list={["mobile-link", { active: section === link.key }]}>{link.label}</a>
-      ))}
-      <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="mobile-link">GitHub</a>
-    </nav>
+    <!-- the collapsing row measures this wrapper, so the padding sits inside it -->
+    <div class="mobile-menu-inner">
+      <nav>
+        {links.map((link) => (
+          <a href={link.href} class:list={["mobile-link", { active: section === link.key }]}>{link.label}</a>
+        ))}
+        <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="mobile-link">GitHub</a>
+      </nav>
+    </div>
   </div>
 </header>
 
@@ -87,6 +90,29 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     border-bottom-color: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+  }
+
+  /*
+   * Solid rather than half-frosted where the user asked for less transparency or
+   * more contrast. Over the hero the bar keeps its own scrim, so it stays out
+   */
+  @media (prefers-reduced-transparency: reduce) {
+    .topbar:not(.over),
+    .topbar.is-stuck {
+      background: var(--bg);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .topbar:not(.over),
+    .topbar.is-stuck {
+      background: var(--bg);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom-color: var(--text);
+    }
   }
 
   .topbar-inner {
@@ -152,6 +178,10 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     text-decoration: none;
   }
 
+  .nav-link:active {
+    background: var(--nav-hover-bg);
+  }
+
   .nav-link.active {
     color: var(--text);
     font-weight: 600;
@@ -171,10 +201,10 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     border-radius: 999px;
     background: var(--text);
     color: var(--bg);
-    font-size: 13.5px;
+    font-size: 0.84rem;
     font-weight: 550;
     text-decoration: none;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, transform 0.12s;
   }
 
   .github-cta:hover {
@@ -182,6 +212,12 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     text-decoration: none;
   }
 
+  .github-cta:active {
+    opacity: 0.7;
+    transform: scale(0.97);
+  }
+
+  /* hidden at desktop widths so it never takes a tab stop the user can't act on */
   .mobile-toggle {
     display: none;
   }
@@ -191,6 +227,10 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     cursor: pointer;
     color: var(--text-muted);
     padding: 4px;
+  }
+
+  .mobile-menu-btn:active {
+    color: var(--text);
   }
 
   .icon-close {
@@ -207,8 +247,6 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
 
   .mobile-menu {
     display: none;
-    overflow: hidden;
-    border-top: 1px solid var(--border);
   }
 
   .mobile-menu nav {
@@ -235,6 +273,12 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     text-decoration: none;
   }
 
+  .mobile-link:active {
+    color: var(--text);
+    background: var(--nav-hover-bg);
+    opacity: 0.7;
+  }
+
   .mobile-link.active {
     color: var(--text);
   }
@@ -256,20 +300,67 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
       display: flex;
     }
 
-    .mobile-toggle:checked ~ .mobile-menu {
+    /*
+     * Visually hidden rather than display:none, so the checkbox keeps its tab
+     * stop and Space opens the menu. The label beside it stays the visible hit
+     * target, and wears the focus ring on the checkbox's behalf
+     */
+    .mobile-toggle {
       display: block;
-      animation: slideDown 0.25s ease-out;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .mobile-toggle:focus-visible ~ .topbar-inner .mobile-menu-btn {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /*
+     * Opens and closes along the same path: a row transition both ways, rather
+     * than a keyframe in and a cut out. visibility trails the close so the links
+     * leave the tab order only once they've finished collapsing
+     */
+    .mobile-menu {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      border-top: 1px solid transparent;
+      transition: grid-template-rows 0.28s cubic-bezier(0.2, 0.7, 0.2, 1),
+        opacity 0.18s ease, border-color 0.28s, visibility 0s linear 0.28s;
+    }
+
+    /*
+     * The wrapper is the grid item, and carries no padding of its own: padding
+     * on the item counts toward the row's minimum, which would leave the closed
+     * menu holding a band of empty header
+     */
+    .mobile-menu-inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .mobile-toggle:checked ~ .mobile-menu {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      visibility: visible;
+      border-top-color: var(--border);
+      transition: grid-template-rows 0.28s cubic-bezier(0.2, 0.7, 0.2, 1),
+        opacity 0.18s ease, border-color 0.28s, visibility 0s;
     }
   }
 
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu,
+    .mobile-toggle:checked ~ .mobile-menu {
+      transition: none;
     }
   }
 </style>

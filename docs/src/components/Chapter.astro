@@ -62,7 +62,7 @@ const {
       </div>
 
       <div class="screen" data-reveal style="--reveal-delay: 140ms">
-        {flow ? <DeviceFlow frames={flow} step={step} /> : screen && <DeviceFrame name={screen.name} alt={screen.alt} />}
+        {flow ? <DeviceFlow frames={flow} step={step} fixedDark={tone === "focus"} /> : screen && <DeviceFrame name={screen.name} alt={screen.alt} fixedDark={tone === "focus"} />}
       </div>
     </div>
   </div>

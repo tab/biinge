@@ -3,17 +3,32 @@ interface Props {
   name: string;
   alt: string;
   eager?: boolean;
+  // a dark section shows the dark screenshot whatever the page theme is
+  fixedDark?: boolean;
 }
 
-const { name, alt, eager = false } = Astro.props;
+const { name, alt, eager = false, fixedDark = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const loading = eager ? "eager" : "lazy";
 ---
 
 <div class="device">
   <div class="device-screen">
-    <img class="d-light" src={`${base}screens/${name}-light.jpg`} alt={alt} width="1206" height="2622" loading={loading} decoding="async" />
-    <img class="d-dark" src={`${base}screens/${name}-dark.jpg`} alt="" aria-hidden="true" width="1206" height="2622" loading={loading} decoding="async" />
+    <!--
+      src is set by the theme script rather than in the markup: two <img> tags
+      with one hidden still downloads both files, and there are twenty frames
+    -->
+    <img
+      data-screen
+      data-light={`${base}screens/${name}-light.jpg`}
+      data-dark={`${base}screens/${name}-dark.jpg`}
+      data-fixed={fixedDark ? "dark" : undefined}
+      alt={alt}
+      width="1206"
+      height="2622"
+      loading={loading}
+      decoding="async"
+    />
   </div>
 </div>
 
@@ -50,13 +65,4 @@ const loading = eager ? "eager" : "lazy";
     object-fit: cover;
     display: block;
   }
-
-  .device-screen .d-dark { display: none; }
-
-  :global(html[data-theme="dark"]) .device-screen .d-light { display: none; }
-  :global(html[data-theme="dark"]) .device-screen .d-dark { display: block; }
-
-  /* a dark section shows the dark screenshot whatever the page theme is */
-  :global(.focus) .device-screen .d-light { display: none; }
-  :global(.focus) .device-screen .d-dark { display: block; }
 </style>

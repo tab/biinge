@@ -62,18 +62,46 @@ const ogImage = `${site}${base}og.png`;
   </head>
   <body>
     <slot />
-    <script>
-      const toggle = document.getElementById("theme-toggle");
-      if (toggle) {
-        toggle.addEventListener("click", () => {
-          const current = document.documentElement.getAttribute("data-theme");
-          const next = current === "dark" ? "light" : "dark";
-          document.documentElement.setAttribute("data-theme", next);
-          try {
-            localStorage.setItem("theme", next);
-          } catch (_) {}
-        });
-      }
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+
+        // The screenshots ship without a src, because two <img> tags with one
+        // hidden downloads both files. This picks the one the theme actually
+        // shows, and runs again whenever the theme changes
+        function paintScreens() {
+          var dark = root.getAttribute("data-theme") === "dark";
+          var screens = document.querySelectorAll("img[data-screen]");
+          for (var i = 0; i < screens.length; i++) {
+            var img = screens[i];
+            var wantsDark = img.getAttribute("data-fixed") === "dark" || dark;
+            var next = wantsDark
+              ? img.getAttribute("data-dark")
+              : img.getAttribute("data-light");
+            if (img.getAttribute("src") !== next) img.setAttribute("src", next);
+          }
+        }
+
+        paintScreens();
+
+        var toggle = document.getElementById("theme-toggle");
+        if (toggle) {
+          toggle.addEventListener("click", function () {
+            var next =
+              root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            // the class eases the palette across, so the swap isn't a hard cut
+            root.classList.add("theme-switching");
+            root.setAttribute("data-theme", next);
+            paintScreens();
+            window.setTimeout(function () {
+              root.classList.remove("theme-switching");
+            }, 300);
+            try {
+              localStorage.setItem("theme", next);
+            } catch (_) {}
+          });
+        }
+      })();
     </script>
     <script>
       // the state badges fill themselves once, as their section arrives

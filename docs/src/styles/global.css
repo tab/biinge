@@ -226,11 +226,17 @@ code {
   font-size: 0.97rem;
   font-weight: 550;
   text-decoration: none;
-  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s,
+    transform 0.12s;
 }
 
 .btn:hover {
   text-decoration: none;
+}
+
+/* Feedback lands on press, not on release - the only signal a touch device gets */
+.btn:active {
+  transform: scale(0.97);
 }
 
 .btn-primary {
@@ -242,6 +248,10 @@ code {
   opacity: 0.86;
 }
 
+.btn-primary:active {
+  opacity: 0.72;
+}
+
 .btn-ghost {
   background: transparent;
   color: var(--text);
@@ -249,6 +259,11 @@ code {
 }
 
 .btn-ghost:hover {
+  border-color: var(--text-muted);
+}
+
+.btn-ghost:active {
+  background: var(--nav-hover-bg);
   border-color: var(--text-muted);
 }
 
@@ -274,6 +289,10 @@ code {
   transform: translateX(3px);
 }
 
+.btn-text:active {
+  opacity: 0.6;
+}
+
 /*
  * Sections lift into place as they arrive. Gated behind .js so the content is
  * never left invisible when the observer doesn't run
@@ -291,12 +310,28 @@ code {
   transform: none;
 }
 
+/*
+ * Light and dark are two very different grounds, so the swap eases instead of
+ * cutting. The class rides on <html> only for the length of the toggle, and
+ * revealing sections keep their own transition
+ */
+.theme-switching,
+.theme-switching *:not([data-reveal]) {
+  transition: background-color 0.25s ease, border-color 0.25s ease,
+    color 0.25s ease, fill 0.25s ease !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
   .btn-text:hover svg {
+    transform: none;
+  }
+
+  /* the press still reads, it just stops moving */
+  .btn:active {
     transform: none;
   }
 

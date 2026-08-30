@@ -16,9 +16,11 @@ interface Frame {
 interface Props {
   frames: Frame[];
   step?: string;
+  // a dark section shows the dark screenshots whatever the page theme is
+  fixedDark?: boolean;
 }
 
-const { frames, step } = Astro.props;
+const { frames, step, fixedDark = false } = Astro.props;
 const beat = step ?? "2.4s";
 const base = import.meta.env.BASE_URL;
 
@@ -49,17 +51,10 @@ const keyframes = `flow-${frames[0].name.replace(/[^a-z0-9]/gi, "")}`;
       {frames.map((frame, i) => (
         <div class="frame" style={`--i: ${i}`}>
           <img
-            class="d-light"
-            src={`${base}screens/${frame.name}-light.jpg`}
-            alt=""
-            width="1206"
-            height="2622"
-            loading={i === 0 ? "eager" : "lazy"}
-            decoding="async"
-          />
-          <img
-            class="d-dark"
-            src={`${base}screens/${frame.name}-dark.jpg`}
+            data-screen
+            data-light={`${base}screens/${frame.name}-light.jpg`}
+            data-dark={`${base}screens/${frame.name}-dark.jpg`}
+            data-fixed={fixedDark ? "dark" : undefined}
             alt=""
             width="1206"
             height="2622"
@@ -115,14 +110,6 @@ const keyframes = `flow-${frames[0].name.replace(/[^a-z0-9]/gi, "")}`;
     object-fit: cover;
     display: block;
   }
-
-  .frame .d-dark { display: none; }
-
-  :global(html[data-theme="dark"]) .frame .d-light { display: none; }
-  :global(html[data-theme="dark"]) .frame .d-dark { display: block; }
-
-  :global(.focus) .frame .d-light { display: none; }
-  :global(.focus) .frame .d-dark { display: block; }
 
   .captions {
     position: relative;

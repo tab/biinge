@@ -12,11 +12,11 @@ import (
 const (
 	// ServerStartTimeout is the maximum time to wait for server to start
 	ServerStartTimeout = 1 * time.Second
-	// ServerStopTimeout is the maximum time to wait for server to start
+	// ServerStopTimeout is the maximum time to wait for server to stop
 	ServerStopTimeout = 1 * time.Second
-	// serverStartPollInterval is how frequently to check if server has started
+	// ServerStartPollInterval is how frequently to check if server has started
 	ServerStartPollInterval = 50 * time.Millisecond
-	// clientPollTimeout is the maximum time to wait for client to connect to server
+	// ClientPollTimeout is the maximum time to wait for client to connect to server
 	ClientPollTimeout = 500 * time.Millisecond
 )
 

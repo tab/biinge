@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"sort"
@@ -179,15 +180,8 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 
 	// Read-repair: refresh a stale add-time poster/title from TMDB, leaving state and pinned untouched
 	if details.PosterPath != "" && details.PosterPath != movie.PosterPath {
-		runtime := uint64(details.Runtime)
-		if runtime == 0 {
-			runtime = movie.Runtime
-		}
-
-		title := details.Title
-		if title == "" {
-			title = movie.Title
-		}
+		runtime := cmp.Or(uint64(details.Runtime), movie.Runtime)
+		title := cmp.Or(details.Title, movie.Title)
 
 		if _, updateErr := p.movies.Update(ctx, &models.Movie{
 			ID:         movie.ID,
@@ -360,15 +354,8 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 
 	// Read-repair the stored poster/title/status (see FetchMovieDetails), leaving counts, state and pinned untouched
 	if details.PosterPath != "" && details.PosterPath != tvShow.PosterPath {
-		title := details.Title
-		if title == "" {
-			title = tvShow.Title
-		}
-
-		status := details.Status
-		if status == "" {
-			status = tvShow.Status
-		}
+		title := cmp.Or(details.Title, tvShow.Title)
+		status := cmp.Or(details.Status, tvShow.Status)
 
 		if _, updateErr := p.series.Update(ctx, &models.Series{
 			ID:            tvShow.ID,

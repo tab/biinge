@@ -10,7 +10,7 @@ import (
 
 // TTLs for cached TMDB responses, a pure freshness-against-API-calls trade since no user action changes what TMDB answers
 const (
-	// tightest of the three: a just-aired episode reaches a season list, and so up-next, only once this expires
+	// DetailsTTL is the tightest of the three (a just-aired episode reaches a season list, and so up-next, only once this expires)
 	DetailsTTL  = 12 * time.Hour
 	SearchTTL   = 6 * time.Hour
 	TrendingTTL = 6 * time.Hour

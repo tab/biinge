@@ -21,18 +21,14 @@ defaults:
 
 jobs:
   check:
-    # Lint and tests share one job: a second macOS runner would cost a concurrency slot
     name: Lint & tests
     permissions:
       contents: read
-    # NOTE: requires a runner image with Xcode 26 (iOS 26 SDK).
     runs-on: macos-latest
     steps:
       - name: Check out the repository
         uses: actions/checkout@v6
 
-      # NOTE: https://github.com/realm/SwiftLint/releases/tag/0.65.1
-      # Pinned from the release, not brew, and must match the version developers run locally
       - name: Install SwiftLint
         env:
           SWIFTLINT_VERSION: "0.65.1"
@@ -43,7 +39,6 @@ jobs:
           sudo install "$RUNNER_TEMP/swiftlint/swiftlint" /usr/local/bin/swiftlint
           swiftlint version
 
-      # Called directly, not through make lint, for the annotations on the diff
       - name: Style & correctness (SwiftLint)
         run: swiftlint lint --strict --reporter github-actions-logging
 

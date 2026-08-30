@@ -37,17 +37,13 @@ jobs:
           go-version-file: 'api/go.mod'
           cache: true
           cache-dependency-path: api/go.sum
-      # Covers go vet and staticcheck too — .golangci.yaml enables govet and
-      # staticcheck as linters, and gofmt and goimports as formatters
       - name: Format, style & correctness (golangci-lint)
-        # NOTE: https://github.com/golangci/golangci-lint-action/releases/tag/v9.3.0
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
         with:
           version: v2.11.3
           working-directory: api
 
   drift:
-    # All three artefacts are hand-committed, so only a diff catches one left behind
     name: Contract & schema drift
     if: github.event_name == 'pull_request'
     permissions:
@@ -69,7 +65,6 @@ jobs:
           NUMBER: ${{ github.event.pull_request.number }}
           BASE: ${{ github.event.pull_request.base.ref }}
         run: |
-          # Read live: labelling fires no run, and a re-run replays the payload it started with
           labels="$(gh pr view "$NUMBER" --json labels --jq '.labels[].name')"
 
           if grep -qx contract-unchanged <<<"$labels"; then
@@ -119,7 +114,6 @@ jobs:
         run: make test:race
 
       - name: Upload coverage to Codecov
-        # NOTE: https://github.com/codecov/codecov-action/tree/v5.4.3
         uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

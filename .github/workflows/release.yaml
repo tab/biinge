@@ -18,7 +18,6 @@ jobs:
           cache: true
           cache-dependency-path: api/go.sum
       - name: golangci-lint
-        # NOTE: https://github.com/golangci/golangci-lint-action/releases/tag/v9.3.0
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
         with:
           version: v2.11.3
@@ -77,17 +76,14 @@ jobs:
         id: version
         run: echo "value=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Set up Docker Buildx
-        # NOTE: https://github.com/docker/setup-buildx-action/releases/tag/v3.11.1
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
       - name: Log in to GitHub Container Registry
-        # NOTE: https://github.com/docker/login-action/releases/tag/v3.4.0
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
-        # NOTE: https://github.com/docker/build-push-action/releases/tag/v6.18.0
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: api
@@ -101,7 +97,6 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.value }}
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
       - name: Create GitHub Release
-        # NOTE: https://github.com/softprops/action-gh-release/releases/tag/v2.3.2
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8
         with:
           tag_name: ${{ steps.version.outputs.value }}
@@ -174,8 +169,6 @@ jobs:
       - name: Install Sentry CLI
         run: curl -sL https://sentry.io/get-cli/ | bash
       - name: Create Sentry release
-        # release name matches APP_VERSION baked into the image, so events line up
-        # set-commits --auto needs the Sentry GitHub integration; drop to --local otherwise
         run: |
           VERSION="${{ github.event.release.tag_name }}"
           sentry-cli releases new "$VERSION"

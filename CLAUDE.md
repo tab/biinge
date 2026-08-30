@@ -77,6 +77,23 @@ Commits are signed and made by hand. Write the message; never run `git commit`.
 The default branch is `master`, not `main` — check before writing a branch name
 or a permalink into docs.
 
+## Hooks
+
+`.githooks/` holds the two checks that run before the code leaves the machine.
+Turn them on once per clone:
+
+```
+git config core.hooksPath .githooks
+```
+
+`commit-msg` rejects a subject that isn't a scoped Conventional Commit and any
+AI attribution in the message. `pre-push` runs the verification loop for each
+area the push touches, then the contract and schema drift check. Push with
+`--no-verify`, or set `SKIP_VERIFY=1`, when you mean to skip it.
+
+The `Title & commits` job repeats both checks on the pull request, so a clone
+without the hooks installed still gets caught.
+
 ## Workflow
 
 - Use `gh` for anything on GitHub: pull requests, issues, checks, releases

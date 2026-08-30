@@ -1,0 +1,46 @@
+name: Pull request
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize, ready_for_review]
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.number }}'
+  cancel-in-progress: true
+
+jobs:
+  conventions:
+    # No path filter: these rules hold for every change, not just the api ones.
+    # The .githooks copies catch this before the push, when they are installed
+    name: Title & commits
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Title is a scoped Conventional Commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\([a-z0-9.-]+\): [A-Z]' <<<"$TITLE"; then
+            echo "::error::the title needs a scoped Conventional Commit, capitalized after the colon. Got: $TITLE"
+            exit 1
+          fi
+          if grep -qE '\.$' <<<"$TITLE"; then
+            echo "::error::drop the trailing period from the title. Got: $TITLE"
+            exit 1
+          fi
+
+      - name: Commit messages carry no AI attribution
+        env:
+          BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          hits="$(git log --format='%H %s%n%b' "origin/$BASE..HEAD" \
+            | grep -inE '\b(claude|anthropic|copilot|chatgpt|codex)\b|claude-session:|🤖' || true)"
+          if [ -n "$hits" ]; then
+            echo "::error::remove the AI tooling attribution from the commit messages"
+            sed 's/^/  /' <<<"$hits"
+            exit 1
+          fi

@@ -11,8 +11,8 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: 'api/go.mod'
           cache: true
@@ -49,8 +49,8 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: 'api/go.mod'
           cache: true
@@ -72,8 +72,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout code
-        # NOTE: https://github.com/actions/checkout/releases/tag/v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v6
       - name: Extract version from tag
         id: version
         run: echo "value=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
@@ -120,8 +119,8 @@ jobs:
       GO_ENV: production
       DATABASE_DSN: ${{ secrets.DATABASE_DSN }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: 'api/go.mod'
           cache: true
@@ -169,8 +168,7 @@ jobs:
       SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
     steps:
       - name: Checkout code
-        # NOTE: https://github.com/actions/checkout/releases/tag/v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install Sentry CLI

@@ -30,7 +30,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # NOTE: https://github.com/realm/SwiftLint/releases/tag/0.65.0
       # Pinned, and installed from the release rather than brew: an unpinned

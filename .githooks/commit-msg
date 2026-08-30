@@ -24,10 +24,14 @@ if grep -qE '\.$' <<<"$subject"; then
   status=1
 fi
 
-# CLAUDE.md: no Co-Authored-By trailer and no mention of AI tooling anywhere
-if grep -viE '^#' "$file" | grep -qiE '\b(claude|anthropic|copilot|chatgpt|cursor\.so|codex)\b|claude-session:|🤖'; then
+# CLAUDE.md: no Co-Authored-By trailer and no mention of AI tooling anywhere.
+# Matched on the attribution forms rather than the bare word, so `docs(claude):`
+# and a body naming CLAUDE.md still pass
+attribution='^[[:space:]]*co-authored-by:.*(claude|anthropic|copilot|chatgpt|codex|cursor)|^[[:space:]]*claude-session:|generated (with|by) .*(claude|anthropic|copilot|chatgpt|codex|cursor)|https://claude\.(ai|com)/|\U0001F916'
+
+if grep -vE '^#' "$file" | grep -qiE "$attribution"; then
   echo "commit-msg: remove the AI tooling attribution"
-  grep -vE '^#' "$file" | grep -inE '\b(claude|anthropic|copilot|chatgpt|cursor\.so|codex)\b|claude-session:|🤖' | sed 's/^/  /'
+  grep -vE '^#' "$file" | grep -inE "$attribution" | sed 's/^/  /'
   status=1
 fi
 

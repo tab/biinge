@@ -37,8 +37,9 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
         run: |
+          attribution='^[[:space:]]*co-authored-by:.*(claude|anthropic|copilot|chatgpt|codex|cursor)|^[[:space:]]*claude-session:|generated (with|by) .*(claude|anthropic|copilot|chatgpt|codex|cursor)|https://claude\.(ai|com)/|\U0001F916'
           hits="$(git log --format='%H %s%n%b' "origin/$BASE..HEAD" \
-            | grep -inE '\b(claude|anthropic|copilot|chatgpt|codex)\b|claude-session:|🤖' || true)"
+            | grep -inE "$attribution" || true)"
           if [ -n "$hits" ]; then
             echo "::error::remove the AI tooling attribution from the commit messages"
             sed 's/^/  /' <<<"$hits"

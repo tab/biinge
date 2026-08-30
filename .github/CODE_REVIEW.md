@@ -41,7 +41,9 @@ Don't guess.
 `docs(readme):`. Imperative, capitalized, no trailing period.
 
 **Commits (major).** One logical change each. No `wip`, no `fix`. No
-`Co-Authored-By` trailer and no mention of AI tooling anywhere in the message.
+AI attribution anywhere in the message: no `Co-Authored-By` or `Claude-Session`
+trailer, no "Generated with" line, no robot emoji. Naming a path is not
+attribution, so `docs(claude):` is fine.
 
 **Description (minor).** No "Test plan" section.
 

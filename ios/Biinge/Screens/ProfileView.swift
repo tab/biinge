@@ -377,12 +377,11 @@ struct StatisticsView: View {
     }
 
     /// Y-axis step in minutes, scaled to the tallest bar so the axis carries about four marks
-    ///
-    /// The step has to come from the data: a fixed one draws a gridline per hour, which is
-    /// three marks across a week and thousands across a whole history. Every candidate past
-    /// an hour is a whole number of hours, and every candidate past a day a whole number of
-    /// days, so a mark never lands mid-unit where two labels would round to the same text.
     private func axisStride(_ maxMinutes: Int) -> Int {
+        // The step has to come from the data: a fixed one draws a gridline per hour, which is
+        // three marks across a week and thousands across a whole history. Every candidate past
+        // an hour is a whole number of hours, and every candidate past a day a whole number of
+        // days, so a mark never lands mid-unit where two labels would round to the same text
         let candidates = [15, 30, 60, 120, 360, 720, 1440, 4320, 10080, 20160, 43200, 86400]
         let target = max(15, maxMinutes / 4)
 

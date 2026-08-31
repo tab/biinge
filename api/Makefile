@@ -118,6 +118,11 @@ lint\:fix:
 	@echo "Running golangci-lint --fix ..."
 	golangci-lint run --fix
 
+.PHONY: doc-comments
+doc-comments:
+	@echo "Checking doc comments..."
+	@../.github/scripts/doc-comments.sh api
+
 .PHONY: vet
 vet:
 	@echo "Running go vet..."
@@ -150,6 +155,7 @@ coverage:
 check:
 	@$(MAKE) fmt
 	@$(MAKE) lint
+	@$(MAKE) doc-comments
 	@$(MAKE) test
 	@$(MAKE) test:race
 	@echo "✓ All checks passed"

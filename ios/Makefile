@@ -17,6 +17,7 @@ test:
 
 .PHONY: lint
 lint:
+	@../.github/scripts/doc-comments.sh ios
 	@if which swiftlint >/dev/null 2>&1; then \
 		swiftlint lint --strict; \
 	else \

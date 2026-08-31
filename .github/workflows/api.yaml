@@ -31,6 +31,9 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v6
+      - name: Doc comments are one line
+        working-directory: .
+        run: .github/scripts/doc-comments.sh api
       - name: Set up Go
         uses: actions/setup-go@v6
         with:

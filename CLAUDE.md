@@ -41,7 +41,9 @@ report an implementation as done on the strength of the code looking right.
 
 - Doc comments are one line and take no trailing period, in Go and Swift alike.
   Extra detail goes in parentheses inside that sentence; anything longer belongs
-  in a body comment, not the doc comment
+  in a body comment, not the doc comment. `.github/scripts/doc-comments.sh`
+  enforces this on top-level Go declarations and every Swift `///`, from
+  `make check`, `make lint` and the API and iOS workflows
 - Comments describe what the code does now, never how it got there. No history,
   no "changed from", no commented-out code left behind
 - Make surgical changes. Don't reformat, rename or "improve" code the task

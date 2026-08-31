@@ -29,6 +29,10 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v6
 
+      - name: Doc comments are one line
+        working-directory: .
+        run: .github/scripts/doc-comments.sh ios
+
       - name: Install SwiftLint
         env:
           SWIFTLINT_VERSION: "0.65.1"

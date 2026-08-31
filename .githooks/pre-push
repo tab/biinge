@@ -37,8 +37,6 @@ grep -q '^ios/' <<<"$changed" && run "ios lint" ios make lint
 grep -q '^ios/' <<<"$changed" && run "ios tests" ios make test
 grep -q '^docs/' <<<"$changed" && run "docs build" docs npm run build
 
-echo "pre-push: schema and spec drift"
-"$root/.github/scripts/schema.sh" "${range%%..*}" || exit 1
-"$root/.github/scripts/swagger.sh" "${range%%..*}" || exit 1
+run "schema and spec drift" api make drift BASE="${range%%..*}"
 
 echo "pre-push: clean"

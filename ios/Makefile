@@ -2,6 +2,7 @@ SCHEME      = Biinge
 PROJECT     = Biinge.xcodeproj
 DERIVED     = build/dd
 DESTINATION ?= platform=iOS Simulator,name=iPhone 17 Pro
+SWIFTLINT_ARGS ?=
 
 .PHONY: build
 build:
@@ -19,7 +20,7 @@ test:
 lint:
 	@../.github/scripts/doc-comments.sh ios
 	@if which swiftlint >/dev/null 2>&1; then \
-		swiftlint lint --strict; \
+		swiftlint lint --strict $(SWIFTLINT_ARGS); \
 	else \
 		echo "swiftlint not installed; skipping"; \
 	fi

@@ -11,6 +11,7 @@ GOOSE_DRIVER=postgres
 GOOSE_MIGRATION_DIR=db/migrate
 
 GO_ENV ?= development
+BASE ?= origin/master
 DOCKER_COMPOSE_CMD=docker compose
 INFRA_NETWORK=biinge-network
 
@@ -108,9 +109,11 @@ fmt:
 	@echo "Formatting code..."
 	go fmt ./...
 
+# `run` does not apply the formatters, so gofmt and goimports need the separate `fmt --diff`
 .PHONY: lint
 lint:
 	@echo "Running golangci-lint..."
+	golangci-lint fmt --diff
 	golangci-lint run
 
 .PHONY: lint\:fix
@@ -122,6 +125,13 @@ lint\:fix:
 doc-comments:
 	@echo "Checking doc comments..."
 	@../.github/scripts/doc-comments.sh api
+
+# Compares against BASE, so it needs the branch history rather than a shallow clone
+.PHONY: drift
+drift:
+	@echo "Checking schema and spec drift..."
+	@../.github/scripts/schema.sh $(BASE)
+	@../.github/scripts/swagger.sh $(BASE)
 
 .PHONY: vet
 vet:

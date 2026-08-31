@@ -18,8 +18,8 @@ import (
 	"biinge-api/internal/config/logger"
 )
 
-// captureLogs builds a logger writing to a pipe and returns everything it emitted.
-// The logger has to be built inside the swap because it binds to os.Stdout on construction
+// captureLogs builds a logger writing to a pipe and returns everything it emitted (built inside
+// the swap, since a logger binds to os.Stdout on construction)
 func captureLogs(t *testing.T, fn func(log *logger.Logger)) string {
 	t.Helper()
 

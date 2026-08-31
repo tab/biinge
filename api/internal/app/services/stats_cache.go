@@ -11,9 +11,8 @@ import (
 	"biinge-api/internal/config/logger"
 )
 
-// StatsCache holds a user's rendered statistics per period. It sits between the stats
-// service and the store so the write paths can drop an entry without depending on the
-// service that reads it
+// StatsCache holds a user's rendered statistics per period (it sits between the stats service
+// and the store, so a write path can drop an entry without depending on the service that reads it)
 type StatsCache interface {
 	Fetch(ctx context.Context, userId uuid.UUID, period models.StatsPeriod, source func() (*models.Stats, error)) (*models.Stats, error)
 	Invalidate(ctx context.Context, userId uuid.UUID)
@@ -36,10 +35,10 @@ func (c *statsCache) Fetch(ctx context.Context, userId uuid.UUID, period models.
 	return cache.Fetch(ctx, c.store, c.log, statsCacheKey(userId, period), cache.StatsTTL, source)
 }
 
-// Invalidate drops every period at once, since a single watch moves the counts in all
-// of them. A failure only costs staleness until the entries expire, so it never fails
-// the write that triggered it
+// Invalidate drops every period at once, since a single watch moves the counts in all of them
 func (c *statsCache) Invalidate(ctx context.Context, userId uuid.UUID) {
+	// a failure only costs staleness until the entries expire, so it never fails the write
+	// that triggered it
 	keys := make([]string, 0, len(models.StatsPeriods))
 	for _, period := range models.StatsPeriods {
 		keys = append(keys, statsCacheKey(userId, period))

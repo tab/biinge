@@ -32,11 +32,11 @@ const (
 	PlatformPlayStation4 uint64 = 48
 )
 
-// The IGDB game_type values that are a game someone owns and plays. On PlayStation the remaster or
-// port is often the only version that runs, so restricting this to main games loses Demon's Souls,
-// The Last of Us Remastered and Red Dead Redemption entirely. DLC, expansions and bundles stay out —
-// they are not separately trackable
+// The IGDB game_type values that are a game someone owns and plays
 const (
+	// On PlayStation the remaster or port is often the only version that runs, so restricting
+	// this to main games loses Demon's Souls, The Last of Us Remastered and Red Dead Redemption
+	// entirely. DLC, expansions and bundles stay out: they are not separately trackable
 	gameTypeMain                = 0
 	gameTypeStandaloneExpansion = 4
 	gameTypeRemake              = 8
@@ -60,8 +60,8 @@ const trendingCandidates = 200
 // tokenRefreshMargin re-authenticates this far before the Twitch token actually expires
 const tokenRefreshMargin = 5 * time.Minute
 
-// detailFields is the full field set for a game detail screen. The similar_games expansion carries the
-// fields playstationFilter would test, since Apicalypse can't filter through a nested expansion
+// detailFields is the full field set for a game detail screen (the similar_games expansion carries
+// the fields playstationFilter would test, since Apicalypse can't filter through a nested expansion)
 const detailFields = "fields name,summary,first_release_date,total_rating,total_rating_count," +
 	"cover.image_id,game_status.status,genres.name,platforms.name,release_dates.date,release_dates.platform," +
 	"similar_games.name,similar_games.game_type,similar_games.version_parent," +
@@ -71,9 +71,9 @@ const detailFields = "fields name,summary,first_release_date,total_rating,total_
 const listFields = "fields name,first_release_date,total_rating,total_rating_count," +
 	"cover.image_id,release_dates.date,release_dates.platform;"
 
-// playstationFilter keeps playable games released on a PlayStation we track, dropping editions, DLC and
-// cover-less entries. It is an expression rather than a full clause because Apicalypse allows only one
-// `where` per query
+// playstationFilter keeps playable games released on a PlayStation we track, dropping editions, DLC
+// and cover-less entries (an expression rather than a full clause, since Apicalypse allows only one
+// `where` per query)
 var playstationFilter = fmt.Sprintf(
 	"platforms = (%d,%d) & game_type = %s & version_parent = null & cover != null",
 	PlatformPlayStation5, PlatformPlayStation4, playableGameTypes,

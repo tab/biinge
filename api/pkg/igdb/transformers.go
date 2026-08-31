@@ -130,8 +130,9 @@ func TransformGameList(result *GameListResult) []GameItem {
 
 // genreLabels renames the IGDB genres that don't read as a genre: the ones carrying their own acronym
 // in brackets, and a handful whose wording is off (Platform sits right above the Platforms section, and
-// Sport and Simulator are singular). The other 14 of IGDB's 23 genres pass through untouched
+// Sport and Simulator are singular)
 var genreLabels = map[string]string{
+	// the other 14 of IGDB's 23 genres pass through untouched
 	"Role-playing (RPG)":         "RPG",
 	"Real Time Strategy (RTS)":   "RTS",
 	"Turn-based strategy (TBS)":  "TBS",
@@ -152,11 +153,11 @@ func genreName(name string) string {
 	return name
 }
 
-// platformLabels shortens the IGDB platform names a detail screen renders. PlayStation keeps its
-// generation, since that is the one the user picks a game to play on; every other family collapses to
-// the family name, where the exact model changes nothing about how the game is tracked. A name with no
-// entry here passes through as IGDB wrote it
+// platformLabels shortens the IGDB platform names a detail screen renders
 var platformLabels = map[string]string{
+	// PlayStation keeps its generation, since that is the one the user picks a game to play on;
+	// every other family collapses to the family name, where the exact model changes nothing about
+	// how the game is tracked. A name with no entry here passes through as IGDB wrote it
 	"PlayStation":                         "PS1",
 	"PlayStation 2":                       "PS2",
 	"PlayStation 3":                       "PS3",

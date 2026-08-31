@@ -25,7 +25,7 @@ func newTestJwt() Jwt {
 
 // b64url encodes a raw string the same way the JWT spec encodes each segment
 // (unpadded, URL-safe base64), so hand-crafted tokens below decode the same
-// way a real token would.
+// way a real token would
 func b64url(s string) string {
 	return base64.RawURLEncoding.EncodeToString([]byte(s))
 }

@@ -12,9 +12,21 @@ touched() { grep -qE "$1" <<<"$changed"; }
 contract="$(grep -E '^api/internal/(app/(controllers|serializers)/.*|config/router/router)\.go$' <<<"$changed" \
   | grep -vE '_(test|mock)\.go$' || true)"
 
-if [ -n "$contract" ] && [ -z "${ALLOW_SPEC_DRIFT:-}" ] && ! touched '^api/api/swagger\.yaml$'; then
+# A comment or a gofmt realignment moves no contract, so grade the changed lines rather than the path
+moved=""
+while IFS= read -r file; do
+  [ -z "$file" ] && continue
+
+  lines="$(git diff -U0 -w "$base"...HEAD -- "$file" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' || true)"
+
+  if [ -n "$lines" ] && grep -qvE '^[+-][[:space:]]*(//.*)?$' <<<"$lines"; then
+    moved+="$file"$'\n'
+  fi
+done <<<"$contract"
+
+if [ -n "$moved" ] && [ -z "${ALLOW_SPEC_DRIFT:-}" ] && ! touched '^api/api/swagger\.yaml$'; then
   echo "::error::a route or serializer changed without api/api/swagger.yaml"
-  while IFS= read -r file; do echo "  $file"; done <<<"$contract"
+  while IFS= read -r file; do [ -n "$file" ] && echo "  $file"; done <<<"$moved"
   echo "  no contract moved? label the pull request contract-unchanged, then re-run this job"
   status=1
 fi

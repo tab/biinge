@@ -52,6 +52,12 @@ of the repo.
 the reference page and playground. It doesn't read the spec, so a contract
 change touches both.
 
+CI enforces this. The `Contract & schema drift` job fails a pull request that
+moves a controller, a serializer or `router.go` without `api/swagger.yaml`. When
+a change genuinely moves no contract, label the pull request
+`contract-unchanged`, then re-run the job: labelling fires no run of its own,
+and the job reads the labels live rather than from the event that started it.
+
 ## Generated code is committed
 
 Regenerate and commit alongside the change:
@@ -61,6 +67,9 @@ Regenerate and commit alongside the change:
   canonical dump, and CI loads it to create the test database
 - mockgen mocks live next to the interface they mock as `*_mock.go`
 
+The same job fails a pull request that edits `db/migrate/` without re-dumping
+`db/schema.sql`, or `db/sqlc/` without the regenerated output beside it.
+
 `vendor/` is gitignored. Don't commit it.
 
 ## Verification loop
@@ -68,6 +77,10 @@ Regenerate and commit alongside the change:
 `make check` at the end of every change — it runs fmt, lint, test and test:race,
 the same set CI runs. golangci-lint covers go vet and staticcheck, so neither
 runs separately. Fix and re-run until clean.
+
+Tests run with `-p=1`. Every package shares the `biinge-test` database and
+`pkg/spec` truncates it, so packages running in parallel wipe each other's rows
+mid-test and fail on a foreign key.
 
 Tests need a live `biinge-test` database and `GO_ENV=test`. If the database
 isn't reachable, say the suite didn't run rather than reporting success from the

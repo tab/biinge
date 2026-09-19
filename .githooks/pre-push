@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Runs each touched area's verification loop, then the schema and spec drift checks
+set -euo pipefail
+
+[ -n "${SKIP_VERIFY:-}" ] && { echo "pre-push: SKIP_VERIFY set, skipping"; exit 0; }
+
+root="$(git rev-parse --show-toplevel)"
+zero="0000000000000000000000000000000000000000"
+range=""
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  if [ "$remote_sha" = "$zero" ]; then
+    range="$(git merge-base origin/master "$local_sha" 2>/dev/null || echo origin/master)..$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+done
+
+[ -z "$range" ] && exit 0
+
+changed="$(git diff --name-only "$range")"
+[ -z "$changed" ] && exit 0
+
+run() {
+  local label="$1" dir="$2"
+  shift 2
+  echo "pre-push: $label"
+  ( cd "$root/$dir" && "$@" ) || {
+    echo "pre-push: $label failed. Fix it, or push with --no-verify when you mean to"
+    exit 1
+  }
+}
+
+grep -q '^api/' <<<"$changed" && run "api verification loop" api make check
+grep -q '^ios/' <<<"$changed" && run "ios lint" ios make lint
+grep -q '^ios/' <<<"$changed" && run "ios tests" ios make test
+grep -q '^docs/' <<<"$changed" && run "docs build" docs npm run build
+
+run "schema and spec drift" api make drift BASE="${range%%..*}"
+
+echo "pre-push: clean"

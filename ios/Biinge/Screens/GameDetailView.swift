@@ -177,9 +177,10 @@ struct GameDetailView: View {
         return "\(parts[2]).\(parts[1]).\(parts[0])"
     }
 
-    /// Hours to beat, with the 100% time in parentheses only when it reads as longer. IGDB's completely
-    /// figure is sometimes level with normally, and the two round to the same hour more often than not
+    /// Hours to beat, with the 100% time in parentheses only when it reads as longer
     private func formatRuntime(_ minutes: Int?, completed: Int?) -> String {
+        // IGDB's completely figure is sometimes level with normally, and the two round to the
+        // same hour more often than not
         guard let minutes, minutes > 0 else { return "" }
         let hours = minutes / 60
         let completedHours = (completed ?? 0) / 60

@@ -180,23 +180,24 @@ func FilterTvCredits(credits []TvCredit, excludedGenreIds []int) []TvCreditItem 
 	filtered := make([]TvCredit, 0)
 
 	for _, credit := range credits {
-		if !credit.Adult && credit.PosterPath != "" && credit.FirstAirDate != "" && len(credit.GenreIds) > 0 {
-			hasExcludedGenre := false
+		if credit.Adult || credit.PosterPath == "" || credit.FirstAirDate == "" || len(credit.GenreIds) == 0 {
+			continue
+		}
 
-			for _, excludedId := range excludedGenreIds {
-				if slices.Contains(credit.GenreIds, excludedId) {
-					hasExcludedGenre = true
-				}
+		hasExcludedGenre := false
 
-				if hasExcludedGenre {
-					break
-				}
-			}
-
-			if !hasExcludedGenre {
-				filtered = append(filtered, credit)
+		for _, excludedId := range excludedGenreIds {
+			if slices.Contains(credit.GenreIds, excludedId) {
+				hasExcludedGenre = true
+				break
 			}
 		}
+
+		if hasExcludedGenre {
+			continue
+		}
+
+		filtered = append(filtered, credit)
 	}
 
 	sort.Slice(filtered, func(i, j int) bool {

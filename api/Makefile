@@ -11,6 +11,7 @@ GOOSE_DRIVER=postgres
 GOOSE_MIGRATION_DIR=db/migrate
 
 GO_ENV ?= development
+BASE ?= origin/master
 DOCKER_COMPOSE_CMD=docker compose
 INFRA_NETWORK=biinge-network
 
@@ -118,6 +119,18 @@ lint\:fix:
 	@echo "Running golangci-lint --fix ..."
 	golangci-lint run --fix
 
+.PHONY: doc-comments
+doc-comments:
+	@echo "Checking doc comments..."
+	@../.github/scripts/doc-comments.sh api
+
+# Compares against BASE, so it needs the branch history rather than a shallow clone
+.PHONY: drift
+drift:
+	@echo "Checking schema and spec drift..."
+	@../.github/scripts/schema.sh $(BASE)
+	@../.github/scripts/swagger.sh $(BASE)
+
 .PHONY: vet
 vet:
 	@echo "Running go vet..."
@@ -131,17 +144,17 @@ staticcheck:
 .PHONY: test
 test:
 	@echo "Running tests..."
-	GO_ENV=test go test -cover ./...
+	GO_ENV=test go test -p=1 -cover ./...
 
 .PHONY: test\:race
 test\:race:
 	@echo "Running tests with race detector..."
-	GO_ENV=test go test -race -cover -coverprofile=coverage.out -covermode=atomic ./...
+	GO_ENV=test go test -p=1 -race -cover -coverprofile=coverage.out -covermode=atomic ./...
 
 .PHONY: coverage
 coverage:
 	@echo "Generating test coverage report..."
-	GO_ENV=test go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+	GO_ENV=test go test -p=1 ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 # Full verification loop — run before committing to catch everything CI checks.
 # Steps are invoked via recursive $(MAKE) so the colon-named test:race target
@@ -150,6 +163,7 @@ coverage:
 check:
 	@$(MAKE) fmt
 	@$(MAKE) lint
+	@$(MAKE) doc-comments
 	@$(MAKE) test
 	@$(MAKE) test:race
 	@echo "✓ All checks passed"

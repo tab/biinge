@@ -28,12 +28,13 @@ type EpisodeStatsSerializer struct {
 }
 
 // GameStatsSerializer counts a user's games (a bounded period omits playing, which describes
-// a game now rather than during a past window). Minutes are IGDB's time to beat, not played time
+// a game now rather than during a past window)
 type GameStatsSerializer struct {
 	Want    uint64  `json:"want"`
 	Playing *uint64 `json:"playing,omitempty"`
 	Played  uint64  `json:"played"`
-	Minutes uint64  `json:"minutes"`
+	// IGDB's time to beat, not played time
+	Minutes uint64 `json:"minutes"`
 }
 
 type ActivityBucketSerializer struct {

@@ -1,5 +1,5 @@
 ---
-name: biinge-generate-mock
+name: generate-mock
 description: Generate or regenerate a gomock mock for an interface in the biinge api. Use when adding a new interface, changing an existing one, or when tests fail against a stale mock.
 ---
 

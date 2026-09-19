@@ -20,14 +20,13 @@ func (p StatsPeriod) String() string {
 	return string(p)
 }
 
-// Stats is a user's aggregate watch statistics. Minutes are summed runtimes
-//
-// Every count is scoped to the period. Want is the whole list all-time and what was
-// added to it inside a bounded period; SeriesWatched is shows finished all-time and
-// shows with a watched episode inside a bounded one. SeriesWatching and GamesPlaying are
-// nil on a bounded period, since a show or game is in progress now rather than during
-// some past window. GamesMinutes is IGDB's time to beat, not time actually played.
+// Stats is a user's aggregate watch statistics, every count scoped to the period
 type Stats struct {
+	// Minutes are summed runtimes. Want is the whole list all-time and what was added to it
+	// inside a bounded period; SeriesWatched is shows finished all-time and shows with a
+	// watched episode inside a bounded one. SeriesWatching and GamesPlaying are nil on a
+	// bounded period, since a show or game is in progress now rather than during some past
+	// window. GamesMinutes is IGDB's time to beat, not time actually played
 	Period          StatsPeriod
 	MoviesWant      uint64
 	MoviesWatched   uint64

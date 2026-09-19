@@ -1,9 +1,9 @@
 ---
-name: biinge-verify
+name: verify
 description: Run the verification loop for the area you changed (api, ios or docs). Use at the end of any implementation, when asked to verify changes, run lint or tests, or check that changes pass CI.
 ---
 
-# biinge verification loop
+# Verification loop
 
 Run the loop for every area the change touched. Fix issues at each step and
 re-run before moving to the next. **An implementation isn't finished until its

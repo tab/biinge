@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 
@@ -116,15 +117,8 @@ func (p *igdbProvider) FetchGameDetails(ctx context.Context, id uint64, userId u
 	// Read-repair: refresh a stale add-time cover/title from IGDB, leaving state and pinned untouched.
 	// IGDB drops replaced images after 30 days, so a stored image_id can go dead on its own
 	if details.PosterPath != "" && details.PosterPath != game.PosterPath {
-		runtime := details.Runtime
-		if runtime == 0 {
-			runtime = game.Runtime
-		}
-
-		title := details.Title
-		if title == "" {
-			title = game.Title
-		}
+		runtime := cmp.Or(details.Runtime, game.Runtime)
+		title := cmp.Or(details.Title, game.Title)
 
 		if _, updateErr := p.games.Update(ctx, &models.Game{
 			ID:         game.ID,

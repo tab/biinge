@@ -30,21 +30,51 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+      - name: Doc comments (make doc-comments)
+        run: make doc-comments
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: 'api/go.mod'
           cache: true
           cache-dependency-path: api/go.sum
-      # Covers go vet and staticcheck too — .golangci.yaml enables govet and
-      # staticcheck as linters, and gofmt and goimports as formatters
-      - name: Format, style & correctness (golangci-lint)
-        # NOTE: https://github.com/golangci/golangci-lint-action/releases/tag/v9.3.0
-        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
+      - name: Install golangci-lint
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.3
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Format, style & correctness (make lint)
+        run: make lint
+
+  drift:
+    name: Contract & schema drift
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
         with:
-          version: v2.11.3
-          working-directory: api
+          fetch-depth: 0
+
+      - name: Compare against the base branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          labels="$(gh pr view "$NUMBER" --json labels --jq '.labels[].name')"
+
+          if grep -qx contract-unchanged <<<"$labels"; then
+            export ALLOW_SPEC_DRIFT=1
+          fi
+
+          make -C api drift BASE="origin/$BASE"
 
   test:
     name: Tests & coverage
@@ -69,9 +99,9 @@ jobs:
           - 5432:5432
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: 'api/go.mod'
           cache: true
@@ -86,7 +116,6 @@ jobs:
         run: make test:race
 
       - name: Upload coverage to Codecov
-        # NOTE: https://github.com/codecov/codecov-action/tree/v5.4.3
         uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

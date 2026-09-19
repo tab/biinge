@@ -41,7 +41,9 @@ report an implementation as done on the strength of the code looking right.
 
 - Doc comments are one line and take no trailing period, in Go and Swift alike.
   Extra detail goes in parentheses inside that sentence; anything longer belongs
-  in a body comment, not the doc comment
+  in a body comment, not the doc comment. `.github/scripts/doc-comments.sh`
+  enforces this on top-level Go declarations and every Swift `///`, from
+  `make check`, `make lint` and the API and iOS workflows
 - Comments describe what the code does now, never how it got there. No history,
   no "changed from", no commented-out code left behind
 - Make surgical changes. Don't reformat, rename or "improve" code the task
@@ -69,19 +71,38 @@ absent — treat empty as unset when reading one.
 ## Commits
 
 Conventional Commits, always scoped: `feat(api):`, `fix(ios):`, `docs(readme):`.
-Imperative and capitalized, no trailing period. No `Co-Authored-By` trailer and
-no mention of AI tooling anywhere in the message.
+Imperative and capitalized, no trailing period. No AI attribution anywhere in
+the message: no `Co-Authored-By` or `Claude-Session` trailer, no "Generated
+with" line, no robot emoji. Naming a path is not attribution, so `docs(claude):`
+for a change under `.claude/` is fine.
 
 Commits are signed and made by hand. Write the message; never run `git commit`.
 
 The default branch is `master`, not `main` — check before writing a branch name
 or a permalink into docs.
 
+## Hooks
+
+`.githooks/` holds the two checks that run before the code leaves the machine.
+Turn them on once per clone:
+
+```
+git config core.hooksPath .githooks
+```
+
+`commit-msg` rejects a subject that isn't a scoped Conventional Commit and any
+AI attribution in the message. `pre-push` runs the verification loop for each
+area the push touches, then the schema and spec drift checks. Push with
+`--no-verify`, or set `SKIP_VERIFY=1`, when you mean to skip it.
+
+The `Title & commits` job repeats both checks on the pull request, so a clone
+without the hooks installed still gets caught.
+
 ## Workflow
 
 - Use `gh` for anything on GitHub: pull requests, issues, checks, releases
 - PR descriptions carry no "Test plan" section
 - Before merging `master` into a working branch, pull both so neither is stale
-- Skills in `.claude/skills/` hold the procedural loops (`biinge-verify`,
-  `biinge-generate-mock`) and load on demand — reach for them rather than
-  reciting the steps
+- Skills in `.claude/skills/` hold the procedural loops (`verify`, `add-test`,
+  `generate-mock`) and load on demand. Reach for them rather than reciting the
+  steps

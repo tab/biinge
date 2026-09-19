@@ -19,6 +19,7 @@ linters:
     - gochecknoinits
     - goconst
     - gocritic
+    - godoclint
     - gocyclo
     - gosec
     - govet
@@ -92,7 +93,7 @@ linters:
       require-explanation: true
       require-specific: true
     nestif:
-      min-complexity: 4
+      min-complexity: 2
     wsl_v5:
       allow-first-in-block: true
       allow-whole-block: false

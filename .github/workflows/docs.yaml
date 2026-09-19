@@ -21,8 +21,6 @@ defaults:
 
 jobs:
   build:
-    # The build is the whole check — the site has no separate lint or test suite.
-    # Deployment lives in pages.yaml and still runs only on master.
     name: Build
     permissions:
       contents: read
@@ -37,7 +35,6 @@ jobs:
           cache: npm
           cache-dependency-path: docs/package-lock.json
 
-      # Fails when package-lock.json has drifted from package.json
       - name: Install dependencies
         run: npm ci
 

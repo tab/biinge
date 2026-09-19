@@ -109,11 +109,9 @@ fmt:
 	@echo "Formatting code..."
 	go fmt ./...
 
-# `run` does not apply the formatters, so gofmt and goimports need the separate `fmt --diff`
 .PHONY: lint
 lint:
 	@echo "Running golangci-lint..."
-	golangci-lint fmt --diff
 	golangci-lint run
 
 .PHONY: lint\:fix

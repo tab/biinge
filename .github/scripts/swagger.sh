@@ -24,10 +24,10 @@ while IFS= read -r file; do
   fi
 done <<<"$contract"
 
-if [ -n "$moved" ] && [ -z "${ALLOW_SPEC_DRIFT:-}" ] && ! touched '^api/api/swagger\.yaml$'; then
+if [ -n "$moved" ] && [ "${ALLOW_SPEC_DRIFT:-}" != true ] && ! touched '^api/api/swagger\.yaml$'; then
   echo "::error::a route or serializer changed without api/api/swagger.yaml"
   while IFS= read -r file; do [ -n "$file" ] && echo "  $file"; done <<<"$moved"
-  echo "  no contract moved? label the pull request contract-unchanged, then re-run this job"
+  echo "  no contract moved? label the pull request contract-unchanged"
   status=1
 fi
 

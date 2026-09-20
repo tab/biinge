@@ -20,27 +20,24 @@ defaults:
     working-directory: ios
 
 jobs:
-  check:
-    name: Lint & tests
+  linter:
+    name: Linter
     permissions:
       contents: read
     runs-on: macos-latest
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v6
-
-      - name: Install SwiftLint
-        env:
-          SWIFTLINT_VERSION: "0.65.1"
-        run: |
-          curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
-            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip"
-          unzip -q -o "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
-          sudo install "$RUNNER_TEMP/swiftlint/swiftlint" /usr/local/bin/swiftlint
-          swiftlint version
-
-      - name: Doc comments & style (make lint)
+      - uses: actions/checkout@v6
+      - name: Install
+        run: ../.github/scripts/swiftlint.sh
+      - name: Lint
         run: make lint SWIFTLINT_ARGS=--reporter=github-actions-logging
 
-      - name: Unit tests (make test)
+  tests:
+    name: Tests
+    permissions:
+      contents: read
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Test
         run: make test

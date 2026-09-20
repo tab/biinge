@@ -136,11 +136,6 @@ vet:
 	@echo "Running go vet..."
 	go vet ./...
 
-.PHONY: staticcheck
-staticcheck:
-	@echo "Running staticcheck..."
-	go run honnef.co/go/tools/cmd/staticcheck@latest ./...
-
 .PHONY: test
 test:
 	@echo "Running tests..."

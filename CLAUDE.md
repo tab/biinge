@@ -64,8 +64,8 @@ files and, for CI, in GitHub Actions repository variables:
 | the deployment compose file | `CLIENT_URL` |
 
 Committed templates (`*.env.example`, `api/.env.production`) hold placeholders
-or empty values. The Pages workflow derives the CNAME from `SITE_URL` instead of
-committing one. An unset repository variable arrives as an empty string, not as
+or empty values. The release workflow derives the CNAME from `SITE_URL` instead
+of committing one. An unset repository variable arrives as an empty string, not as
 absent — treat empty as unset when reading one.
 
 ## Commits
@@ -95,8 +95,8 @@ AI attribution in the message. `pre-push` runs the verification loop for each
 area the push touches, then the schema and spec drift checks. Push with
 `--no-verify`, or set `SKIP_VERIFY=1`, when you mean to skip it.
 
-The `Title & commits` job repeats both checks on the pull request, so a clone
-without the hooks installed still gets caught.
+The `Title` and `Commits` jobs repeat both checks on the pull request, so a
+clone without the hooks installed still gets caught.
 
 ## Workflow
 

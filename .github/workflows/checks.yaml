@@ -1,35 +1,76 @@
 name: Checks
 on:
   pull_request:
-    types: [opened, reopened, edited, synchronize, ready_for_review]
+    types: [opened, reopened, edited, synchronize, ready_for_review, labeled, unlabeled]
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.number }}'
   cancel-in-progress: true
 
 jobs:
-  conventions:
-    name: Title & commits
+  title:
+    name: Title
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
-      pull-requests: read
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+      - name: Check
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: .github/scripts/subject.sh "$TITLE"
+
+  commits:
+    name: Commits
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Title is a scoped Conventional Commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-          NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          title="$(gh pr view "$NUMBER" --json title --jq .title)"
-
-          .github/scripts/subject.sh "$title"
-
-      - name: Commits are scoped and carry no AI attribution
+      - name: Check
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
         run: .github/scripts/commits.sh "origin/$BASE"
+
+  drift:
+    name: Drift
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    env:
+      BASE: ${{ github.event.pull_request.base.ref }}
+      ALLOW_SPEC_DRIFT: ${{ contains(github.event.pull_request.labels.*.name, 'contract-unchanged') }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Schema
+        run: .github/scripts/schema.sh "origin/$BASE"
+      - name: Spec
+        run: .github/scripts/swagger.sh "origin/$BASE"
+
+  docs:
+    name: Docs
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          PUBLIC_API_BASE_URL: ${{ vars.PUBLIC_API_BASE_URL }}
+        run: npm run build

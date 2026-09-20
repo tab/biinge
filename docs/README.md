@@ -62,10 +62,5 @@ read `../api/api/swagger.yaml`, so a contract change touches both files. See
 
 ## Deployment
 
-`.github/workflows/pages.yaml` builds and deploys on every push to `master` that
-touches `docs/`. It runs `npm ci` and `npm run build` on Node 22, writes
-`dist/CNAME` from the host part of `SITE_URL` when that variable is set, then
-uploads `docs/dist` and deploys it to GitHub Pages.
+The `Docs` job in `.github/workflows/release.yaml` builds and deploys the site to GitHub Pages.
 
-`.github/workflows/docs.yaml` runs the same build on pull requests that touch
-`docs/`, without deploying.

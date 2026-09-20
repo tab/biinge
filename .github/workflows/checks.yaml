@@ -14,7 +14,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Check
         env:
           TITLE: ${{ github.event.pull_request.title }}
@@ -27,7 +27,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check
@@ -44,7 +44,7 @@ jobs:
       BASE: ${{ github.event.pull_request.base.ref }}
       ALLOW_SPEC_DRIFT: ${{ contains(github.event.pull_request.labels.*.name, 'contract-unchanged') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Schema
@@ -61,8 +61,8 @@ jobs:
       run:
         working-directory: docs
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm

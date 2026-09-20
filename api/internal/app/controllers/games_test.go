@@ -18,7 +18,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -29,7 +28,7 @@ func newGamesController(t *testing.T, ctrl *gomock.Controller) (GamesController,
 	games := services.NewMockGames(ctrl)
 	provider := services.NewMockIgdbProvider(ctrl)
 
-	return NewGamesController(games, provider, logger.NewLogger(testConfig())), games, provider
+	return NewGamesController(games, provider), games, provider
 }
 
 // authenticated attaches a user to the request the way the authentication middleware does

@@ -11,7 +11,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -37,15 +36,13 @@ type seriesController struct {
 	series   services.Series
 	progress services.Progress
 	provider services.TmdbProvider
-	log      *logger.Logger
 }
 
-func NewSeriesController(series services.Series, progress services.Progress, provider services.TmdbProvider, log *logger.Logger) SeriesController {
+func NewSeriesController(series services.Series, progress services.Progress, provider services.TmdbProvider) SeriesController {
 	return &seriesController{
 		series:   series,
 		progress: progress,
 		provider: provider,
-		log:      log.WithComponent("SeriesController"),
 	}
 }
 

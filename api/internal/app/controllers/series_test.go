@@ -18,7 +18,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -26,9 +25,8 @@ func newSeriesController(ctrl *gomock.Controller) (*services.MockSeries, *servic
 	series := services.NewMockSeries(ctrl)
 	progress := services.NewMockProgress(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
 
-	return series, progress, provider, NewSeriesController(series, progress, provider, log)
+	return series, progress, provider, NewSeriesController(series, progress, provider)
 }
 
 func Test_SeriesController_HandleList(t *testing.T) {

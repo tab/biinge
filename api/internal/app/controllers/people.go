@@ -10,7 +10,6 @@ import (
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -20,13 +19,11 @@ type PeopleController interface {
 
 type peopleController struct {
 	provider services.TmdbProvider
-	log      *logger.Logger
 }
 
-func NewPeopleController(provider services.TmdbProvider, log *logger.Logger) PeopleController {
+func NewPeopleController(provider services.TmdbProvider) PeopleController {
 	return &peopleController{
 		provider: provider,
-		log:      log.WithComponent("PeopleController"),
 	}
 }
 

@@ -11,7 +11,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -26,14 +25,12 @@ type MoviesController interface {
 type moviesController struct {
 	movies   services.Movies
 	provider services.TmdbProvider
-	log      *logger.Logger
 }
 
-func NewMoviesController(movies services.Movies, provider services.TmdbProvider, log *logger.Logger) MoviesController {
+func NewMoviesController(movies services.Movies, provider services.TmdbProvider) MoviesController {
 	return &moviesController{
 		movies:   movies,
 		provider: provider,
-		log:      log.WithComponent("MoviesController"),
 	}
 }
 

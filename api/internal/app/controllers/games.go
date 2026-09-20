@@ -11,7 +11,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -26,14 +25,12 @@ type GamesController interface {
 type gamesController struct {
 	games    services.Games
 	provider services.IgdbProvider
-	log      *logger.Logger
 }
 
-func NewGamesController(games services.Games, provider services.IgdbProvider, log *logger.Logger) GamesController {
+func NewGamesController(games services.Games, provider services.IgdbProvider) GamesController {
 	return &gamesController{
 		games:    games,
 		provider: provider,
-		log:      log.WithComponent("GamesController"),
 	}
 }
 

@@ -37,10 +37,6 @@ type Client interface {
 	FetchTrendingMovies(ctx context.Context) (*MovieListResult, error)
 	FetchTrendingTv(ctx context.Context) (*TvListResult, error)
 	FetchTrendingPeople(ctx context.Context) (*PersonListResult, error)
-
-	WithApiReadAccessToken(apiReadAccessToken string) Client
-	WithLocale(lang string) Client
-	WithTimeout(timeout time.Duration) Client
 }
 
 type client struct {
@@ -382,27 +378,6 @@ func (c *client) FetchPersonDetails(ctx context.Context, id uint64) (*PersonDeta
 
 		return nil, ErrUnexpectedResponse
 	}
-}
-
-func (c *client) WithApiReadAccessToken(apiReadAccessToken string) Client {
-	c.cfg.APIReadAccessToken = apiReadAccessToken
-	c.apiClient.SetHeader("Authorization", "Bearer "+apiReadAccessToken)
-
-	return c
-}
-
-func (c *client) WithLocale(lang string) Client {
-	c.cfg.Locale = lang
-	c.apiClient.SetQueryParam("language", lang)
-
-	return c
-}
-
-func (c *client) WithTimeout(timeout time.Duration) Client {
-	c.cfg.Timeout = timeout
-	c.apiClient.SetTimeout(timeout)
-
-	return c
 }
 
 func (c *client) SearchMovies(ctx context.Context, query string, page uint64) (*MovieListResult, error) {

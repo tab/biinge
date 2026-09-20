@@ -19,3 +19,9 @@ type Game struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
+
+// GameFilter narrows a user's games to the given IGDB ids
+type GameFilter struct {
+	UserId  uuid.UUID
+	IgdbIds []uint64
+}

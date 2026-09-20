@@ -18,7 +18,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -28,8 +27,7 @@ func Test_MoviesController_HandleList(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewMoviesController(movies, provider, log)
+	controller := NewMoviesController(movies, provider)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -156,8 +154,7 @@ func Test_MoviesController_HandleDetails(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewMoviesController(movies, provider, log)
+	controller := NewMoviesController(movies, provider)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -285,8 +282,7 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewMoviesController(movies, provider, log)
+	controller := NewMoviesController(movies, provider)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -413,8 +409,7 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewMoviesController(movies, provider, log)
+	controller := NewMoviesController(movies, provider)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -561,8 +556,7 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewMoviesController(movies, provider, log)
+	controller := NewMoviesController(movies, provider)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -584,7 +578,7 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				movies.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(550), id).Return(nil)
+				movies.EXPECT().Delete(gomock.Any(), uint64(550), id).Return(nil)
 			},
 			withUser: true,
 			param:    "550",
@@ -620,7 +614,7 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
-				movies.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(550), id).Return(assert.AnError)
+				movies.EXPECT().Delete(gomock.Any(), uint64(550), id).Return(assert.AnError)
 			},
 			withUser: true,
 			param:    "550",

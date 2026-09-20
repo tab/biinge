@@ -9,7 +9,6 @@ import (
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -27,14 +26,12 @@ type CatalogController interface {
 type catalogController struct {
 	provider services.TmdbProvider
 	games    services.IgdbProvider
-	log      *logger.Logger
 }
 
-func NewCatalogController(provider services.TmdbProvider, games services.IgdbProvider, log *logger.Logger) CatalogController {
+func NewCatalogController(provider services.TmdbProvider, games services.IgdbProvider) CatalogController {
 	return &catalogController{
 		provider: provider,
 		games:    games,
-		log:      log.WithComponent("CatalogController"),
 	}
 }
 

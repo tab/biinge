@@ -59,7 +59,7 @@ func (p *igdbProvider) FetchGameDetails(ctx context.Context, id uint64, userId u
 		recommendationIds = append(recommendationIds, item.Id)
 	}
 
-	recommendedGames, err := p.games.FindGamesByIgdbIds(ctx, recommendationIds, userId)
+	recommendedGames, err := p.games.FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: recommendationIds})
 	if err != nil {
 		p.log.Error().Err(err).Msg("Failed to fetch recommendation states")
 		return nil, errors.ErrFailedToFetchResults
@@ -86,33 +86,35 @@ func (p *igdbProvider) FetchGameDetails(ctx context.Context, id uint64, userId u
 		})
 	}
 
-	game, err := p.games.FindByIgdbId(ctx, id, userId)
+	stored, err := p.games.FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{id}})
 	if err != nil {
-		if errors.Is(err, errors.ErrGameNotFound) {
-			p.log.Debug().Uint64("Id", id).Msg("Game not found in database")
-
-			return &serializers.GameDetailsSerializer{
-				Id:               id,
-				Pinned:           false,
-				State:            models.StateTypeNone,
-				Title:            details.Title,
-				PosterPath:       details.PosterPath,
-				Overview:         details.Overview,
-				Status:           details.Status,
-				ReleaseDate:      details.ReleaseDate,
-				Runtime:          details.Runtime,
-				RuntimeCompleted: details.RuntimeCompleted,
-				Rating:           details.Rating,
-				Genres:           details.Genres,
-				Platforms:        details.Platforms,
-				Recommendations:  recommendations,
-			}, nil
-		}
-
 		p.log.Error().Err(err).Uint64("Id", id).Msg("Failed to fetch game state")
 
 		return nil, errors.ErrFailedToFetchGame
 	}
+
+	if len(stored) == 0 {
+		p.log.Debug().Uint64("Id", id).Msg("Game not found in database")
+
+		return &serializers.GameDetailsSerializer{
+			Id:               id,
+			Pinned:           false,
+			State:            models.StateTypeNone,
+			Title:            details.Title,
+			PosterPath:       details.PosterPath,
+			Overview:         details.Overview,
+			Status:           details.Status,
+			ReleaseDate:      details.ReleaseDate,
+			Runtime:          details.Runtime,
+			RuntimeCompleted: details.RuntimeCompleted,
+			Rating:           details.Rating,
+			Genres:           details.Genres,
+			Platforms:        details.Platforms,
+			Recommendations:  recommendations,
+		}, nil
+	}
+
+	game := stored[0]
 
 	// Read-repair: refresh a stale add-time cover/title from IGDB, leaving state and pinned untouched.
 	// IGDB drops replaced images after 30 days, so a stored image_id can go dead on its own
@@ -150,10 +152,12 @@ func (p *igdbProvider) FetchGameDetails(ctx context.Context, id uint64, userId u
 
 // fallbackGameDetails serves stored library data when IGDB is unavailable, else a fetch error
 func (p *igdbProvider) fallbackGameDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.GameDetailsSerializer, error) {
-	game, err := p.games.FindByIgdbId(ctx, id, userId)
-	if err != nil {
+	stored, err := p.games.FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{id}})
+	if err != nil || len(stored) == 0 {
 		return nil, igdb.ErrFailedToFetchGameDetails
 	}
+
+	game := stored[0]
 
 	p.log.Warn().Uint64("Id", id).Msg("Serving stored game details while IGDB is unavailable")
 
@@ -266,7 +270,7 @@ func (p *igdbProvider) buildGameList(ctx context.Context, response *igdb.GameLis
 		ids = append(ids, item.Id)
 	}
 
-	gamesList, err := p.games.FindGamesByIgdbIds(ctx, ids, userId)
+	gamesList, err := p.games.FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: ids})
 	if err != nil {
 		p.log.Error().Err(err).Msg("Failed to fetch game states")
 		return nil, errors.ErrFailedToFetchResults

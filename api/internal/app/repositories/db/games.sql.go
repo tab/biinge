@@ -101,61 +101,6 @@ func (q *Queries) DeleteGameByIgdbId(ctx context.Context, arg DeleteGameByIgdbId
 	return err
 }
 
-const findGameByIgdbId = `-- name: FindGameByIgdbId :one
-SELECT
-  id,
-  user_id,
-  igdb_id,
-  title,
-  poster_path,
-  runtime,
-  pinned,
-  state,
-  played_at,
-  created_at,
-  updated_at
-FROM games
-WHERE igdb_id = $1 AND user_id = $2 LIMIT 1
-`
-
-type FindGameByIgdbIdParams struct {
-	IgdbID uint64
-	UserID uuid.UUID
-}
-
-type FindGameByIgdbIdRow struct {
-	ID         uuid.UUID
-	UserID     uuid.UUID
-	IgdbID     uint64
-	Title      string
-	PosterPath string
-	Runtime    uint64
-	Pinned     bool
-	State      StateTypes
-	PlayedAt   pgtype.Timestamptz
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-}
-
-func (q *Queries) FindGameByIgdbId(ctx context.Context, arg FindGameByIgdbIdParams) (FindGameByIgdbIdRow, error) {
-	row := q.db.QueryRow(ctx, findGameByIgdbId, arg.IgdbID, arg.UserID)
-	var i FindGameByIgdbIdRow
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.IgdbID,
-		&i.Title,
-		&i.PosterPath,
-		&i.Runtime,
-		&i.Pinned,
-		&i.State,
-		&i.PlayedAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const findGamesByIgdbIds = `-- name: FindGamesByIgdbIds :many
 SELECT
   id,

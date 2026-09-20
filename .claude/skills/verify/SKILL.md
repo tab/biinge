@@ -26,8 +26,8 @@ make test         # GO_ENV=test, needs a live biinge-test database
 make test:race
 ```
 
-`make vet` and `make staticcheck` stay available standalone, but `make lint`
-already covers both — .golangci.yaml enables govet and staticcheck as linters.
+`make vet` stays available standalone, but `make lint` already covers it —
+.golangci.yaml enables govet and staticcheck as linters.
 
 Tests need Postgres running and the `biinge-test` database migrated:
 

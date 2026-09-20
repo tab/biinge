@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,7 +24,6 @@ func newTestClient(t *testing.T, baseURL string) *client {
 			BaseURL:            baseURL,
 			APIReadAccessToken: "test-token",
 			Locale:             "en-US",
-			Timeout:            DefaultTimeout,
 		},
 	}
 	log := logger.NewLogger(cfg)
@@ -65,35 +63,6 @@ func Test_NewClient(t *testing.T) {
 	assert.Equal(t, "application/json", c.apiClient.Header.Get("Accept"))
 	assert.Equal(t, "application/json", c.apiClient.Header.Get("Content-Type"))
 	assert.Equal(t, "Bearer test-token", c.apiClient.Header.Get("Authorization"))
-}
-
-func Test_Client_WithApiReadAccessToken(t *testing.T) {
-	c := newTestClient(t, "https://api.themoviedb.org/3")
-
-	result := c.WithApiReadAccessToken("new-token")
-
-	assert.Same(t, c, result)
-	assert.Equal(t, "new-token", c.cfg.APIReadAccessToken)
-	assert.Equal(t, "Bearer new-token", c.apiClient.Header.Get("Authorization"))
-}
-
-func Test_Client_WithLocale(t *testing.T) {
-	c := newTestClient(t, "https://api.themoviedb.org/3")
-
-	result := c.WithLocale("fr-FR")
-
-	assert.Same(t, c, result)
-	assert.Equal(t, "fr-FR", c.cfg.Locale)
-	assert.Equal(t, "fr-FR", c.apiClient.QueryParam.Get("language"))
-}
-
-func Test_Client_WithTimeout(t *testing.T) {
-	c := newTestClient(t, "https://api.themoviedb.org/3")
-
-	result := c.WithTimeout(2 * time.Second)
-
-	assert.Same(t, c, result)
-	assert.Equal(t, 2*time.Second, c.cfg.Timeout)
 }
 
 func Test_Client_FetchMovieDetails(t *testing.T) {

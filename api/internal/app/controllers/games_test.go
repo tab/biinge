@@ -18,7 +18,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -29,7 +28,7 @@ func newGamesController(t *testing.T, ctrl *gomock.Controller) (GamesController,
 	games := services.NewMockGames(ctrl)
 	provider := services.NewMockIgdbProvider(ctrl)
 
-	return NewGamesController(games, provider, logger.NewLogger(testConfig())), games, provider
+	return NewGamesController(games, provider), games, provider
 }
 
 // authenticated attaches a user to the request the way the authentication middleware does
@@ -370,7 +369,7 @@ func Test_GamesController_HandleDelete(t *testing.T) {
 	}
 
 	t.Run("Success", func(t *testing.T) {
-		games.EXPECT().DeleteByIgdbId(gomock.Any(), uint64(1942), userId).Return(nil)
+		games.EXPECT().Delete(gomock.Any(), uint64(1942), userId).Return(nil)
 
 		resp := serve("/games/1942", true)
 		defer resp.Body.Close()
@@ -386,7 +385,7 @@ func Test_GamesController_HandleDelete(t *testing.T) {
 	})
 
 	t.Run("Service error", func(t *testing.T) {
-		games.EXPECT().DeleteByIgdbId(gomock.Any(), uint64(1942), userId).Return(assert.AnError)
+		games.EXPECT().Delete(gomock.Any(), uint64(1942), userId).Return(assert.AnError)
 
 		resp := serve("/games/1942", true)
 		defer resp.Body.Close()

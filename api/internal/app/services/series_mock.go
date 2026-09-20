@@ -58,76 +58,32 @@ func (mr *MockSeriesMockRecorder) Create(ctx, params any) *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *MockSeries) Delete(ctx context.Context, id uuid.UUID) error {
+func (m *MockSeries) Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, id)
+	ret := m.ctrl.Call(m, "Delete", ctx, tmdbId, userId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockSeriesMockRecorder) Delete(ctx, id any) *gomock.Call {
+func (mr *MockSeriesMockRecorder) Delete(ctx, tmdbId, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockSeries)(nil).Delete), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockSeries)(nil).Delete), ctx, tmdbId, userId)
 }
 
-// DeleteByTmdbId mocks base method.
-func (m *MockSeries) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
+// FindByFilter mocks base method.
+func (m *MockSeries) FindByFilter(ctx context.Context, filter models.SeriesFilter) ([]models.Series, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteByTmdbId", ctx, tmdbId, userId)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteByTmdbId indicates an expected call of DeleteByTmdbId.
-func (mr *MockSeriesMockRecorder) DeleteByTmdbId(ctx, tmdbId, userId any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByTmdbId", reflect.TypeOf((*MockSeries)(nil).DeleteByTmdbId), ctx, tmdbId, userId)
-}
-
-// FindById mocks base method.
-func (m *MockSeries) FindById(ctx context.Context, id uuid.UUID) (*models.Series, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindById", ctx, id)
-	ret0, _ := ret[0].(*models.Series)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindById indicates an expected call of FindById.
-func (mr *MockSeriesMockRecorder) FindById(ctx, id any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindById", reflect.TypeOf((*MockSeries)(nil).FindById), ctx, id)
-}
-
-// FindByTmdbId mocks base method.
-func (m *MockSeries) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Series, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByTmdbId", ctx, tmdbId, userId)
-	ret0, _ := ret[0].(*models.Series)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByTmdbId indicates an expected call of FindByTmdbId.
-func (mr *MockSeriesMockRecorder) FindByTmdbId(ctx, tmdbId, userId any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByTmdbId", reflect.TypeOf((*MockSeries)(nil).FindByTmdbId), ctx, tmdbId, userId)
-}
-
-// FindSeriesByTmdbIds mocks base method.
-func (m *MockSeries) FindSeriesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Series, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindSeriesByTmdbIds", ctx, tmdbIds, userId)
+	ret := m.ctrl.Call(m, "FindByFilter", ctx, filter)
 	ret0, _ := ret[0].([]models.Series)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindSeriesByTmdbIds indicates an expected call of FindSeriesByTmdbIds.
-func (mr *MockSeriesMockRecorder) FindSeriesByTmdbIds(ctx, tmdbIds, userId any) *gomock.Call {
+// FindByFilter indicates an expected call of FindByFilter.
+func (mr *MockSeriesMockRecorder) FindByFilter(ctx, filter any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSeriesByTmdbIds", reflect.TypeOf((*MockSeries)(nil).FindSeriesByTmdbIds), ctx, tmdbIds, userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByFilter", reflect.TypeOf((*MockSeries)(nil).FindByFilter), ctx, filter)
 }
 
 // List mocks base method.

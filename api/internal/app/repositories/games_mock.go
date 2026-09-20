@@ -57,48 +57,33 @@ func (mr *MockGameRepositoryMockRecorder) Create(ctx, params any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockGameRepository)(nil).Create), ctx, params)
 }
 
-// DeleteByIgdbId mocks base method.
-func (m *MockGameRepository) DeleteByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) error {
+// Delete mocks base method.
+func (m *MockGameRepository) Delete(ctx context.Context, igdbId uint64, userId uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteByIgdbId", ctx, igdbId, userId)
+	ret := m.ctrl.Call(m, "Delete", ctx, igdbId, userId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteByIgdbId indicates an expected call of DeleteByIgdbId.
-func (mr *MockGameRepositoryMockRecorder) DeleteByIgdbId(ctx, igdbId, userId any) *gomock.Call {
+// Delete indicates an expected call of Delete.
+func (mr *MockGameRepositoryMockRecorder) Delete(ctx, igdbId, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByIgdbId", reflect.TypeOf((*MockGameRepository)(nil).DeleteByIgdbId), ctx, igdbId, userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockGameRepository)(nil).Delete), ctx, igdbId, userId)
 }
 
-// FindByIgdbId mocks base method.
-func (m *MockGameRepository) FindByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) (*models.Game, error) {
+// FindByFilter mocks base method.
+func (m *MockGameRepository) FindByFilter(ctx context.Context, filter models.GameFilter) ([]models.Game, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByIgdbId", ctx, igdbId, userId)
-	ret0, _ := ret[0].(*models.Game)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByIgdbId indicates an expected call of FindByIgdbId.
-func (mr *MockGameRepositoryMockRecorder) FindByIgdbId(ctx, igdbId, userId any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByIgdbId", reflect.TypeOf((*MockGameRepository)(nil).FindByIgdbId), ctx, igdbId, userId)
-}
-
-// FindGamesByIgdbIds mocks base method.
-func (m *MockGameRepository) FindGamesByIgdbIds(ctx context.Context, igdbIds []uint64, userId uuid.UUID) ([]models.Game, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindGamesByIgdbIds", ctx, igdbIds, userId)
+	ret := m.ctrl.Call(m, "FindByFilter", ctx, filter)
 	ret0, _ := ret[0].([]models.Game)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindGamesByIgdbIds indicates an expected call of FindGamesByIgdbIds.
-func (mr *MockGameRepositoryMockRecorder) FindGamesByIgdbIds(ctx, igdbIds, userId any) *gomock.Call {
+// FindByFilter indicates an expected call of FindByFilter.
+func (mr *MockGameRepositoryMockRecorder) FindByFilter(ctx, filter any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindGamesByIgdbIds", reflect.TypeOf((*MockGameRepository)(nil).FindGamesByIgdbIds), ctx, igdbIds, userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByFilter", reflect.TypeOf((*MockGameRepository)(nil).FindByFilter), ctx, filter)
 }
 
 // List mocks base method.

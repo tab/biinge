@@ -80,8 +80,8 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(sampleGameDetails(), nil)
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{26192, 19561}, userId).Return(nil, nil)
-		gamesSvc.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(nil, errors.ErrGameNotFound)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{26192, 19561}}).Return(nil, nil)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{}, nil)
 
 		result, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.NoError(t, err)
@@ -105,15 +105,15 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(sampleGameDetails(), nil)
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{26192, 19561}, userId).Return(nil, nil)
-		gamesSvc.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(&models.Game{
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{26192, 19561}}).Return(nil, nil)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{{
 			ID:         uuid.New(),
 			IgdbId:     1942,
 			Title:      "The Witcher 3",
 			PosterPath: "co1wyy",
 			State:      models.StateTypePlayed,
 			Pinned:     true,
-		}, nil)
+		}}, nil)
 
 		result, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.NoError(t, err)
@@ -130,15 +130,15 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		stored := uuid.New()
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(sampleGameDetails(), nil)
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{26192, 19561}, userId).Return(nil, nil)
-		gamesSvc.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(&models.Game{
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{26192, 19561}}).Return(nil, nil)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{{
 			ID:         stored,
 			IgdbId:     1942,
 			Title:      "The Witcher 3",
 			PosterPath: "co-expired",
 			Runtime:    3000,
 			State:      models.StateTypeWant,
-		}, nil)
+		}}, nil)
 
 		gamesSvc.EXPECT().Update(ctx, &models.Game{
 			ID:         stored,
@@ -162,12 +162,12 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(sampleGameDetails(), nil)
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{26192, 19561}, userId).Return(nil, nil)
-		gamesSvc.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(&models.Game{
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{26192, 19561}}).Return(nil, nil)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{{
 			IgdbId:     1942,
 			PosterPath: "co1wyy",
 			State:      models.StateTypeWant,
-		}, nil)
+		}}, nil)
 
 		_, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.NoError(t, err)
@@ -180,10 +180,10 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(sampleGameDetails(), nil)
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{26192, 19561}, userId).Return([]models.Game{
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{26192, 19561}}).Return([]models.Game{
 			{IgdbId: 26192, State: models.StateTypePlaying},
 		}, nil)
-		gamesSvc.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(nil, errors.ErrGameNotFound)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{}, nil)
 
 		result, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.NoError(t, err)
@@ -202,7 +202,7 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(sampleGameDetails(), nil)
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{26192, 19561}, userId).Return(nil, errors.ErrFailedToFetchResults)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{26192, 19561}}).Return(nil, errors.ErrFailedToFetchResults)
 
 		result, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.ErrorIs(t, err, errors.ErrFailedToFetchResults)
@@ -216,14 +216,14 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(nil, igdb.ErrUnexpectedResponse)
-		gamesSvc.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(&models.Game{
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{{
 			IgdbId:     1942,
 			Title:      "The Witcher 3",
 			PosterPath: "co-stored",
 			Runtime:    3000,
 			State:      models.StateTypePlayed,
 			Pinned:     true,
-		}, nil)
+		}}, nil)
 
 		result, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.NoError(t, err)
@@ -242,7 +242,7 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(nil, igdb.ErrUnexpectedResponse)
-		gamesSvc.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(nil, errors.ErrGameNotFound)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{}, nil)
 
 		result, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.ErrorIs(t, err, igdb.ErrFailedToFetchGameDetails)
@@ -342,7 +342,7 @@ func Test_IgdbProvider_SearchGames(t *testing.T) {
 			{Id: 2000, Name: "The Witcher 2", Cover: igdb.Cover{ImageId: "co2"}},
 		}}, nil)
 
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{1942, 2000}, userId).Return([]models.Game{
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942, 2000}}).Return([]models.Game{
 			{IgdbId: 1942, State: models.StateTypePlayed},
 		}, nil)
 
@@ -362,7 +362,7 @@ func Test_IgdbProvider_SearchGames(t *testing.T) {
 		provider, client, gamesSvc := newIgdbProvider(t, ctrl)
 
 		client.EXPECT().SearchGames(ctx, "witcher", DefaultPerPage, DefaultPerPage).Return(&igdb.GameListResult{}, nil)
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{}, userId).Return(nil, nil)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{}}).Return(nil, nil)
 
 		result, err := provider.SearchGames(ctx, "witcher", 2, userId)
 		require.NoError(t, err)
@@ -399,7 +399,7 @@ func Test_IgdbProvider_FetchTrendingGames(t *testing.T) {
 			{Id: 1942, Name: "The Witcher 3", Cover: igdb.Cover{ImageId: "co1wyy"}},
 		}}, nil)
 
-		gamesSvc.EXPECT().FindGamesByIgdbIds(ctx, []uint64{1942}, userId).Return(nil, nil)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return(nil, nil)
 
 		result, err := provider.FetchTrendingGames(ctx, userId)
 		require.NoError(t, err)

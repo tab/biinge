@@ -16,26 +16,15 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
-
-func testConfig() *config.Config {
-	return &config.Config{
-		AppEnv:   "test",
-		AppAddr:  "localhost:8080",
-		LogLevel: "info",
-	}
-}
 
 func Test_CatalogController_HandleSearchMovies(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl))
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -177,8 +166,7 @@ func Test_CatalogController_HandleSearchSeries(t *testing.T) {
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl))
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -301,8 +289,7 @@ func Test_CatalogController_HandleSearchPeople(t *testing.T) {
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl))
 
 	type result struct {
 		response serializers.PaginationResponse[serializers.SearchPersonSerializer]
@@ -401,8 +388,7 @@ func Test_CatalogController_HandleTrendingMovies(t *testing.T) {
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl))
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -509,8 +495,7 @@ func Test_CatalogController_HandleTrendingSeries(t *testing.T) {
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl))
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -617,8 +602,7 @@ func Test_CatalogController_HandleTrendingPeople(t *testing.T) {
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl), log)
+	controller := NewCatalogController(provider, services.NewMockIgdbProvider(ctrl))
 
 	type result struct {
 		response serializers.PaginationResponse[serializers.SearchPersonSerializer]
@@ -703,7 +687,7 @@ func Test_CatalogController_HandleSearchGames(t *testing.T) {
 	defer ctrl.Finish()
 
 	games := services.NewMockIgdbProvider(ctrl)
-	controller := NewCatalogController(services.NewMockTmdbProvider(ctrl), games, logger.NewLogger(testConfig()))
+	controller := NewCatalogController(services.NewMockTmdbProvider(ctrl), games)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -785,7 +769,7 @@ func Test_CatalogController_HandleTrendingGames(t *testing.T) {
 	defer ctrl.Finish()
 
 	games := services.NewMockIgdbProvider(ctrl)
-	controller := NewCatalogController(services.NewMockTmdbProvider(ctrl), games, logger.NewLogger(testConfig()))
+	controller := NewCatalogController(services.NewMockTmdbProvider(ctrl), games)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)

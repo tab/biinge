@@ -46,26 +46,6 @@ SELECT
 FROM series
 WHERE tmdb_id = ANY(@tmdb_ids::integer[]) AND user_id = @user_id;
 
--- name: FindSeriesById :one
-SELECT
-  id,
-  user_id,
-  tmdb_id,
-  title,
-  poster_path,
-  seasons_count,
-  episodes_count,
-  status,
-  state,
-  pinned,
-  created_at,
-  updated_at,
-  tracked_state,
-  synced_at,
-  last_air_at
-FROM series
-WHERE id = $1 LIMIT 1;
-
 -- name: FindSeriesByTmdbId :one
 SELECT
   id,

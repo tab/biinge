@@ -18,7 +18,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -26,9 +25,8 @@ func newSeriesController(ctrl *gomock.Controller) (*services.MockSeries, *servic
 	series := services.NewMockSeries(ctrl)
 	progress := services.NewMockProgress(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
 
-	return series, progress, provider, NewSeriesController(series, progress, provider, log)
+	return series, progress, provider, NewSeriesController(series, progress, provider)
 }
 
 func Test_SeriesController_HandleList(t *testing.T) {
@@ -882,7 +880,7 @@ func Test_SeriesController_HandleDelete(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				series.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(1399), id).Return(nil)
+				series.EXPECT().Delete(gomock.Any(), uint64(1399), id).Return(nil)
 			},
 			withUser: true,
 			param:    "1399",
@@ -918,7 +916,7 @@ func Test_SeriesController_HandleDelete(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
-				series.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(1399), id).Return(assert.AnError)
+				series.EXPECT().Delete(gomock.Any(), uint64(1399), id).Return(assert.AnError)
 			},
 			withUser: true,
 			param:    "1399",

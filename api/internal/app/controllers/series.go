@@ -11,7 +11,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -37,15 +36,13 @@ type seriesController struct {
 	series   services.Series
 	progress services.Progress
 	provider services.TmdbProvider
-	log      *logger.Logger
 }
 
-func NewSeriesController(series services.Series, progress services.Progress, provider services.TmdbProvider, log *logger.Logger) SeriesController {
+func NewSeriesController(series services.Series, progress services.Progress, provider services.TmdbProvider) SeriesController {
 	return &seriesController{
 		series:   series,
 		progress: progress,
 		provider: provider,
-		log:      log.WithComponent("SeriesController"),
 	}
 }
 
@@ -256,7 +253,7 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = c.series.DeleteByTmdbId(r.Context(), id, user.ID)
+	err = c.series.Delete(r.Context(), id, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})

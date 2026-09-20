@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
@@ -17,9 +16,8 @@ type Games interface {
 	Create(ctx context.Context, params *models.Game) (*models.Game, error)
 	Update(ctx context.Context, params *models.Game) (*models.Game, error)
 	UpdateByIgdbId(ctx context.Context, params *models.Game) (*models.Game, error)
-	DeleteByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) error
-	FindByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) (*models.Game, error)
-	FindGamesByIgdbIds(ctx context.Context, igdbIds []uint64, userId uuid.UUID) ([]models.Game, error)
+	Delete(ctx context.Context, igdbId uint64, userId uuid.UUID) error
+	FindByFilter(ctx context.Context, filter models.GameFilter) ([]models.Game, error)
 }
 
 type games struct {
@@ -97,8 +95,8 @@ func (g *games) UpdateByIgdbId(ctx context.Context, params *models.Game) (*model
 	return item, nil
 }
 
-func (g *games) DeleteByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) error {
-	err := g.repository.DeleteByIgdbId(ctx, igdbId, userId)
+func (g *games) Delete(ctx context.Context, igdbId uint64, userId uuid.UUID) error {
+	err := g.repository.Delete(ctx, igdbId, userId)
 	if err != nil {
 		g.log.Error().Err(err).Msg("Failed to delete game by IGDB Id")
 		return errors.ErrFailedToDeleteGame
@@ -109,22 +107,8 @@ func (g *games) DeleteByIgdbId(ctx context.Context, igdbId uint64, userId uuid.U
 	return nil
 }
 
-func (g *games) FindByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) (*models.Game, error) {
-	item, err := g.repository.FindByIgdbId(ctx, igdbId, userId)
-	if err != nil {
-		// a game the user never added is the ordinary case, not a failure
-		if !errors.Is(err, pgx.ErrNoRows) {
-			g.log.Error().Err(err).Msg("Failed to fetch game by IGDB Id")
-		}
-
-		return nil, errors.ErrGameNotFound
-	}
-
-	return item, nil
-}
-
-func (g *games) FindGamesByIgdbIds(ctx context.Context, igdbIds []uint64, userId uuid.UUID) ([]models.Game, error) {
-	collection, err := g.repository.FindGamesByIgdbIds(ctx, igdbIds, userId)
+func (g *games) FindByFilter(ctx context.Context, filter models.GameFilter) ([]models.Game, error) {
+	collection, err := g.repository.FindByFilter(ctx, filter)
 	if err != nil {
 		g.log.Error().Err(err).Msg("Failed to fetch games by IGDB Ids")
 		return nil, errors.ErrFailedToFetchResults

@@ -16,7 +16,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -25,8 +24,7 @@ func Test_PeopleController_HandleDetails(t *testing.T) {
 	defer ctrl.Finish()
 
 	provider := services.NewMockTmdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewPeopleController(provider, log)
+	controller := NewPeopleController(provider)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)

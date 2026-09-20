@@ -233,11 +233,12 @@ func Test_SyncRepository_SyncMovie_WritesSnapshot(t *testing.T) {
 	err = repo.SyncMovie(ctx, created.ID, models.MovieSyncInput{Title: "New", PosterPath: "/new.jpg", Runtime: 120, ReleasedAt: released})
 	require.NoError(t, err)
 
-	row, err := client.Queries().FindMovieById(ctx, created.ID)
+	rows, err := movies.FindByFilter(ctx, models.MovieFilter{UserId: userID, TmdbIds: []uint64{930001}})
 	require.NoError(t, err)
+	require.Len(t, rows, 1)
 
-	assert.Equal(t, "New", row.Title)
-	assert.Equal(t, "/new.jpg", row.PosterPath)
-	assert.Equal(t, uint64(120), row.Runtime)
-	assert.Equal(t, models.StateTypeWant, models.StateType(row.State), "sync must not touch user-driven state")
+	assert.Equal(t, "New", rows[0].Title)
+	assert.Equal(t, "/new.jpg", rows[0].PosterPath)
+	assert.Equal(t, uint64(120), rows[0].Runtime)
+	assert.Equal(t, models.StateTypeWant, rows[0].State, "sync must not touch user-driven state")
 }

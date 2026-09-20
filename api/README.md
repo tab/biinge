@@ -29,7 +29,7 @@ overrides it.
 | `REDIS_URL`                             | Redis URL for the TMDB and IGDB cache                        |
 | `TMDB_API_READ_ACCESS_TOKEN`            | TMDB v4 read token (required for detail/search/trending)     |
 | `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | Twitch app credentials for IGDB (required outside dev)       |
-| `JWT_SECRET_KEY` / `SECRET_KEY_BASE`    | token signing secrets                                        |
+| `JWT_SECRET_KEY`                        | token signing secret                                         |
 | `SENTRY_DSN`                            | error reporting (optional)                                   |
 
 ## Database
@@ -76,7 +76,7 @@ make check    # fmt + lint + test + test:race
 
 Individual targets: `make fmt`, `make lint`, `make test`, `make test:race`,
 `make coverage`. Tests run against a live `biinge-test` database (`GO_ENV=test`).
-`make vet` and `make staticcheck` also exist, but `make lint` covers both —
+`make vet` also exists, but `make lint` covers it —
 `.golangci.yaml` enables govet and staticcheck as linters.
 
 ## Contributing

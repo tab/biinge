@@ -16,7 +16,6 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -26,8 +25,7 @@ func Test_UpNextController_HandleUpNext(t *testing.T) {
 
 	provider := services.NewMockTmdbProvider(ctrl)
 	games := services.NewMockIgdbProvider(ctrl)
-	log := logger.NewLogger(testConfig())
-	controller := NewUpNextController(provider, games, log)
+	controller := NewUpNextController(provider, games)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)

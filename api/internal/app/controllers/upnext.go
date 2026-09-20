@@ -7,7 +7,6 @@ import (
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
-	"biinge-api/internal/config/logger"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -18,14 +17,12 @@ type UpNextController interface {
 type upNextController struct {
 	provider services.TmdbProvider
 	games    services.IgdbProvider
-	log      *logger.Logger
 }
 
-func NewUpNextController(provider services.TmdbProvider, games services.IgdbProvider, log *logger.Logger) UpNextController {
+func NewUpNextController(provider services.TmdbProvider, games services.IgdbProvider) UpNextController {
 	return &upNextController{
 		provider: provider,
 		games:    games,
-		log:      log.WithComponent("UpNextController"),
 	}
 }
 

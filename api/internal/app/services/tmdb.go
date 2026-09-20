@@ -98,7 +98,7 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 		recommendationIds = append(recommendationIds, item.Id)
 	}
 
-	moviesList, err := p.movies.FindMoviesByTmdbIds(ctx, recommendationIds, userId)
+	moviesList, err := p.movies.FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: recommendationIds})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -145,31 +145,8 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 		})
 	}
 
-	movie, err := p.movies.FindByTmdbId(ctx, id, userId)
+	stored, err := p.movies.FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{id}})
 	if err != nil {
-		if errors.Is(err, errors.ErrMovieNotFound) {
-			p.log.Debug().
-				Err(err).
-				Uint64("Id", id).
-				Msg("Movie not found in database")
-
-			return &serializers.MovieDetailsSerializer{
-				Id:              id,
-				Pinned:          false,
-				State:           models.StateTypeNone,
-				Status:          details.Status,
-				Title:           details.Title,
-				PosterPath:      details.PosterPath,
-				Overview:        details.Overview,
-				ReleaseDate:     details.ReleaseDate,
-				Runtime:         details.Runtime,
-				Rating:          details.Rating,
-				Credits:         credits,
-				Recommendations: recommendations,
-				Videos:          videos,
-			}, nil
-		}
-
 		p.log.Error().
 			Err(err).
 			Uint64("Id", id).
@@ -177,6 +154,30 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 
 		return nil, errors.ErrFailedToFetchMovie
 	}
+
+	if len(stored) == 0 {
+		p.log.Debug().
+			Uint64("Id", id).
+			Msg("Movie not found in database")
+
+		return &serializers.MovieDetailsSerializer{
+			Id:              id,
+			Pinned:          false,
+			State:           models.StateTypeNone,
+			Status:          details.Status,
+			Title:           details.Title,
+			PosterPath:      details.PosterPath,
+			Overview:        details.Overview,
+			ReleaseDate:     details.ReleaseDate,
+			Runtime:         details.Runtime,
+			Rating:          details.Rating,
+			Credits:         credits,
+			Recommendations: recommendations,
+			Videos:          videos,
+		}, nil
+	}
+
+	movie := stored[0]
 
 	// Read-repair: refresh a stale add-time poster/title from TMDB, leaving state and pinned untouched
 	if details.PosterPath != "" && details.PosterPath != movie.PosterPath {
@@ -212,10 +213,12 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 
 // fallbackMovieDetails serves stored library data when TMDB is unavailable, else a fetch error
 func (p *tmdbProvider) fallbackMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error) {
-	movie, err := p.movies.FindByTmdbId(ctx, id, userId)
-	if err != nil {
+	stored, err := p.movies.FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{id}})
+	if err != nil || len(stored) == 0 {
 		return nil, tmdb.ErrFailedToFetchMovieDetails
 	}
+
+	movie := stored[0]
 
 	p.log.Warn().Uint64("Id", id).Msg("Serving stored movie details while TMDB is unavailable")
 
@@ -258,7 +261,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		recommendationIds = append(recommendationIds, item.Id)
 	}
 
-	tvShowsList, err := p.series.FindSeriesByTmdbIds(ctx, recommendationIds, userId)
+	tvShowsList, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: recommendationIds})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -317,33 +320,8 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		})
 	}
 
-	tvShow, err := p.series.FindByTmdbId(ctx, id, userId)
+	stored, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{id}})
 	if err != nil {
-		if errors.Is(err, errors.ErrSeriesNotFound) {
-			p.log.Debug().
-				Err(err).
-				Uint64("Id", id).
-				Msg("Series not found in database")
-
-			return &serializers.SeriesDetailsSerializer{
-				Id:              id,
-				Pinned:          false,
-				State:           models.StateTypeNone,
-				Status:          details.Status,
-				Title:           details.Title,
-				PosterPath:      details.PosterPath,
-				Overview:        details.Overview,
-				ReleaseDate:     details.ReleaseDate,
-				SeasonsCount:    uint64(max(details.SeasonsCount, 0)),
-				EpisodesCount:   uint64(max(details.EpisodesCount, 0)),
-				Rating:          details.Rating,
-				Credits:         credits,
-				Recommendations: recommendations,
-				Videos:          videos,
-				Seasons:         seasons,
-			}, nil
-		}
-
 		p.log.Error().
 			Err(err).
 			Uint64("Id", id).
@@ -351,6 +329,32 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 
 		return nil, errors.ErrFailedToFetchSeries
 	}
+
+	if len(stored) == 0 {
+		p.log.Debug().
+			Uint64("Id", id).
+			Msg("Series not found in database")
+
+		return &serializers.SeriesDetailsSerializer{
+			Id:              id,
+			Pinned:          false,
+			State:           models.StateTypeNone,
+			Status:          details.Status,
+			Title:           details.Title,
+			PosterPath:      details.PosterPath,
+			Overview:        details.Overview,
+			ReleaseDate:     details.ReleaseDate,
+			SeasonsCount:    uint64(max(details.SeasonsCount, 0)),
+			EpisodesCount:   uint64(max(details.EpisodesCount, 0)),
+			Rating:          details.Rating,
+			Credits:         credits,
+			Recommendations: recommendations,
+			Videos:          videos,
+			Seasons:         seasons,
+		}, nil
+	}
+
+	tvShow := stored[0]
 
 	// Read-repair the stored poster/title/status (see FetchMovieDetails), leaving counts, state and pinned untouched
 	if details.PosterPath != "" && details.PosterPath != tvShow.PosterPath {
@@ -390,10 +394,12 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 
 // fallbackTvDetails serves stored library data when TMDB is unavailable, else a fetch error
 func (p *tmdbProvider) fallbackTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error) {
-	tvShow, err := p.series.FindByTmdbId(ctx, id, userId)
-	if err != nil {
+	stored, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{id}})
+	if err != nil || len(stored) == 0 {
 		return nil, tmdb.ErrFailedToFetchTvDetails
 	}
+
+	tvShow := stored[0]
 
 	p.log.Warn().Uint64("Id", id).Msg("Serving stored series details while TMDB is unavailable")
 
@@ -439,7 +445,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		movieCreditIds = append(movieCreditIds, item.Id)
 	}
 
-	moviesList, err := p.movies.FindMoviesByTmdbIds(ctx, movieCreditIds, userId)
+	moviesList, err := p.movies.FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: movieCreditIds})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -474,7 +480,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		tvCreditIds = append(tvCreditIds, uint64(item.Id))
 	}
 
-	seriesList, err := p.series.FindSeriesByTmdbIds(ctx, tvCreditIds, userId)
+	seriesList, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: tvCreditIds})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -716,7 +722,7 @@ func (p *tmdbProvider) buildMovieList(ctx context.Context, response *tmdb.MovieL
 		ids = append(ids, item.Id)
 	}
 
-	moviesList, err := p.movies.FindMoviesByTmdbIds(ctx, ids, userId)
+	moviesList, err := p.movies.FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: ids})
 	if err != nil {
 		p.log.Error().Err(err).Msg("Failed to fetch movie states")
 		return nil, errors.ErrFailedToFetchResults
@@ -765,7 +771,7 @@ func (p *tmdbProvider) buildSeriesList(ctx context.Context, response *tmdb.TvLis
 		ids = append(ids, item.Id)
 	}
 
-	seriesList, err := p.series.FindSeriesByTmdbIds(ctx, ids, userId)
+	seriesList, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: ids})
 	if err != nil {
 		p.log.Error().Err(err).Msg("Failed to fetch series states")
 		return nil, errors.ErrFailedToFetchResults

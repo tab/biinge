@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: 'api/go.mod'
           cache: true
@@ -49,7 +49,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: 'api/go.mod'
           cache: true
@@ -115,7 +115,7 @@ jobs:
       DATABASE_DSN: ${{ secrets.DATABASE_DSN }}
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: 'api/go.mod'
           cache: true

@@ -235,7 +235,7 @@ func (c *gamesController) HandleDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.games.DeleteByIgdbId(r.Context(), id, user.ID)
+	err = c.games.Delete(r.Context(), id, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})

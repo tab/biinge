@@ -217,36 +217,6 @@ func Test_MovieRepository_Delete(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewMovieRepository(client)
-	userID := newProgressTestUser(t, client, "movie.delete")
-
-	created, err := repository.Create(ctx, &models.Movie{
-		UserId:     userID,
-		TmdbId:     740001,
-		Title:      "Doomed",
-		PosterPath: "/doomed.jpg",
-		Runtime:    100,
-		State:      models.StateTypeWant,
-	})
-	require.NoError(t, err)
-
-	t.Run("Success removes the row", func(t *testing.T) {
-		err := repository.Delete(ctx, created.ID)
-		require.NoError(t, err)
-
-		_, err = repository.FindById(ctx, created.ID)
-		require.Error(t, err)
-	})
-
-	t.Run("Deleting a missing id is a no-op", func(t *testing.T) {
-		err := repository.Delete(ctx, uuid.New())
-		require.NoError(t, err)
-	})
-}
-
-func Test_MovieRepository_DeleteByTmdbId(t *testing.T) {
-	ctx := context.Background()
-	client := newRepoTestClient(t)
-	repository := NewMovieRepository(client)
 	userID := newProgressTestUser(t, client, "movie.delete.tmdb")
 
 	created, err := repository.Create(ctx, &models.Movie{
@@ -260,93 +230,21 @@ func Test_MovieRepository_DeleteByTmdbId(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("Success removes the row", func(t *testing.T) {
-		err := repository.DeleteByTmdbId(ctx, created.TmdbId, userID)
+		err := repository.Delete(ctx, created.TmdbId, userID)
 		require.NoError(t, err)
 
-		_, err = repository.FindByTmdbId(ctx, created.TmdbId, userID)
-		require.Error(t, err)
+		rows, err := repository.FindByFilter(ctx, models.MovieFilter{UserId: userID, TmdbIds: []uint64{created.TmdbId}})
+		require.NoError(t, err)
+		assert.Empty(t, rows)
 	})
 
 	t.Run("Deleting a missing tmdb id is a no-op", func(t *testing.T) {
-		err := repository.DeleteByTmdbId(ctx, 999998, userID)
+		err := repository.Delete(ctx, 999998, userID)
 		require.NoError(t, err)
 	})
 }
 
-func Test_MovieRepository_FindById(t *testing.T) {
-	ctx := context.Background()
-	client := newRepoTestClient(t)
-	repository := NewMovieRepository(client)
-	userID := newProgressTestUser(t, client, "movie.find.id")
-
-	created, err := repository.Create(ctx, &models.Movie{
-		UserId:     userID,
-		TmdbId:     760001,
-		Title:      "Findable",
-		PosterPath: "/findable.jpg",
-		Runtime:    111,
-		State:      models.StateTypeWatched,
-	})
-	require.NoError(t, err)
-
-	t.Run("Success", func(t *testing.T) {
-		result, err := repository.FindById(ctx, created.ID)
-		require.NoError(t, err)
-
-		assert.Equal(t, created.ID, result.ID)
-		assert.Equal(t, uint64(760001), result.TmdbId)
-		assert.Equal(t, "Findable", result.Title)
-		assert.Equal(t, uint64(111), result.Runtime)
-		assert.Equal(t, models.StateTypeWatched, result.State)
-	})
-
-	t.Run("Unknown id returns error", func(t *testing.T) {
-		result, err := repository.FindById(ctx, uuid.New())
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-}
-
-func Test_MovieRepository_FindByTmdbId(t *testing.T) {
-	ctx := context.Background()
-	client := newRepoTestClient(t)
-	repository := NewMovieRepository(client)
-	userID := newProgressTestUser(t, client, "movie.find.tmdb")
-
-	created, err := repository.Create(ctx, &models.Movie{
-		UserId:     userID,
-		TmdbId:     770001,
-		Title:      "Findable By Tmdb",
-		PosterPath: "/findable.jpg",
-		Runtime:    99,
-		State:      models.StateTypeWant,
-	})
-	require.NoError(t, err)
-
-	t.Run("Success", func(t *testing.T) {
-		result, err := repository.FindByTmdbId(ctx, created.TmdbId, userID)
-		require.NoError(t, err)
-
-		assert.Equal(t, created.ID, result.ID)
-		assert.Equal(t, uint64(770001), result.TmdbId)
-		assert.Equal(t, models.StateTypeWant, result.State)
-	})
-
-	t.Run("Unknown tmdb id returns error", func(t *testing.T) {
-		result, err := repository.FindByTmdbId(ctx, 999997, userID)
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Wrong user returns error", func(t *testing.T) {
-		otherUser := newProgressTestUser(t, client, "movie.tmdb.other")
-		result, err := repository.FindByTmdbId(ctx, created.TmdbId, otherUser)
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-}
-
-func Test_MovieRepository_FindMoviesByTmdbIds(t *testing.T) {
+func Test_MovieRepository_FindByFilter(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewMovieRepository(client)
@@ -366,7 +264,7 @@ func Test_MovieRepository_FindMoviesByTmdbIds(t *testing.T) {
 	}
 
 	t.Run("Returns the matching subset", func(t *testing.T) {
-		result, err := repository.FindMoviesByTmdbIds(ctx, []uint64{780001, 780003, 999000}, userID)
+		result, err := repository.FindByFilter(ctx, models.MovieFilter{UserId: userID, TmdbIds: []uint64{780001, 780003, 999000}})
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
 
@@ -381,7 +279,7 @@ func Test_MovieRepository_FindMoviesByTmdbIds(t *testing.T) {
 	})
 
 	t.Run("Empty slice returns no rows", func(t *testing.T) {
-		result, err := repository.FindMoviesByTmdbIds(ctx, []uint64{}, userID)
+		result, err := repository.FindByFilter(ctx, models.MovieFilter{UserId: userID, TmdbIds: []uint64{}})
 		require.NoError(t, err)
 		assert.Empty(t, result)
 	})
@@ -402,8 +300,8 @@ func Test_MovieRepository_QueryErrors(t *testing.T) {
 		assert.Equal(t, uint64(0), total)
 	})
 
-	t.Run("FindMoviesByTmdbIds surfaces query errors", func(t *testing.T) {
-		result, err := repository.FindMoviesByTmdbIds(canceled, []uint64{1}, userID)
+	t.Run("FindByFilter surfaces query errors", func(t *testing.T) {
+		result, err := repository.FindByFilter(canceled, models.MovieFilter{UserId: userID, TmdbIds: []uint64{1}})
 		require.Error(t, err)
 		assert.Nil(t, result)
 	})

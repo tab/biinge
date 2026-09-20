@@ -37,22 +37,6 @@ SELECT
 FROM games
 WHERE igdb_id = ANY(@igdb_ids::integer[]) AND user_id = @user_id;
 
--- name: FindGameByIgdbId :one
-SELECT
-  id,
-  user_id,
-  igdb_id,
-  title,
-  poster_path,
-  runtime,
-  pinned,
-  state,
-  played_at,
-  created_at,
-  updated_at
-FROM games
-WHERE igdb_id = $1 AND user_id = $2 LIMIT 1;
-
 -- name: CreateGame :one
 INSERT INTO games (
   user_id,

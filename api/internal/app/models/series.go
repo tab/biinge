@@ -21,3 +21,9 @@ type Series struct {
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 }
+
+// SeriesFilter narrows a user's series to the given TMDB ids
+type SeriesFilter struct {
+	UserId  uuid.UUID
+	TmdbIds []uint64
+}

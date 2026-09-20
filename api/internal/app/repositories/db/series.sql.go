@@ -164,50 +164,6 @@ func (q *Queries) FindEpisodeTmdbIdsBySeriesId(ctx context.Context, seriesID uui
 	return items, nil
 }
 
-const findSeriesById = `-- name: FindSeriesById :one
-SELECT
-  id,
-  user_id,
-  tmdb_id,
-  title,
-  poster_path,
-  seasons_count,
-  episodes_count,
-  status,
-  state,
-  pinned,
-  created_at,
-  updated_at,
-  tracked_state,
-  synced_at,
-  last_air_at
-FROM series
-WHERE id = $1 LIMIT 1
-`
-
-func (q *Queries) FindSeriesById(ctx context.Context, id uuid.UUID) (Series, error) {
-	row := q.db.QueryRow(ctx, findSeriesById, id)
-	var i Series
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.TmdbID,
-		&i.Title,
-		&i.PosterPath,
-		&i.SeasonsCount,
-		&i.EpisodesCount,
-		&i.Status,
-		&i.State,
-		&i.Pinned,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.TrackedState,
-		&i.SyncedAt,
-		&i.LastAirAt,
-	)
-	return i, err
-}
-
 const findSeriesByState = `-- name: FindSeriesByState :many
 WITH counter AS (
   SELECT COUNT(*) AS total

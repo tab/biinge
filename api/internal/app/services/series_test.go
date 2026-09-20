@@ -304,51 +304,6 @@ func Test_Series_Delete(t *testing.T) {
 	repository := repositories.NewMockSeriesRepository(ctrl)
 	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
 
-	id := uuid.New()
-
-	tests := []struct {
-		name   string
-		before func()
-		error  error
-	}{
-		{
-			name: "Success",
-			before: func() {
-				repository.EXPECT().Delete(ctx, id).Return(nil)
-			},
-		},
-		{
-			name: "Error",
-			before: func() {
-				repository.EXPECT().Delete(ctx, id).Return(assert.AnError)
-			},
-			error: errors.ErrFailedToDeleteSeries,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			err := service.Delete(ctx, id)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func Test_Series_DeleteByTmdbId(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
-
 	userId := uuid.New()
 
 	tests := []struct {
@@ -359,13 +314,13 @@ func Test_Series_DeleteByTmdbId(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().DeleteByTmdbId(ctx, uint64(300), userId).Return(nil)
+				repository.EXPECT().Delete(ctx, uint64(300), userId).Return(nil)
 			},
 		},
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().DeleteByTmdbId(ctx, uint64(300), userId).Return(assert.AnError)
+				repository.EXPECT().Delete(ctx, uint64(300), userId).Return(assert.AnError)
 			},
 			error: errors.ErrFailedToDeleteSeries,
 		},
@@ -375,7 +330,7 @@ func Test_Series_DeleteByTmdbId(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			err := service.DeleteByTmdbId(ctx, 300, userId)
+			err := service.Delete(ctx, 300, userId)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)
@@ -386,123 +341,7 @@ func Test_Series_DeleteByTmdbId(t *testing.T) {
 	}
 }
 
-func Test_Series_FindById(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
-
-	id := uuid.New()
-
-	tests := []struct {
-		name     string
-		before   func()
-		expected *models.Series
-		error    error
-	}{
-		{
-			name: "Success",
-			before: func() {
-				repository.EXPECT().FindById(ctx, id).Return(&models.Series{
-					ID:     id,
-					TmdbId: 300,
-					Title:  "Breaking Bad",
-				}, nil)
-			},
-			expected: &models.Series{
-				ID:     id,
-				TmdbId: 300,
-				Title:  "Breaking Bad",
-			},
-		},
-		{
-			name: "Error",
-			before: func() {
-				repository.EXPECT().FindById(ctx, id).Return(nil, assert.AnError)
-			},
-			expected: nil,
-			error:    errors.ErrSeriesNotFound,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			result, err := service.FindById(ctx, id)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-				assert.Nil(t, result)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.expected, result)
-			}
-		})
-	}
-}
-
-func Test_Series_FindByTmdbId(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockSeriesRepository(ctrl)
-	service := NewSeries(repository, newTestStatsCache(), newTestLogger())
-
-	userId := uuid.New()
-
-	tests := []struct {
-		name     string
-		before   func()
-		expected *models.Series
-		error    error
-	}{
-		{
-			name: "Success",
-			before: func() {
-				repository.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(&models.Series{
-					TmdbId: 300,
-					UserId: userId,
-					Title:  "Breaking Bad",
-				}, nil)
-			},
-			expected: &models.Series{
-				TmdbId: 300,
-				UserId: userId,
-				Title:  "Breaking Bad",
-			},
-		},
-		{
-			name: "Error",
-			before: func() {
-				repository.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(nil, assert.AnError)
-			},
-			expected: nil,
-			error:    errors.ErrSeriesNotFound,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			result, err := service.FindByTmdbId(ctx, 300, userId)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-				assert.Nil(t, result)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.expected, result)
-			}
-		})
-	}
-}
-
-func Test_Series_FindSeriesByTmdbIds(t *testing.T) {
+func Test_Series_FindByFilter(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -522,7 +361,7 @@ func Test_Series_FindSeriesByTmdbIds(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().FindSeriesByTmdbIds(ctx, tmdbIds, userId).Return([]models.Series{
+				repository.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: tmdbIds}).Return([]models.Series{
 					{TmdbId: 300, State: "watching"},
 					{TmdbId: 400, State: "want"},
 				}, nil)
@@ -535,7 +374,7 @@ func Test_Series_FindSeriesByTmdbIds(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().FindSeriesByTmdbIds(ctx, tmdbIds, userId).Return(nil, assert.AnError)
+				repository.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: tmdbIds}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -546,7 +385,7 @@ func Test_Series_FindSeriesByTmdbIds(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := service.FindSeriesByTmdbIds(ctx, tmdbIds, userId)
+			result, err := service.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: tmdbIds})
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)

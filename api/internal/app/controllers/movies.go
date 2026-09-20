@@ -235,7 +235,7 @@ func (c *moviesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = c.movies.DeleteByTmdbId(r.Context(), id, user.ID)
+	err = c.movies.Delete(r.Context(), id, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})

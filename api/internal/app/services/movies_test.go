@@ -310,51 +310,6 @@ func Test_Movies_Delete(t *testing.T) {
 	repository := repositories.NewMockMovieRepository(ctrl)
 	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
 
-	id := uuid.New()
-
-	tests := []struct {
-		name   string
-		before func()
-		error  error
-	}{
-		{
-			name: "Success",
-			before: func() {
-				repository.EXPECT().Delete(ctx, id).Return(nil)
-			},
-		},
-		{
-			name: "Error",
-			before: func() {
-				repository.EXPECT().Delete(ctx, id).Return(assert.AnError)
-			},
-			error: errors.ErrFailedToDeleteMovie,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			err := service.Delete(ctx, id)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func Test_Movies_DeleteByTmdbId(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
-
 	userId := uuid.New()
 
 	tests := []struct {
@@ -365,13 +320,13 @@ func Test_Movies_DeleteByTmdbId(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().DeleteByTmdbId(ctx, uint64(100), userId).Return(nil)
+				repository.EXPECT().Delete(ctx, uint64(100), userId).Return(nil)
 			},
 		},
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().DeleteByTmdbId(ctx, uint64(100), userId).Return(assert.AnError)
+				repository.EXPECT().Delete(ctx, uint64(100), userId).Return(assert.AnError)
 			},
 			error: errors.ErrFailedToDeleteMovie,
 		},
@@ -381,7 +336,7 @@ func Test_Movies_DeleteByTmdbId(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			err := service.DeleteByTmdbId(ctx, 100, userId)
+			err := service.Delete(ctx, 100, userId)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)
@@ -392,123 +347,7 @@ func Test_Movies_DeleteByTmdbId(t *testing.T) {
 	}
 }
 
-func Test_Movies_FindById(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
-
-	id := uuid.New()
-
-	tests := []struct {
-		name     string
-		before   func()
-		expected *models.Movie
-		error    error
-	}{
-		{
-			name: "Success",
-			before: func() {
-				repository.EXPECT().FindById(ctx, id).Return(&models.Movie{
-					ID:     id,
-					TmdbId: 100,
-					Title:  "The Matrix",
-				}, nil)
-			},
-			expected: &models.Movie{
-				ID:     id,
-				TmdbId: 100,
-				Title:  "The Matrix",
-			},
-		},
-		{
-			name: "Error",
-			before: func() {
-				repository.EXPECT().FindById(ctx, id).Return(nil, assert.AnError)
-			},
-			expected: nil,
-			error:    errors.ErrMovieNotFound,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			result, err := service.FindById(ctx, id)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-				assert.Nil(t, result)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.expected, result)
-			}
-		})
-	}
-}
-
-func Test_Movies_FindByTmdbId(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockMovieRepository(ctrl)
-	service := NewMovies(repository, newTestStatsCache(), newTestLogger())
-
-	userId := uuid.New()
-
-	tests := []struct {
-		name     string
-		before   func()
-		expected *models.Movie
-		error    error
-	}{
-		{
-			name: "Success",
-			before: func() {
-				repository.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(&models.Movie{
-					TmdbId: 100,
-					UserId: userId,
-					Title:  "The Matrix",
-				}, nil)
-			},
-			expected: &models.Movie{
-				TmdbId: 100,
-				UserId: userId,
-				Title:  "The Matrix",
-			},
-		},
-		{
-			name: "Error",
-			before: func() {
-				repository.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(nil, assert.AnError)
-			},
-			expected: nil,
-			error:    errors.ErrMovieNotFound,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			result, err := service.FindByTmdbId(ctx, 100, userId)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-				assert.Nil(t, result)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.expected, result)
-			}
-		})
-	}
-}
-
-func Test_Movies_FindMoviesByTmdbIds(t *testing.T) {
+func Test_Movies_FindByFilter(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -528,7 +367,7 @@ func Test_Movies_FindMoviesByTmdbIds(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().FindMoviesByTmdbIds(ctx, tmdbIds, userId).Return([]models.Movie{
+				repository.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: tmdbIds}).Return([]models.Movie{
 					{TmdbId: 100, State: "want"},
 					{TmdbId: 200, State: "watched"},
 				}, nil)
@@ -541,7 +380,7 @@ func Test_Movies_FindMoviesByTmdbIds(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().FindMoviesByTmdbIds(ctx, tmdbIds, userId).Return(nil, assert.AnError)
+				repository.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: tmdbIds}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -552,7 +391,7 @@ func Test_Movies_FindMoviesByTmdbIds(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := service.FindMoviesByTmdbIds(ctx, tmdbIds, userId)
+			result, err := service.FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: tmdbIds})
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)

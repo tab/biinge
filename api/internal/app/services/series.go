@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
@@ -17,11 +16,8 @@ type Series interface {
 	Create(ctx context.Context, params *models.Series) (*models.Series, error)
 	Update(ctx context.Context, params *models.Series) (*models.Series, error)
 	UpdateByTmdbId(ctx context.Context, params *models.Series) (*models.Series, error)
-	Delete(ctx context.Context, id uuid.UUID) error
-	DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error
-	FindById(ctx context.Context, id uuid.UUID) (*models.Series, error)
-	FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Series, error)
-	FindSeriesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Series, error)
+	Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error
+	FindByFilter(ctx context.Context, filter models.SeriesFilter) ([]models.Series, error)
 }
 
 type series struct {
@@ -103,18 +99,8 @@ func (s *series) UpdateByTmdbId(ctx context.Context, params *models.Series) (*mo
 	return item, nil
 }
 
-func (s *series) Delete(ctx context.Context, id uuid.UUID) error {
-	err := s.repository.Delete(ctx, id)
-	if err != nil {
-		s.log.Error().Err(err).Msg("Failed to delete series")
-		return errors.ErrFailedToDeleteSeries
-	}
-
-	return nil
-}
-
-func (s *series) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
-	err := s.repository.DeleteByTmdbId(ctx, tmdbId, userId)
+func (s *series) Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
+	err := s.repository.Delete(ctx, tmdbId, userId)
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to delete series by TMDB Id")
 		return errors.ErrFailedToDeleteSeries
@@ -125,36 +111,8 @@ func (s *series) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.
 	return nil
 }
 
-func (s *series) FindById(ctx context.Context, id uuid.UUID) (*models.Series, error) {
-	item, err := s.repository.FindById(ctx, id)
-	if err != nil {
-		// a show the user never added is the ordinary case, not a failure
-		if !errors.Is(err, pgx.ErrNoRows) {
-			s.log.Error().Err(err).Msg("Failed to fetch series by Id")
-		}
-
-		return nil, errors.ErrSeriesNotFound
-	}
-
-	return item, nil
-}
-
-func (s *series) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Series, error) {
-	item, err := s.repository.FindByTmdbId(ctx, tmdbId, userId)
-	if err != nil {
-		// a show the user never added is the ordinary case, not a failure
-		if !errors.Is(err, pgx.ErrNoRows) {
-			s.log.Error().Err(err).Msg("Failed to fetch series by TMDB Id")
-		}
-
-		return nil, errors.ErrSeriesNotFound
-	}
-
-	return item, nil
-}
-
-func (s *series) FindSeriesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Series, error) {
-	collection, err := s.repository.FindSeriesByTmdbIds(ctx, tmdbIds, userId)
+func (s *series) FindByFilter(ctx context.Context, filter models.SeriesFilter) ([]models.Series, error) {
+	collection, err := s.repository.FindByFilter(ctx, filter)
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to fetch series by TMDB Ids")
 		return nil, errors.ErrFailedToFetchResults

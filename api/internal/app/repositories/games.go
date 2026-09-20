@@ -15,9 +15,8 @@ type GameRepository interface {
 	Create(ctx context.Context, params *models.Game) (*models.Game, error)
 	Update(ctx context.Context, params *models.Game) (*models.Game, error)
 	UpdateByIgdbId(ctx context.Context, params *models.Game) (*models.Game, error)
-	DeleteByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) error
-	FindByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) (*models.Game, error)
-	FindGamesByIgdbIds(ctx context.Context, igdbIds []uint64, userId uuid.UUID) ([]models.Game, error)
+	Delete(ctx context.Context, igdbId uint64, userId uuid.UUID) error
+	FindByFilter(ctx context.Context, filter models.GameFilter) ([]models.Game, error)
 }
 
 type game struct {
@@ -146,41 +145,17 @@ func (g *game) UpdateByIgdbId(ctx context.Context, params *models.Game) (*models
 	}, nil
 }
 
-func (g *game) DeleteByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) error {
+func (g *game) Delete(ctx context.Context, igdbId uint64, userId uuid.UUID) error {
 	return g.client.Queries().DeleteGameByIgdbId(ctx, db.DeleteGameByIgdbIdParams{
 		IgdbID: igdbId,
 		UserID: userId,
 	})
 }
 
-func (g *game) FindByIgdbId(ctx context.Context, igdbId uint64, userId uuid.UUID) (*models.Game, error) {
-	result, err := g.client.Queries().FindGameByIgdbId(ctx, db.FindGameByIgdbIdParams{
-		IgdbID: igdbId,
-		UserID: userId,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &models.Game{
-		ID:         result.ID,
-		UserId:     result.UserID,
-		IgdbId:     result.IgdbID,
-		Title:      result.Title,
-		PosterPath: result.PosterPath,
-		Runtime:    result.Runtime,
-		State:      models.StateType(result.State),
-		Pinned:     result.Pinned,
-		PlayedAt:   result.PlayedAt.Time,
-		CreatedAt:  result.CreatedAt.Time,
-		UpdatedAt:  result.UpdatedAt.Time,
-	}, nil
-}
-
-func (g *game) FindGamesByIgdbIds(ctx context.Context, igdbIds []uint64, userId uuid.UUID) ([]models.Game, error) {
+func (g *game) FindByFilter(ctx context.Context, filter models.GameFilter) ([]models.Game, error) {
 	rows, err := g.client.Queries().FindGamesByIgdbIds(ctx, db.FindGamesByIgdbIdsParams{
-		IgdbIds: toInt32Slice(igdbIds),
-		UserID:  userId,
+		IgdbIds: toInt32Slice(filter.IgdbIds),
+		UserID:  filter.UserId,
 	})
 	if err != nil {
 		return nil, err

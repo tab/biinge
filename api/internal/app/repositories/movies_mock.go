@@ -58,76 +58,32 @@ func (mr *MockMovieRepositoryMockRecorder) Create(ctx, params any) *gomock.Call 
 }
 
 // Delete mocks base method.
-func (m *MockMovieRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (m *MockMovieRepository) Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, id)
+	ret := m.ctrl.Call(m, "Delete", ctx, tmdbId, userId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockMovieRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
+func (mr *MockMovieRepositoryMockRecorder) Delete(ctx, tmdbId, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockMovieRepository)(nil).Delete), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockMovieRepository)(nil).Delete), ctx, tmdbId, userId)
 }
 
-// DeleteByTmdbId mocks base method.
-func (m *MockMovieRepository) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
+// FindByFilter mocks base method.
+func (m *MockMovieRepository) FindByFilter(ctx context.Context, filter models.MovieFilter) ([]models.Movie, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteByTmdbId", ctx, tmdbId, userId)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteByTmdbId indicates an expected call of DeleteByTmdbId.
-func (mr *MockMovieRepositoryMockRecorder) DeleteByTmdbId(ctx, tmdbId, userId any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByTmdbId", reflect.TypeOf((*MockMovieRepository)(nil).DeleteByTmdbId), ctx, tmdbId, userId)
-}
-
-// FindById mocks base method.
-func (m *MockMovieRepository) FindById(ctx context.Context, id uuid.UUID) (*models.Movie, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindById", ctx, id)
-	ret0, _ := ret[0].(*models.Movie)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindById indicates an expected call of FindById.
-func (mr *MockMovieRepositoryMockRecorder) FindById(ctx, id any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindById", reflect.TypeOf((*MockMovieRepository)(nil).FindById), ctx, id)
-}
-
-// FindByTmdbId mocks base method.
-func (m *MockMovieRepository) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Movie, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByTmdbId", ctx, tmdbId, userId)
-	ret0, _ := ret[0].(*models.Movie)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByTmdbId indicates an expected call of FindByTmdbId.
-func (mr *MockMovieRepositoryMockRecorder) FindByTmdbId(ctx, tmdbId, userId any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByTmdbId", reflect.TypeOf((*MockMovieRepository)(nil).FindByTmdbId), ctx, tmdbId, userId)
-}
-
-// FindMoviesByTmdbIds mocks base method.
-func (m *MockMovieRepository) FindMoviesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Movie, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindMoviesByTmdbIds", ctx, tmdbIds, userId)
+	ret := m.ctrl.Call(m, "FindByFilter", ctx, filter)
 	ret0, _ := ret[0].([]models.Movie)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindMoviesByTmdbIds indicates an expected call of FindMoviesByTmdbIds.
-func (mr *MockMovieRepositoryMockRecorder) FindMoviesByTmdbIds(ctx, tmdbIds, userId any) *gomock.Call {
+// FindByFilter indicates an expected call of FindByFilter.
+func (mr *MockMovieRepositoryMockRecorder) FindByFilter(ctx, filter any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindMoviesByTmdbIds", reflect.TypeOf((*MockMovieRepository)(nil).FindMoviesByTmdbIds), ctx, tmdbIds, userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByFilter", reflect.TypeOf((*MockMovieRepository)(nil).FindByFilter), ctx, filter)
 }
 
 // List mocks base method.

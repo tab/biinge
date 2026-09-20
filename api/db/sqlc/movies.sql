@@ -37,38 +37,6 @@ SELECT
 FROM movies
 WHERE tmdb_id = ANY(@tmdb_ids::integer[]) AND user_id = @user_id;
 
--- name: FindMovieById :one
-SELECT
-  id,
-  user_id,
-  tmdb_id,
-  title,
-  poster_path,
-  runtime,
-  pinned,
-  state,
-  watched_at,
-  created_at,
-  updated_at
-FROM movies
-WHERE id = $1 LIMIT 1;
-
--- name: FindMovieByTmdbId :one
-SELECT
-  id,
-  user_id,
-  tmdb_id,
-  title,
-  poster_path,
-  runtime,
-  pinned,
-  state,
-  watched_at,
-  created_at,
-  updated_at
-FROM movies
-WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1;
-
 -- name: CreateMovie :one
 INSERT INTO movies (
   user_id,
@@ -135,9 +103,6 @@ RETURNING
   created_at,
   updated_at,
   watched_at;
-
--- name: DeleteMovie :exec
-DELETE FROM movies WHERE id = $1;
 
 -- name: DeleteMovieByTmdbId :exec
 DELETE FROM movies WHERE tmdb_id = $1 AND user_id = $2;

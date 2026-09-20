@@ -56,10 +56,10 @@ func Test_Movies_InvalidatesStats(t *testing.T) {
 		{
 			name: "Removing from a list",
 			before: func(repository *repositories.MockMovieRepository) {
-				repository.EXPECT().DeleteByTmdbId(ctx, uint64(100), userId).Return(nil)
+				repository.EXPECT().Delete(ctx, uint64(100), userId).Return(nil)
 			},
 			call: func(service Movies) error {
-				return service.DeleteByTmdbId(ctx, 100, userId)
+				return service.Delete(ctx, 100, userId)
 			},
 			invalidate: true,
 		},
@@ -139,10 +139,10 @@ func Test_Series_InvalidatesStats(t *testing.T) {
 		{
 			name: "Removing from a list",
 			before: func(repository *repositories.MockSeriesRepository) {
-				repository.EXPECT().DeleteByTmdbId(ctx, uint64(200), userId).Return(nil)
+				repository.EXPECT().Delete(ctx, uint64(200), userId).Return(nil)
 			},
 			call: func(service Series) error {
-				return service.DeleteByTmdbId(ctx, 200, userId)
+				return service.Delete(ctx, 200, userId)
 			},
 			invalidate: true,
 		},

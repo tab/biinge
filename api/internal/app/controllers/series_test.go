@@ -880,7 +880,7 @@ func Test_SeriesController_HandleDelete(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				series.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(1399), id).Return(nil)
+				series.EXPECT().Delete(gomock.Any(), uint64(1399), id).Return(nil)
 			},
 			withUser: true,
 			param:    "1399",
@@ -916,7 +916,7 @@ func Test_SeriesController_HandleDelete(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
-				series.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(1399), id).Return(assert.AnError)
+				series.EXPECT().Delete(gomock.Any(), uint64(1399), id).Return(assert.AnError)
 			},
 			withUser: true,
 			param:    "1399",

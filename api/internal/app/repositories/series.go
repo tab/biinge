@@ -15,11 +15,8 @@ type SeriesRepository interface {
 	Create(ctx context.Context, params *models.Series) (*models.Series, error)
 	Update(ctx context.Context, params *models.Series) (*models.Series, error)
 	UpdateByTmdbId(ctx context.Context, params *models.Series) (*models.Series, error)
-	Delete(ctx context.Context, id uuid.UUID) error
-	DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error
-	FindById(ctx context.Context, id uuid.UUID) (*models.Series, error)
-	FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Series, error)
-	FindSeriesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Series, error)
+	Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error
+	FindByFilter(ctx context.Context, filter models.SeriesFilter) ([]models.Series, error)
 }
 
 type series struct {
@@ -116,42 +113,17 @@ func (s *series) UpdateByTmdbId(ctx context.Context, params *models.Series) (*mo
 	return seriesFromRow(result), nil
 }
 
-func (s *series) Delete(ctx context.Context, id uuid.UUID) error {
-	return s.client.Queries().DeleteSeries(ctx, id)
-}
-
-func (s *series) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
+func (s *series) Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
 	return s.client.Queries().DeleteSeriesByTmdbId(ctx, db.DeleteSeriesByTmdbIdParams{
 		TmdbID: tmdbId,
 		UserID: userId,
 	})
 }
 
-func (s *series) FindById(ctx context.Context, id uuid.UUID) (*models.Series, error) {
-	result, err := s.client.Queries().FindSeriesById(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	return seriesFromRow(result), nil
-}
-
-func (s *series) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Series, error) {
-	result, err := s.client.Queries().FindSeriesByTmdbId(ctx, db.FindSeriesByTmdbIdParams{
-		TmdbID: tmdbId,
-		UserID: userId,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return seriesFromRow(result), nil
-}
-
-func (s *series) FindSeriesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Series, error) {
+func (s *series) FindByFilter(ctx context.Context, filter models.SeriesFilter) ([]models.Series, error) {
 	rows, err := s.client.Queries().FindSeriesByTmdbIds(ctx, db.FindSeriesByTmdbIdsParams{
-		TmdbIds: toInt32Slice(tmdbIds),
-		UserID:  userId,
+		TmdbIds: toInt32Slice(filter.TmdbIds),
+		UserID:  filter.UserId,
 	})
 	if err != nil {
 		return nil, err

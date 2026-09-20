@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -142,7 +141,7 @@ func Test_Games_UpdateByIgdbId(t *testing.T) {
 	})
 }
 
-func Test_Games_DeleteByIgdbId(t *testing.T) {
+func Test_Games_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -153,48 +152,19 @@ func Test_Games_DeleteByIgdbId(t *testing.T) {
 	userId := uuid.New()
 
 	t.Run("Success", func(t *testing.T) {
-		repository.EXPECT().DeleteByIgdbId(ctx, uint64(1942), userId).Return(nil)
+		repository.EXPECT().Delete(ctx, uint64(1942), userId).Return(nil)
 
-		require.NoError(t, service.DeleteByIgdbId(ctx, 1942, userId))
+		require.NoError(t, service.Delete(ctx, 1942, userId))
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		repository.EXPECT().DeleteByIgdbId(ctx, uint64(1942), userId).Return(assert.AnError)
+		repository.EXPECT().Delete(ctx, uint64(1942), userId).Return(assert.AnError)
 
-		require.ErrorIs(t, service.DeleteByIgdbId(ctx, 1942, userId), errors.ErrFailedToDeleteGame)
+		require.ErrorIs(t, service.Delete(ctx, 1942, userId), errors.ErrFailedToDeleteGame)
 	})
 }
 
-func Test_Games_FindByIgdbId(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockGameRepository(ctrl)
-	service := NewGames(repository, newTestStatsCache(), newTestLogger())
-
-	userId := uuid.New()
-
-	t.Run("Success", func(t *testing.T) {
-		repository.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(&models.Game{IgdbId: 1942}, nil)
-
-		result, err := service.FindByIgdbId(ctx, 1942, userId)
-		require.NoError(t, err)
-
-		assert.Equal(t, uint64(1942), result.IgdbId)
-	})
-
-	// a game the user never added is the ordinary case for the details screen
-	t.Run("Missing row is a not found", func(t *testing.T) {
-		repository.EXPECT().FindByIgdbId(ctx, uint64(1942), userId).Return(nil, pgx.ErrNoRows)
-
-		result, err := service.FindByIgdbId(ctx, 1942, userId)
-		require.ErrorIs(t, err, errors.ErrGameNotFound)
-		assert.Nil(t, result)
-	})
-}
-
-func Test_Games_FindGamesByIgdbIds(t *testing.T) {
+func Test_Games_FindByFilter(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -206,18 +176,18 @@ func Test_Games_FindGamesByIgdbIds(t *testing.T) {
 	ids := []uint64{1942, 2000}
 
 	t.Run("Success", func(t *testing.T) {
-		repository.EXPECT().FindGamesByIgdbIds(ctx, ids, userId).Return([]models.Game{{IgdbId: 1942}}, nil)
+		repository.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: ids}).Return([]models.Game{{IgdbId: 1942}}, nil)
 
-		result, err := service.FindGamesByIgdbIds(ctx, ids, userId)
+		result, err := service.FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: ids})
 		require.NoError(t, err)
 
 		assert.Len(t, result, 1)
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		repository.EXPECT().FindGamesByIgdbIds(ctx, ids, userId).Return(nil, assert.AnError)
+		repository.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: ids}).Return(nil, assert.AnError)
 
-		result, err := service.FindGamesByIgdbIds(ctx, ids, userId)
+		result, err := service.FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: ids})
 		require.ErrorIs(t, err, errors.ErrFailedToFetchResults)
 		assert.Nil(t, result)
 	})

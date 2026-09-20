@@ -240,12 +240,12 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(sampleMovieDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{200}, userId).Return([]models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{200}}).Return([]models.Movie{
 					{TmdbId: 200, State: "want"},
 				}, nil)
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(&models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{{
 					ID: movieID, TmdbId: 100, Title: "Old Title", PosterPath: "/old-poster.jpg", Runtime: 100, State: "watched", Pinned: true,
-				}, nil)
+				}}, nil)
 				moviesSvc.EXPECT().Update(ctx, &models.Movie{
 					ID: movieID, Title: "The Matrix", PosterPath: "/tmdb-poster.jpg", Runtime: 136,
 				}).Return(&models.Movie{}, nil)
@@ -271,10 +271,10 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(sampleMovieDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{200}, userId).Return([]models.Movie{}, nil)
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(&models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{200}}).Return([]models.Movie{}, nil)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{{
 					ID: movieID, TmdbId: 100, Title: "The Matrix", PosterPath: "/tmdb-poster.jpg", Runtime: 136, State: "want",
-				}, nil)
+				}}, nil)
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -302,10 +302,10 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(response, nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{200}, userId).Return([]models.Movie{}, nil)
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(&models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{200}}).Return([]models.Movie{}, nil)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{{
 					ID: movieID, TmdbId: 100, Title: "Stored Title", PosterPath: "/old.jpg", Runtime: 90, State: "want",
-				}, nil)
+				}}, nil)
 				moviesSvc.EXPECT().Update(ctx, &models.Movie{
 					ID: movieID, Title: "Stored Title", PosterPath: "/new-poster.jpg", Runtime: 90,
 				}).Return(&models.Movie{}, nil)
@@ -331,10 +331,10 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(sampleMovieDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{200}, userId).Return([]models.Movie{}, nil)
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(&models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{200}}).Return([]models.Movie{}, nil)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{{
 					ID: movieID, TmdbId: 100, Title: "Old", PosterPath: "/old.jpg", Runtime: 100, State: "watched", Pinned: true,
-				}, nil)
+				}}, nil)
 				moviesSvc.EXPECT().Update(ctx, gomock.Any()).Return(nil, assert.AnError)
 			},
 			expected: &serializers.MovieDetailsSerializer{
@@ -358,10 +358,10 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(sampleMovieDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{200}, userId).Return([]models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{200}}).Return([]models.Movie{
 					{TmdbId: 200, State: "want"},
 				}, nil)
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(nil, errors.ErrMovieNotFound)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{}, nil)
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -384,9 +384,9 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(nil, assert.AnError)
 
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(&models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{{
 					ID: movieID, TmdbId: 100, Title: "Stored Title", PosterPath: "/stored.jpg", Runtime: 120, State: "watched", Pinned: true,
-				}, nil)
+				}}, nil)
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -405,7 +405,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(nil, assert.AnError)
 
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(nil, errors.ErrMovieNotFound)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{}, nil)
 			},
 			expected: nil,
 			error:    tmdb.ErrFailedToFetchMovieDetails,
@@ -415,7 +415,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(sampleMovieDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{200}, userId).Return(nil, assert.AnError)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{200}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -425,8 +425,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(sampleMovieDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{200}, userId).Return([]models.Movie{}, nil)
-				moviesSvc.EXPECT().FindByTmdbId(ctx, uint64(100), userId).Return(nil, assert.AnError)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{200}}).Return([]models.Movie{}, nil)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchMovie,
@@ -475,12 +475,12 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(sampleTvDetails(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{400}, userId).Return([]models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{400}}).Return([]models.Series{
 					{TmdbId: 400, State: "want"},
 				}, nil)
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(&models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{{
 					ID: seriesID, TmdbId: 300, Title: "Old", PosterPath: "/old.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Old Status", State: "watching", Pinned: true,
-				}, nil)
+				}}, nil)
 				seriesSvc.EXPECT().Update(ctx, &models.Series{
 					ID: seriesID, Title: "Breaking Bad", PosterPath: "/bb-tmdb.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended",
 				}).Return(&models.Series{}, nil)
@@ -508,10 +508,10 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(sampleTvDetails(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{400}, userId).Return([]models.Series{}, nil)
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(&models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{400}}).Return([]models.Series{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{{
 					ID: seriesID, TmdbId: 300, Title: "Breaking Bad", PosterPath: "/bb-tmdb.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended", State: "watched",
-				}, nil)
+				}}, nil)
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -541,10 +541,10 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(response, nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{400}, userId).Return([]models.Series{}, nil)
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(&models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{400}}).Return([]models.Series{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{{
 					ID: seriesID, TmdbId: 300, Title: "Stored Title", PosterPath: "/old.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Stored Status", State: "watching",
-				}, nil)
+				}}, nil)
 				seriesSvc.EXPECT().Update(ctx, &models.Series{
 					ID: seriesID, Title: "Stored Title", PosterPath: "/new.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Stored Status",
 				}).Return(&models.Series{}, nil)
@@ -572,10 +572,10 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(sampleTvDetails(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{400}, userId).Return([]models.Series{}, nil)
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(&models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{400}}).Return([]models.Series{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{{
 					ID: seriesID, TmdbId: 300, Title: "Old", PosterPath: "/old.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended", State: "watched", Pinned: true,
-				}, nil)
+				}}, nil)
 				seriesSvc.EXPECT().Update(ctx, gomock.Any()).Return(nil, assert.AnError)
 			},
 			expected: &serializers.SeriesDetailsSerializer{
@@ -601,10 +601,10 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(sampleTvDetails(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{400}, userId).Return([]models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{400}}).Return([]models.Series{
 					{TmdbId: 400, State: "want"},
 				}, nil)
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(nil, errors.ErrSeriesNotFound)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{}, nil)
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -629,9 +629,9 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(nil, assert.AnError)
 
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(&models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{{
 					ID: seriesID, TmdbId: 300, Title: "Stored Title", PosterPath: "/stored.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended", State: "watched", Pinned: true,
-				}, nil)
+				}}, nil)
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -653,7 +653,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(nil, assert.AnError)
 
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(nil, errors.ErrSeriesNotFound)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{}, nil)
 			},
 			expected: nil,
 			error:    tmdb.ErrFailedToFetchTvDetails,
@@ -663,7 +663,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(sampleTvDetails(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{400}, userId).Return(nil, assert.AnError)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{400}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -673,8 +673,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(sampleTvDetails(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{400}, userId).Return([]models.Series{}, nil)
-				seriesSvc.EXPECT().FindByTmdbId(ctx, uint64(300), userId).Return(nil, assert.AnError)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{400}}).Return([]models.Series{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchSeries,
@@ -722,10 +722,10 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchPersonDetails(ctx, uint64(500)).Return(samplePersonDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{600}, userId).Return([]models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{600}}).Return([]models.Movie{
 					{TmdbId: 600, State: "watched"},
 				}, nil)
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{700}, userId).Return([]models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{700}}).Return([]models.Series{
 					{TmdbId: 700, State: "want"},
 				}, nil)
 			},
@@ -748,8 +748,8 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchPersonDetails(ctx, uint64(500)).Return(samplePersonDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{600}, userId).Return([]models.Movie{}, nil)
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{700}, userId).Return([]models.Series{}, nil)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{600}}).Return([]models.Movie{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{700}}).Return([]models.Series{}, nil)
 			},
 			expected: &serializers.PersonDetailsSerializer{
 				Id:          500,
@@ -778,7 +778,7 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchPersonDetails(ctx, uint64(500)).Return(samplePersonDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{600}, userId).Return(nil, assert.AnError)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{600}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -788,8 +788,8 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchPersonDetails(ctx, uint64(500)).Return(samplePersonDetails(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{600}, userId).Return([]models.Movie{}, nil)
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{700}, userId).Return(nil, assert.AnError)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{600}}).Return([]models.Movie{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{700}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -1040,7 +1040,7 @@ func Test_Tmdb_SearchMovies(t *testing.T) {
 			before: func() {
 				client.EXPECT().SearchMovies(ctx, "matrix", uint64(1)).Return(sampleMovieListResult(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{100, 103, 101, 102}, userId).Return([]models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100, 103, 101, 102}}).Return([]models.Movie{
 					{TmdbId: 100, State: "want"},
 				}, nil)
 			},
@@ -1065,7 +1065,7 @@ func Test_Tmdb_SearchMovies(t *testing.T) {
 			before: func() {
 				client.EXPECT().SearchMovies(ctx, "matrix", uint64(1)).Return(sampleMovieListResult(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{100, 103, 101, 102}, userId).Return(nil, assert.AnError)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100, 103, 101, 102}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -1113,7 +1113,7 @@ func Test_Tmdb_FetchTrendingMovies(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTrendingMovies(ctx).Return(sampleMovieListResult(), nil)
 
-				moviesSvc.EXPECT().FindMoviesByTmdbIds(ctx, []uint64{100, 103, 101, 102}, userId).Return([]models.Movie{
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100, 103, 101, 102}}).Return([]models.Movie{
 					{TmdbId: 100, State: "want"},
 				}, nil)
 			},
@@ -1176,7 +1176,7 @@ func Test_Tmdb_SearchSeries(t *testing.T) {
 			before: func() {
 				client.EXPECT().SearchTv(ctx, "bad", uint64(1)).Return(sampleTvListResult(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{300, 303, 301, 302}, userId).Return([]models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300, 303, 301, 302}}).Return([]models.Series{
 					{TmdbId: 300, State: "watching"},
 				}, nil)
 			},
@@ -1201,7 +1201,7 @@ func Test_Tmdb_SearchSeries(t *testing.T) {
 			before: func() {
 				client.EXPECT().SearchTv(ctx, "bad", uint64(1)).Return(sampleTvListResult(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{300, 303, 301, 302}, userId).Return(nil, assert.AnError)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300, 303, 301, 302}}).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToFetchResults,
@@ -1249,7 +1249,7 @@ func Test_Tmdb_FetchTrendingSeries(t *testing.T) {
 			before: func() {
 				client.EXPECT().FetchTrendingTv(ctx).Return(sampleTvListResult(), nil)
 
-				seriesSvc.EXPECT().FindSeriesByTmdbIds(ctx, []uint64{300, 303, 301, 302}, userId).Return([]models.Series{
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300, 303, 301, 302}}).Return([]models.Series{
 					{TmdbId: 300, State: "watching"},
 				}, nil)
 			},

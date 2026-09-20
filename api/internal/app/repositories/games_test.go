@@ -213,38 +213,7 @@ func Test_GameRepository_Update(t *testing.T) {
 	})
 }
 
-func Test_GameRepository_FindByIgdbId(t *testing.T) {
-	ctx := context.Background()
-	client := newRepoTestClient(t)
-	repository := NewGameRepository(client)
-	userID := newProgressTestUser(t, client, "game.find")
-
-	_, err := repository.Create(ctx, &models.Game{
-		UserId: userID, IgdbId: 840001, Title: "Ghost of Tsushima", PosterPath: "co6", State: models.StateTypePlayed,
-	})
-	require.NoError(t, err)
-
-	t.Run("Success", func(t *testing.T) {
-		result, err := repository.FindByIgdbId(ctx, 840001, userID)
-		require.NoError(t, err)
-
-		assert.Equal(t, "Ghost of Tsushima", result.Title)
-	})
-
-	t.Run("Missing row", func(t *testing.T) {
-		result, err := repository.FindByIgdbId(ctx, 849999, userID)
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Scoped to the owner", func(t *testing.T) {
-		result, err := repository.FindByIgdbId(ctx, 840001, uuid.New())
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-}
-
-func Test_GameRepository_FindGamesByIgdbIds(t *testing.T) {
+func Test_GameRepository_FindByFilter(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewGameRepository(client)
@@ -261,21 +230,21 @@ func Test_GameRepository_FindGamesByIgdbIds(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("Returns only the ids the user tracks", func(t *testing.T) {
-		rows, err := repository.FindGamesByIgdbIds(ctx, []uint64{850001, 850002, 859999}, userID)
+		rows, err := repository.FindByFilter(ctx, models.GameFilter{UserId: userID, IgdbIds: []uint64{850001, 850002, 859999}})
 		require.NoError(t, err)
 
 		assert.Len(t, rows, 2)
 	})
 
 	t.Run("Empty ids", func(t *testing.T) {
-		rows, err := repository.FindGamesByIgdbIds(ctx, []uint64{}, userID)
+		rows, err := repository.FindByFilter(ctx, models.GameFilter{UserId: userID, IgdbIds: []uint64{}})
 		require.NoError(t, err)
 
 		assert.Empty(t, rows)
 	})
 }
 
-func Test_GameRepository_DeleteByIgdbId(t *testing.T) {
+func Test_GameRepository_Delete(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewGameRepository(client)
@@ -287,15 +256,15 @@ func Test_GameRepository_DeleteByIgdbId(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("Success", func(t *testing.T) {
-		require.NoError(t, repository.DeleteByIgdbId(ctx, 860001, userID))
+		require.NoError(t, repository.Delete(ctx, 860001, userID))
 
-		result, err := repository.FindByIgdbId(ctx, 860001, userID)
-		require.Error(t, err)
-		assert.Nil(t, result)
+		rows, err := repository.FindByFilter(ctx, models.GameFilter{UserId: userID, IgdbIds: []uint64{860001}})
+		require.NoError(t, err)
+		assert.Empty(t, rows)
 	})
 
 	// deleting something that isn't there is not an error, it is already gone
 	t.Run("Missing row", func(t *testing.T) {
-		require.NoError(t, repository.DeleteByIgdbId(ctx, 869999, userID))
+		require.NoError(t, repository.Delete(ctx, 869999, userID))
 	})
 }

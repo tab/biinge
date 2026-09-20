@@ -65,12 +65,6 @@ var (
 	ErrFailedToFetchProgress  = errors.New("failed to fetch progress")
 
 	ErrFailedToFetchStats = errors.New("failed to fetch stats")
-
-	ErrGameNotFound    = errors.New("game not found")
-	ErrMovieNotFound   = errors.New("movie not found")
-	ErrSeriesNotFound  = errors.New("series not found")
-	ErrSeasonNotFound  = errors.New("season not found")
-	ErrEpisodeNotFound = errors.New("episode not found")
 )
 
 var (

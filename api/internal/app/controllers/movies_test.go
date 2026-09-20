@@ -578,7 +578,7 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				movies.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(550), id).Return(nil)
+				movies.EXPECT().Delete(gomock.Any(), uint64(550), id).Return(nil)
 			},
 			withUser: true,
 			param:    "550",
@@ -614,7 +614,7 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
-				movies.EXPECT().DeleteByTmdbId(gomock.Any(), uint64(550), id).Return(assert.AnError)
+				movies.EXPECT().Delete(gomock.Any(), uint64(550), id).Return(assert.AnError)
 			},
 			withUser: true,
 			param:    "550",

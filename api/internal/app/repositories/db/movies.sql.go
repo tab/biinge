@@ -87,15 +87,6 @@ func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Creat
 	return i, err
 }
 
-const deleteMovie = `-- name: DeleteMovie :exec
-DELETE FROM movies WHERE id = $1
-`
-
-func (q *Queries) DeleteMovie(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteMovie, id)
-	return err
-}
-
 const deleteMovieByTmdbId = `-- name: DeleteMovieByTmdbId :exec
 DELETE FROM movies WHERE tmdb_id = $1 AND user_id = $2
 `
@@ -108,111 +99,6 @@ type DeleteMovieByTmdbIdParams struct {
 func (q *Queries) DeleteMovieByTmdbId(ctx context.Context, arg DeleteMovieByTmdbIdParams) error {
 	_, err := q.db.Exec(ctx, deleteMovieByTmdbId, arg.TmdbID, arg.UserID)
 	return err
-}
-
-const findMovieById = `-- name: FindMovieById :one
-SELECT
-  id,
-  user_id,
-  tmdb_id,
-  title,
-  poster_path,
-  runtime,
-  pinned,
-  state,
-  watched_at,
-  created_at,
-  updated_at
-FROM movies
-WHERE id = $1 LIMIT 1
-`
-
-type FindMovieByIdRow struct {
-	ID         uuid.UUID
-	UserID     uuid.UUID
-	TmdbID     uint64
-	Title      string
-	PosterPath string
-	Runtime    uint64
-	Pinned     bool
-	State      StateTypes
-	WatchedAt  pgtype.Timestamptz
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-}
-
-func (q *Queries) FindMovieById(ctx context.Context, id uuid.UUID) (FindMovieByIdRow, error) {
-	row := q.db.QueryRow(ctx, findMovieById, id)
-	var i FindMovieByIdRow
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.TmdbID,
-		&i.Title,
-		&i.PosterPath,
-		&i.Runtime,
-		&i.Pinned,
-		&i.State,
-		&i.WatchedAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const findMovieByTmdbId = `-- name: FindMovieByTmdbId :one
-SELECT
-  id,
-  user_id,
-  tmdb_id,
-  title,
-  poster_path,
-  runtime,
-  pinned,
-  state,
-  watched_at,
-  created_at,
-  updated_at
-FROM movies
-WHERE tmdb_id = $1 AND user_id = $2 LIMIT 1
-`
-
-type FindMovieByTmdbIdParams struct {
-	TmdbID uint64
-	UserID uuid.UUID
-}
-
-type FindMovieByTmdbIdRow struct {
-	ID         uuid.UUID
-	UserID     uuid.UUID
-	TmdbID     uint64
-	Title      string
-	PosterPath string
-	Runtime    uint64
-	Pinned     bool
-	State      StateTypes
-	WatchedAt  pgtype.Timestamptz
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-}
-
-func (q *Queries) FindMovieByTmdbId(ctx context.Context, arg FindMovieByTmdbIdParams) (FindMovieByTmdbIdRow, error) {
-	row := q.db.QueryRow(ctx, findMovieByTmdbId, arg.TmdbID, arg.UserID)
-	var i FindMovieByTmdbIdRow
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.TmdbID,
-		&i.Title,
-		&i.PosterPath,
-		&i.Runtime,
-		&i.Pinned,
-		&i.State,
-		&i.WatchedAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }
 
 const findMoviesByState = `-- name: FindMoviesByState :many

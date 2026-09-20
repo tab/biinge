@@ -224,38 +224,6 @@ func Test_SeriesRepository_Delete(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewSeriesRepository(client)
-	userID := newProgressTestUser(t, client, "series.delete")
-
-	created, err := repository.Create(ctx, &models.Series{
-		UserId:        userID,
-		TmdbId:        840001,
-		Title:         "Doomed",
-		PosterPath:    "/doomed.jpg",
-		SeasonsCount:  1,
-		EpisodesCount: 1,
-		Status:        "Ended",
-		State:         models.StateTypeWant,
-	})
-	require.NoError(t, err)
-
-	t.Run("Success removes the row", func(t *testing.T) {
-		err := repository.Delete(ctx, created.ID)
-		require.NoError(t, err)
-
-		_, err = repository.FindById(ctx, created.ID)
-		require.Error(t, err)
-	})
-
-	t.Run("Deleting a missing id is a no-op", func(t *testing.T) {
-		err := repository.Delete(ctx, uuid.New())
-		require.NoError(t, err)
-	})
-}
-
-func Test_SeriesRepository_DeleteByTmdbId(t *testing.T) {
-	ctx := context.Background()
-	client := newRepoTestClient(t)
-	repository := NewSeriesRepository(client)
 	userID := newProgressTestUser(t, client, "series.delete.tmdb")
 
 	created, err := repository.Create(ctx, &models.Series{
@@ -271,98 +239,21 @@ func Test_SeriesRepository_DeleteByTmdbId(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("Success removes the row", func(t *testing.T) {
-		err := repository.DeleteByTmdbId(ctx, created.TmdbId, userID)
+		err := repository.Delete(ctx, created.TmdbId, userID)
 		require.NoError(t, err)
 
-		_, err = repository.FindByTmdbId(ctx, created.TmdbId, userID)
-		require.Error(t, err)
+		rows, err := repository.FindByFilter(ctx, models.SeriesFilter{UserId: userID, TmdbIds: []uint64{created.TmdbId}})
+		require.NoError(t, err)
+		assert.Empty(t, rows)
 	})
 
 	t.Run("Deleting a missing tmdb id is a no-op", func(t *testing.T) {
-		err := repository.DeleteByTmdbId(ctx, 999995, userID)
+		err := repository.Delete(ctx, 999995, userID)
 		require.NoError(t, err)
 	})
 }
 
-func Test_SeriesRepository_FindById(t *testing.T) {
-	ctx := context.Background()
-	client := newRepoTestClient(t)
-	repository := NewSeriesRepository(client)
-	userID := newProgressTestUser(t, client, "series.find.id")
-
-	created, err := repository.Create(ctx, &models.Series{
-		UserId:        userID,
-		TmdbId:        860001,
-		Title:         "Findable",
-		PosterPath:    "/findable.jpg",
-		SeasonsCount:  3,
-		EpisodesCount: 30,
-		Status:        "Ended",
-		State:         models.StateTypeWatched,
-	})
-	require.NoError(t, err)
-
-	t.Run("Success", func(t *testing.T) {
-		result, err := repository.FindById(ctx, created.ID)
-		require.NoError(t, err)
-
-		assert.Equal(t, created.ID, result.ID)
-		assert.Equal(t, uint64(860001), result.TmdbId)
-		assert.Equal(t, "Findable", result.Title)
-		assert.Equal(t, uint64(3), result.SeasonsCount)
-		assert.Equal(t, uint64(30), result.EpisodesCount)
-		assert.Equal(t, models.StateTypeWatched, result.State)
-	})
-
-	t.Run("Unknown id returns error", func(t *testing.T) {
-		result, err := repository.FindById(ctx, uuid.New())
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-}
-
-func Test_SeriesRepository_FindByTmdbId(t *testing.T) {
-	ctx := context.Background()
-	client := newRepoTestClient(t)
-	repository := NewSeriesRepository(client)
-	userID := newProgressTestUser(t, client, "series.find.tmdb")
-
-	created, err := repository.Create(ctx, &models.Series{
-		UserId:        userID,
-		TmdbId:        870001,
-		Title:         "Findable By Tmdb",
-		PosterPath:    "/findable.jpg",
-		SeasonsCount:  1,
-		EpisodesCount: 10,
-		Status:        "Ended",
-		State:         models.StateTypeWant,
-	})
-	require.NoError(t, err)
-
-	t.Run("Success", func(t *testing.T) {
-		result, err := repository.FindByTmdbId(ctx, created.TmdbId, userID)
-		require.NoError(t, err)
-
-		assert.Equal(t, created.ID, result.ID)
-		assert.Equal(t, uint64(870001), result.TmdbId)
-		assert.Equal(t, models.StateTypeWant, result.State)
-	})
-
-	t.Run("Unknown tmdb id returns error", func(t *testing.T) {
-		result, err := repository.FindByTmdbId(ctx, 999994, userID)
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Wrong user returns error", func(t *testing.T) {
-		otherUser := newProgressTestUser(t, client, "series.tmdb.other")
-		result, err := repository.FindByTmdbId(ctx, created.TmdbId, otherUser)
-		require.Error(t, err)
-		assert.Nil(t, result)
-	})
-}
-
-func Test_SeriesRepository_FindSeriesByTmdbIds(t *testing.T) {
+func Test_SeriesRepository_FindByFilter(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewSeriesRepository(client)
@@ -384,7 +275,7 @@ func Test_SeriesRepository_FindSeriesByTmdbIds(t *testing.T) {
 	}
 
 	t.Run("Returns the matching subset", func(t *testing.T) {
-		result, err := repository.FindSeriesByTmdbIds(ctx, []uint64{880001, 880003, 999000}, userID)
+		result, err := repository.FindByFilter(ctx, models.SeriesFilter{UserId: userID, TmdbIds: []uint64{880001, 880003, 999000}})
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
 
@@ -399,7 +290,7 @@ func Test_SeriesRepository_FindSeriesByTmdbIds(t *testing.T) {
 	})
 
 	t.Run("Empty slice returns no rows", func(t *testing.T) {
-		result, err := repository.FindSeriesByTmdbIds(ctx, []uint64{}, userID)
+		result, err := repository.FindByFilter(ctx, models.SeriesFilter{UserId: userID, TmdbIds: []uint64{}})
 		require.NoError(t, err)
 		assert.Empty(t, result)
 	})
@@ -420,8 +311,8 @@ func Test_SeriesRepository_QueryErrors(t *testing.T) {
 		assert.Equal(t, uint64(0), total)
 	})
 
-	t.Run("FindSeriesByTmdbIds surfaces query errors", func(t *testing.T) {
-		result, err := repository.FindSeriesByTmdbIds(canceled, []uint64{1}, userID)
+	t.Run("FindByFilter surfaces query errors", func(t *testing.T) {
+		result, err := repository.FindByFilter(canceled, models.SeriesFilter{UserId: userID, TmdbIds: []uint64{1}})
 		require.Error(t, err)
 		assert.Nil(t, result)
 	})

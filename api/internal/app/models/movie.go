@@ -27,3 +27,9 @@ type MovieSyncInput struct {
 	Runtime    uint64
 	ReleasedAt time.Time
 }
+
+// MovieFilter narrows a user's movies to the given TMDB ids
+type MovieFilter struct {
+	UserId  uuid.UUID
+	TmdbIds []uint64
+}

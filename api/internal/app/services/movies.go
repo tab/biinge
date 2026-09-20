@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 
 	"biinge-api/internal/app/errors"
 	"biinge-api/internal/app/models"
@@ -17,11 +16,8 @@ type Movies interface {
 	Create(ctx context.Context, params *models.Movie) (*models.Movie, error)
 	Update(ctx context.Context, params *models.Movie) (*models.Movie, error)
 	UpdateByTmdbId(ctx context.Context, params *models.Movie) (*models.Movie, error)
-	Delete(ctx context.Context, id uuid.UUID) error
-	DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error
-	FindById(ctx context.Context, id uuid.UUID) (*models.Movie, error)
-	FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Movie, error)
-	FindMoviesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Movie, error)
+	Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error
+	FindByFilter(ctx context.Context, filter models.MovieFilter) ([]models.Movie, error)
 }
 
 type movies struct {
@@ -99,18 +95,8 @@ func (m *movies) UpdateByTmdbId(ctx context.Context, params *models.Movie) (*mod
 	return item, nil
 }
 
-func (m *movies) Delete(ctx context.Context, id uuid.UUID) error {
-	err := m.repository.Delete(ctx, id)
-	if err != nil {
-		m.log.Error().Err(err).Msg("Failed to delete movie")
-		return errors.ErrFailedToDeleteMovie
-	}
-
-	return nil
-}
-
-func (m *movies) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
-	err := m.repository.DeleteByTmdbId(ctx, tmdbId, userId)
+func (m *movies) Delete(ctx context.Context, tmdbId uint64, userId uuid.UUID) error {
+	err := m.repository.Delete(ctx, tmdbId, userId)
 	if err != nil {
 		m.log.Error().Err(err).Msg("Failed to delete movie by TMDB Id")
 		return errors.ErrFailedToDeleteMovie
@@ -121,36 +107,8 @@ func (m *movies) DeleteByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.
 	return nil
 }
 
-func (m *movies) FindById(ctx context.Context, id uuid.UUID) (*models.Movie, error) {
-	item, err := m.repository.FindById(ctx, id)
-	if err != nil {
-		// a movie the user never added is the ordinary case, not a failure
-		if !errors.Is(err, pgx.ErrNoRows) {
-			m.log.Error().Err(err).Msg("Failed to fetch movie by Id")
-		}
-
-		return nil, errors.ErrMovieNotFound
-	}
-
-	return item, nil
-}
-
-func (m *movies) FindByTmdbId(ctx context.Context, tmdbId uint64, userId uuid.UUID) (*models.Movie, error) {
-	item, err := m.repository.FindByTmdbId(ctx, tmdbId, userId)
-	if err != nil {
-		// a movie the user never added is the ordinary case, not a failure
-		if !errors.Is(err, pgx.ErrNoRows) {
-			m.log.Error().Err(err).Msg("Failed to fetch movie by TMDB Id")
-		}
-
-		return nil, errors.ErrMovieNotFound
-	}
-
-	return item, nil
-}
-
-func (m *movies) FindMoviesByTmdbIds(ctx context.Context, tmdbIds []uint64, userId uuid.UUID) ([]models.Movie, error) {
-	collection, err := m.repository.FindMoviesByTmdbIds(ctx, tmdbIds, userId)
+func (m *movies) FindByFilter(ctx context.Context, filter models.MovieFilter) ([]models.Movie, error) {
+	collection, err := m.repository.FindByFilter(ctx, filter)
 	if err != nil {
 		m.log.Error().Err(err).Msg("Failed to fetch movies by TMDB Ids")
 		return nil, errors.ErrFailedToFetchResults

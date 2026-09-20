@@ -253,7 +253,7 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = c.series.DeleteByTmdbId(r.Context(), id, user.ID)
+	err = c.series.Delete(r.Context(), id, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})

@@ -369,7 +369,7 @@ func Test_GamesController_HandleDelete(t *testing.T) {
 	}
 
 	t.Run("Success", func(t *testing.T) {
-		games.EXPECT().DeleteByIgdbId(gomock.Any(), uint64(1942), userId).Return(nil)
+		games.EXPECT().Delete(gomock.Any(), uint64(1942), userId).Return(nil)
 
 		resp := serve("/games/1942", true)
 		defer resp.Body.Close()
@@ -385,7 +385,7 @@ func Test_GamesController_HandleDelete(t *testing.T) {
 	})
 
 	t.Run("Service error", func(t *testing.T) {
-		games.EXPECT().DeleteByIgdbId(gomock.Any(), uint64(1942), userId).Return(assert.AnError)
+		games.EXPECT().Delete(gomock.Any(), uint64(1942), userId).Return(assert.AnError)
 
 		resp := serve("/games/1942", true)
 		defer resp.Body.Close()

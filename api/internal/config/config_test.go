@@ -36,15 +36,13 @@ func Test_LoadConfig(t *testing.T) {
 			args: []string{},
 			env:  map[string]string{},
 			expected: &Config{
-				AppEnv:        TestEnv,
-				AppAddr:       "localhost:8080",
-				ClientURL:     "http://localhost:3000",
-				DatabaseDSN:   "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
-				SecretKeyBase: "SECRET",
-				JWTSecretKey:  "SECRET",
+				AppEnv:       TestEnv,
+				AppAddr:      "localhost:8080",
+				ClientURL:    "http://localhost:3000",
+				DatabaseDSN:  "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
+				JWTSecretKey: "SECRET",
 				TMDBConfig: TMDBConfig{
 					BaseURL:            "https://api.themoviedb.org/3",
-					BaseImageURL:       "https://image.tmdb.org/t/p",
 					APIReadAccessToken: "SECRET",
 					Locale:             "en-US",
 				},
@@ -65,13 +63,10 @@ func Test_LoadConfig(t *testing.T) {
 			assert.Equal(t, tt.expected.AppAddr, result.AppAddr)
 			assert.Equal(t, tt.expected.ClientURL, result.ClientURL)
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
-			assert.Equal(t, tt.expected.SecretKeyBase, result.SecretKeyBase)
 			assert.Equal(t, tt.expected.JWTSecretKey, result.JWTSecretKey)
 			assert.Equal(t, tt.expected.BaseURL, result.BaseURL)
-			assert.Equal(t, tt.expected.BaseImageURL, result.BaseImageURL)
 			assert.Equal(t, tt.expected.APIReadAccessToken, result.APIReadAccessToken)
 			assert.Equal(t, tt.expected.Locale, result.Locale)
-			assert.Equal(t, tt.expected.Timeout, result.Timeout)
 
 			t.Cleanup(func() {
 				for key := range tt.env {

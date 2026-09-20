@@ -29,7 +29,7 @@ overrides it.
 | `REDIS_URL`                             | Redis URL for the TMDB and IGDB cache                        |
 | `TMDB_API_READ_ACCESS_TOKEN`            | TMDB v4 read token (required for detail/search/trending)     |
 | `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | Twitch app credentials for IGDB (required outside dev)       |
-| `JWT_SECRET_KEY` / `SECRET_KEY_BASE`    | token signing secrets                                        |
+| `JWT_SECRET_KEY`                        | token signing secret                                         |
 | `SENTRY_DSN`                            | error reporting (optional)                                   |
 
 ## Database

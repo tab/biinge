@@ -31,20 +31,17 @@ const (
 )
 
 type TMDBConfig struct {
-	BaseURL      string
-	BaseImageURL string
+	BaseURL string
 
 	APIReadAccessToken string
 
-	Locale  string
-	Timeout time.Duration
+	Locale string
 }
 
 // IGDBConfig holds the IGDB game database credentials and endpoints (Twitch issues the token)
 type IGDBConfig struct {
-	BaseURL      string
-	TokenURL     string
-	BaseImageURL string
+	BaseURL  string
+	TokenURL string
 
 	ClientID     string
 	ClientSecret string
@@ -61,23 +58,22 @@ type WorkerConfig struct {
 }
 
 type Config struct {
-	AppEnv        string
-	AppName       string
-	AppVersion    string
-	AppAddr       string
-	ClientURL     string
-	DatabaseDSN   string
-	SecretKeyBase string
-	JWTSecretKey  string
-	LogLevel      string
-	SentryDSN     string
+	AppEnv       string
+	AppName      string
+	AppVersion   string
+	AppAddr      string
+	ClientURL    string
+	DatabaseDSN  string
+	JWTSecretKey string
+	LogLevel     string
+	SentryDSN    string
 
 	RedisURL string
 
 	TMDBConfig
 	WorkerConfig
 
-	// named rather than embedded: BaseURL and BaseImageURL would collide with TMDBConfig
+	// named rather than embedded: BaseURL would collide with TMDBConfig
 	IGDB IGDBConfig
 }
 
@@ -97,22 +93,20 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		AppEnv:        env,
-		AppName:       getEnvString("APP_NAME"),
-		AppVersion:    getEnvString("APP_VERSION"),
-		AppAddr:       getEnvString("APP_ADDRESS"),
-		ClientURL:     getEnvString("CLIENT_URL"),
-		DatabaseDSN:   getEnvString("DATABASE_DSN"),
-		SecretKeyBase: getEnvString("SECRET_KEY_BASE"),
-		JWTSecretKey:  getEnvString("JWT_SECRET_KEY"),
-		LogLevel:      getEnvString("LOG_LEVEL"),
-		SentryDSN:     getEnvString("SENTRY_DSN"),
+		AppEnv:       env,
+		AppName:      getEnvString("APP_NAME"),
+		AppVersion:   getEnvString("APP_VERSION"),
+		AppAddr:      getEnvString("APP_ADDRESS"),
+		ClientURL:    getEnvString("CLIENT_URL"),
+		DatabaseDSN:  getEnvString("DATABASE_DSN"),
+		JWTSecretKey: getEnvString("JWT_SECRET_KEY"),
+		LogLevel:     getEnvString("LOG_LEVEL"),
+		SentryDSN:    getEnvString("SENTRY_DSN"),
 
 		RedisURL: getEnvString("REDIS_URL"),
 
 		TMDBConfig: TMDBConfig{
 			BaseURL:            getEnvString("TMDB_BASE_URL"),
-			BaseImageURL:       getEnvString("TMDB_BASE_IMAGE_URL"),
 			APIReadAccessToken: getEnvString("TMDB_API_READ_ACCESS_TOKEN"),
 			Locale:             getEnvString("TMDB_LOCALE"),
 		},
@@ -120,7 +114,6 @@ func LoadConfig() *Config {
 		IGDB: IGDBConfig{
 			BaseURL:      getEnvString("IGDB_BASE_URL"),
 			TokenURL:     getEnvString("IGDB_TOKEN_URL"),
-			BaseImageURL: getEnvString("IGDB_BASE_IMAGE_URL"),
 			ClientID:     getEnvString("IGDB_CLIENT_ID"),
 			ClientSecret: getEnvString("IGDB_CLIENT_SECRET"),
 		},

@@ -12,7 +12,6 @@ package tmdb
 import (
 	context "context"
 	reflect "reflect"
-	time "time"
 
 	gomock "go.uber.org/mock/gomock"
 )
@@ -204,46 +203,4 @@ func (m *MockClient) SearchTv(ctx context.Context, query string, page uint64) (*
 func (mr *MockClientMockRecorder) SearchTv(ctx, query, page any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTv", reflect.TypeOf((*MockClient)(nil).SearchTv), ctx, query, page)
-}
-
-// WithApiReadAccessToken mocks base method.
-func (m *MockClient) WithApiReadAccessToken(apiReadAccessToken string) Client {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithApiReadAccessToken", apiReadAccessToken)
-	ret0, _ := ret[0].(Client)
-	return ret0
-}
-
-// WithApiReadAccessToken indicates an expected call of WithApiReadAccessToken.
-func (mr *MockClientMockRecorder) WithApiReadAccessToken(apiReadAccessToken any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithApiReadAccessToken", reflect.TypeOf((*MockClient)(nil).WithApiReadAccessToken), apiReadAccessToken)
-}
-
-// WithLocale mocks base method.
-func (m *MockClient) WithLocale(lang string) Client {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithLocale", lang)
-	ret0, _ := ret[0].(Client)
-	return ret0
-}
-
-// WithLocale indicates an expected call of WithLocale.
-func (mr *MockClientMockRecorder) WithLocale(lang any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithLocale", reflect.TypeOf((*MockClient)(nil).WithLocale), lang)
-}
-
-// WithTimeout mocks base method.
-func (m *MockClient) WithTimeout(timeout time.Duration) Client {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithTimeout", timeout)
-	ret0, _ := ret[0].(Client)
-	return ret0
-}
-
-// WithTimeout indicates an expected call of WithTimeout.
-func (mr *MockClientMockRecorder) WithTimeout(timeout any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTimeout", reflect.TypeOf((*MockClient)(nil).WithTimeout), timeout)
 }

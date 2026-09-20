@@ -90,7 +90,7 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
       - name: Notes
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64
         with:
           tag_name: ${{ env.VERSION }}
           name: Release ${{ env.VERSION }}

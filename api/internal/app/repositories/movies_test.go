@@ -201,6 +201,36 @@ func Test_MovieRepository_UpdateByTmdbId(t *testing.T) {
 		assert.True(t, result.Pinned)
 	})
 
+	t.Run("Other user's row on the same title is untouched", func(t *testing.T) {
+		otherID := newProgressTestUser(t, client, "movie.update.other")
+
+		other, err := repository.Create(ctx, &models.Movie{
+			UserId:     otherID,
+			TmdbId:     created.TmdbId,
+			Title:      "Toggle Movie",
+			PosterPath: "/toggle.jpg",
+			Runtime:    100,
+			State:      models.StateTypeWant,
+		})
+		require.NoError(t, err)
+
+		_, err = repository.UpdateByTmdbId(ctx, &models.Movie{
+			TmdbId: created.TmdbId,
+			UserId: userID,
+			State:  models.StateTypeWatched,
+			Pinned: false,
+		})
+		require.NoError(t, err)
+
+		rows, err := repository.FindByFilter(ctx, models.MovieFilter{UserId: otherID, TmdbIds: []uint64{created.TmdbId}})
+		require.NoError(t, err)
+		require.Len(t, rows, 1)
+
+		assert.Equal(t, other.ID, rows[0].ID)
+		assert.Equal(t, models.StateTypeWant, rows[0].State)
+		assert.True(t, rows[0].WatchedAt.IsZero())
+	})
+
 	t.Run("Unknown tmdb id returns error", func(t *testing.T) {
 		result, err := repository.UpdateByTmdbId(ctx, &models.Movie{
 			TmdbId: 999999,

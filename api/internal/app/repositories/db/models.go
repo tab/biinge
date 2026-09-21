@@ -55,6 +55,47 @@ func (ns NullAppearanceType) Value() (driver.Value, error) {
 	return string(ns.AppearanceType), nil
 }
 
+type ProviderType string
+
+const (
+	ProviderTypeJellyfin ProviderType = "jellyfin"
+)
+
+func (e *ProviderType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ProviderType(s)
+	case string:
+		*e = ProviderType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ProviderType: %T", src)
+	}
+	return nil
+}
+
+type NullProviderType struct {
+	ProviderType ProviderType
+	Valid        bool // Valid is true if ProviderType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullProviderType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ProviderType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ProviderType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullProviderType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ProviderType), nil
+}
+
 type StateTypes string
 
 const (
@@ -101,6 +142,50 @@ func (ns NullStateTypes) Value() (driver.Value, error) {
 	return string(ns.StateTypes), nil
 }
 
+type StatusType string
+
+const (
+	StatusTypeMarked     StatusType = "marked"
+	StatusTypeIgnored    StatusType = "ignored"
+	StatusTypeUnresolved StatusType = "unresolved"
+	StatusTypeFailed     StatusType = "failed"
+)
+
+func (e *StatusType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = StatusType(s)
+	case string:
+		*e = StatusType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for StatusType: %T", src)
+	}
+	return nil
+}
+
+type NullStatusType struct {
+	StatusType StatusType
+	Valid      bool // Valid is true if StatusType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStatusType) Scan(value interface{}) error {
+	if value == nil {
+		ns.StatusType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.StatusType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStatusType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.StatusType), nil
+}
+
 type Episode struct {
 	ID         uuid.UUID
 	SeasonID   uuid.UUID
@@ -129,6 +214,15 @@ type Game struct {
 	PlayedAt   pgtype.Timestamptz
 	SyncedAt   pgtype.Timestamptz
 	ReleasedAt pgtype.Timestamptz
+}
+
+type Integration struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Provider  ProviderType
+	TokenHash string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
 
 type Movie struct {
@@ -191,4 +285,14 @@ type User struct {
 	DeletedAt         pgtype.Timestamptz
 	CreatedAt         pgtype.Timestamptz
 	UpdatedAt         pgtype.Timestamptz
+}
+
+type Webhook struct {
+	ID            uuid.UUID
+	IntegrationID uuid.UUID
+	Payload       []byte
+	Status        StatusType
+	Error         pgtype.Text
+	CreatedAt     pgtype.Timestamptz
+	UpdatedAt     pgtype.Timestamptz
 }

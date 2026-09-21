@@ -34,7 +34,7 @@ func NewAuthenticationMiddleware(jwt jwt.Jwt, users services.Users, log *logger.
 
 func (m *authenticationMiddleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, ok := extractBearerToken(r)
+		token, ok := BearerToken(r)
 		if !ok {
 			m.log.Error().Msg("Invalid authorization header")
 			writeJSONError(w, http.StatusUnauthorized, "unauthorized")
@@ -99,7 +99,8 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 	_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: message})
 }
 
-func extractBearerToken(r *http.Request) (string, bool) {
+// BearerToken reads the Authorization bearer value, false when the header is missing or not a bearer scheme
+func BearerToken(r *http.Request) (string, bool) {
 	authHeader := r.Header.Get(Authorization)
 	if authHeader == "" {
 		return "", false

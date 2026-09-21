@@ -12,4 +12,5 @@ var Module = fx.Options(
 	fx.Provide(NewPeopleController),
 	fx.Provide(NewCatalogController),
 	fx.Provide(NewUpNextController),
+	fx.Provide(NewIntegrationsController),
 )

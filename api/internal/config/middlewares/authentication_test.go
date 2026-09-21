@@ -221,3 +221,59 @@ func Test_AuthMiddleware_DoesNotLeakDatastoreErrors(t *testing.T) {
 	assert.NotContains(t, body, "postgres")
 	assert.NotContains(t, body, "host=")
 }
+
+func Test_BearerToken(t *testing.T) {
+	tests := []struct {
+		name     string
+		header   string
+		expected string
+		ok       bool
+	}{
+		{
+			name:     "Bearer token",
+			header:   "Bearer abc.def",
+			expected: "abc.def",
+			ok:       true,
+		},
+		{
+			name:     "Scheme matches case-insensitively",
+			header:   "bearer abc",
+			expected: "abc",
+			ok:       true,
+		},
+		{
+			name:   "Missing header",
+			header: "",
+		},
+		{
+			name:   "Scheme without a token",
+			header: "Bearer ",
+		},
+		{
+			name:   "Scheme without the space",
+			header: "Bearer",
+		},
+		{
+			name:   "Other scheme",
+			header: "Basic abc",
+		},
+		{
+			name:   "Token without a scheme",
+			header: "abc",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			if tt.header != "" {
+				req.Header.Set("Authorization", tt.header)
+			}
+
+			token, ok := BearerToken(req)
+
+			assert.Equal(t, tt.ok, ok)
+			assert.Equal(t, tt.expected, token)
+		})
+	}
+}

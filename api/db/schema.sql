@@ -42,6 +42,15 @@ CREATE TYPE public.appearance_type AS ENUM (
 
 
 --
+-- Name: provider_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.provider_type AS ENUM (
+    'jellyfin'
+);
+
+
+--
 -- Name: state_types; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -52,6 +61,18 @@ CREATE TYPE public.state_types AS ENUM (
     'none',
     'playing',
     'played'
+);
+
+
+--
+-- Name: status_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.status_type AS ENUM (
+    'marked',
+    'ignored',
+    'unresolved',
+    'failed'
 );
 
 
@@ -98,6 +119,20 @@ CREATE TABLE public.games (
     synced_at timestamp with time zone,
     released_at timestamp with time zone,
     CONSTRAINT games_runtime_non_negative CHECK ((runtime >= 0))
+);
+
+
+--
+-- Name: integrations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.integrations (
+    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    user_id uuid NOT NULL,
+    provider public.provider_type NOT NULL,
+    token_hash character(64) NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -201,6 +236,21 @@ CREATE TABLE public.users (
 
 
 --
+-- Name: webhooks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.webhooks (
+    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    integration_id uuid NOT NULL,
+    payload jsonb NOT NULL,
+    status public.status_type NOT NULL,
+    error text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: episodes episodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -214,6 +264,14 @@ ALTER TABLE ONLY public.episodes
 
 ALTER TABLE ONLY public.games
     ADD CONSTRAINT games_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: integrations integrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.integrations
+    ADD CONSTRAINT integrations_pkey PRIMARY KEY (id);
 
 
 --
@@ -246,6 +304,14 @@ ALTER TABLE ONLY public.series
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: webhooks webhooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.webhooks
+    ADD CONSTRAINT webhooks_pkey PRIMARY KEY (id);
 
 
 --
@@ -295,6 +361,20 @@ CREATE INDEX games_user_id_played_at_idx ON public.games USING btree (user_id, p
 --
 
 CREATE INDEX games_user_id_state_pinned_created_idx ON public.games USING btree (user_id, state, pinned DESC, created_at DESC);
+
+
+--
+-- Name: integrations_token_hash_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX integrations_token_hash_unique ON public.integrations USING btree (token_hash);
+
+
+--
+-- Name: integrations_user_id_provider_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX integrations_user_id_provider_unique ON public.integrations USING btree (user_id, provider);
 
 
 --
@@ -368,6 +448,13 @@ CREATE UNIQUE INDEX users_login_key ON public.users USING btree (login) WHERE (d
 
 
 --
+-- Name: webhooks_integration_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX webhooks_integration_id_created_at_idx ON public.webhooks USING btree (integration_id, created_at);
+
+
+--
 -- Name: episodes episodes_season_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -381,6 +468,14 @@ ALTER TABLE ONLY public.episodes
 
 ALTER TABLE ONLY public.games
     ADD CONSTRAINT games_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: integrations integrations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.integrations
+    ADD CONSTRAINT integrations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -405,6 +500,14 @@ ALTER TABLE ONLY public.seasons
 
 ALTER TABLE ONLY public.series
     ADD CONSTRAINT series_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: webhooks webhooks_integration_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.webhooks
+    ADD CONSTRAINT webhooks_integration_id_fkey FOREIGN KEY (integration_id) REFERENCES public.integrations(id) ON DELETE CASCADE;
 
 
 --

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -37,6 +38,8 @@ type Client interface {
 	FetchTrendingMovies(ctx context.Context) (*MovieListResult, error)
 	FetchTrendingTv(ctx context.Context) (*TvListResult, error)
 	FetchTrendingPeople(ctx context.Context) (*PersonListResult, error)
+
+	Find(ctx context.Context, externalId string, source string) (*FindResult, error)
 }
 
 type client struct {
@@ -424,6 +427,15 @@ func (c *client) FetchTrendingPeople(ctx context.Context) (*PersonListResult, er
 	// person/popular is far cleaner than trending/person and includes known_for for filtering
 	endpoint := c.cfg.BaseURL + "/person/popular"
 	return fetchList[PersonListResult](ctx, c, endpoint, nil)
+}
+
+// Find resolves an external id (IMDb, TVDB) to the TMDB movies and episodes carrying it
+func (c *client) Find(ctx context.Context, externalId string, source string) (*FindResult, error) {
+	endpoint := fmt.Sprintf("%s/find/%s", c.cfg.BaseURL, url.PathEscape(externalId))
+
+	return fetchList[FindResult](ctx, c, endpoint, map[string]string{
+		"external_source": source,
+	})
 }
 
 // fetchList GETs a TMDB list endpoint, mapping status codes to the package's sentinel errors

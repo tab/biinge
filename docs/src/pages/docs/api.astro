@@ -6,6 +6,7 @@ import Footer from "../../components/Footer.astro";
 // What the playground points at out of the box: the hosted API in a deployed build,
 // a local server otherwise. Origin only, the endpoint paths carry their own /api/v1
 const apiBaseURL = import.meta.env.PUBLIC_API_BASE_URL || "http://localhost:8080";
+const base = import.meta.env.BASE_URL;
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -69,6 +70,9 @@ const upNextJson = esc(`{
     }
   ]
 }`);
+const jellyfinTokenJson = esc(`{
+  "token": "3f9c2b1e8d7a6c5b4e3f2a1d0c9b8a7f..."
+}`);
 const statsJson = esc(`{
   "period": "all",
   "movies": { "want": 131, "watched": 895, "minutes": 104760 },
@@ -99,6 +103,10 @@ interface Endpoint {
   params?: QueryParam[];
   body?: string;
   resp?: string;
+  // the status the example response carries, when it is not 200
+  status?: number;
+  // a curl example in place of the playground, for a request the page should not send itself
+  curl?: string;
 }
 
 const paging: QueryParam[] = [
@@ -134,6 +142,20 @@ const endpoints: Endpoint[] = [
   "appearance": "dark"
 }` },
   { id: "stats", group: "Account", method: "GET", path: "/api/v1/accounts/stats", desc: "Library counts, watch-time totals and watch activity for the selected period.", note: "week, month and year mean the current calendar week, month and year, not a rolling window. Inside one of them, want counts what was added rather than the whole list, and the watching and playing counts are omitted. Defaults to all.", params: [{ name: "period", hint: "week | month | year | all" }], resp: statsJson },
+
+  { id: "jellyfin-token", group: "Integrations", method: "POST", path: "/api/v1/accounts/integrations/jellyfin", desc: "Create a Jellyfin token for the current user. A second call replaces the first token.", note: "The token is shown once. The API stores only its SHA-256. It can add watched marks to your library, so treat it as a password. The setup guide explains where it goes.", resp: jellyfinTokenJson, status: 201 },
+  { id: "jellyfin-revoke", group: "Integrations", method: "DELETE", path: "/api/v1/accounts/integrations/jellyfin", desc: "Revoke the Jellyfin token. Events carrying it get 401 from then on. Also 204 when there was no token." },
+  { id: "jellyfin-webhook", group: "Integrations", method: "POST", path: "/api/v1/webhooks/jellyfin", desc: "The endpoint the Jellyfin Webhook plugin posts to. It takes the Jellyfin token, not the access token. A Jellyfin token can add watched marks to its owner's library, so this page never sends it. Try the endpoint from your own machine against your own server.", note: "Only Played true with SaveReason PlaybackFinished or TogglePlayed does anything. A movie resolves through Provider_tmdb, an episode through Provider_tvdb or Provider_imdb. A title that is not in the library, or is already watched, is ignored with 204. A title biinge cannot resolve gets 422, a TMDB failure 502 and a database failure 503. Every accepted event is stored with its status.", curl: `curl -X POST <your API base>/api/v1/webhooks/jellyfin \\
+  -H "Authorization: Bearer <Jellyfin token>" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "ItemType": "Episode",
+    "SaveReason": "PlaybackFinished",
+    "Played": true,
+    "Provider_tvdb": "3254641",
+    "Provider_imdb": "tt1480055",
+    "Name": "Winter Is Coming"
+  }'` },
 
   { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | watched" }, ...paging], resp: movieListJson },
   { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library. id is the TMDB movie id.", body: `{
@@ -324,9 +346,12 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
             <p>
               Registration, login and token refresh are public. Every other
               <code>/api/v1</code> endpoint needs an
-              <code>Authorization: Bearer</code> token — run
+              <code>Authorization: Bearer</code> access token. Run
               <a href="#login">Login</a> below and the playground copies the
-              access token into the field here.
+              access token into the field here. The one exception is the
+              <a href="#jellyfin-webhook">Jellyfin webhook</a>. It takes the
+              Jellyfin token from the <a href={`${base}docs/jellyfin/`}>setup guide</a>
+              in the same header.
             </p>
             <p class="conn-note">
               Requests go straight from your browser, so your server's CORS
@@ -343,7 +368,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
             </div>
             <div class="pg-row">
               <label class="pg-label">Token</label>
-              <input type="text" id="pg-token" value="" placeholder="access_token" class="pg-input" />
+              <input type="password" id="pg-token" value="" placeholder="access_token" autocomplete="off" class="pg-input" />
             </div>
           </div>
         </div>
@@ -367,12 +392,18 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
                   {ep.note && <p>{ep.note}</p>}
                   {ep.resp && (
                     <div class="resp-block">
-                      <div class="resp-label">Example response <span class="ok">200</span></div>
+                      <div class="resp-label">Example response <span class="ok">{ep.status ?? 200}</span></div>
                       <pre><code set:html={ep.resp} /></pre>
                     </div>
                   )}
                 </div>
                 <div class="col-play">
+                  {ep.curl ? (
+                    <div class="resp-block">
+                      <div class="resp-label">curl</div>
+                      <pre><code>{ep.curl}</code></pre>
+                    </div>
+                  ) : (
                   <div class="pg" data-method={ep.method} data-path={ep.path}>
                     {pathParams.map((p) => (
                       <div class="pg-row">
@@ -401,6 +432,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
                       <pre><code class="pg-out"></code></pre>
                     </div>
                   </div>
+                  )}
                 </div>
               </div>
             </section>
@@ -429,9 +461,10 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
                 <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid or expired access token, or wrong login credentials</td></tr>
                 <tr><td><code>409</code></td><td>Conflict</td><td>Registering a login or email that is already taken</td></tr>
                 <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>The request was well formed but the work failed — including a title the upstream provider doesn't have</td></tr>
-                <tr><td><code>429</code></td><td>Too Many Requests</td><td>More than 5 requests a minute per IP to the public <code>/users</code> routes, or 120 a minute per user everywhere else</td></tr>
+                <tr><td><code>429</code></td><td>Too Many Requests</td><td>More than 5 requests a minute per IP to the public <code>/users</code> routes, 120 a minute per IP to the webhook, or 120 a minute per user everywhere else</td></tr>
                 <tr><td><code>500</code></td><td>Internal Server Error</td><td>Registration failed for a reason the API won't detail</td></tr>
-                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable, from <code>/ready</code> or from the auth middleware</td></tr>
+                <tr><td><code>502</code></td><td>Bad Gateway</td><td>TMDB failed while a Jellyfin event was being resolved</td></tr>
+                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable, from <code>/ready</code>, from the auth middleware or from the Jellyfin webhook</td></tr>
               </tbody>
             </table>
             <p class="errors-note">

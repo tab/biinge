@@ -289,7 +289,6 @@ func Test_Progress_LeavesTheCacheAloneOnFailure(t *testing.T) {
 	statsCache := NewMockStatsCache(ctrl)
 
 	repository.EXPECT().MarkEpisodeWatched(ctx, userId, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
-
 	service := NewProgress(repository, statsCache, newTestLogger())
 
 	_, err := service.MarkEpisode(ctx, userId, models.SeriesInput{}, models.SeasonInput{}, models.EpisodeInput{})

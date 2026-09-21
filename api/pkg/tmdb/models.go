@@ -380,3 +380,22 @@ type PersonListResult struct {
 	TotalPages   int              `json:"total_pages"`
 	TotalResults int              `json:"total_results"`
 }
+
+// --- Find by external id ---
+
+// External sources accepted by /find/{id}
+const (
+	FindSourceImdb = "imdb_id"
+	FindSourceTvdb = "tvdb_id"
+)
+
+// FindEpisode is an episode result of /find, which also names the show it belongs to
+type FindEpisode struct {
+	Episode
+	ShowId uint64 `json:"show_id"`
+}
+
+// FindResult is the /find response, reduced to the result kind the API resolves
+type FindResult struct {
+	TvEpisodeResults []FindEpisode `json:"tv_episode_results"`
+}

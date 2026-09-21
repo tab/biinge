@@ -12,6 +12,8 @@ sql:
       - db/sqlc/episodes.sql
       - db/sqlc/stats.sql
       - db/sqlc/users.sql
+      - db/sqlc/integrations.sql
+      - db/sqlc/webhooks.sql
     gen:
       go:
         package: db

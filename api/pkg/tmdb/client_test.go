@@ -860,3 +860,121 @@ func Test_Client_FetchTrendingPeople(t *testing.T) {
 		TotalResults: 1,
 	}, result)
 }
+
+func Test_Client_Find(t *testing.T) {
+	tests := []struct {
+		name           string
+		statusCode     int
+		body           string
+		transportError bool
+		expectedErr    error
+		jsonErr        bool
+		expected       *FindResult
+	}{
+		{
+			name:       "Episode",
+			statusCode: http.StatusOK,
+			body:       `{"movie_results":[],"person_results":[],"tv_results":[],"tv_episode_results":[{"id":63056,"name":"Winter Is Coming","air_date":"2011-04-17","episode_number":1,"season_number":1,"show_id":1399,"still_path":"/w.jpg","runtime":62,"vote_average":8.1,"vote_count":10}],"tv_season_results":[]}`,
+			expected: &FindResult{
+				TvEpisodeResults: []FindEpisode{
+					{
+						Episode: Episode{ID: 63056, Name: "Winter Is Coming", AirDate: "2011-04-17", EpisodeNumber: 1, SeasonNumber: 1, StillPath: "/w.jpg", Runtime: 62, VoteAverage: 8.1, VoteCount: 10},
+						ShowId:  1399,
+					},
+				},
+			},
+		},
+		{
+			name:       "Empty",
+			statusCode: http.StatusOK,
+			body:       `{"movie_results":[],"person_results":[],"tv_results":[],"tv_episode_results":[],"tv_season_results":[]}`,
+			expected: &FindResult{
+				TvEpisodeResults: []FindEpisode{},
+			},
+		},
+		{
+			name:        "Forbidden",
+			statusCode:  http.StatusForbidden,
+			expectedErr: ErrAccessForbidden,
+		},
+		{
+			name:        "NotFound",
+			statusCode:  http.StatusNotFound,
+			expectedErr: ErrNotFound,
+		},
+		{
+			name:        "UnexpectedStatus",
+			statusCode:  http.StatusInternalServerError,
+			expectedErr: ErrUnexpectedResponse,
+		},
+		{
+			name:       "MalformedJSON",
+			statusCode: http.StatusOK,
+			body:       `{"movie_results":`,
+			jsonErr:    true,
+		},
+		{
+			name:           "TransportError",
+			transportError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var baseURL string
+
+			if tt.transportError {
+				baseURL = closedServerURL(t)
+			} else {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+					w.WriteHeader(tt.statusCode)
+					_, _ = w.Write([]byte(tt.body))
+				}))
+				defer server.Close()
+
+				baseURL = server.URL
+			}
+
+			c := newTestClient(t, baseURL)
+
+			result, err := c.Find(context.Background(), "tt1480055", FindSourceImdb)
+
+			switch {
+			case tt.expectedErr != nil:
+				require.ErrorIs(t, err, tt.expectedErr)
+				assert.Nil(t, result)
+			case tt.jsonErr || tt.transportError:
+				require.Error(t, err)
+				assert.Nil(t, result)
+			default:
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
+			}
+		})
+	}
+}
+
+func Test_Client_Find_RequestShape(t *testing.T) {
+	var capturedPath string
+
+	var capturedQuery = map[string]string{}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedPath = r.URL.Path
+		capturedQuery["external_source"] = r.URL.Query().Get("external_source")
+		capturedQuery["language"] = r.URL.Query().Get("language")
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+
+	c := newTestClient(t, server.URL)
+
+	_, err := c.Find(context.Background(), "123456", FindSourceTvdb)
+
+	require.NoError(t, err)
+	assert.Equal(t, "/find/123456", capturedPath)
+	assert.Equal(t, "tvdb_id", capturedQuery["external_source"])
+	assert.Equal(t, "en-US", capturedQuery["language"])
+}

@@ -29,6 +29,7 @@ func NewRouter(
 	people controllers.PeopleController,
 	catalog controllers.CatalogController,
 	upNext controllers.UpNextController,
+	integrations controllers.IntegrationsController,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -72,6 +73,13 @@ func NewRouter(
 			r.Post("/tokens", sessions.HandleRefresh)
 		})
 
+		// Media servers authenticate with their own token, checked inside the handler after the IP limit
+		r.Route("/webhooks", func(r chi.Router) {
+			r.Use(httprate.LimitBy(120, time.Minute, keyByIP))
+
+			r.Post("/jellyfin", integrations.HandleJellyfinWebhook)
+		})
+
 		r.Group(func(r chi.Router) {
 			r.Use(authentication.Authenticate)
 			r.Use(httprate.LimitBy(120, time.Minute, keyByUserID))
@@ -80,6 +88,9 @@ func NewRouter(
 				r.Get("/me", accounts.Me)
 				r.Get("/stats", accounts.HandleStats)
 				r.Patch("/", accounts.HandleUpdate)
+
+				r.Post("/integrations/jellyfin", integrations.HandleCreateToken)
+				r.Delete("/integrations/jellyfin", integrations.HandleRevoke)
 			})
 
 			r.Route("/movies", func(r chi.Router) {

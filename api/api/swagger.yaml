@@ -303,6 +303,56 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/accounts/integrations/jellyfin:
+    post:
+      summary: "Create a Jellyfin token"
+      description: "Links Jellyfin to the current user with a fresh token, replacing any earlier one. The plaintext is returned once and never again; only its SHA-256 is stored"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntegrationTokenSerializer"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    delete:
+      summary: "Revoke the Jellyfin token"
+      description: "Removes the Jellyfin link. Events carrying the old token get 401 from then on. Also 204 when there was no link"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: "No Content"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
   /api/v1/movies:
     get:
       summary: "Movies list"
@@ -1957,11 +2007,69 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/webhooks/jellyfin:
+    post:
+      summary: "Jellyfin webhook"
+      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin and marks the movie or episode watched when the token's owner tracks it and has not watched it yet. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Events with Played false or a SaveReason other than PlaybackFinished or TogglePlayed are dropped with 204 before any work. Every other event is stored with its status. Limited to 120 requests a minute per IP, checked before the token"
+      tags:
+        - integrations
+      security:
+        - JellyfinToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JellyfinEvent"
+      responses:
+        "204":
+          description: "No Content: a mark was written, or the event was ignored"
+        "400":
+          description: "Bad Request: the body is not valid JSON, is JSON but not an object, has a listed key with the wrong JSON type, or is over 1 MiB"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized: missing, unknown or revoked token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity: a movie without Provider_tmdb, an episode without Provider_tvdb and Provider_imdb, or an id TMDB does not know"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "429":
+          description: "Too Many Requests"
+          content:
+            text/plain:
+              schema:
+                type: string
+        "502":
+          description: "Bad Gateway: TMDB failed for a reason other than not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "503":
+          description: "Service Unavailable: the token lookup, the library write or the event insert failed in the database"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
+    JellyfinToken:
+      type: http
+      scheme: bearer
+      description: "The 64-character hex token from POST /api/v1/accounts/integrations/jellyfin, sent as Authorization: Bearer by the Jellyfin Webhook plugin"
 
   schemas:
     HealthSerializer:
@@ -3328,3 +3436,45 @@ components:
       required:
         - data
         - meta
+
+    IntegrationTokenSerializer:
+      type: object
+      properties:
+        token:
+          type: string
+          description: "Jellyfin token, 32 random bytes as hex, shown once"
+          example: "3f9c2b1e8d7a6c5b4e3f2a1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b"
+      required:
+        - token
+
+    JellyfinEvent:
+      type: object
+      description: "The JSON the Webhook plugin sends with Send All Properties on. Keys match case-insensitively and every key not listed here is ignored, but the whole body is stored"
+      properties:
+        ItemType:
+          type: string
+          description: "Movie or Episode; anything else is ignored with 204"
+          example: "Episode"
+        SaveReason:
+          type: string
+          description: "Must be PlaybackFinished or TogglePlayed"
+          example: "PlaybackFinished"
+        Played:
+          type: boolean
+          description: "Must be true"
+          example: true
+        Provider_tmdb:
+          type: string
+          description: "Movie TMDB id"
+          example: "603"
+        Provider_tvdb:
+          type: string
+          description: "Episode TVDB id, tried first for episodes"
+          example: "3254641"
+        Provider_imdb:
+          type: string
+          description: "Episode IMDb id, used when the TVDB id is missing"
+          example: "tt1480055"
+        Name:
+          type: string
+          description: "Logging only"

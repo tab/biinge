@@ -160,6 +160,21 @@ func (mr *MockClientMockRecorder) FetchTvSeasonDetails(ctx, id, seasonNumber any
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchTvSeasonDetails", reflect.TypeOf((*MockClient)(nil).FetchTvSeasonDetails), ctx, id, seasonNumber)
 }
 
+// Find mocks base method.
+func (m *MockClient) Find(ctx context.Context, externalId, source string) (*FindResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Find", ctx, externalId, source)
+	ret0, _ := ret[0].(*FindResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Find indicates an expected call of Find.
+func (mr *MockClientMockRecorder) Find(ctx, externalId, source any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockClient)(nil).Find), ctx, externalId, source)
+}
+
 // SearchMovies mocks base method.
 func (m *MockClient) SearchMovies(ctx context.Context, query string, page uint64) (*MovieListResult, error) {
 	m.ctrl.T.Helper()

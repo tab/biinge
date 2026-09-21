@@ -1,0 +1,237 @@
+/* The setup guides (self-hosting, Jellyfin) share one layout: lead, prerequisites box, numbered steps, config sections and tables */
+.page {
+  padding: 80px 0 120px;
+}
+
+.page-head {
+  max-width: 880px;
+  margin-bottom: 64px;
+}
+
+.prereq {
+  max-width: 900px;
+  padding: 30px 34px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  margin-bottom: 72px;
+}
+
+.prereq h2 {
+  font-family: var(--display);
+  font-variation-settings: "wdth" 100, "wght" 610;
+  font-weight: 610;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.prereq ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prereq li {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  padding-left: 20px;
+  position: relative;
+}
+
+.prereq li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.prereq strong,
+.step strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.steps {
+  list-style: none;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+}
+
+.step h3 {
+  font-family: var(--display);
+  font-variation-settings: "wdth" 100, "wght" 610;
+  font-weight: 610;
+  font-size: 1.45rem;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+.step p {
+  max-width: 76ch;
+  font-size: 1.03rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.step .note {
+  margin-top: 14px;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+/* inline code in prose only; the CodeBlock component styles its own <pre><code> */
+.step p code,
+.config p code,
+.config li code,
+.config td code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  color: var(--text);
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+.config {
+  max-width: 900px;
+  margin-top: 96px;
+}
+
+.config h2 {
+  font-family: var(--display);
+  font-variation-settings: "wdth" 100, "wght" 620;
+  font-weight: 620;
+  font-size: 1.8rem;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.config-lead {
+  max-width: 76ch;
+  font-size: 1.03rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.prod-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prod-list li {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  padding-left: 18px;
+  position: relative;
+}
+
+.prod-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+th {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 550;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+td {
+  color: var(--text-muted);
+}
+
+td code {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 48px 0 64px;
+  }
+
+  .prereq {
+    padding: 24px;
+    margin-bottom: 56px;
+  }
+
+  .steps {
+    gap: 44px;
+  }
+
+  .config {
+    margin-top: 64px;
+  }
+
+  td code {
+    white-space: normal;
+  }
+}

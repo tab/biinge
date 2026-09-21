@@ -1,0 +1,166 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import CodeBlock from "../../components/CodeBlock.astro";
+import "../../styles/guide.css";
+
+// The webhook URL of the API this site documents. Origin only, the route carries its own /api/v1
+const apiBaseURL = import.meta.env.PUBLIC_API_BASE_URL || "http://localhost:8080";
+const webhookURL = `${apiBaseURL}/api/v1/webhooks/jellyfin`;
+const base = import.meta.env.BASE_URL;
+
+const destination = `Webhook Name:       biinge
+Webhook Url:        ${webhookURL}
+Notification Type:  User Data Saved
+User Filter:        <your Jellyfin user>
+Item Type:          Movies, Episodes
+Send All Properties: on`;
+
+const header = `Key:    Authorization
+Value:  Bearer <the token from the app>`;
+
+const rules = [
+  { event: "A movie you want to watch or are watching", result: "Moves to watched" },
+  { event: "An episode of a show you want to watch or are watching", result: "Marks the episode. The show becomes watching, or watched once every season is done" },
+  { event: "A movie or an episode you have already watched", result: "Nothing changes" },
+  { event: "An episode of a show you have already watched", result: "Nothing changes" },
+  { event: "A title that is not in your library", result: "Nothing changes" },
+];
+---
+
+<Layout
+  title="Jellyfin sync - biinge"
+  description="Let Jellyfin mark movies and episodes watched in biinge the moment you finish them."
+>
+  <Header />
+  <main class="page">
+    <div class="container">
+      <div class="page-head">
+        <p class="eyebrow-label">Integrations</p>
+        <h1>Sync watched marks from Jellyfin.</h1>
+        <p class="lead">
+          Finish a movie or an episode in Jellyfin and biinge marks it watched.
+          Sync runs one way, from Jellyfin to biinge. It only touches titles that are already in your library.
+          Setup takes a token from the app and one webhook destination on the Jellyfin server.
+        </p>
+      </div>
+
+      <div class="prereq">
+        <h2>Before you start</h2>
+        <ul>
+          <li><strong>Jellyfin 12</strong> with the Webhook plugin from the Jellyfin plugin catalog</li>
+          <li><strong>Admin rights</strong> on that Jellyfin server. Only an admin can add a webhook destination</li>
+          <li>
+            Movies and episodes scraped by Jellyfin's built-in TMDB providers. That is where the ids come from.
+            A library scraped only from local NFO files may lack them
+          </li>
+          <li>A biinge server the Jellyfin server can reach over HTTPS</li>
+        </ul>
+      </div>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="step-head"><span class="num">1</span><h3>Generate a token in the app</h3></div>
+          <p>
+            Open <strong>Profile</strong>, then <strong>Jellyfin</strong>, and tap <strong>Generate token</strong>.
+            The app shows the token once, with a copy button. Copy it now. It is not shown again.
+          </p>
+          <p class="note">
+            This is a Jellyfin token, not the app's access or refresh token. It can add watched marks to your library,
+            so treat it as a password. Generate a new one to replace it, or revoke it from the same screen.
+          </p>
+        </li>
+
+        <li class="step">
+          <div class="step-head"><span class="num">2</span><h3>Add a webhook destination in Jellyfin</h3></div>
+          <p>
+            In the Jellyfin dashboard open <strong>Plugins</strong>, then <strong>Webhook</strong>, and add a
+            <strong>Generic Destination</strong> with these values.
+          </p>
+          <CodeBlock code={destination} label="destination" />
+          <p class="note">
+            Set the <strong>User Filter</strong> to your own Jellyfin user. Every event that carries the token lands on
+            the biinge account that owns it. Without the filter, plays by other people on the server would too.
+          </p>
+        </li>
+
+        <li class="step">
+          <div class="step-head"><span class="num">3</span><h3>Add the request header</h3></div>
+          <p>
+            In the same destination, add one <strong>Request Header</strong>. Paste the token from step 1 after
+            <code>Bearer</code>, with a single space between them.
+          </p>
+          <CodeBlock code={header} label="header" />
+          <p class="note">
+            The token is the only thing biinge checks. Anyone who has it can add watched marks to your library until
+            you revoke it.
+          </p>
+        </li>
+
+        <li class="step">
+          <div class="step-head"><span class="num">4</span><h3>Watch something</h3></div>
+          <p>
+            Save the destination, then finish a movie or an episode in Jellyfin. Marking it played from the Jellyfin
+            UI works too. The mark shows up in biinge on the next refresh.
+          </p>
+        </li>
+      </ol>
+
+      <div class="config">
+        <h2>What a play does</h2>
+        <p class="config-lead">
+          Jellyfin only adds marks. It never removes one, never adds a title, and never changes a watched title to
+          anything else. Unmarking stays in the app.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>You finish</th><th>In biinge</th></tr>
+            </thead>
+            <tbody>
+              {rules.map((row) => (
+                <tr>
+                  <td>{row.event}</td>
+                  <td>{row.result}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="config">
+        <h2>When a mark does not show up</h2>
+        <ul class="prod-list">
+          <li>
+            Check the Webhook plugin log on the Jellyfin server. It records every delivery and the status the API
+            answered with
+          </li>
+          <li>
+            <code>401</code> means the token is missing, wrong or revoked. Generate a new one and update the header
+          </li>
+          <li>
+            <code>422</code> means biinge could not resolve the title. The movie has no TMDB id, the episode has no
+            TVDB or IMDb id, or TMDB does not know that id. Refresh the item's metadata in Jellyfin
+          </li>
+          <li>
+            <code>502</code> means TMDB did not answer. The plugin does not retry, so mark the title in the app
+          </li>
+          <li>
+            <code>503</code> means biinge's database was unreachable. The plugin does not retry, so mark the title in
+            the app
+          </li>
+          <li>
+            A movie or a show that is not in your library is ignored on purpose. Add it in the app first
+          </li>
+          <li>
+            Every accepted event is kept on the server with what biinge did about it. The
+            <a href={`${base}docs/api/#jellyfin-webhook`}>API reference</a> lists the fields the endpoint reads
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>

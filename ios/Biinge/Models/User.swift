@@ -12,6 +12,11 @@ struct TokenPair: Decodable, Sendable {
     }
 }
 
+/// A freshly generated Jellyfin token; the API shows it once and stores only its hash
+struct JellyfinToken: Decodable, Sendable {
+    let token: String
+}
+
 struct User: Decodable, Sendable, Identifiable, Equatable {
     let id: UUID
     let login: String

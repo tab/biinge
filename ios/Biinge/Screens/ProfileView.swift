@@ -30,6 +30,11 @@ struct ProfileView: View {
                     } label: {
                         Label("Appearance", systemImage: "paintbrush")
                     }
+                    Button {
+                        sheet = .jellyfin
+                    } label: {
+                        Label("Jellyfin", systemImage: "play.tv")
+                    }
                 }
                 .foregroundStyle(.primary)
 
@@ -75,6 +80,9 @@ struct ProfileView: View {
                 if ProcessInfo.processInfo.environment["DEBUG_STATISTICS"] == "1" {
                     sheet = .statistics
                 }
+                if ProcessInfo.processInfo.environment["DEBUG_JELLYFIN"] == "1" {
+                    sheet = .jellyfin
+                }
                 #endif
             }
             .sheet(item: $sheet) { route in
@@ -84,6 +92,8 @@ struct ProfileView: View {
                         StatisticsView()
                     case .appearance:
                         AppearanceView(authManager: authManager)
+                    case .jellyfin:
+                        JellyfinView()
                     case .info(let item):
                         InfoView(title: item.title, sections: item.sections)
                     }
@@ -138,12 +148,14 @@ struct ProfileView: View {
 private enum ProfileSheet: Identifiable {
     case statistics
     case appearance
+    case jellyfin
     case info(InfoItem)
 
     var id: String {
         switch self {
         case .statistics: return "statistics"
         case .appearance: return "appearance"
+        case .jellyfin: return "jellyfin"
         case .info(let item): return item.id
         }
     }

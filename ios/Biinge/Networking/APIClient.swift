@@ -48,6 +48,16 @@ actor APIClient {
         try await send("PATCH", "/accounts/", body: body)
     }
 
+    // MARK: - Jellyfin
+
+    func createJellyfinToken() async throws -> JellyfinToken {
+        try await post("/accounts/integrations/jellyfin")
+    }
+
+    func revokeJellyfin() async throws {
+        try await delete("/accounts/integrations/jellyfin")
+    }
+
     // MARK: - Search & trending
 
     func searchMovies(query: String, page: Int = 1) async throws -> Paginated<SearchMovie> {
@@ -229,6 +239,12 @@ actor APIClient {
     ) async throws -> Response {
         let request = makeRequest(method, path, query: [], body: try encoder.encode(body))
         let data = try await perform(request, authenticated: authenticated, retried: false)
+        return try decode(data)
+    }
+
+    func post<Response: Decodable & Sendable>(_ path: String) async throws -> Response {
+        let request = makeRequest("POST", path, query: [], body: nil)
+        let data = try await perform(request, authenticated: true, retried: false)
         return try decode(data)
     }
 

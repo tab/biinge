@@ -109,7 +109,7 @@ func (c *seriesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}
@@ -192,7 +192,7 @@ func (c *seriesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}
@@ -248,7 +248,7 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}
@@ -278,7 +278,7 @@ func (c *seriesController) HandleSeasonDetails(w http.ResponseWriter, r *http.Re
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}
@@ -317,7 +317,7 @@ func (c *seriesController) HandleEpisodeDetails(w http.ResponseWriter, r *http.R
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}

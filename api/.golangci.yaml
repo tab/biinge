@@ -111,6 +111,7 @@ linters:
           - dupl
           - errcheck
           - forcetypeassert
+          - goconst
           - gosec
           - nilnil
         path: _test\.go

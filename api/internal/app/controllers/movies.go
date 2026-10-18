@@ -95,7 +95,7 @@ func (c *moviesController) HandleDetails(w http.ResponseWriter, r *http.Request)
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}
@@ -175,7 +175,7 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}
@@ -230,7 +230,7 @@ func (c *moviesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: "invalid tmdb id"})
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: errors.ErrInvalidTmdbId.Error()})
 
 		return
 	}

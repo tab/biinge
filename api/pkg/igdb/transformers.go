@@ -154,6 +154,8 @@ func genreName(name string) string {
 }
 
 // platformLabels shortens the IGDB platform names a detail screen renders
+//
+//nolint:goconst // a lookup table reads best with every label spelled out
 var platformLabels = map[string]string{
 	// PlayStation keeps its generation, since that is the one the user picks a game to play on;
 	// every other family collapses to the family name, where the exact model changes nothing about

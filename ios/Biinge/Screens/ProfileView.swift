@@ -31,9 +31,9 @@ struct ProfileView: View {
                         Label("Appearance", systemImage: "paintbrush")
                     }
                     Button {
-                        sheet = .jellyfin
+                        sheet = .integrations
                     } label: {
-                        Label("Jellyfin", systemImage: "play.tv")
+                        Label("Integrations", systemImage: "puzzlepiece.extension")
                     }
                 }
                 .foregroundStyle(.primary)
@@ -80,8 +80,11 @@ struct ProfileView: View {
                 if ProcessInfo.processInfo.environment["DEBUG_STATISTICS"] == "1" {
                     sheet = .statistics
                 }
+                if ProcessInfo.processInfo.environment["DEBUG_INTEGRATIONS"] == "1" {
+                    sheet = .integrations
+                }
                 if ProcessInfo.processInfo.environment["DEBUG_JELLYFIN"] == "1" {
-                    sheet = .jellyfin
+                    sheet = .integrations
                 }
                 #endif
             }
@@ -92,8 +95,8 @@ struct ProfileView: View {
                         StatisticsView()
                     case .appearance:
                         AppearanceView(authManager: authManager)
-                    case .jellyfin:
-                        JellyfinView()
+                    case .integrations:
+                        IntegrationsView()
                     case .info(let item):
                         InfoView(title: item.title, sections: item.sections)
                     }
@@ -148,22 +151,23 @@ struct ProfileView: View {
 private enum ProfileSheet: Identifiable {
     case statistics
     case appearance
-    case jellyfin
+    case integrations
     case info(InfoItem)
 
     var id: String {
         switch self {
         case .statistics: return "statistics"
         case .appearance: return "appearance"
-        case .jellyfin: return "jellyfin"
+        case .integrations: return "integrations"
         case .info(let item): return item.id
         }
     }
 }
 
-/// Shared chrome for Profile modals: dark backdrop, translucent close button, rounded-top card
+/// Shared chrome for Profile modals: dark backdrop, translucent close button, rounded-top card (a pushed screen gets a back chevron instead)
 struct ModalScaffold<Content: View>: View {
     let title: String
+    var pushed = false
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -184,7 +188,7 @@ struct ModalScaffold<Content: View>: View {
             }
             .scrollIndicators(.hidden)
 
-            CloseButton()
+            CloseButton(back: pushed)
         }
     }
 }
@@ -578,6 +582,53 @@ struct AppearanceView: View {
                         Divider()
                     }
                 }
+            }
+        }
+    }
+}
+
+/// Profile → Integrations: the services that can feed the library, each pushed inside this sheet
+struct IntegrationsView: View {
+    @State private var showsJellyfin = Self.initialJellyfin
+
+    private static var initialJellyfin: Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["DEBUG_JELLYFIN"] == "1"
+        #else
+        return false
+        #endif
+    }
+
+    var body: some View {
+        NavigationStack {
+            ModalScaffold(title: "Integrations") {
+                Button {
+                    showsJellyfin = true
+                } label: {
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Jellyfin")
+                                .font(.biingeCallout)
+                                .foregroundStyle(.primary)
+                            Text("Sync watched marks from your Jellyfin server")
+                                .font(.biingeFootnote)
+                                .foregroundStyle(Color.biingeGraniteGray)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.biingeFootnote)
+                            .foregroundStyle(Color.biingeGraniteGray)
+                    }
+                    .padding(.vertical, 14)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.pressable)
+            }
+            // the bar stays hidden on both screens: toggling it makes the back button jump when the push lands
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(isPresented: $showsJellyfin) {
+                JellyfinView()
+                    .toolbar(.hidden, for: .navigationBar)
             }
         }
     }

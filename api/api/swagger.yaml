@@ -2010,7 +2010,7 @@ paths:
   /api/v1/webhooks/jellyfin:
     post:
       summary: "Jellyfin webhook"
-      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin and marks the movie or episode watched when the token's owner tracks it and has not watched it yet. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Events with Played false or a SaveReason other than PlaybackFinished or TogglePlayed are dropped with 204 before any work. Every other event is stored with its status. Limited to 120 requests a minute per IP, checked before the token"
+      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin. A played event marks the movie or episode watched when the token's owner tracks it and has not watched it yet. An unplayed toggle takes the mark away again: the movie goes back to want, the episode is unmarked through the progress cascade. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Only Played true with SaveReason PlaybackFinished or TogglePlayed, and Played false with SaveReason TogglePlayed, do anything; every other save is dropped with 204 before any work. Every other event is stored with its status. Limited to 120 requests a minute per IP, checked before the token"
       tags:
         - integrations
       security:
@@ -2023,7 +2023,7 @@ paths:
               $ref: "#/components/schemas/JellyfinEvent"
       responses:
         "204":
-          description: "No Content: a mark was written, or the event was ignored"
+          description: "No Content: a mark was written or taken away, or the event was ignored"
         "400":
           description: "Bad Request: the body is not valid JSON, is JSON but not an object, has a listed key with the wrong JSON type, or is over 1 MiB"
           content:

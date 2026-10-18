@@ -149,6 +149,7 @@ const (
 	StatusTypeIgnored    StatusType = "ignored"
 	StatusTypeUnresolved StatusType = "unresolved"
 	StatusTypeFailed     StatusType = "failed"
+	StatusTypeUnmarked   StatusType = "unmarked"
 )
 
 func (e *StatusType) Scan(src interface{}) error {

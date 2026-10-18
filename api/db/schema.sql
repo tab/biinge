@@ -72,7 +72,8 @@ CREATE TYPE public.status_type AS ENUM (
     'marked',
     'ignored',
     'unresolved',
-    'failed'
+    'failed',
+    'unmarked'
 );
 
 

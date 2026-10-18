@@ -3,7 +3,8 @@
 ## Goal
 
 When a person marks a movie or an episode watched in Jellyfin, biinge marks it watched.
-Only titles already in the library are affected. A title that is already watched is left alone.
+When a person marks one unplayed in Jellyfin, biinge takes the watched mark away.
+Only titles already in the library are affected. A title that is already watched is left alone by a watched event.
 
 ## Context
 
@@ -21,16 +22,17 @@ The target version is Jellyfin 12.
 - A Jellyfin token per user. The user creates it, sees it once and can revoke it
 - A `webhooks` table. Every event that passes the filter is stored with what biinge did about it
 - A webhook endpoint for the Jellyfin Webhook plugin. It accepts `UserDataSaved` events for movies and episodes
-- Two writes. A movie marked watched in Jellyfin becomes watched in biinge. An episode marked watched in Jellyfin becomes
-  watched in biinge. Both only for titles already in the library
-- A Profile screen in the iOS app for the token and the setup steps
+- Four writes. A movie marked watched in Jellyfin becomes watched in biinge. An episode marked watched in Jellyfin becomes
+  watched in biinge. A movie or an episode marked unplayed in Jellyfin loses its watched mark in biinge. All only for titles
+  already in the library
+- A Jellyfin screen under Profile → Integrations in the iOS app for the token and the setup steps
 - A setup guide on the docs site. The API reference and `swagger.yaml` get the new routes
 
 ### Out
 
 - Pushing biinge marks to Jellyfin. Sync is one way
 - Polling the Jellyfin API, or storing any Jellyfin credential in biinge
-- Removing a watched mark because of a Jellyfin event (unmark, unplayed, deleted item)
+- Removing a watched mark because a Jellyfin item was deleted
 - Rewatch tracking. A title that is already watched keeps its `watched_at`
 - Adding a title that is not in the library
 - Backfilling plays from before the token was created
@@ -44,26 +46,32 @@ The target version is Jellyfin 12.
 
 ### Main flow
 
-1. In the app, the user opens Profile → Jellyfin and taps Generate token. The app shows the token once, with a copy button,
+1. In the app, the user opens Profile → Integrations → Jellyfin and taps Generate token. The app shows the token once, with a copy button,
    and lists the setup steps with the webhook URL for this API
 2. A Jellyfin admin adds a Generic Destination in the Webhook plugin. Webhook Url: `<API base>/api/v1/webhooks/jellyfin`.
    Request header: `Authorization: Bearer <token>`. Notification Type: "User Data Saved". Item Type: "Movies" and "Episodes".
    User Filter: that person's Jellyfin user. "Send All Properties": ticked
-3. The person finishes a movie or an episode in Jellyfin, or marks it played there. The plugin POSTs the event
+3. The person finishes a movie or an episode in Jellyfin, or marks it played or unplayed there. The plugin POSTs the event
 4. The API finds the user by the token. It keeps only events with `Played` true and `SaveReason` `PlaybackFinished` or
-   `TogglePlayed`. It resolves the title on TMDB, applies the rules below and replies `204`
+   `TogglePlayed`, and events with `Played` false and `SaveReason` `TogglePlayed`. It resolves the title on TMDB, applies the
+   rules below and replies `204`
 5. The app shows the change on its next refresh
 
 ### Rules
 
-Jellyfin only adds marks to titles the person already tracks. It never adds a title and never changes a `watched` state.
-Every write goes through the `Movies` and `Progress` services, which invalidate the user's stats cache. An ignored event
-invalidates nothing.
+Jellyfin only changes the watched mark of titles the person already tracks. It never adds a title. A watched event never
+changes a `watched` state, and an unplayed toggle only touches a title that is watched. Every write goes through the `Movies`
+and `Progress` services, which invalidate the user's stats cache. An ignored event invalidates nothing.
 
 Movie events:
 
 - Not in the library, or already `watched`: no write
 - In `want` or `watching`: move to `watched`. Set `watched_at` to now. Keep `pinned`
+
+Movie events with `Played` false:
+
+- Not in the library, or not `watched`: no write
+- In `watched`: move to `want`. Keep `pinned`
 
 Episode events, checked against the show's current progress:
 
@@ -73,6 +81,13 @@ Episode events, checked against the show's current progress:
 - Show `want` or `watching`: mark the episode through the existing progress cascade. The show becomes `watching`, or
   `watched` when every season is watched and the TMDB status is not `Returning Series`. `tracked_state` does not change
 
+Episode events with `Played` false, checked against the show's current progress:
+
+- Show not in the library: no write
+- Episode not watched: no write
+- Episode watched: unmark it through the existing progress cascade (`UnmarkEpisode`), also when the show is `watched`.
+  The season and show state derive through the cascade
+
 ### Acceptance criteria
 
 Webhook:
@@ -80,7 +95,8 @@ Webhook:
 - **AC1**: a POST with a missing, unknown or revoked token gets `401` and writes nothing. AC3 comes first when the IP is over the limit
 - **AC2**: a POST with a body that is not valid JSON, is JSON but not an object, or is over 1 MiB, gets `400` and writes nothing
 - **AC3**: the 121st POST from one IP within a minute gets `429`. The token is not checked
-- **AC4**: an event with `Played` false, or a `SaveReason` other than `PlaybackFinished` or `TogglePlayed`, gets `204` and writes nothing
+- **AC4**: an event with `Played` true and a `SaveReason` other than `PlaybackFinished` or `TogglePlayed`, or with `Played`
+  false and a `SaveReason` other than `TogglePlayed`, gets `204` and writes nothing
 - **AC5**: a movie event for a title not in the library, or already `watched`, gets `204` and writes nothing
 - **AC6**: a movie event for a title in `want` or `watching` moves it to `watched`, sets `watched_at` and keeps `pinned`
 - **AC7**: an episode event with `Provider_tvdb` resolves through TMDB `/find` to the show, season and episode and marks the
@@ -91,9 +107,14 @@ Webhook:
 - **AC10**: an unresolvable event gets `422`, a warning log and no write. Unresolvable means a movie event without
   `Provider_tmdb`, an episode event with neither `Provider_tvdb` nor `Provider_imdb`, or an id TMDB answers with not found
 - **AC11**: a TMDB request that fails for any reason other than not found gets `502` and no write
-- **AC12**: an event that writes a mark invalidates the user's stats cache. An event that writes nothing leaves the cache alone
+- **AC12**: an event that writes or removes a mark invalidates the user's stats cache. An event that writes nothing leaves the cache alone
 - **AC13**: every event that passes the token check and the AC4 filter gets a `webhooks` row with the raw payload and its
   status, the `422` and `502` ones included. Events dropped by AC1 to AC4 get no row
+- **AC19**: a movie event with `Played` false for a title in `watched` moves it to `want`, keeps `pinned` and stores the
+  event as `unmarked`. For a title not in the library, or not `watched`, it gets `204` and writes nothing
+- **AC20**: an episode event with `Played` false for a watched episode unmarks it through the progress cascade, also when
+  the show is `watched`, and stores the event as `unmarked`. For a show not in the library, or an episode that is not
+  watched, it gets `204` and writes nothing
 
 Token endpoints:
 
@@ -103,7 +124,7 @@ Token endpoints:
 
 Client and docs:
 
-- **AC17**: Profile → Jellyfin in the iOS app offers Generate token and Revoke and lists the setup steps with the webhook URL.
+- **AC17**: Profile → Integrations → Jellyfin in the iOS app offers Generate token and Revoke and lists the setup steps with the webhook URL.
   After Generate it shows the new token once, with Copy
 - **AC18**: `api/api/swagger.yaml`, `docs/src/pages/docs/api.astro` and a setup guide page on the docs site describe the new
   routes and the Jellyfin configuration
@@ -133,8 +154,8 @@ The API reads these keys. Key matching is case-insensitive. Every other key is i
 | Key | Use |
 | --- | --- |
 | `ItemType` | `Movie` or `Episode`. Anything else is ignored with `204` |
-| `SaveReason` | must be `PlaybackFinished` or `TogglePlayed` |
-| `Played` | must be `true` |
+| `SaveReason` | `PlaybackFinished` or `TogglePlayed` when `Played` is true, `TogglePlayed` when it is false |
+| `Played` | `true` marks watched, `false` unmarks |
 | `Provider_tmdb` | movie TMDB id |
 | `Provider_tvdb` | episode TVDB id, tried first |
 | `Provider_imdb` | episode IMDb id, used when the TVDB id is missing |
@@ -151,7 +172,7 @@ Responses:
 
 | Status | When | Body |
 | --- | --- | --- |
-| `204` | mark written, or event ignored | none |
+| `204` | mark written or removed, or event ignored | none |
 | `400` | body is not valid JSON, is JSON but not an object, or is over 1 MiB | `{ "error": "..." }` |
 | `401` | missing, unknown or revoked token | `{ "error": "..." }` |
 | `422` | no usable provider id, or TMDB answers not found | `{ "error": "..." }` |
@@ -183,7 +204,7 @@ Table `webhooks`. One row per stored event, so a wrong or missing mark can be tr
 - `id`: uuid, primary key
 - `integration_id`: foreign key to `integrations`, cascade delete
 - `payload`: `jsonb`, the request body as received
-- `status`: `status_type` enum, one of `marked`, `ignored`, `unresolved`, `failed`
+- `status`: `status_type` enum, one of `marked`, `unmarked`, `ignored`, `unresolved`, `failed`
 - `error`: `text`, nullable, the reason for `unresolved` and `failed`
 - `created_at`, `updated_at`: as on every other table
 
@@ -194,9 +215,10 @@ The token is 32 random bytes as hex. A soft-deleted owner's token stops working 
 ## Decisions
 
 - Webhook push instead of polling. Polling needs a Jellyfin credential in biinge, and Jellyfin only has server-wide admin
-  keys or user logins. The token biinge hands out can only add watched marks. The cost is no backfill
+  keys or user logins. The token biinge hands out can only change watched marks. The cost is no backfill
 - `UserDataSaved` instead of `PlaybackStop`, so "mark played" in Jellyfin counts too
-- Jellyfin only adds marks. A library rescan or a user-data reset in Jellyfin must never erase biinge history
+- Only a manual unplayed toggle removes a mark. A deleted Jellyfin item removes nothing, and any other unplayed save is dropped,
+  so biinge history is not erased by anything but a deliberate toggle
 - Processing runs inside the request. At most two TMDB calls per event, and the show detail call uses the existing cache
 - "Send All Properties" instead of a Handlebars template. One less copy-paste step in the setup
 - Episodes resolve through `/find` only. A name search can match the wrong show

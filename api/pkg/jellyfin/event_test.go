@@ -138,3 +138,38 @@ func Test_Event_Finished(t *testing.T) {
 		})
 	}
 }
+
+func Test_Event_Unplayed(t *testing.T) {
+	tests := []struct {
+		name     string
+		event    Event
+		expected bool
+	}{
+		{
+			name:     "Marked unplayed by hand",
+			event:    Event{Played: false, SaveReason: SaveReasonTogglePlayed},
+			expected: true,
+		},
+		{
+			name:     "Marked played by hand",
+			event:    Event{Played: true, SaveReason: SaveReasonTogglePlayed},
+			expected: false,
+		},
+		{
+			name:     "Playback start on an unplayed item",
+			event:    Event{Played: false, SaveReason: "PlaybackStart"},
+			expected: false,
+		},
+		{
+			name:     "Import from another source",
+			event:    Event{Played: false, SaveReason: "Import"},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.event.Unplayed())
+		})
+	}
+}

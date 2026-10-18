@@ -21,11 +21,14 @@ const header = `Key:    Authorization
 Value:  Bearer <the token from the app>`;
 
 const rules = [
-  { event: "A movie you want to watch or are watching", result: "Moves to watched" },
-  { event: "An episode of a show you want to watch or are watching", result: "Marks the episode. The show becomes watching, or watched once every season is done" },
-  { event: "A movie or an episode you have already watched", result: "Nothing changes" },
-  { event: "An episode of a show you have already watched", result: "Nothing changes" },
-  { event: "A title that is not in your library", result: "Nothing changes" },
+  { event: "Finish or mark played a movie you want to watch or are watching", result: "Moves to watched" },
+  { event: "Finish or mark played an episode of a show you want to watch or are watching", result: "Marks the episode. The show becomes watching, or watched once every season is done" },
+  { event: "Mark played a movie or an episode you have already watched", result: "Nothing changes" },
+  { event: "Mark played an episode of a show you have already watched", result: "Nothing changes" },
+  { event: "Mark unplayed a watched movie", result: "Moves back to want to watch" },
+  { event: "Mark unplayed a watched episode", result: "Unmarks the episode. The show follows, the same as unmarking in the app" },
+  { event: "Mark unplayed a movie or an episode you have not watched", result: "Nothing changes" },
+  { event: "Anything on a title that is not in your library", result: "Nothing changes" },
 ];
 ---
 
@@ -40,7 +43,7 @@ const rules = [
         <p class="eyebrow-label">Integrations</p>
         <h1>Sync watched marks from Jellyfin.</h1>
         <p class="lead">
-          Finish a movie or an episode in Jellyfin and biinge marks it watched.
+          Finish a movie or an episode in Jellyfin and biinge marks it watched. Mark it unplayed and biinge takes the mark away.
           Sync runs one way, from Jellyfin to biinge. It only touches titles that are already in your library.
           Setup takes a token from the app and one webhook destination on the Jellyfin server.
         </p>
@@ -63,11 +66,11 @@ const rules = [
         <li class="step">
           <div class="step-head"><span class="num">1</span><h3>Generate a token in the app</h3></div>
           <p>
-            Open <strong>Profile</strong>, then <strong>Jellyfin</strong>, and tap <strong>Generate token</strong>.
+            Open <strong>Profile</strong>, then <strong>Integrations</strong>, then <strong>Jellyfin</strong>, and tap <strong>Generate token</strong>.
             The app shows the token once, with a copy button. Copy it now. It is not shown again.
           </p>
           <p class="note">
-            This is a Jellyfin token, not the app's access or refresh token. It can add watched marks to your library,
+            This is a Jellyfin token, not the app's access or refresh token. It can add and remove watched marks in your library,
             so treat it as a password. Generate a new one to replace it, or revoke it from the same screen.
           </p>
         </li>
@@ -93,7 +96,7 @@ const rules = [
           </p>
           <CodeBlock code={header} label="header" />
           <p class="note">
-            The token is the only thing biinge checks. Anyone who has it can add watched marks to your library until
+            The token is the only thing biinge checks. Anyone who has it can add and remove watched marks in your library until
             you revoke it.
           </p>
         </li>
@@ -102,7 +105,7 @@ const rules = [
           <div class="step-head"><span class="num">4</span><h3>Watch something</h3></div>
           <p>
             Save the destination, then finish a movie or an episode in Jellyfin. Marking it played from the Jellyfin
-            UI works too. The mark shows up in biinge on the next refresh.
+            UI works too, and marking it unplayed takes the mark away. The change shows up in biinge on the next refresh.
           </p>
         </li>
       </ol>
@@ -110,8 +113,8 @@ const rules = [
       <div class="config">
         <h2>What a play does</h2>
         <p class="config-lead">
-          Jellyfin only adds marks. It never removes one, never adds a title, and never changes a watched title to
-          anything else. Unmarking stays in the app.
+          Jellyfin never adds a title. Marking played adds a watched mark and marking unplayed takes it away. Nothing
+          else in Jellyfin changes a mark, a library scan and a plugin import included.
         </p>
         <div class="table-wrap">
           <table>

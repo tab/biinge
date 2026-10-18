@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Profile → Jellyfin: issues or revokes the webhook token and walks through the Jellyfin side of the setup
+/// Profile → Integrations → Jellyfin: issues or revokes the webhook token and walks through the Jellyfin side of the setup
 struct JellyfinView: View {
     @Environment(\.apiClient) private var apiClient
     @State private var token: String?
@@ -10,10 +10,10 @@ struct JellyfinView: View {
     @State private var confirmRevoke = false
 
     var body: some View {
-        ModalScaffold(title: "Jellyfin") {
+        ModalScaffold(title: "Jellyfin", pushed: true) {
             VStack(alignment: .leading, spacing: 28) {
                 Text("Finish a movie or an episode in Jellyfin and it is marked watched here. "
-                    + "Only titles already in your library are affected, and nothing is ever unmarked.")
+                    + "Mark it unplayed there and the mark goes away. Only titles already in your library are affected.")
                     .font(.biingeBody)
                     .foregroundStyle(.primary)
 
@@ -54,7 +54,7 @@ struct JellyfinView: View {
                     )
                 }
             } else {
-                Text("This token is not your login. It only lets Jellyfin add watched marks to your library, "
+                Text("This token is not your login. It only lets Jellyfin add and remove watched marks in your library, "
                     + "so treat it like a password. Generating a new one replaces the old one.")
                     .font(.biingeFootnote)
                     .foregroundStyle(Color.biingeGraniteGray)

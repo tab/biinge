@@ -11,6 +11,7 @@ type WebhookStatus string
 
 const (
 	WebhookStatusMarked     WebhookStatus = "marked"
+	WebhookStatusUnmarked   WebhookStatus = "unmarked"
 	WebhookStatusIgnored    WebhookStatus = "ignored"
 	WebhookStatusUnresolved WebhookStatus = "unresolved"
 	WebhookStatusFailed     WebhookStatus = "failed"

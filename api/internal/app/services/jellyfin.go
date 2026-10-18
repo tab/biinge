@@ -17,7 +17,7 @@ import (
 	"biinge-api/pkg/tmdb"
 )
 
-// Jellyfin turns a Webhook plugin event into a watched mark on a title the user already tracks
+// Jellyfin applies a Webhook plugin event to a title the user already tracks
 type Jellyfin interface {
 	Handle(ctx context.Context, integration *models.Integration, event *jellyfin.Event) error
 }
@@ -51,7 +51,7 @@ func NewJellyfin(
 
 // Handle drops progress saves before any work, then resolves and merges the event and stores it with its status
 func (j *jellyfinService) Handle(ctx context.Context, integration *models.Integration, event *jellyfin.Event) error {
-	if !event.Finished() {
+	if !event.Finished() && !event.Unplayed() {
 		return nil
 	}
 
@@ -99,7 +99,7 @@ func (j *jellyfinService) Handle(ctx context.Context, integration *models.Integr
 	return err
 }
 
-// movie marks the movie watched when the user tracks it; Jellyfin's TMDB provider always sets Provider_tmdb
+// movie applies the event to a tracked movie; Jellyfin's TMDB provider always sets Provider_tmdb
 func (j *jellyfinService) movie(ctx context.Context, userId uuid.UUID, event *jellyfin.Event) (models.WebhookStatus, error) {
 	tmdbId, err := strconv.ParseUint(event.ProviderTmdb, 10, 64)
 	if err != nil || tmdbId == 0 {
@@ -111,23 +111,27 @@ func (j *jellyfinService) movie(ctx context.Context, userId uuid.UUID, event *je
 		return models.WebhookStatusFailed, errors.ErrFailedToProcessWebhook
 	}
 
-	// a title that is not tracked, or is already watched, is left exactly as it is
-	if len(rows) == 0 || rows[0].State == models.StateTypeWatched {
+	if len(rows) == 0 || (rows[0].State == models.StateTypeWatched) == event.Played {
 		return models.WebhookStatusIgnored, nil
 	}
 
-	// pinned is passed back as read so the mark leaves it alone
+	state, status := models.StateTypeWatched, models.WebhookStatusMarked
+	if !event.Played {
+		state, status = models.StateTypeWant, models.WebhookStatusUnmarked
+	}
+
+	// pinned is passed back as read so the write leaves it alone
 	_, err = j.movies.UpdateByTmdbId(ctx, &models.Movie{
 		TmdbId: tmdbId,
 		UserId: userId,
-		State:  models.StateTypeWatched,
+		State:  state,
 		Pinned: rows[0].Pinned,
 	})
 	if err != nil {
 		return models.WebhookStatusFailed, errors.ErrFailedToProcessWebhook
 	}
 
-	return models.WebhookStatusMarked, nil
+	return status, nil
 }
 
 // episode resolves the episode through /find, then applies the merge rules against the show's progress
@@ -164,9 +168,9 @@ func (j *jellyfinService) episode(ctx context.Context, userId uuid.UUID, event *
 		return models.WebhookStatusFailed, errors.ErrFailedToProcessWebhook
 	}
 
-	// an untracked show and an episode that is already watched are left as they are; a new row on
-	// a finished show would run the cascade and flip it back to watching, so that is left too
-	if progress.State == models.StateTypeNone || progress.State == models.StateTypeWatched || slices.Contains(progress.WatchedEpisodes, episodeId) {
+	// a mark on a finished show would add a row, run the cascade and flip it back to watching, so that is left alone
+	watched := slices.Contains(progress.WatchedEpisodes, episodeId)
+	if progress.State == models.StateTypeNone || watched == event.Played || (event.Played && progress.State == models.StateTypeWatched) {
 		return models.WebhookStatusIgnored, nil
 	}
 
@@ -187,6 +191,15 @@ func (j *jellyfinService) episode(ctx context.Context, userId uuid.UUID, event *
 	}
 
 	season := details.Seasons[index]
+
+	if !event.Played {
+		if _, err = j.progress.UnmarkEpisode(ctx, userId, found.ShowId, season.Id, episodeId); err != nil {
+			return models.WebhookStatusFailed, errors.ErrFailedToProcessWebhook
+		}
+
+		return models.WebhookStatusUnmarked, nil
+	}
+
 	airAt, _ := tmdb.ParseDate(found.AirDate)
 
 	_, err = j.progress.MarkEpisode(ctx, userId,

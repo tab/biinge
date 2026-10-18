@@ -57,6 +57,7 @@ func Test_Jellyfin_Handle(t *testing.T) {
 	movieFilter := models.MovieFilter{UserId: userId, TmdbIds: []uint64{movieId}}
 	markWatched := &models.Movie{TmdbId: movieId, UserId: userId, State: models.StateTypeWatched}
 	markWatchedPinned := &models.Movie{TmdbId: movieId, UserId: userId, State: models.StateTypeWatched, Pinned: true}
+	unmarkPinned := &models.Movie{TmdbId: movieId, UserId: userId, State: models.StateTypeWant, Pinned: true}
 	foundEpisode := &tmdb.FindResult{TvEpisodeResults: []tmdb.FindEpisode{{
 		Episode: tmdb.Episode{ID: int(episodeId), Name: "Winter Is Coming", AirDate: "2011-04-17", EpisodeNumber: 1, SeasonNumber: 1, StillPath: "/w.jpg", Runtime: 62},
 		ShowId:  showId,
@@ -87,7 +88,7 @@ func Test_Jellyfin_Handle(t *testing.T) {
 		error  error
 	}{
 		{
-			name: "Unplayed event is dropped before any work",
+			name: "Unplayed finish is dropped before any work",
 			event: func() *jellyfin.Event {
 				event := jellyfinEvent(jellyfin.ItemTypeMovie, map[string]string{"tmdb": "603"})
 				event.Played = false
@@ -161,6 +162,33 @@ func Test_Jellyfin_Handle(t *testing.T) {
 				movies.EXPECT().UpdateByTmdbId(ctx, markWatchedPinned).Return(&models.Movie{}, nil)
 			},
 			status: models.WebhookStatusMarked,
+		},
+		{
+			name: "Unplayed toggle on a watched movie sends it back to want and keeps pinned",
+			event: func() *jellyfin.Event {
+				event := jellyfinEvent(jellyfin.ItemTypeMovie, map[string]string{"tmdb": "603"})
+				event.SaveReason, event.Played = jellyfin.SaveReasonTogglePlayed, false
+
+				return event
+			}(),
+			before: func() {
+				movies.EXPECT().FindByFilter(ctx, movieFilter).Return([]models.Movie{{TmdbId: movieId, State: models.StateTypeWatched, Pinned: true}}, nil)
+				movies.EXPECT().UpdateByTmdbId(ctx, unmarkPinned).Return(&models.Movie{}, nil)
+			},
+			status: models.WebhookStatusUnmarked,
+		},
+		{
+			name: "Unplayed toggle on a movie in want is ignored",
+			event: func() *jellyfin.Event {
+				event := jellyfinEvent(jellyfin.ItemTypeMovie, map[string]string{"tmdb": "603"})
+				event.SaveReason, event.Played = jellyfin.SaveReasonTogglePlayed, false
+
+				return event
+			}(),
+			before: func() {
+				movies.EXPECT().FindByFilter(ctx, movieFilter).Return([]models.Movie{{TmdbId: movieId, State: models.StateTypeWant}}, nil)
+			},
+			status: models.WebhookStatusIgnored,
 		},
 		{
 			name:   "Movie without a TMDB id is unresolved",
@@ -244,6 +272,70 @@ func Test_Jellyfin_Handle(t *testing.T) {
 				progress.EXPECT().MarkEpisode(ctx, userId, seriesInput, seasonInput, episodeInput).Return(&models.SeriesProgress{}, nil)
 			},
 			status: models.WebhookStatusMarked,
+		},
+		{
+			name: "Unplayed toggle on a watched episode is unmarked through the cascade",
+			event: func() *jellyfin.Event {
+				event := jellyfinEvent(jellyfin.ItemTypeEpisode, map[string]string{"tvdb": "3254641"})
+				event.SaveReason, event.Played = jellyfin.SaveReasonTogglePlayed, false
+
+				return event
+			}(),
+			before: func() {
+				client.EXPECT().Find(ctx, "3254641", tmdb.FindSourceTvdb).Return(foundEpisode, nil)
+				progress.EXPECT().Get(ctx, userId, showId).Return(&models.SeriesProgress{SeriesTmdbId: showId, State: models.StateTypeWatching, WatchedEpisodes: []uint64{1, episodeId}}, nil)
+				client.EXPECT().FetchTvDetails(ctx, showId).Return(showDetails, nil)
+				progress.EXPECT().UnmarkEpisode(ctx, userId, showId, seasonId, episodeId).Return(&models.SeriesProgress{}, nil)
+			},
+			status: models.WebhookStatusUnmarked,
+		},
+		{
+			name: "Unplayed toggle on a watched show's episode is unmarked, unlike a mark",
+			event: func() *jellyfin.Event {
+				event := jellyfinEvent(jellyfin.ItemTypeEpisode, map[string]string{"tvdb": "3254641"})
+				event.SaveReason, event.Played = jellyfin.SaveReasonTogglePlayed, false
+
+				return event
+			}(),
+			before: func() {
+				client.EXPECT().Find(ctx, "3254641", tmdb.FindSourceTvdb).Return(foundEpisode, nil)
+				progress.EXPECT().Get(ctx, userId, showId).Return(&models.SeriesProgress{SeriesTmdbId: showId, State: models.StateTypeWatched, WatchedEpisodes: []uint64{episodeId}}, nil)
+				client.EXPECT().FetchTvDetails(ctx, showId).Return(showDetails, nil)
+				progress.EXPECT().UnmarkEpisode(ctx, userId, showId, seasonId, episodeId).Return(&models.SeriesProgress{}, nil)
+			},
+			status: models.WebhookStatusUnmarked,
+		},
+		{
+			name: "Unplayed toggle on an unwatched episode is ignored",
+			event: func() *jellyfin.Event {
+				event := jellyfinEvent(jellyfin.ItemTypeEpisode, map[string]string{"tvdb": "3254641"})
+				event.SaveReason, event.Played = jellyfin.SaveReasonTogglePlayed, false
+
+				return event
+			}(),
+			before: func() {
+				client.EXPECT().Find(ctx, "3254641", tmdb.FindSourceTvdb).Return(foundEpisode, nil)
+				progress.EXPECT().Get(ctx, userId, showId).Return(&models.SeriesProgress{SeriesTmdbId: showId, State: models.StateTypeWatching, WatchedEpisodes: []uint64{1}}, nil)
+			},
+			status: models.WebhookStatusIgnored,
+		},
+		{
+			name: "Episode unmark failing is failed",
+			event: func() *jellyfin.Event {
+				event := jellyfinEvent(jellyfin.ItemTypeEpisode, map[string]string{"tvdb": "3254641"})
+				event.SaveReason, event.Played = jellyfin.SaveReasonTogglePlayed, false
+
+				return event
+			}(),
+			before: func() {
+				client.EXPECT().Find(ctx, "3254641", tmdb.FindSourceTvdb).Return(foundEpisode, nil)
+				progress.EXPECT().Get(ctx, userId, showId).Return(&models.SeriesProgress{SeriesTmdbId: showId, State: models.StateTypeWatching, WatchedEpisodes: []uint64{episodeId}}, nil)
+				client.EXPECT().FetchTvDetails(ctx, showId).Return(showDetails, nil)
+				progress.EXPECT().UnmarkEpisode(ctx, userId, showId, seasonId, episodeId).Return(nil, errors.ErrFailedToUpdateProgress)
+			},
+			status: models.WebhookStatusFailed,
+			reason: errors.ErrFailedToProcessWebhook.Error(),
+			error:  errors.ErrFailedToProcessWebhook,
 		},
 		{
 			name:  "Episode of a want show resolves through the IMDb id and is marked",

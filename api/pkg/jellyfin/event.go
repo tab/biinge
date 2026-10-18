@@ -55,3 +55,8 @@ func ParseEvent(body io.Reader) (*Event, error) {
 func (e *Event) Finished() bool {
 	return e.Played && (e.SaveReason == SaveReasonPlaybackFinished || e.SaveReason == SaveReasonTogglePlayed)
 }
+
+// Unplayed reports whether the event records a manual unplayed mark
+func (e *Event) Unplayed() bool {
+	return !e.Played && e.SaveReason == SaveReasonTogglePlayed
+}

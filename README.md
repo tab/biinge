@@ -1,22 +1,37 @@
 # biinge
 
-Movie & TV tracker — keep separate lists of what you want to watch, what
-you're watching, and what you've finished, across movies and TV shows.
+Movie, TV and game tracker. Keep separate lists of what you want to start,
+what you're in the middle of and what you've finished.
 
-![screenshots](https://github.com/user-attachments/assets/08474315-74c5-4677-847e-effa783401c3)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/public/screens/flow-1-library-dark.jpg">
+    <img src="docs/public/screens/flow-1-library-light.jpg" alt="Movies library" width="200">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/public/screens/tv-watching-dark.jpg">
+    <img src="docs/public/screens/tv-watching-light.jpg" alt="TV shows you're watching" width="200">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/public/screens/games-dark.jpg">
+    <img src="docs/public/screens/games-light.jpg" alt="Games you're playing" width="200">
+  </picture>
+</p>
 
 ## Features
 
-- **Track movies and TV shows** — separate want / watching / watched lists
-- **Episode-level progress** — mark individual episodes and seasons; the show's state follows automatically
-- **Up Next** — a queue of aired-but-unwatched episodes and released movies from the titles you pin
-- **Search & trending** — browse TMDB's catalog of movies, shows, and people
-- **Statistics** — watch-time totals and a monthly activity chart
-- **Pinning & themes** — pin favorites to the top; dark, light, or system appearance
+- **Track movies, TV shows and games**: want / watching / watched lists, and want / playing / played for games
+- **Episode-level progress**: mark individual episodes and seasons, and the show's state follows
+- **Up Next**: aired episodes you haven't watched, plus released movies and games, from the titles you pin
+- **Search & trending**: movies, shows and people from TMDB, games from IGDB
+- **Jellyfin sync**: played and unplayed marks in Jellyfin carry over (one way, library titles only)
+- **Statistics**: watch-time totals and a monthly activity chart
+- **Pinning & themes**: pin favorites to the top, with dark, light or system appearance
 
 ## Repository layout
 
-Monorepo, one deployable unit per top-level directory. The two apps are
+Monorepo, one deployable unit per top-level directory: `api/` (Go REST API),
+`ios/` (SwiftUI app) and `docs/` (Astro site). The API and the app are
 decoupled by the HTTP contract in `api/api/swagger.yaml`; there is no shared
 code directory.
 

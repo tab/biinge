@@ -11,6 +11,7 @@ package services
 
 import (
 	models "biinge-api/internal/app/models"
+	jellyfin "biinge-api/pkg/jellyfin"
 	context "context"
 	reflect "reflect"
 
@@ -57,6 +58,21 @@ func (mr *MockIntegrationsMockRecorder) Authenticate(ctx, token any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockIntegrations)(nil).Authenticate), ctx, token)
 }
 
+// Connect mocks base method.
+func (m *MockIntegrations) Connect(ctx context.Context, userId uuid.UUID, credentials jellyfin.Credentials) (*models.JellyfinConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Connect", ctx, userId, credentials)
+	ret0, _ := ret[0].(*models.JellyfinConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Connect indicates an expected call of Connect.
+func (mr *MockIntegrationsMockRecorder) Connect(ctx, userId, credentials any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Connect", reflect.TypeOf((*MockIntegrations)(nil).Connect), ctx, userId, credentials)
+}
+
 // CreateToken mocks base method.
 func (m *MockIntegrations) CreateToken(ctx context.Context, userId uuid.UUID) (string, error) {
 	m.ctrl.T.Helper()
@@ -72,6 +88,20 @@ func (mr *MockIntegrationsMockRecorder) CreateToken(ctx, userId any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateToken", reflect.TypeOf((*MockIntegrations)(nil).CreateToken), ctx, userId)
 }
 
+// Disconnect mocks base method.
+func (m *MockIntegrations) Disconnect(ctx context.Context, userId uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Disconnect", ctx, userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Disconnect indicates an expected call of Disconnect.
+func (mr *MockIntegrationsMockRecorder) Disconnect(ctx, userId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Disconnect", reflect.TypeOf((*MockIntegrations)(nil).Disconnect), ctx, userId)
+}
+
 // Revoke mocks base method.
 func (m *MockIntegrations) Revoke(ctx context.Context, userId uuid.UUID) error {
 	m.ctrl.T.Helper()
@@ -84,4 +114,19 @@ func (m *MockIntegrations) Revoke(ctx context.Context, userId uuid.UUID) error {
 func (mr *MockIntegrationsMockRecorder) Revoke(ctx, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockIntegrations)(nil).Revoke), ctx, userId)
+}
+
+// Status mocks base method.
+func (m *MockIntegrations) Status(ctx context.Context, userId uuid.UUID) (*models.JellyfinConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Status", ctx, userId)
+	ret0, _ := ret[0].(*models.JellyfinConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Status indicates an expected call of Status.
+func (mr *MockIntegrationsMockRecorder) Status(ctx, userId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Status", reflect.TypeOf((*MockIntegrations)(nil).Status), ctx, userId)
 }

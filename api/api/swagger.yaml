@@ -353,6 +353,142 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/accounts/integrations/jellyfin/connection:
+    put:
+      summary: "Connect Jellyfin"
+      description: "Signs in to this instance's Jellyfin server as the user with the given username and password, and stores the connection. Connecting again replaces the connection and signs the earlier token out of Jellyfin. The API never stores the password and never returns the Jellyfin token. A failed sign-in keeps any earlier connection. 404 means this instance has no Jellyfin server configured"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JellyfinConnectionRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JellyfinConnectionSerializer"
+        "400":
+          description: "Bad Request: malformed JSON, an empty username or an empty password"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized: missing, invalid or expired biinge access token. A Jellyfin failure never returns 401"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found: this instance has no Jellyfin server configured"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity: Jellyfin rejected the username or password"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "502":
+          description: "Bad Gateway: the Jellyfin server could not be reached"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "503":
+          description: "Service Unavailable: the connection could not be read or written"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    get:
+      summary: "Jellyfin connection status"
+      description: "Returns this instance's Jellyfin server address, whether the user is connected and the Jellyfin username. It never returns the Jellyfin token. 404 means this instance has no Jellyfin server configured"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JellyfinConnectionSerializer"
+        "401":
+          description: "Unauthorized: missing, invalid or expired biinge access token. A Jellyfin failure never returns 401"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found: this instance has no Jellyfin server configured"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "503":
+          description: "Service Unavailable: the connection could not be read or written"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    delete:
+      summary: "Disconnect Jellyfin"
+      description: "Signs the stored token out of Jellyfin and clears the connection. A failed sign-out still clears it. The webhook token stays. Also 204 when there was no connection. 404 means this instance has no Jellyfin server configured"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: "No Content"
+        "401":
+          description: "Unauthorized: missing, invalid or expired biinge access token. A Jellyfin failure never returns 401"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found: this instance has no Jellyfin server configured"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "503":
+          description: "Service Unavailable: the connection could not be read or written"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
   /api/v1/movies:
     get:
       summary: "Movies list"
@@ -3446,6 +3582,41 @@ components:
           example: "3f9c2b1e8d7a6c5b4e3f2a1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b"
       required:
         - token
+
+    JellyfinConnectionRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: "Jellyfin username, trimmed"
+          example: "alice"
+        password:
+          type: string
+          description: "Jellyfin password, sent as is and used for one sign-in. The API never stores it"
+          example: "your-password"
+      required:
+        - username
+        - password
+
+    JellyfinConnectionSerializer:
+      type: object
+      description: "The user's Jellyfin connection. It never carries the Jellyfin token"
+      properties:
+        base_url:
+          type: string
+          description: "This instance's Jellyfin server address"
+          example: "https://jellyfin.example.com"
+        connected:
+          type: boolean
+          description: "Whether the user has a stored Jellyfin connection"
+          example: true
+        username:
+          type: string
+          description: "Jellyfin username, omitted when not connected"
+          example: "alice"
+      required:
+        - base_url
+        - connected
 
     JellyfinEvent:
       type: object

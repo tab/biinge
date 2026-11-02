@@ -13,15 +13,16 @@ import (
 	"biinge-api/internal/app/models"
 )
 
-// memoryCache is an in-memory cache.Cache with injectable errors
+// memoryCache is an in-memory cache.Cache with injectable errors (it records each key's TTL but never expires one)
 type memoryCache struct {
 	store     map[string][]byte
+	ttls      map[string]time.Duration
 	deleteErr error
 	deleted   []string
 }
 
 func newMemoryCache() *memoryCache {
-	return &memoryCache{store: map[string][]byte{}}
+	return &memoryCache{store: map[string][]byte{}, ttls: map[string]time.Duration{}}
 }
 
 func (c *memoryCache) Get(_ context.Context, key string) ([]byte, bool, error) {
@@ -30,8 +31,9 @@ func (c *memoryCache) Get(_ context.Context, key string) ([]byte, bool, error) {
 	return data, ok, nil
 }
 
-func (c *memoryCache) Set(_ context.Context, key string, value []byte, _ time.Duration) error {
+func (c *memoryCache) Set(_ context.Context, key string, value []byte, ttl time.Duration) error {
 	c.store[key] = value
+	c.ttls[key] = ttl
 
 	return nil
 }

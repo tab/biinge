@@ -2596,6 +2596,10 @@ components:
         imdbId:
           type: string
           description: "IMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this movie, present when the user has a Jellyfin connection and exactly one library item carries its TMDB id (omitted otherwise, also when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear). Only GET /api/v1/movies/{id} fills it"
+          example: "4f1c9a3e7b2d48e6a0c5f19d83b72e64"
         title:
           type: string
           description: "Movie title"
@@ -2823,6 +2827,10 @@ components:
         imdbId:
           type: string
           description: "IMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this series, present when the user has a Jellyfin connection and exactly one library item carries its TMDB id (omitted otherwise, also when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear). Only GET /api/v1/series/{id} fills it"
+          example: "9d2e47b1c03a4f8e85b6d1a7e2c94f30"
         title:
           type: string
           description: "Series title"
@@ -3141,6 +3149,10 @@ components:
           type: integer
           format: int64
           description: "Episode TMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this episode, present when the series matches one library item and that series holds exactly one episode with this season and episode number (omitted otherwise, also without a Jellyfin connection or when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear)"
+          example: "c7e15a0d9b3f4e2a86d1f07b54a9e3c2"
         title:
           type: string
           description: "Episode title"
@@ -3224,6 +3236,10 @@ components:
           type: integer
           format: int64
           description: "Episode TMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this episode, present when the series matches one library item and that series holds exactly one episode with this season and episode number (omitted otherwise, also without a Jellyfin connection or when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear)"
+          example: "c7e15a0d9b3f4e2a86d1f07b54a9e3c2"
         title:
           type: string
           description: "Episode title"

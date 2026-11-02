@@ -90,6 +90,91 @@ const statsJson = esc(`{
   ]
 }`);
 
+const movieDetailsJson = esc(`{
+  "id": 693134,
+  "imdbId": "tt15239678",
+  "jellyfinId": "4f1c9a3e7b2d48e6a0c5f19d83b72e64",
+  "title": "Dune: Part Two",
+  "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
+  "pinned": true,
+  "state": "want",
+  "overview": "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen…",
+  "status": "Released",
+  "releaseDate": "2024-02-27",
+  "runtime": 167,
+  "rating": 8.1,
+  "credits": […],
+  "recommendations": […],
+  "videos": […]
+}`);
+const seriesDetailsJson = esc(`{
+  "id": 125988,
+  "imdbId": "tt14688458",
+  "jellyfinId": "9d2e47b1c03a4f8e85b6d1a7e2c94f30",
+  "title": "Silo",
+  "posterPath": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+  "pinned": false,
+  "state": "watching",
+  "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground…",
+  "status": "Returning Series",
+  "releaseDate": "2023-05-04",
+  "seasonsCount": 3,
+  "episodesCount": 30,
+  "rating": 8.1,
+  "credits": […],
+  "recommendations": […],
+  "videos": […],
+  "seasons": […]
+}`);
+const seasonDetailsJson = esc(`{
+  "id": 342410,
+  "tmdbShowId": 125988,
+  "title": "Season 1",
+  "number": 1,
+  "posterPath": "/zBx1X06G1OlndbXTCZI13FECNz2.jpg",
+  "airDate": "2023-05-04",
+  "overview": "",
+  "watched": false,
+  "episodes": [
+    {
+      "id": 4171851,
+      "jellyfinId": "c7e15a0d9b3f4e2a86d1f07b54a9e3c2",
+      "title": "Freedom Day",
+      "number": 1,
+      "posterPath": "/4LfxsCjAuRLdVTO6YIo0ZVUOHk6.jpg",
+      "runtime": 59,
+      "overview": "Sheriff Holston faces a choice that will change everything…",
+      "rating": 7.9,
+      "airDate": "2023-05-04",
+      "watched": true
+    },
+    {
+      "id": 4171852,
+      "title": "Holston's Pick",
+      "number": 2,
+      "posterPath": "/9z0iDOvCpdvDqKZqC1GhYbiWyU2.jpg",
+      "runtime": 50,
+      "overview": "Juliette is drawn into the investigation of a death in the silo…",
+      "rating": 7.7,
+      "airDate": "2023-05-04",
+      "watched": false
+    }
+  ]
+}`);
+const episodeDetailsJson = esc(`{
+  "id": 4171851,
+  "jellyfinId": "c7e15a0d9b3f4e2a86d1f07b54a9e3c2",
+  "title": "Freedom Day",
+  "number": 1,
+  "posterPath": "/4LfxsCjAuRLdVTO6YIo0ZVUOHk6.jpg",
+  "runtime": 59,
+  "overview": "Sheriff Holston faces a choice that will change everything…",
+  "rating": 7.9,
+  "airDate": "2023-05-04",
+  "watched": true,
+  "credits": […],
+  "videos": […]
+}`);
 interface QueryParam {
   name: string;
   // prefilled when the endpoint needs a value to answer at all, empty otherwise
@@ -176,7 +261,7 @@ const endpoints: Endpoint[] = [
   "runtime": 167,
   "state": "want"
 }` },
-  { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations." },
+  { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding, changing and listing movies never return it.", resp: movieDetailsJson },
   { id: "movie-update", group: "Movies", method: "PATCH", path: "/api/v1/movies/{id}", desc: "Change state or pin the movie.", body: `{
   "state": "watched",
   "pinned": true
@@ -208,14 +293,14 @@ const endpoints: Endpoint[] = [
   "status": "Returning Series",
   "state": "want"
 }` },
-  { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons." },
+  { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding, changing and listing shows never return it.", resp: seriesDetailsJson },
   { id: "series-update", group: "TV Series", method: "PATCH", path: "/api/v1/series/{id}", desc: "Change state or pin the show.", body: `{
   "state": "watching",
   "pinned": true
 }` },
   { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library." },
-  { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and episodes." },
-  { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details." },
+  { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and episodes.", note: "An episode's jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: seasonDetailsJson },
+  { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: episodeDetailsJson },
 
   { id: "progress-get", group: "Progress", method: "GET", path: "/api/v1/series/{id}/progress", desc: "Watched seasons and episodes for a show." },
   { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark a show watched. Ids come from the URL, and the body carries the rows to write.", note: "Only the seasons and episodes you list are recorded, so a body without them marks nothing. The example lists two episodes of season one; a real client sends all nine, and every other season too.", body: `{

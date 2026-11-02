@@ -40,6 +40,36 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
+// Episodes mocks base method.
+func (m *MockClient) Episodes(ctx context.Context, connection Connection, seriesId string) ([]Episode, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Episodes", ctx, connection, seriesId)
+	ret0, _ := ret[0].([]Episode)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Episodes indicates an expected call of Episodes.
+func (mr *MockClientMockRecorder) Episodes(ctx, connection, seriesId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Episodes", reflect.TypeOf((*MockClient)(nil).Episodes), ctx, connection, seriesId)
+}
+
+// Items mocks base method.
+func (m *MockClient) Items(ctx context.Context, connection Connection) ([]Item, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Items", ctx, connection)
+	ret0, _ := ret[0].([]Item)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Items indicates an expected call of Items.
+func (mr *MockClientMockRecorder) Items(ctx, connection any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Items", reflect.TypeOf((*MockClient)(nil).Items), ctx, connection)
+}
+
 // SignIn mocks base method.
 func (m *MockClient) SignIn(ctx context.Context, deviceId string, credentials Credentials) (*Session, error) {
 	m.ctrl.T.Helper()

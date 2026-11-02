@@ -16,8 +16,13 @@ import (
 const (
 	DefaultTimeout = 10 * time.Second
 
-	signInPath  = "/Users/AuthenticateByName"
-	signOutPath = "/Sessions/Logout"
+	signInPath   = "/Users/AuthenticateByName"
+	signOutPath  = "/Sessions/Logout"
+	itemsPath    = "/Users/{userId}/Items"
+	episodesPath = "/Shows/{seriesId}/Episodes"
+
+	// ItemTypeSeries sits beside ItemTypeMovie (event.go) as the other type Items returns
+	ItemTypeSeries = "Series"
 
 	// authorization names the API as a Jellyfin client on a device (device id, then app version)
 	authorization = `MediaBrowser Client="biinge", Device="biinge API", DeviceId="%s", Version="%s"`
@@ -36,10 +41,33 @@ type Session struct {
 	UserName    string
 }
 
-// Client signs a user in to and out of the instance's Jellyfin server, each sign-in as its own device
+// Connection is a signed-in user's device id, access token and Jellyfin user id, for reads as that user
+type Connection struct {
+	DeviceId    string
+	AccessToken string
+	UserId      string
+}
+
+// Item is a movie or series in the user's library (TmdbId is empty when Jellyfin holds none)
+type Item struct {
+	Id     string
+	Type   string
+	TmdbId string
+}
+
+// Episode is one episode of a series (Season and Number are nil when Jellyfin holds none)
+type Episode struct {
+	Id     string
+	Season *int
+	Number *int
+}
+
+// Client signs a user in to and out of the instance's Jellyfin server, each sign-in as its own device, and reads their library
 type Client interface {
 	SignIn(ctx context.Context, deviceId string, credentials Credentials) (*Session, error)
 	SignOut(ctx context.Context, deviceId string, token string) error
+	Items(ctx context.Context, connection Connection) ([]Item, error)
+	Episodes(ctx context.Context, connection Connection, seriesId string) ([]Episode, error)
 }
 
 type client struct {
@@ -156,5 +184,134 @@ func (c *client) SignOut(ctx context.Context, deviceId string, token string) err
 			Msg("Unexpected response from Jellyfin")
 
 		return ErrUnavailable
+	}
+}
+
+func (c *client) Items(ctx context.Context, connection Connection) ([]Item, error) {
+	// The Authorization header carries the token, so only the path template and status are logged
+	response, err := c.apiClient.R().
+		SetContext(ctx).
+		SetHeader("Authorization", fmt.Sprintf(authorization+`, Token="%s"`, connection.DeviceId, c.version, connection.AccessToken)).
+		SetPathParam("userId", connection.UserId).
+		SetQueryParams(map[string]string{
+			"IncludeItemTypes": ItemTypeMovie + "," + ItemTypeSeries,
+			"Recursive":        "true",
+			"Fields":           "ProviderIds",
+			"EnableImages":     "false",
+			"EnableUserData":   "false",
+		}).
+		Get(itemsPath)
+	if err != nil {
+		c.log.Error().
+			Err(err).
+			Str("endpoint", itemsPath).
+			Msg("Failed to reach Jellyfin")
+
+		return nil, ErrUnavailable
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		var result struct {
+			Items []struct {
+				Id          string
+				Type        string
+				ProviderIds map[string]string
+			}
+		}
+		if err = json.Unmarshal(response.Body(), &result); err != nil {
+			c.log.Error().
+				Err(err).
+				Str("endpoint", itemsPath).
+				Int("statusCode", response.StatusCode()).
+				Msg("Failed to decode the Jellyfin items")
+
+			return nil, ErrUnavailable
+		}
+
+		items := make([]Item, 0, len(result.Items))
+		for _, item := range result.Items {
+			items = append(items, Item{Id: item.Id, Type: item.Type, TmdbId: item.ProviderIds["Tmdb"]})
+		}
+
+		return items, nil
+	case http.StatusUnauthorized:
+		c.log.Warn().
+			Str("endpoint", itemsPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Jellyfin rejected the token")
+
+		return nil, ErrInvalidCredentials
+	default:
+		c.log.Error().
+			Str("endpoint", itemsPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Unexpected response from Jellyfin")
+
+		return nil, ErrUnavailable
+	}
+}
+
+func (c *client) Episodes(ctx context.Context, connection Connection, seriesId string) ([]Episode, error) {
+	// The Authorization header carries the token, so only the path template and status are logged
+	response, err := c.apiClient.R().
+		SetContext(ctx).
+		SetHeader("Authorization", fmt.Sprintf(authorization+`, Token="%s"`, connection.DeviceId, c.version, connection.AccessToken)).
+		SetPathParam("seriesId", seriesId).
+		SetQueryParams(map[string]string{
+			"userId":         connection.UserId,
+			"IsMissing":      "false",
+			"EnableImages":   "false",
+			"EnableUserData": "false",
+		}).
+		Get(episodesPath)
+	if err != nil {
+		c.log.Error().
+			Err(err).
+			Str("endpoint", episodesPath).
+			Msg("Failed to reach Jellyfin")
+
+		return nil, ErrUnavailable
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		var result struct {
+			Items []struct {
+				Id                string
+				ParentIndexNumber *int
+				IndexNumber       *int
+			}
+		}
+		if err = json.Unmarshal(response.Body(), &result); err != nil {
+			c.log.Error().
+				Err(err).
+				Str("endpoint", episodesPath).
+				Int("statusCode", response.StatusCode()).
+				Msg("Failed to decode the Jellyfin episodes")
+
+			return nil, ErrUnavailable
+		}
+
+		episodes := make([]Episode, 0, len(result.Items))
+		for _, episode := range result.Items {
+			episodes = append(episodes, Episode{Id: episode.Id, Season: episode.ParentIndexNumber, Number: episode.IndexNumber})
+		}
+
+		return episodes, nil
+	case http.StatusUnauthorized:
+		c.log.Warn().
+			Str("endpoint", episodesPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Jellyfin rejected the token")
+
+		return nil, ErrInvalidCredentials
+	default:
+		c.log.Error().
+			Str("endpoint", episodesPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Unexpected response from Jellyfin")
+
+		return nil, ErrUnavailable
 	}
 }

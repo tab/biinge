@@ -16,4 +16,5 @@ var Module = fx.Options(
 	fx.Provide(NewUsers),
 	fx.Provide(NewIntegrations),
 	fx.Provide(NewJellyfin),
+	fx.Provide(NewLibrary),
 )

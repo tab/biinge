@@ -39,6 +39,7 @@ type MovieSerializer struct {
 type MovieDetailsSerializer struct {
 	Id              uint64                     `json:"id"`
 	ImdbId          string                     `json:"imdbId,omitempty"`
+	JellyfinId      string                     `json:"jellyfinId,omitempty"`
 	Title           string                     `json:"title"`
 	PosterPath      string                     `json:"posterPath"`
 	Pinned          bool                       `json:"pinned"`

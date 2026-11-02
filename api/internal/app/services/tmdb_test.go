@@ -224,7 +224,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 	movieID := uuid.New()
@@ -249,6 +250,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				moviesSvc.EXPECT().Update(ctx, &models.Movie{
 					ID: movieID, Title: "The Matrix", PosterPath: "/tmdb-poster.jpg", Runtime: 136,
 				}).Return(&models.Movie{}, nil)
+
+				library.EXPECT().Movie(ctx, userId, uint64(100)).Return("jf-movie")
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -261,6 +264,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				ReleaseDate:     "1999-03-31",
 				Runtime:         136,
 				Rating:          8.7,
+				JellyfinId:      "jf-movie",
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("want"),
 				Videos:          expectedMovieVideos(),
@@ -275,6 +279,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{{
 					ID: movieID, TmdbId: 100, Title: "The Matrix", PosterPath: "/tmdb-poster.jpg", Runtime: 136, State: "want",
 				}}, nil)
+
+				library.EXPECT().Movie(ctx, userId, uint64(100)).Return("")
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -309,6 +315,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				moviesSvc.EXPECT().Update(ctx, &models.Movie{
 					ID: movieID, Title: "Stored Title", PosterPath: "/new-poster.jpg", Runtime: 90,
 				}).Return(&models.Movie{}, nil)
+
+				library.EXPECT().Movie(ctx, userId, uint64(100)).Return("")
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -336,6 +344,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 					ID: movieID, TmdbId: 100, Title: "Old", PosterPath: "/old.jpg", Runtime: 100, State: "watched", Pinned: true,
 				}}, nil)
 				moviesSvc.EXPECT().Update(ctx, gomock.Any()).Return(nil, assert.AnError)
+
+				library.EXPECT().Movie(ctx, userId, uint64(100)).Return("")
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -362,6 +372,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 					{TmdbId: 200, State: "want"},
 				}, nil)
 				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{}, nil)
+
+				library.EXPECT().Movie(ctx, userId, uint64(100)).Return("jf-movie")
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -374,6 +386,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				ReleaseDate:     "1999-03-31",
 				Runtime:         136,
 				Rating:          8.7,
+				JellyfinId:      "jf-movie",
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("want"),
 				Videos:          expectedMovieVideos(),
@@ -387,6 +400,8 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: userId, TmdbIds: []uint64{100}}).Return([]models.Movie{{
 					ID: movieID, TmdbId: 100, Title: "Stored Title", PosterPath: "/stored.jpg", Runtime: 120, State: "watched", Pinned: true,
 				}}, nil)
+
+				library.EXPECT().Movie(ctx, userId, uint64(100)).Return("jf-movie")
 			},
 			expected: &serializers.MovieDetailsSerializer{
 				Id:              100,
@@ -395,6 +410,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Title:           "Stored Title",
 				PosterPath:      "/stored.jpg",
 				Runtime:         120,
+				JellyfinId:      "jf-movie",
 				Credits:         []serializers.PersonSerializer{},
 				Recommendations: []serializers.RecommendationSerializer{},
 				Videos:          []serializers.VideoSerializer{},
@@ -450,6 +466,66 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 	}
 }
 
+func Test_Tmdb_FetchMovieDetails_PerUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	client := tmdb.NewMockClient(ctrl)
+	moviesSvc := NewMockMovies(ctrl)
+	library := NewMockLibrary(ctrl)
+	store := newMemoryCache()
+	provider := NewTmdbProvider(client, moviesSvc, NewMockSeries(ctrl), NewMockProgress(ctrl), library, store, newTestLogger())
+
+	firstUserId := uuid.New()
+	secondUserId := uuid.New()
+
+	tests := []struct {
+		name     string
+		userId   uuid.UUID
+		before   func()
+		expected string
+	}{
+		{
+			name:   "First user reads TMDB",
+			userId: firstUserId,
+			before: func() {
+				client.EXPECT().FetchMovieDetails(ctx, uint64(100)).Return(sampleMovieDetails(), nil)
+
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: firstUserId, TmdbIds: []uint64{200}}).Return([]models.Movie{}, nil)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: firstUserId, TmdbIds: []uint64{100}}).Return([]models.Movie{}, nil)
+
+				library.EXPECT().Movie(ctx, firstUserId, uint64(100)).Return("jf-first")
+			},
+			expected: "jf-first",
+		},
+		{
+			name:   "Second user reads the cached details",
+			userId: secondUserId,
+			before: func() {
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: secondUserId, TmdbIds: []uint64{200}}).Return([]models.Movie{}, nil)
+				moviesSvc.EXPECT().FindByFilter(ctx, models.MovieFilter{UserId: secondUserId, TmdbIds: []uint64{100}}).Return([]models.Movie{}, nil)
+
+				library.EXPECT().Movie(ctx, secondUserId, uint64(100)).Return("jf-second")
+			},
+			expected: "jf-second",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			result, err := provider.FetchMovieDetails(ctx, 100, tt.userId)
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, result.JellyfinId)
+			assert.Contains(t, store.store, "tmdb:v1:movie:100")
+			assert.NotContains(t, string(store.store["tmdb:v1:movie:100"]), "jf-")
+		})
+	}
+}
+
 func Test_Tmdb_FetchTvDetails(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -459,7 +535,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 	seriesID := uuid.New()
@@ -484,6 +561,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				seriesSvc.EXPECT().Update(ctx, &models.Series{
 					ID: seriesID, Title: "Breaking Bad", PosterPath: "/bb-tmdb.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended",
 				}).Return(&models.Series{}, nil)
+
+				library.EXPECT().Series(ctx, userId, uint64(300)).Return("jf-series")
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -497,6 +576,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				SeasonsCount:    5,
 				EpisodesCount:   62,
 				Rating:          9.5,
+				JellyfinId:      "jf-series",
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("want"),
 				Videos:          expectedTvVideos(),
@@ -512,6 +592,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{{
 					ID: seriesID, TmdbId: 300, Title: "Breaking Bad", PosterPath: "/bb-tmdb.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended", State: "watched",
 				}}, nil)
+
+				library.EXPECT().Series(ctx, userId, uint64(300)).Return("")
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -548,6 +630,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				seriesSvc.EXPECT().Update(ctx, &models.Series{
 					ID: seriesID, Title: "Stored Title", PosterPath: "/new.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Stored Status",
 				}).Return(&models.Series{}, nil)
+
+				library.EXPECT().Series(ctx, userId, uint64(300)).Return("")
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -577,6 +661,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 					ID: seriesID, TmdbId: 300, Title: "Old", PosterPath: "/old.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended", State: "watched", Pinned: true,
 				}}, nil)
 				seriesSvc.EXPECT().Update(ctx, gomock.Any()).Return(nil, assert.AnError)
+
+				library.EXPECT().Series(ctx, userId, uint64(300)).Return("")
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -605,6 +691,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 					{TmdbId: 400, State: "want"},
 				}, nil)
 				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{}, nil)
+
+				library.EXPECT().Series(ctx, userId, uint64(300)).Return("jf-series")
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -618,6 +706,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				SeasonsCount:    5,
 				EpisodesCount:   62,
 				Rating:          9.5,
+				JellyfinId:      "jf-series",
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("want"),
 				Videos:          expectedTvVideos(),
@@ -632,6 +721,8 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: []uint64{300}}).Return([]models.Series{{
 					ID: seriesID, TmdbId: 300, Title: "Stored Title", PosterPath: "/stored.jpg", SeasonsCount: 5, EpisodesCount: 62, Status: "Ended", State: "watched", Pinned: true,
 				}}, nil)
+
+				library.EXPECT().Series(ctx, userId, uint64(300)).Return("jf-series")
 			},
 			expected: &serializers.SeriesDetailsSerializer{
 				Id:              300,
@@ -642,6 +733,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				PosterPath:      "/stored.jpg",
 				SeasonsCount:    5,
 				EpisodesCount:   62,
+				JellyfinId:      "jf-series",
 				Credits:         []serializers.PersonSerializer{},
 				Recommendations: []serializers.RecommendationSerializer{},
 				Videos:          []serializers.VideoSerializer{},
@@ -698,6 +790,66 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 	}
 }
 
+func Test_Tmdb_FetchTvDetails_PerUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	client := tmdb.NewMockClient(ctrl)
+	seriesSvc := NewMockSeries(ctrl)
+	library := NewMockLibrary(ctrl)
+	store := newMemoryCache()
+	provider := NewTmdbProvider(client, NewMockMovies(ctrl), seriesSvc, NewMockProgress(ctrl), library, store, newTestLogger())
+
+	firstUserId := uuid.New()
+	secondUserId := uuid.New()
+
+	tests := []struct {
+		name     string
+		userId   uuid.UUID
+		before   func()
+		expected string
+	}{
+		{
+			name:   "First user reads TMDB",
+			userId: firstUserId,
+			before: func() {
+				client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(sampleTvDetails(), nil)
+
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: firstUserId, TmdbIds: []uint64{400}}).Return([]models.Series{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: firstUserId, TmdbIds: []uint64{300}}).Return([]models.Series{}, nil)
+
+				library.EXPECT().Series(ctx, firstUserId, uint64(300)).Return("jf-first")
+			},
+			expected: "jf-first",
+		},
+		{
+			name:   "Second user reads the cached details",
+			userId: secondUserId,
+			before: func() {
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: secondUserId, TmdbIds: []uint64{400}}).Return([]models.Series{}, nil)
+				seriesSvc.EXPECT().FindByFilter(ctx, models.SeriesFilter{UserId: secondUserId, TmdbIds: []uint64{300}}).Return([]models.Series{}, nil)
+
+				library.EXPECT().Series(ctx, secondUserId, uint64(300)).Return("jf-second")
+			},
+			expected: "jf-second",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			result, err := provider.FetchTvDetails(ctx, 300, tt.userId)
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, result.JellyfinId)
+			assert.Contains(t, store.store, "tmdb:v1:tv:300")
+			assert.NotContains(t, string(store.store["tmdb:v1:tv:300"]), "jf-")
+		})
+	}
+}
+
 func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -707,7 +859,8 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -822,7 +975,8 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 	userId := uuid.New()
 
 	tests := []struct {
@@ -839,6 +993,8 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 					WatchedSeasons:  []uint64{50},
 					WatchedEpisodes: []uint64{80},
 				}, nil)
+
+				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(nil)
 			},
 			expected: &serializers.SeasonDetailsSerializer{
 				Id:         50,
@@ -855,10 +1011,41 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 			},
 		},
 		{
+			name: "Success matches episodes by number",
+			before: func() {
+				season := sampleSeasonDetails()
+				season.Episodes = append(season.Episodes,
+					tmdb.Episode{ID: 81, AirDate: "2008-01-27", EpisodeNumber: 2, Name: "Cat's in the Bag", Overview: "The second.", Runtime: 48, StillPath: "/e2.jpg", VoteAverage: 7.5},
+					tmdb.Episode{ID: 82, AirDate: "2008-02-10", EpisodeNumber: 3, Name: "And the Bag's in the River", Overview: "The third.", Runtime: 48, StillPath: "/e3.jpg", VoteAverage: 7.8},
+				)
+
+				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(season, nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-e1", 3: "jf-e3", 9: "jf-e9"}).Times(1)
+			},
+			expected: &serializers.SeasonDetailsSerializer{
+				Id:         50,
+				TmdbShowId: 300,
+				Title:      "Season 1",
+				Number:     1,
+				PosterPath: "/s1.jpg",
+				AirDate:    "2008-01-20",
+				Overview:   "The first season.",
+				Episodes: []serializers.SeasonEpisodeSerializer{
+					{Id: 80, Title: "Pilot", Number: 1, PosterPath: "/e1.jpg", Runtime: 58, Overview: "The pilot.", Rating: 8.0, AirDate: "2008-01-20", JellyfinId: "jf-e1"},
+					{Id: 81, Title: "Cat's in the Bag", Number: 2, PosterPath: "/e2.jpg", Runtime: 48, Overview: "The second.", Rating: 7.5, AirDate: "2008-01-27"},
+					{Id: 82, Title: "And the Bag's in the River", Number: 3, PosterPath: "/e3.jpg", Runtime: 48, Overview: "The third.", Rating: 7.8, AirDate: "2008-02-10", JellyfinId: "jf-e3"},
+				},
+			},
+		},
+		{
 			name: "Success with nothing watched",
 			before: func() {
 				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(sampleSeasonDetails(), nil)
 				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(map[uint64]string{})
 			},
 			expected: &serializers.SeasonDetailsSerializer{
 				Id:         50,
@@ -919,22 +1106,27 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 	userId := uuid.New()
 
 	tests := []struct {
 		name     string
+		episode  uint64
 		before   func()
 		expected *serializers.EpisodeDetailsSerializer
 		error    error
 	}{
 		{
-			name: "Success merges watched state",
+			name:    "Success merges watched state",
+			episode: 1,
 			before: func() {
 				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(sampleEpisodeDetails(), nil)
 				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{
 					WatchedEpisodes: []uint64{80},
 				}, nil)
+
+				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-e1", 2: "jf-e2"})
 			},
 			expected: &serializers.EpisodeDetailsSerializer{
 				Id:         80,
@@ -946,6 +1138,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				Rating:     8.0,
 				AirDate:    "2008-01-20",
 				Watched:    true,
+				JellyfinId: "jf-e1",
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -956,10 +1149,13 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 			},
 		},
 		{
-			name: "Success not watched",
+			name:    "Success not watched",
+			episode: 1,
 			before: func() {
 				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(sampleEpisodeDetails(), nil)
 				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(map[uint64]string{2: "jf-e2"})
 			},
 			expected: &serializers.EpisodeDetailsSerializer{
 				Id:         80,
@@ -981,7 +1177,39 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 			},
 		},
 		{
-			name: "Client error",
+			name:    "Success matches the requested episode number",
+			episode: 2,
+			before: func() {
+				episode := sampleEpisodeDetails()
+				episode.EpisodeNumber = 2
+
+				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(2)).Return(episode, nil)
+				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-e1", 2: "jf-e2"})
+			},
+			expected: &serializers.EpisodeDetailsSerializer{
+				Id:         80,
+				JellyfinId: "jf-e2",
+				Title:      "Pilot",
+				Number:     2,
+				PosterPath: "/e1.jpg",
+				Runtime:    58,
+				Overview:   "The pilot.",
+				Rating:     8.0,
+				AirDate:    "2008-01-20",
+				Credits: []serializers.PersonSerializer{
+					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
+					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
+				},
+				Videos: []serializers.VideoSerializer{
+					{Id: "ev1", Key: "evkey"},
+				},
+			},
+		},
+		{
+			name:    "Client error",
+			episode: 1,
 			before: func() {
 				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(nil, assert.AnError)
 			},
@@ -989,7 +1217,8 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 			error:    tmdb.ErrFailedToFetchEpisodeDetails,
 		},
 		{
-			name: "Progress error",
+			name:    "Progress error",
+			episode: 1,
 			before: func() {
 				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(sampleEpisodeDetails(), nil)
 				progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(nil, assert.AnError)
@@ -1003,7 +1232,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := provider.FetchTvEpisodeDetails(ctx, 300, 1, 1, userId)
+			result, err := provider.FetchTvEpisodeDetails(ctx, 300, 1, tt.episode, userId)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)
@@ -1012,6 +1241,121 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				require.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
 			}
+		})
+	}
+}
+
+func Test_Tmdb_FetchTvSeasonDetails_PerUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	client := tmdb.NewMockClient(ctrl)
+	progressSvc := NewMockProgress(ctrl)
+	library := NewMockLibrary(ctrl)
+	store := newMemoryCache()
+	provider := NewTmdbProvider(client, NewMockMovies(ctrl), NewMockSeries(ctrl), progressSvc, library, store, newTestLogger())
+
+	firstUserId := uuid.New()
+	secondUserId := uuid.New()
+
+	tests := []struct {
+		name     string
+		userId   uuid.UUID
+		before   func()
+		expected string
+	}{
+		{
+			name:   "First user reads TMDB",
+			userId: firstUserId,
+			before: func() {
+				client.EXPECT().FetchTvSeasonDetails(ctx, uint64(300), uint64(1)).Return(sampleSeasonDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, firstUserId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, firstUserId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-first"})
+			},
+			expected: "jf-first",
+		},
+		{
+			name:   "Second user reads the cached season",
+			userId: secondUserId,
+			before: func() {
+				progressSvc.EXPECT().Get(ctx, secondUserId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, secondUserId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-second"})
+			},
+			expected: "jf-second",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			result, err := provider.FetchTvSeasonDetails(ctx, 300, 1, tt.userId)
+
+			require.NoError(t, err)
+			require.Len(t, result.Episodes, 1)
+			assert.Equal(t, tt.expected, result.Episodes[0].JellyfinId)
+			assert.Contains(t, store.store, "tmdb:v1:tv:300:season:1")
+			assert.NotContains(t, string(store.store["tmdb:v1:tv:300:season:1"]), "jf-")
+		})
+	}
+}
+
+func Test_Tmdb_FetchTvEpisodeDetails_PerUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	client := tmdb.NewMockClient(ctrl)
+	progressSvc := NewMockProgress(ctrl)
+	library := NewMockLibrary(ctrl)
+	store := newMemoryCache()
+	provider := NewTmdbProvider(client, NewMockMovies(ctrl), NewMockSeries(ctrl), progressSvc, library, store, newTestLogger())
+
+	firstUserId := uuid.New()
+	secondUserId := uuid.New()
+
+	tests := []struct {
+		name     string
+		userId   uuid.UUID
+		before   func()
+		expected string
+	}{
+		{
+			name:   "First user reads TMDB",
+			userId: firstUserId,
+			before: func() {
+				client.EXPECT().FetchTvEpisodeDetails(ctx, uint64(300), uint64(1), uint64(1)).Return(sampleEpisodeDetails(), nil)
+				progressSvc.EXPECT().Get(ctx, firstUserId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, firstUserId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-first"})
+			},
+			expected: "jf-first",
+		},
+		{
+			name:   "Second user reads the cached episode",
+			userId: secondUserId,
+			before: func() {
+				progressSvc.EXPECT().Get(ctx, secondUserId, uint64(300)).Return(&models.SeriesProgress{State: models.StateTypeNone}, nil)
+
+				library.EXPECT().Episodes(ctx, secondUserId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-second"})
+			},
+			expected: "jf-second",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			result, err := provider.FetchTvEpisodeDetails(ctx, 300, 1, 1, tt.userId)
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, result.JellyfinId)
+			assert.Contains(t, store.store, "tmdb:v1:tv:300:season:1:episode:1")
+			assert.NotContains(t, string(store.store["tmdb:v1:tv:300:season:1:episode:1"]), "jf-")
 		})
 	}
 }
@@ -1025,7 +1369,8 @@ func Test_Tmdb_SearchMovies(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1098,7 +1443,8 @@ func Test_Tmdb_FetchTrendingMovies(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1161,7 +1507,8 @@ func Test_Tmdb_SearchSeries(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1234,7 +1581,8 @@ func Test_Tmdb_FetchTrendingSeries(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -1297,7 +1645,8 @@ func Test_Tmdb_SearchPeople(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	tests := []struct {
 		name     string
@@ -1361,7 +1710,8 @@ func Test_Tmdb_FetchTrendingPeople(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 
 	tests := []struct {
 		name     string
@@ -1426,7 +1776,8 @@ func Test_Tmdb_FetchUpNext(t *testing.T) {
 	moviesSvc := NewMockMovies(ctrl)
 	seriesSvc := NewMockSeries(ctrl)
 	progressSvc := NewMockProgress(ctrl)
-	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, cache.NewNoopCache(), newTestLogger())
+	library := NewMockLibrary(ctrl)
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, library, cache.NewNoopCache(), newTestLogger())
 	userId := uuid.New()
 
 	tests := []struct {

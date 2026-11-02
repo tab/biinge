@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -19,6 +20,7 @@ import (
 type capturedRequest struct {
 	method        string
 	path          string
+	query         url.Values
 	authorization string
 	userAgent     string
 	body          string
@@ -33,6 +35,7 @@ func newTestServer(t *testing.T, captured *capturedRequest, statusCode int, body
 		*captured = capturedRequest{
 			method:        r.Method,
 			path:          r.URL.Path,
+			query:         r.URL.Query(),
 			authorization: r.Header.Get("Authorization"),
 			userAgent:     r.Header.Get("User-Agent"),
 			body:          string(requestBody),
@@ -220,6 +223,196 @@ func Test_Client_SignOut(t *testing.T) {
 			}
 
 			require.NoError(t, err)
+		})
+	}
+}
+
+func Test_Client_Items(t *testing.T) {
+	ctx := context.Background()
+	connection := Connection{DeviceId: "device-1", AccessToken: "token-1", UserId: "user-1"}
+
+	tests := []struct {
+		name           string
+		statusCode     int
+		body           string
+		transportError bool
+		expected       []Item
+		error          error
+	}{
+		{
+			name:       "Success",
+			statusCode: http.StatusOK,
+			body: `{"Items":[
+				{"Id":"item-1","Type":"Movie","ProviderIds":{"Tmdb":"603","Imdb":"tt0133093"}},
+				{"Id":"item-2","Type":"Series","ProviderIds":{"Tmdb":"1399"}},
+				{"Id":"item-3","Type":"Movie","ProviderIds":{"Imdb":"tt0000001"}},
+				{"Id":"item-4","Type":"Series"}
+			],"TotalRecordCount":4}`,
+			expected: []Item{
+				{Id: "item-1", Type: ItemTypeMovie, TmdbId: "603"},
+				{Id: "item-2", Type: ItemTypeSeries, TmdbId: "1399"},
+				{Id: "item-3", Type: ItemTypeMovie},
+				{Id: "item-4", Type: ItemTypeSeries},
+			},
+		},
+		{
+			name:       "EmptyLibrary",
+			statusCode: http.StatusOK,
+			body:       `{"Items":[],"TotalRecordCount":0}`,
+			expected:   []Item{},
+		},
+		{
+			name:       "RevokedToken",
+			statusCode: http.StatusUnauthorized,
+			error:      ErrInvalidCredentials,
+		},
+		{
+			name:       "ServerError",
+			statusCode: http.StatusInternalServerError,
+			error:      ErrUnavailable,
+		},
+		{
+			name:       "UndecodableBody",
+			statusCode: http.StatusOK,
+			body:       `<html>Bad Gateway</html>`,
+			error:      ErrUnavailable,
+		},
+		{
+			name:           "Unreachable",
+			transportError: true,
+			error:          ErrUnavailable,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var captured capturedRequest
+
+			baseURL := closedServerURL(t)
+			if !tt.transportError {
+				baseURL = newTestServer(t, &captured, tt.statusCode, tt.body).URL
+			}
+
+			result, err := newTestClient(t, baseURL, "1.2.3").Items(ctx, connection)
+
+			if !tt.transportError {
+				assert.Equal(t, http.MethodGet, captured.method)
+				assert.Equal(t, "/Users/user-1/Items", captured.path)
+				assert.Equal(t, url.Values{
+					"IncludeItemTypes": {"Movie,Series"},
+					"Recursive":        {"true"},
+					"Fields":           {"ProviderIds"},
+					"EnableImages":     {"false"},
+					"EnableUserData":   {"false"},
+				}, captured.query)
+				assert.Equal(t, `MediaBrowser Client="biinge", Device="biinge API", DeviceId="device-1", Version="1.2.3", Token="token-1"`, captured.authorization)
+				assert.Equal(t, "biinge-api", captured.userAgent)
+			}
+
+			if tt.error != nil {
+				require.ErrorIs(t, err, tt.error)
+				assert.Nil(t, result)
+
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func Test_Client_Episodes(t *testing.T) {
+	ctx := context.Background()
+	connection := Connection{DeviceId: "device-1", AccessToken: "token-1", UserId: "user-1"}
+	zero, one, two := 0, 1, 2
+
+	tests := []struct {
+		name           string
+		statusCode     int
+		body           string
+		transportError bool
+		expected       []Episode
+		error          error
+	}{
+		{
+			name:       "Success",
+			statusCode: http.StatusOK,
+			body: `{"Items":[
+				{"Id":"episode-1","Type":"Episode","ParentIndexNumber":1,"IndexNumber":2},
+				{"Id":"episode-2","Type":"Episode","ParentIndexNumber":0,"IndexNumber":1},
+				{"Id":"episode-3","Type":"Episode","IndexNumber":1},
+				{"Id":"episode-4","Type":"Episode","ParentIndexNumber":2}
+			],"TotalRecordCount":4}`,
+			expected: []Episode{
+				{Id: "episode-1", Season: &one, Number: &two},
+				{Id: "episode-2", Season: &zero, Number: &one},
+				{Id: "episode-3", Number: &one},
+				{Id: "episode-4", Season: &two},
+			},
+		},
+		{
+			name:       "NoEpisodes",
+			statusCode: http.StatusOK,
+			body:       `{"Items":[],"TotalRecordCount":0}`,
+			expected:   []Episode{},
+		},
+		{
+			name:       "RevokedToken",
+			statusCode: http.StatusUnauthorized,
+			error:      ErrInvalidCredentials,
+		},
+		{
+			name:       "ServerError",
+			statusCode: http.StatusInternalServerError,
+			error:      ErrUnavailable,
+		},
+		{
+			name:       "UndecodableBody",
+			statusCode: http.StatusOK,
+			body:       `{"Items":[{"Id":"episode-1","IndexNumber":"one"}]}`,
+			error:      ErrUnavailable,
+		},
+		{
+			name:           "Unreachable",
+			transportError: true,
+			error:          ErrUnavailable,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var captured capturedRequest
+
+			baseURL := closedServerURL(t)
+			if !tt.transportError {
+				baseURL = newTestServer(t, &captured, tt.statusCode, tt.body).URL
+			}
+
+			result, err := newTestClient(t, baseURL, "1.2.3").Episodes(ctx, connection, "series-1")
+
+			if !tt.transportError {
+				assert.Equal(t, http.MethodGet, captured.method)
+				assert.Equal(t, "/Shows/series-1/Episodes", captured.path)
+				assert.Equal(t, url.Values{
+					"userId":         {"user-1"},
+					"IsMissing":      {"false"},
+					"EnableImages":   {"false"},
+					"EnableUserData": {"false"},
+				}, captured.query)
+				assert.Equal(t, `MediaBrowser Client="biinge", Device="biinge API", DeviceId="device-1", Version="1.2.3", Token="token-1"`, captured.authorization)
+				assert.Equal(t, "biinge-api", captured.userAgent)
+			}
+
+			if tt.error != nil {
+				require.ErrorIs(t, err, tt.error)
+				assert.Nil(t, result)
+
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
 		})
 	}
 }

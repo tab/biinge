@@ -21,19 +21,20 @@ import (
 	"biinge-api/internal/config/middlewares"
 )
 
-func newSeriesController(ctrl *gomock.Controller) (*services.MockSeries, *services.MockProgress, *services.MockTmdbProvider, SeriesController) {
+func newSeriesController(ctrl *gomock.Controller) (*services.MockSeries, *services.MockProgress, *services.MockTmdbProvider, *services.MockLibrary, SeriesController) {
 	series := services.NewMockSeries(ctrl)
 	progress := services.NewMockProgress(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
+	library := services.NewMockLibrary(ctrl)
 
-	return series, progress, provider, NewSeriesController(series, progress, provider)
+	return series, progress, provider, library, NewSeriesController(series, progress, provider, library)
 }
 
 func Test_SeriesController_HandleList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	series, _, _, controller := newSeriesController(ctrl)
+	series, _, _, _, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -174,7 +175,7 @@ func Test_SeriesController_HandleDetails(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, _, provider, controller := newSeriesController(ctrl)
+	_, _, provider, _, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -300,7 +301,7 @@ func Test_SeriesController_HandleSeasonDetails(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, _, provider, controller := newSeriesController(ctrl)
+	_, _, provider, _, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -436,7 +437,7 @@ func Test_SeriesController_HandleEpisodeDetails(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, _, provider, controller := newSeriesController(ctrl)
+	_, _, provider, _, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -586,7 +587,7 @@ func Test_SeriesController_HandleCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	series, _, _, controller := newSeriesController(ctrl)
+	series, _, _, _, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -712,7 +713,7 @@ func Test_SeriesController_HandleUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	series, _, _, controller := newSeriesController(ctrl)
+	series, _, _, _, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -858,7 +859,7 @@ func Test_SeriesController_HandleDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	series, _, _, controller := newSeriesController(ctrl)
+	series, _, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -881,6 +882,7 @@ func Test_SeriesController_HandleDelete(t *testing.T) {
 			name: "Success",
 			before: func() {
 				series.EXPECT().Delete(gomock.Any(), uint64(1399), id).Return(nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedSeries, TmdbId: 1399, Played: false})
 			},
 			withUser: true,
 			param:    "1399",
@@ -962,6 +964,8 @@ func Test_SeriesController_HandleDelete(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }

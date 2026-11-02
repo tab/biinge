@@ -254,7 +254,7 @@ const endpoints: Endpoint[] = [
   }'` },
 
   { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | watched" }, ...paging], resp: movieListJson },
-  { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library. id is the TMDB movie id.", body: `{
+  { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library. id is the TMDB movie id.", note: "With your Jellyfin account connected, a movie added as watched is also marked played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{
   "id": 693134,
   "title": "Dune: Part Two",
   "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
@@ -262,11 +262,11 @@ const endpoints: Endpoint[] = [
   "state": "want"
 }` },
   { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding, changing and listing movies never return it.", resp: movieDetailsJson },
-  { id: "movie-update", group: "Movies", method: "PATCH", path: "/api/v1/movies/{id}", desc: "Change state or pin the movie.", body: `{
+  { id: "movie-update", group: "Movies", method: "PATCH", path: "/api/v1/movies/{id}", desc: "Change state or pin the movie.", note: "With your Jellyfin account connected, a change into watched also marks the movie played in Jellyfin, and a change out of watched marks it unplayed. A pin or the same state again sends nothing. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{
   "state": "watched",
   "pinned": true
 }` },
-  { id: "movie-delete", group: "Movies", method: "DELETE", path: "/api/v1/movies/{id}", desc: "Remove the movie from the library." },
+  { id: "movie-delete", group: "Movies", method: "DELETE", path: "/api/v1/movies/{id}", desc: "Remove the movie from the library.", note: "With your Jellyfin account connected, the movie is also marked unplayed in Jellyfin, whatever its state was. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
 
   { id: "games-list", group: "Games", method: "GET", path: "/api/v1/games", desc: "Your game library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | playing | played" }, ...paging] },
   { id: "games-create", group: "Games", method: "POST", path: "/api/v1/games", desc: "Add a game to the library. id is the IGDB game id, and posterPath is an IGDB cover image_id rather than a path.", body: `{
@@ -298,12 +298,12 @@ const endpoints: Endpoint[] = [
   "state": "watching",
   "pinned": true
 }` },
-  { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library." },
+  { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library.", note: "With your Jellyfin account connected, the show and each of its matched episodes are also marked unplayed in Jellyfin, whatever its state was. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
   { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and episodes.", note: "An episode's jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: seasonDetailsJson },
   { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: episodeDetailsJson },
 
   { id: "progress-get", group: "Progress", method: "GET", path: "/api/v1/series/{id}/progress", desc: "Watched seasons and episodes for a show." },
-  { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark a show watched. Ids come from the URL, and the body carries the rows to write.", note: "Only the seasons and episodes you list are recorded, so a body without them marks nothing. The example lists two episodes of season one; a real client sends all nine, and every other season too.", body: `{
+  { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark a show watched. Ids come from the URL, and the body carries the rows to write.", note: "Only the seasons and episodes you list are recorded, so a body without them marks nothing. The example lists two episodes of season one; a real client sends all nine, and every other season too. With your Jellyfin account connected, a mark that changes your watched episodes also marks the show and each of its matched episodes played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{
   "series": {
     "title": "Severance",
     "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
@@ -324,8 +324,8 @@ const endpoints: Endpoint[] = [
     }
   ]
 }` },
-  { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show, dropping every season and episode recorded for it." },
-  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", note: "The episodes array is what actually gets recorded. Send the season's episodes in it — without them the show ends up with no watched episodes, and nothing is tracked.", body: `{
+  { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show, dropping every season and episode recorded for it.", note: "With your Jellyfin account connected, an unmark that changes your watched episodes also marks the show and each of its matched episodes unplayed in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
+  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", note: "The episodes array is what actually gets recorded. Send the season's episodes in it — without them the show ends up with no watched episodes, and nothing is tracked. With your Jellyfin account connected, a mark that changes your watched episodes also marks each matched episode of the season played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped.", body: `{
   "series": {
     "title": "Severance",
     "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
@@ -339,8 +339,8 @@ const endpoints: Endpoint[] = [
     { "id": 3396429, "title": "Half Loop", "posterPath": "/wIQP0P2tyE7VRIN3xR8Efq7UgKt.jpg", "runtime": 53, "airDate": "2022-02-17" }
   ]
 }` },
-  { id: "season-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Unmark a season and its episodes." },
-  { id: "episode-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Mark an episode as watched.", note: "The show and season rows are created from this body if they don't exist yet, so send their metadata alongside the episode.", body: `{
+  { id: "season-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Unmark a season and its episodes.", note: "With your Jellyfin account connected, an unmark that changes your watched episodes also marks each matched episode of the season unplayed in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped." },
+  { id: "episode-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Mark an episode as watched.", note: "The show and season rows are created from this body if they don't exist yet, so send their metadata alongside the episode. With your Jellyfin account connected, a mark that changes your watched episodes also marks the episode played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped.", body: `{
   "series": {
     "title": "Severance",
     "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
@@ -356,7 +356,7 @@ const endpoints: Endpoint[] = [
     "airDate": "2022-02-17"
   }
 }` },
-  { id: "episode-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Unmark an episode." },
+  { id: "episode-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Unmark an episode.", note: "With your Jellyfin account connected, an unmark that changes your watched episodes also marks the episode unplayed in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped." },
 
   { id: "search-movies", group: "Search & Trending", method: "GET", path: "/api/v1/search/movies", desc: "Search movies. query is required.", params: [{ name: "query", value: "dune", hint: "search terms" }, { name: "page", hint: "1" }] },
   { id: "search-series", group: "Search & Trending", method: "GET", path: "/api/v1/search/series", desc: "Search TV shows. query is required.", params: [{ name: "query", value: "silo", hint: "search terms" }, { name: "page", hint: "1" }] },

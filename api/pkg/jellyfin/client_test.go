@@ -417,6 +417,88 @@ func Test_Client_Episodes(t *testing.T) {
 	}
 }
 
+func Test_Client_SetPlayed(t *testing.T) {
+	ctx := context.Background()
+	connection := Connection{DeviceId: "device-1", AccessToken: "token-1", UserId: "user-1"}
+
+	tests := []struct {
+		name           string
+		played         bool
+		statusCode     int
+		transportError bool
+		method         string
+		error          error
+	}{
+		{
+			name:       "Played",
+			played:     true,
+			statusCode: http.StatusOK,
+			method:     http.MethodPost,
+		},
+		{
+			name:       "Unplayed",
+			played:     false,
+			statusCode: http.StatusOK,
+			method:     http.MethodDelete,
+		},
+		{
+			name:       "NoContent",
+			played:     true,
+			statusCode: http.StatusNoContent,
+			method:     http.MethodPost,
+		},
+		{
+			name:       "RevokedToken",
+			played:     true,
+			statusCode: http.StatusUnauthorized,
+			method:     http.MethodPost,
+			error:      ErrInvalidCredentials,
+		},
+		{
+			name:       "ServerError",
+			played:     false,
+			statusCode: http.StatusInternalServerError,
+			method:     http.MethodDelete,
+			error:      ErrUnavailable,
+		},
+		{
+			name:           "Unreachable",
+			played:         true,
+			transportError: true,
+			error:          ErrUnavailable,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var captured capturedRequest
+
+			baseURL := closedServerURL(t)
+			if !tt.transportError {
+				baseURL = newTestServer(t, &captured, tt.statusCode, "").URL
+			}
+
+			err := newTestClient(t, baseURL, "1.2.3").SetPlayed(ctx, connection, PlayedState{ItemId: "item-1", Played: tt.played})
+
+			if !tt.transportError {
+				assert.Equal(t, tt.method, captured.method)
+				assert.Equal(t, "/UserPlayedItems/item-1", captured.path)
+				assert.Equal(t, url.Values{"userId": {"user-1"}}, captured.query)
+				assert.Equal(t, `MediaBrowser Client="biinge", Device="biinge API", DeviceId="device-1", Version="1.2.3", Token="token-1"`, captured.authorization)
+				assert.Equal(t, "biinge-api", captured.userAgent)
+			}
+
+			if tt.error != nil {
+				require.ErrorIs(t, err, tt.error)
+
+				return
+			}
+
+			require.NoError(t, err)
+		})
+	}
+}
+
 func Test_Client_Version(t *testing.T) {
 	ctx := context.Background()
 	credentials := Credentials{Username: "alice", Password: "secret"}

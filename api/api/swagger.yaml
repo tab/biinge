@@ -551,7 +551,7 @@ paths:
 
     post:
       summary: "Create movie"
-      description: "Adds a movie to the user's list"
+      description: "Adds a movie to the user's list. When the user has a Jellyfin connection, a movie added as watched also marks the matching Jellyfin item played, in the background after the biinge write. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - movies
       parameters:
@@ -668,7 +668,7 @@ paths:
 
     patch:
       summary: "Update movie"
-      description: "Updates a movie status and pinned state"
+      description: "Updates a movie status and pinned state. When the user has a Jellyfin connection, a change into watched also marks the matching Jellyfin item played and a change out of watched marks it unplayed, in the background after the biinge write; a pin or an unchanged state writes nothing. The current state is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - movies
       parameters:
@@ -726,7 +726,7 @@ paths:
 
     delete:
       summary: "Delete movie"
-      description: "Deletes a movie from user's lists"
+      description: "Deletes a movie from user's lists. When the user has a Jellyfin connection, it also marks the matching Jellyfin item unplayed, whatever the movie's state was, in the background after the biinge write. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - movies
       parameters:
@@ -1268,7 +1268,7 @@ paths:
 
     delete:
       summary: "Delete series"
-      description: "Removes a series from the user's lists"
+      description: "Removes a series from the user's lists. When the user has a Jellyfin connection, it also marks the matching Jellyfin series and each of its matched episodes unplayed, whatever the series state was, in the background after the biinge write. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - series
       parameters:
@@ -1358,7 +1358,7 @@ paths:
   /api/v1/series/{id}/watched:
     post:
       summary: "Mark whole show watched"
-      description: "Marks the series and all provided seasons and episodes as watched in a single transaction; the series state is derived (watched, or watching if still in production)"
+      description: "Marks the series and all provided seasons and episodes as watched in a single transaction; the series state is derived (watched, or watching if still in production). When the user has a Jellyfin connection, a mark that changes the watched episodes also marks the matching Jellyfin series and each of its matched episodes played, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1403,7 +1403,7 @@ paths:
                 $ref: "#/components/schemas/ErrorSerializer"
     delete:
       summary: "Unmark whole show watched"
-      description: "Removes the series and cascades deletion of its seasons and episodes; returns an empty (none) progress snapshot"
+      description: "Removes the series and cascades deletion of its seasons and episodes; returns an empty (none) progress snapshot. When the user has a Jellyfin connection, an unmark that changes the watched episodes also marks the matching Jellyfin series and each of its matched episodes unplayed, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1444,7 +1444,7 @@ paths:
   /api/v1/series/{id}/seasons/{seasonId}/watched:
     post:
       summary: "Mark season watched"
-      description: "Marks a season and all provided episodes as watched, then recomputes the series state"
+      description: "Marks a season and all provided episodes as watched, then recomputes the series state. When the user has a Jellyfin connection, a mark that changes the watched episodes also marks each matched Jellyfin episode of the season played, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1495,7 +1495,7 @@ paths:
                 $ref: "#/components/schemas/ErrorSerializer"
     delete:
       summary: "Unmark season watched"
-      description: "Deletes a season (cascading its episodes), then recomputes the series state"
+      description: "Deletes a season (cascading its episodes), then recomputes the series state. When the user has a Jellyfin connection, an unmark that changes the watched episodes also marks each matched Jellyfin episode of the season unplayed, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1542,7 +1542,7 @@ paths:
   /api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched:
     post:
       summary: "Mark episode watched"
-      description: "Marks a single episode watched, upserting its parent series and season, then recomputes the season and series state"
+      description: "Marks a single episode watched, upserting its parent series and season, then recomputes the season and series state. When the user has a Jellyfin connection, a mark that changes the watched episodes also marks the matching Jellyfin episode played, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1599,7 +1599,7 @@ paths:
                 $ref: "#/components/schemas/ErrorSerializer"
     delete:
       summary: "Unmark episode watched"
-      description: "Deletes a single watched episode, then recomputes the season and series state (untracking the show once it has no watched episodes left)"
+      description: "Deletes a single watched episode, then recomputes the season and series state (untracking the show once it has no watched episodes left). When the user has a Jellyfin connection, an unmark that changes the watched episodes also marks the matching Jellyfin episode unplayed, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:

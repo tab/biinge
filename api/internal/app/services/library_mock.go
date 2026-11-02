@@ -82,3 +82,15 @@ func (mr *MockLibraryMockRecorder) Series(ctx, userId, tmdbId any) *gomock.Call 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Series", reflect.TypeOf((*MockLibrary)(nil).Series), ctx, userId, tmdbId)
 }
+
+// SetPlayed mocks base method.
+func (m *MockLibrary) SetPlayed(ctx context.Context, userId uuid.UUID, target PlayedTarget) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetPlayed", ctx, userId, target)
+}
+
+// SetPlayed indicates an expected call of SetPlayed.
+func (mr *MockLibraryMockRecorder) SetPlayed(ctx, userId, target any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPlayed", reflect.TypeOf((*MockLibrary)(nil).SetPlayed), ctx, userId, target)
+}

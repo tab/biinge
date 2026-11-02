@@ -20,6 +20,7 @@ const (
 	signOutPath  = "/Sessions/Logout"
 	itemsPath    = "/Users/{userId}/Items"
 	episodesPath = "/Shows/{seriesId}/Episodes"
+	playedPath   = "/UserPlayedItems/{itemId}"
 
 	// ItemTypeSeries sits beside ItemTypeMovie (event.go) as the other type Items returns
 	ItemTypeSeries = "Series"
@@ -62,12 +63,19 @@ type Episode struct {
 	Number *int
 }
 
-// Client signs a user in to and out of the instance's Jellyfin server, each sign-in as its own device, and reads their library
+// PlayedState is the played flag to set on one Jellyfin item
+type PlayedState struct {
+	ItemId string
+	Played bool
+}
+
+// Client signs a user in to and out of the instance's Jellyfin server, each sign-in as its own device, and reads and marks their library
 type Client interface {
 	SignIn(ctx context.Context, deviceId string, credentials Credentials) (*Session, error)
 	SignOut(ctx context.Context, deviceId string, token string) error
 	Items(ctx context.Context, connection Connection) ([]Item, error)
 	Episodes(ctx context.Context, connection Connection, seriesId string) ([]Episode, error)
+	SetPlayed(ctx context.Context, connection Connection, state PlayedState) error
 }
 
 type client struct {
@@ -313,5 +321,48 @@ func (c *client) Episodes(ctx context.Context, connection Connection, seriesId s
 			Msg("Unexpected response from Jellyfin")
 
 		return nil, ErrUnavailable
+	}
+}
+
+func (c *client) SetPlayed(ctx context.Context, connection Connection, state PlayedState) error {
+	// Jellyfin marks an item played on POST and unplayed on DELETE of the same URL
+	method := http.MethodPost
+	if !state.Played {
+		method = http.MethodDelete
+	}
+
+	// The Authorization header carries the token, so only the path template and status are logged
+	response, err := c.apiClient.R().
+		SetContext(ctx).
+		SetHeader("Authorization", fmt.Sprintf(authorization+`, Token="%s"`, connection.DeviceId, c.version, connection.AccessToken)).
+		SetPathParam("itemId", state.ItemId).
+		SetQueryParam("userId", connection.UserId).
+		Execute(method, playedPath)
+	if err != nil {
+		c.log.Error().
+			Err(err).
+			Str("endpoint", playedPath).
+			Msg("Failed to reach Jellyfin")
+
+		return ErrUnavailable
+	}
+
+	switch {
+	case response.IsSuccess():
+		return nil
+	case response.StatusCode() == http.StatusUnauthorized:
+		c.log.Warn().
+			Str("endpoint", playedPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Jellyfin rejected the token")
+
+		return ErrInvalidCredentials
+	default:
+		c.log.Error().
+			Str("endpoint", playedPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Unexpected response from Jellyfin")
+
+		return ErrUnavailable
 	}
 }

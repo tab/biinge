@@ -70,6 +70,20 @@ func (mr *MockClientMockRecorder) Items(ctx, connection any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Items", reflect.TypeOf((*MockClient)(nil).Items), ctx, connection)
 }
 
+// SetPlayed mocks base method.
+func (m *MockClient) SetPlayed(ctx context.Context, connection Connection, state PlayedState) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetPlayed", ctx, connection, state)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetPlayed indicates an expected call of SetPlayed.
+func (mr *MockClientMockRecorder) SetPlayed(ctx, connection, state any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPlayed", reflect.TypeOf((*MockClient)(nil).SetPlayed), ctx, connection, state)
+}
+
 // SignIn mocks base method.
 func (m *MockClient) SignIn(ctx context.Context, deviceId string, credentials Credentials) (*Session, error) {
 	m.ctrl.T.Helper()

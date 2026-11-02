@@ -17,6 +17,7 @@ import (
 
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
+	"biinge-api/internal/app/services"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -24,7 +25,7 @@ func Test_SeriesController_HandleProgress(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, progress, _, controller := newSeriesController(ctrl)
+	_, progress, _, _, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -150,7 +151,7 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, progress, _, controller := newSeriesController(ctrl)
+	_, progress, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -172,8 +173,35 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 		error    bool
 	}{
 		{
-			name: "Success",
+			name: "Success - Changed",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
+				progress.EXPECT().MarkShow(gomock.Any(), id, gomock.Any()).Return(&models.SeriesProgress{
+					SeriesTmdbId:    1399,
+					State:           "watched",
+					WatchedSeasons:  []uint64{1},
+					WatchedEpisodes: []uint64{101},
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedSeries, TmdbId: 1399, Played: true})
+			},
+			withUser: true,
+			param:    "1399",
+			body:     strings.NewReader(`{ "series": { "title": "Game of Thrones", "posterPath": "/g.jpg", "seasonsCount": 8, "episodesCount": 73, "status": "Ended" }, "seasons": [] }`),
+			expected: result{
+				response: serializers.ProgressResponseSerializer{
+					Id:              1399,
+					State:           "watched",
+					WatchedSeasons:  []uint64{1},
+					WatchedEpisodes: []uint64{101},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Unchanged",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
 				progress.EXPECT().MarkShow(gomock.Any(), id, gomock.Any()).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "watched",
@@ -237,7 +265,23 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
 				progress.EXPECT().MarkShow(gomock.Any(), id, gomock.Any()).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			param:    "1399",
+			body:     strings.NewReader(`{ "series": { "title": "Game of Thrones" } }`),
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
+			name: "Progress Error",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			param:    "1399",
@@ -286,6 +330,8 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }
@@ -294,7 +340,7 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, progress, _, controller := newSeriesController(ctrl)
+	_, progress, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -315,8 +361,34 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 		error    bool
 	}{
 		{
-			name: "Success",
+			name: "Success - Changed",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
+				progress.EXPECT().UnmarkShow(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{
+					SeriesTmdbId:    1399,
+					State:           "want",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{},
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedSeries, TmdbId: 1399, Played: false})
+			},
+			withUser: true,
+			param:    "1399",
+			expected: result{
+				response: serializers.ProgressResponseSerializer{
+					Id:              1399,
+					State:           "want",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Unchanged",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
 				progress.EXPECT().UnmarkShow(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "want",
@@ -364,7 +436,22 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
 				progress.EXPECT().UnmarkShow(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			param:    "1399",
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
+			name: "Progress Error",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			param:    "1399",
@@ -412,6 +499,8 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }
@@ -420,7 +509,7 @@ func Test_SeriesController_HandleMarkSeasonWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, progress, _, controller := newSeriesController(ctrl)
+	_, progress, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -442,14 +531,16 @@ func Test_SeriesController_HandleMarkSeasonWatched(t *testing.T) {
 		error    bool
 	}{
 		{
-			name: "Success",
+			name: "Success - Changed",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
 				progress.EXPECT().MarkSeason(gomock.Any(), id, gomock.Any(), gomock.Any()).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "watching",
 					WatchedSeasons:  []uint64{3624},
 					WatchedEpisodes: []uint64{101},
 				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: true})
 			},
 			withUser: true,
 			path:     "/series/1399/seasons/3624/watched",
@@ -460,6 +551,31 @@ func Test_SeriesController_HandleMarkSeasonWatched(t *testing.T) {
 					State:           "watching",
 					WatchedSeasons:  []uint64{3624},
 					WatchedEpisodes: []uint64{101},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Unchanged",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{102, 101}}, nil)
+				progress.EXPECT().MarkSeason(gomock.Any(), id, gomock.Any(), gomock.Any()).Return(&models.SeriesProgress{
+					SeriesTmdbId:    1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{3624},
+					WatchedEpisodes: []uint64{101, 102},
+				}, nil)
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/watched",
+			body:     strings.NewReader(`{ "series": { "title": "Game of Thrones" }, "season": { "title": "Season 1", "number": 1, "episodesCount": 10 }, "episodes": [] }`),
+			expected: result{
+				response: serializers.ProgressResponseSerializer{
+					Id:              1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{3624},
+					WatchedEpisodes: []uint64{101, 102},
 				},
 				status: "200 OK",
 				code:   http.StatusOK,
@@ -520,7 +636,23 @@ func Test_SeriesController_HandleMarkSeasonWatched(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
 				progress.EXPECT().MarkSeason(gomock.Any(), id, gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/watched",
+			body:     strings.NewReader(`{ "series": { "title": "Game of Thrones" }, "season": { "title": "Season 1", "number": 1 } }`),
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
+			name: "Progress Error",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			path:     "/series/1399/seasons/3624/watched",
@@ -569,6 +701,8 @@ func Test_SeriesController_HandleMarkSeasonWatched(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }
@@ -577,7 +711,7 @@ func Test_SeriesController_HandleUnmarkSeasonWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, progress, _, controller := newSeriesController(ctrl)
+	_, progress, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -598,8 +732,34 @@ func Test_SeriesController_HandleUnmarkSeasonWatched(t *testing.T) {
 		error    bool
 	}{
 		{
-			name: "Success",
+			name: "Success - Changed",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
+				progress.EXPECT().UnmarkSeason(gomock.Any(), id, uint64(1399), uint64(3624)).Return(&models.SeriesProgress{
+					SeriesTmdbId:    1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{},
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: false})
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/watched",
+			expected: result{
+				response: serializers.ProgressResponseSerializer{
+					Id:              1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Unchanged",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
 				progress.EXPECT().UnmarkSeason(gomock.Any(), id, uint64(1399), uint64(3624)).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "watching",
@@ -659,7 +819,22 @@ func Test_SeriesController_HandleUnmarkSeasonWatched(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
 				progress.EXPECT().UnmarkSeason(gomock.Any(), id, uint64(1399), uint64(3624)).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/watched",
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
+			name: "Progress Error",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			path:     "/series/1399/seasons/3624/watched",
@@ -707,6 +882,8 @@ func Test_SeriesController_HandleUnmarkSeasonWatched(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }
@@ -715,7 +892,7 @@ func Test_SeriesController_HandleMarkEpisodeWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, progress, _, controller := newSeriesController(ctrl)
+	_, progress, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -737,8 +914,35 @@ func Test_SeriesController_HandleMarkEpisodeWatched(t *testing.T) {
 		error    bool
 	}{
 		{
-			name: "Success",
+			name: "Success - Changed",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
+				progress.EXPECT().MarkEpisode(gomock.Any(), id, gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.SeriesProgress{
+					SeriesTmdbId:    1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{63056},
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true})
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/episodes/63056/watched",
+			body:     strings.NewReader(`{ "series": { "title": "Game of Thrones" }, "season": { "title": "Season 1", "number": 1 }, "episode": { "title": "Winter Is Coming", "runtime": 62, "airDate": "2011-04-17" } }`),
+			expected: result{
+				response: serializers.ProgressResponseSerializer{
+					Id:              1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{63056},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Unchanged",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{63056}}, nil)
 				progress.EXPECT().MarkEpisode(gomock.Any(), id, gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "watching",
@@ -828,7 +1032,23 @@ func Test_SeriesController_HandleMarkEpisodeWatched(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
 				progress.EXPECT().MarkEpisode(gomock.Any(), id, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/episodes/63056/watched",
+			body:     strings.NewReader(`{ "series": { "title": "Game of Thrones" }, "season": { "title": "Season 1", "number": 1 }, "episode": { "title": "Winter Is Coming", "runtime": 62 } }`),
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
+			name: "Progress Error",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			path:     "/series/1399/seasons/3624/episodes/63056/watched",
@@ -877,6 +1097,8 @@ func Test_SeriesController_HandleMarkEpisodeWatched(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }
@@ -885,7 +1107,7 @@ func Test_SeriesController_HandleUnmarkEpisodeWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, progress, _, controller := newSeriesController(ctrl)
+	_, progress, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -906,8 +1128,34 @@ func Test_SeriesController_HandleUnmarkEpisodeWatched(t *testing.T) {
 		error    bool
 	}{
 		{
-			name: "Success",
+			name: "Success - Changed",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{63056}}, nil)
+				progress.EXPECT().UnmarkEpisode(gomock.Any(), id, uint64(1399), uint64(3624), uint64(63056)).Return(&models.SeriesProgress{
+					SeriesTmdbId:    1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{},
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: false})
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/episodes/63056/watched",
+			expected: result{
+				response: serializers.ProgressResponseSerializer{
+					Id:              1399,
+					State:           "watching",
+					WatchedSeasons:  []uint64{},
+					WatchedEpisodes: []uint64{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Unchanged",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
 				progress.EXPECT().UnmarkEpisode(gomock.Any(), id, uint64(1399), uint64(3624), uint64(63056)).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "watching",
@@ -979,7 +1227,22 @@ func Test_SeriesController_HandleUnmarkEpisodeWatched(t *testing.T) {
 		{
 			name: "Service Error",
 			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{63056}}, nil)
 				progress.EXPECT().UnmarkEpisode(gomock.Any(), id, uint64(1399), uint64(3624), uint64(63056)).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			path:     "/series/1399/seasons/3624/episodes/63056/watched",
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
+			name: "Progress Error",
+			before: func() {
+				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			path:     "/series/1399/seasons/3624/episodes/63056/watched",
@@ -1027,6 +1290,8 @@ func Test_SeriesController_HandleUnmarkEpisodeWatched(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }

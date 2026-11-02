@@ -36,13 +36,15 @@ type seriesController struct {
 	series   services.Series
 	progress services.Progress
 	provider services.TmdbProvider
+	library  services.Library
 }
 
-func NewSeriesController(series services.Series, progress services.Progress, provider services.TmdbProvider) SeriesController {
+func NewSeriesController(series services.Series, progress services.Progress, provider services.TmdbProvider, library services.Library) SeriesController {
 	return &seriesController{
 		series:   series,
 		progress: progress,
 		provider: provider,
+		library:  library,
 	}
 }
 
@@ -260,6 +262,9 @@ func (c *seriesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 
 		return
 	}
+
+	// Jellyfin follows biinge, so a removed series is unplayed whatever its state was
+	c.library.SetPlayed(r.Context(), user.ID, services.PlayedTarget{Kind: services.PlayedSeries, TmdbId: id, Played: false})
 
 	w.WriteHeader(http.StatusNoContent)
 }

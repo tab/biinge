@@ -211,6 +211,120 @@ func Test_Library_Series(t *testing.T) {
 	}
 }
 
+func Test_Library_MovieIds(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	repository := repositories.NewMockIntegrationRepository(ctrl)
+	client := jellyfin.NewMockClient(ctrl)
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+
+	userId := uuid.New()
+	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
+
+	tests := []struct {
+		name     string
+		before   func()
+		expected map[uint64]string
+	}{
+		{
+			name: "Only unique movie matches",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return([]jellyfin.Item{
+					{Id: "movie", Type: jellyfin.ItemTypeMovie, TmdbId: "603"},
+					{Id: "first", Type: jellyfin.ItemTypeMovie, TmdbId: "604"},
+					{Id: "second", Type: jellyfin.ItemTypeMovie, TmdbId: "604"},
+					{Id: "series", Type: jellyfin.ItemTypeSeries, TmdbId: "605"},
+					{Id: "unlisted", Type: jellyfin.ItemTypeMovie, TmdbId: "700"},
+				}, nil)
+			},
+			expected: map[uint64]string{603: "movie"},
+		},
+		{
+			name: "Not connected",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
+			},
+			expected: map[uint64]string{},
+		},
+		{
+			name: "Jellyfin unavailable",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return(nil, jellyfin.ErrUnavailable)
+			},
+			expected: map[uint64]string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			assert.Equal(t, tt.expected, service.MovieIds(ctx, userId, []uint64{603, 604, 605, 606}))
+		})
+	}
+}
+
+func Test_Library_SeriesIds(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	repository := repositories.NewMockIntegrationRepository(ctrl)
+	client := jellyfin.NewMockClient(ctrl)
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+
+	userId := uuid.New()
+	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
+
+	tests := []struct {
+		name     string
+		before   func()
+		expected map[uint64]string
+	}{
+		{
+			name: "Only unique series matches",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return([]jellyfin.Item{
+					{Id: "series", Type: jellyfin.ItemTypeSeries, TmdbId: "1399"},
+					{Id: "first", Type: jellyfin.ItemTypeSeries, TmdbId: "1400"},
+					{Id: "second", Type: jellyfin.ItemTypeSeries, TmdbId: "1400"},
+					{Id: "movie", Type: jellyfin.ItemTypeMovie, TmdbId: "1401"},
+					{Id: "unlisted", Type: jellyfin.ItemTypeSeries, TmdbId: "1500"},
+				}, nil)
+			},
+			expected: map[uint64]string{1399: "series"},
+		},
+		{
+			name: "Not connected",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
+			},
+			expected: map[uint64]string{},
+		},
+		{
+			name: "Jellyfin unavailable",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return(nil, jellyfin.ErrUnavailable)
+			},
+			expected: map[uint64]string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			assert.Equal(t, tt.expected, service.SeriesIds(ctx, userId, []uint64{1399, 1400, 1401, 1402}))
+		})
+	}
+}
+
 func Test_Library_Episodes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -1042,6 +1156,6 @@ func Test_Library_SetPlayed_TmdbCache(t *testing.T) {
 	writer.setPlayed(ctx, userId, target)
 
 	// the keys and TTL TmdbProvider uses, so the two share entries
-	assert.Equal(t, cache.DetailsTTL, store.ttls["tmdb:v1:tv:1399"])
+	assert.Equal(t, cache.DetailsTTL, store.ttls["tmdb:v2:tv:1399"])
 	assert.Equal(t, cache.DetailsTTL, store.ttls["tmdb:v1:tv:1399:season:1"])
 }

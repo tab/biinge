@@ -1684,6 +1684,29 @@ paths:
               schema:
                 type: object
                 description: "Person details from TMDB"
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  birthday:
+                    type: string
+                    description: "Omitted when TMDB has none"
+                  biography:
+                    type: string
+                    description: "The person's TMDB biography, omitted when TMDB has none"
+                  profilePath:
+                    type: string
+                  gender:
+                    type: integer
+                  movieCredits:
+                    type: array
+                    items:
+                      type: object
+                  tvCredits:
+                    type: array
+                    items:
+                      type: object
         "400":
           description: "Bad Request"
           content:
@@ -2558,6 +2581,10 @@ components:
         imdbId:
           type: string
           description: "IMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this movie, by the same rule and from the same 10-minute library index as MovieDetailsSerializer.jellyfinId (omitted without a Jellyfin connection, without exactly one library item carrying its TMDB id, or when Jellyfin is unavailable)"
+          example: "4f1c9a3e7b2d48e6a0c5f19d83b72e64"
         title:
           type: string
           description: "Movie title"
@@ -2630,6 +2657,12 @@ components:
           type: number
           format: float
           description: "Average rating"
+        genres:
+          type: array
+          description: "Genre names from TMDB (empty when TMDB lists none or is unavailable, and in the create and update responses)"
+          items:
+            type: string
+          example: ["Drama", "Thriller"]
         credits:
           type: object
           description: "Movie credits (cast and crew)"
@@ -2645,6 +2678,7 @@ components:
         - title
         - pinned
         - overview
+        - genres
 
     PaginationMeta:
       type: object
@@ -2789,6 +2823,10 @@ components:
           type: integer
           format: int64
           description: "TMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this series, by the same rule and from the same 10-minute library index as SeriesDetailsSerializer.jellyfinId (omitted without a Jellyfin connection, without exactly one library item carrying its TMDB id, or when Jellyfin is unavailable)"
+          example: "9d2e47b1c03a4f8e85b6d1a7e2c94f30"
         title:
           type: string
           description: "Series title"
@@ -2866,6 +2904,12 @@ components:
           type: number
           format: float
           description: "Average rating"
+        genres:
+          type: array
+          description: "Genre names from TMDB (empty when TMDB lists none or is unavailable, and in the create and update responses)"
+          items:
+            type: string
+          example: ["Drama", "Crime"]
         credits:
           type: array
           description: "Series credits (cast and crew)"
@@ -2892,6 +2936,7 @@ components:
         - pinned
         - state
         - overview
+        - genres
 
     CreateSeriesRequest:
       type: object

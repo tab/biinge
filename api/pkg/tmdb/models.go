@@ -51,6 +51,11 @@ type Recommendations struct {
 	TotalResults int              `json:"total_results"`
 }
 
+type Genre struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type Video struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
@@ -79,6 +84,7 @@ type MovieDetails struct {
 	ReleaseDate     string          `json:"release_date"`
 	Runtime         int             `json:"runtime"`
 	VoteAverage     float64         `json:"vote_average"`
+	Genres          []Genre         `json:"genres"`
 	Credits         Credits         `json:"credits"`
 	Recommendations Recommendations `json:"recommendations"`
 	Videos          Videos          `json:"videos"`
@@ -127,6 +133,7 @@ type PersonDetails struct {
 	ImdbId      string             `json:"imdb_id,omitempty"`
 	Name        string             `json:"name"`
 	Birthday    string             `json:"birthday,omitempty"`
+	Biography   string             `json:"biography,omitempty"`
 	ProfilePath string             `json:"profile_path"`
 	Gender      int                `json:"gender"`
 	Credits     PersonMovieCredits `json:"credits"`
@@ -161,6 +168,7 @@ type MovieResponse struct {
 	ReleaseDate     string               `json:"releaseDate"`
 	Runtime         int                  `json:"runtime"`
 	Rating          float64              `json:"rating"`
+	Genres          []string             `json:"genres"`
 	Credits         []CreditItem         `json:"credits"`
 	Recommendations []RecommendationItem `json:"recommendations"`
 	Videos          []VideoItem          `json:"videos"`
@@ -185,6 +193,7 @@ type PersonResponse struct {
 	ImdbId       string            `json:"imdbId,omitempty"`
 	Name         string            `json:"name"`
 	Birthday     string            `json:"birthday,omitempty"`
+	Biography    string            `json:"biography,omitempty"`
 	ProfilePath  string            `json:"profilePath"`
 	Gender       int               `json:"gender"`
 	MovieCredits []MovieCreditItem `json:"movieCredits"`
@@ -205,6 +214,7 @@ type TvDetails struct {
 	VoteAverage     float64         `json:"vote_average"`
 	SeasonsCount    int             `json:"number_of_seasons"`
 	EpisodesCount   int             `json:"number_of_episodes"`
+	Genres          []Genre         `json:"genres"`
 	Credits         Credits         `json:"credits"`
 	Recommendations Recommendations `json:"recommendations"`
 	Videos          Videos          `json:"videos"`
@@ -222,6 +232,7 @@ type TvResponse struct {
 	Rating          float64              `json:"rating"`
 	SeasonsCount    int                  `json:"number_of_seasons"`
 	EpisodesCount   int                  `json:"number_of_episodes"`
+	Genres          []string             `json:"genres"`
 	Credits         []CreditItem         `json:"credits"`
 	Recommendations []RecommendationItem `json:"recommendations"`
 	Videos          []VideoItem          `json:"videos"`

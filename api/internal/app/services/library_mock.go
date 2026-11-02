@@ -69,6 +69,20 @@ func (mr *MockLibraryMockRecorder) Movie(ctx, userId, tmdbId any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Movie", reflect.TypeOf((*MockLibrary)(nil).Movie), ctx, userId, tmdbId)
 }
 
+// MovieIds mocks base method.
+func (m *MockLibrary) MovieIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MovieIds", ctx, userId, tmdbIds)
+	ret0, _ := ret[0].(map[uint64]string)
+	return ret0
+}
+
+// MovieIds indicates an expected call of MovieIds.
+func (mr *MockLibraryMockRecorder) MovieIds(ctx, userId, tmdbIds any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MovieIds", reflect.TypeOf((*MockLibrary)(nil).MovieIds), ctx, userId, tmdbIds)
+}
+
 // Series mocks base method.
 func (m *MockLibrary) Series(ctx context.Context, userId uuid.UUID, tmdbId uint64) string {
 	m.ctrl.T.Helper()
@@ -81,6 +95,20 @@ func (m *MockLibrary) Series(ctx context.Context, userId uuid.UUID, tmdbId uint6
 func (mr *MockLibraryMockRecorder) Series(ctx, userId, tmdbId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Series", reflect.TypeOf((*MockLibrary)(nil).Series), ctx, userId, tmdbId)
+}
+
+// SeriesIds mocks base method.
+func (m *MockLibrary) SeriesIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SeriesIds", ctx, userId, tmdbIds)
+	ret0, _ := ret[0].(map[uint64]string)
+	return ret0
+}
+
+// SeriesIds indicates an expected call of SeriesIds.
+func (mr *MockLibraryMockRecorder) SeriesIds(ctx, userId, tmdbIds any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SeriesIds", reflect.TypeOf((*MockLibrary)(nil).SeriesIds), ctx, userId, tmdbIds)
 }
 
 // SetPlayed mocks base method.

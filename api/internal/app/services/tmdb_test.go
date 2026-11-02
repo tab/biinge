@@ -29,6 +29,7 @@ func sampleMovieDetails() *tmdb.MovieDetails {
 		ReleaseDate: "1999-03-31",
 		Runtime:     136,
 		VoteAverage: 8.7,
+		Genres:      []tmdb.Genre{{Id: 28, Name: "Action"}, {Id: 878, Name: "Science Fiction"}},
 		Credits: tmdb.Credits{
 			Cast: []tmdb.PersonCast{
 				{Person: tmdb.Person{Id: 1, Name: "Keanu Reeves", ProfilePath: "/keanu.jpg"}, Character: "Neo"},
@@ -62,6 +63,7 @@ func sampleTvDetails() *tmdb.TvDetails {
 		VoteAverage:   9.5,
 		SeasonsCount:  5,
 		EpisodesCount: 62,
+		Genres:        []tmdb.Genre{{Id: 18, Name: "Drama"}},
 		Credits: tmdb.Credits{
 			Cast: []tmdb.PersonCast{
 				{Person: tmdb.Person{Id: 5, Name: "Bryan Cranston", ProfilePath: "/bc.jpg"}, Character: "Walter White"},
@@ -92,6 +94,7 @@ func samplePersonDetails() *tmdb.PersonDetails {
 		ImdbId:      "nm0000206",
 		Name:        "Keanu Reeves",
 		Birthday:    "1964-09-02",
+		Biography:   "Canadian actor.",
 		ProfilePath: "/keanu.jpg",
 		Gender:      2,
 		Credits: tmdb.PersonMovieCredits{
@@ -265,6 +268,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Runtime:         136,
 				Rating:          8.7,
 				JellyfinId:      "jf-movie",
+				Genres:          []string{"Action", "Science Fiction"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("want"),
 				Videos:          expectedMovieVideos(),
@@ -293,6 +297,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				ReleaseDate:     "1999-03-31",
 				Runtime:         136,
 				Rating:          8.7,
+				Genres:          []string{"Action", "Science Fiction"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("none"),
 				Videos:          expectedMovieVideos(),
@@ -329,6 +334,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				ReleaseDate:     "1999-03-31",
 				Runtime:         0,
 				Rating:          8.7,
+				Genres:          []string{"Action", "Science Fiction"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("none"),
 				Videos:          expectedMovieVideos(),
@@ -358,6 +364,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				ReleaseDate:     "1999-03-31",
 				Runtime:         136,
 				Rating:          8.7,
+				Genres:          []string{"Action", "Science Fiction"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("none"),
 				Videos:          expectedMovieVideos(),
@@ -387,6 +394,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Runtime:         136,
 				Rating:          8.7,
 				JellyfinId:      "jf-movie",
+				Genres:          []string{"Action", "Science Fiction"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("want"),
 				Videos:          expectedMovieVideos(),
@@ -411,6 +419,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				PosterPath:      "/stored.jpg",
 				Runtime:         120,
 				JellyfinId:      "jf-movie",
+				Genres:          []string{},
 				Credits:         []serializers.PersonSerializer{},
 				Recommendations: []serializers.RecommendationSerializer{},
 				Videos:          []serializers.VideoSerializer{},
@@ -520,8 +529,8 @@ func Test_Tmdb_FetchMovieDetails_PerUser(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result.JellyfinId)
-			assert.Contains(t, store.store, "tmdb:v1:movie:100")
-			assert.NotContains(t, string(store.store["tmdb:v1:movie:100"]), "jf-")
+			assert.Contains(t, store.store, "tmdb:v2:movie:100")
+			assert.NotContains(t, string(store.store["tmdb:v2:movie:100"]), "jf-")
 		})
 	}
 }
@@ -577,6 +586,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				EpisodesCount:   62,
 				Rating:          9.5,
 				JellyfinId:      "jf-series",
+				Genres:          []string{"Drama"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("want"),
 				Videos:          expectedTvVideos(),
@@ -607,6 +617,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				SeasonsCount:    5,
 				EpisodesCount:   62,
 				Rating:          9.5,
+				Genres:          []string{"Drama"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("none"),
 				Videos:          expectedTvVideos(),
@@ -645,6 +656,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				SeasonsCount:    5,
 				EpisodesCount:   62,
 				Rating:          9.5,
+				Genres:          []string{"Drama"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("none"),
 				Videos:          expectedTvVideos(),
@@ -676,6 +688,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				SeasonsCount:    5,
 				EpisodesCount:   62,
 				Rating:          9.5,
+				Genres:          []string{"Drama"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("none"),
 				Videos:          expectedTvVideos(),
@@ -707,6 +720,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				EpisodesCount:   62,
 				Rating:          9.5,
 				JellyfinId:      "jf-series",
+				Genres:          []string{"Drama"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("want"),
 				Videos:          expectedTvVideos(),
@@ -734,6 +748,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				SeasonsCount:    5,
 				EpisodesCount:   62,
 				JellyfinId:      "jf-series",
+				Genres:          []string{},
 				Credits:         []serializers.PersonSerializer{},
 				Recommendations: []serializers.RecommendationSerializer{},
 				Videos:          []serializers.VideoSerializer{},
@@ -844,8 +859,8 @@ func Test_Tmdb_FetchTvDetails_PerUser(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result.JellyfinId)
-			assert.Contains(t, store.store, "tmdb:v1:tv:300")
-			assert.NotContains(t, string(store.store["tmdb:v1:tv:300"]), "jf-")
+			assert.Contains(t, store.store, "tmdb:v2:tv:300")
+			assert.NotContains(t, string(store.store["tmdb:v2:tv:300"]), "jf-")
 		})
 	}
 }
@@ -886,6 +901,7 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 				Id:          500,
 				Name:        "Keanu Reeves",
 				Birthday:    "1964-09-02",
+				Biography:   "Canadian actor.",
 				ProfilePath: "/keanu.jpg",
 				Gender:      2,
 				MovieCredits: []serializers.MovieCreditSerializer{
@@ -908,6 +924,7 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 				Id:          500,
 				Name:        "Keanu Reeves",
 				Birthday:    "1964-09-02",
+				Biography:   "Canadian actor.",
 				ProfilePath: "/keanu.jpg",
 				Gender:      2,
 				MovieCredits: []serializers.MovieCreditSerializer{

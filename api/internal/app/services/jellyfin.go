@@ -174,7 +174,7 @@ func (j *jellyfinService) episode(ctx context.Context, userId uuid.UUID, event *
 		return models.WebhookStatusIgnored, nil
 	}
 
-	details, err := cache.Fetch(ctx, j.cache, j.log, fmt.Sprintf("tmdb:v1:tv:%d", found.ShowId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+	details, err := cache.Fetch(ctx, j.cache, j.log, fmt.Sprintf("tmdb:v2:tv:%d", found.ShowId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
 		return j.client.FetchTvDetails(ctx, found.ShowId)
 	})
 	if err != nil {

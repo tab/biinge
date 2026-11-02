@@ -53,14 +53,19 @@ func Test_MoviesController_HandleList(t *testing.T) {
 			before: func() {
 				movies.EXPECT().List(gomock.Any(), id, models.StateTypeWant, gomock.Any()).Return([]models.Movie{
 					{TmdbId: 550, Title: "Fight Club", PosterPath: "/f.jpg", Pinned: true, State: "want"},
-				}, uint64(1), nil)
+					{TmdbId: 603, Title: "The Matrix", PosterPath: "/m.jpg", State: "want"},
+				}, uint64(2), nil)
+				library.EXPECT().MovieIds(gomock.Any(), id, []uint64{550, 603}).Return(map[uint64]string{550: "jf-movie"})
 			},
 			withUser: true,
 			target:   "/movies",
 			expected: result{
 				response: serializers.PaginationResponse[serializers.MovieSerializer]{
-					Data: []serializers.MovieSerializer{{Id: 550, Title: "Fight Club", PosterPath: "/f.jpg", Pinned: true, State: "want"}},
-					Meta: serializers.PaginationMeta{Page: 1, Per: 24, Total: 1},
+					Data: []serializers.MovieSerializer{
+						{Id: 550, JellyfinId: "jf-movie", Title: "Fight Club", PosterPath: "/f.jpg", Pinned: true, State: "want"},
+						{Id: 603, Title: "The Matrix", PosterPath: "/m.jpg", State: "want"},
+					},
+					Meta: serializers.PaginationMeta{Page: 1, Per: 24, Total: 2},
 				},
 				status: "200 OK",
 				code:   http.StatusOK,
@@ -70,6 +75,7 @@ func Test_MoviesController_HandleList(t *testing.T) {
 			name: "Success - Watched List",
 			before: func() {
 				movies.EXPECT().List(gomock.Any(), id, models.StateTypeWatched, gomock.Any()).Return([]models.Movie{}, uint64(0), nil)
+				library.EXPECT().MovieIds(gomock.Any(), id, []uint64{}).Return(map[uint64]string{})
 			},
 			withUser: true,
 			target:   "/movies?type=watched",
@@ -319,6 +325,7 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 				response: serializers.MovieDetailsSerializer{
 					Id:              550,
 					State:           "want",
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -342,6 +349,7 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 				response: serializers.MovieDetailsSerializer{
 					Id:              550,
 					State:           "watched",
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -478,6 +486,7 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 					Id:              550,
 					State:           "watched",
 					Pinned:          true,
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -503,6 +512,7 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 				response: serializers.MovieDetailsSerializer{
 					Id:              550,
 					State:           "want",
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -529,6 +539,7 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 					Id:              550,
 					State:           "watched",
 					Pinned:          true,
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -553,6 +564,7 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 				response: serializers.MovieDetailsSerializer{
 					Id:              550,
 					State:           "want",
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},

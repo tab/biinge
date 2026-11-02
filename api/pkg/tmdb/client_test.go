@@ -538,7 +538,7 @@ func Test_Client_FetchPersonDetails(t *testing.T) {
 		{
 			name:       "Success",
 			statusCode: http.StatusOK,
-			body: `{"id":6193,"imdb_id":"nm0000138","name":"Leonardo DiCaprio","birthday":"1974-11-11","profile_path":"/p.jpg","gender":2,` +
+			body: `{"id":6193,"imdb_id":"nm0000138","name":"Leonardo DiCaprio","birthday":"1974-11-11","biography":"American actor.","profile_path":"/p.jpg","gender":2,` +
 				`"credits":{"cast":[{"id":1,"title":"Movie A","poster_path":"/a.jpg","release_date":"2020-01-01","character":"Hero"}],"crew":[]},` +
 				`"tv_credits":{"cast":[],"crew":[]}}`,
 			expected: &PersonDetails{
@@ -546,6 +546,7 @@ func Test_Client_FetchPersonDetails(t *testing.T) {
 				ImdbId:      "nm0000138",
 				Name:        "Leonardo DiCaprio",
 				Birthday:    "1974-11-11",
+				Biography:   "American actor.",
 				ProfilePath: "/p.jpg",
 				Gender:      2,
 				Credits: PersonMovieCredits{

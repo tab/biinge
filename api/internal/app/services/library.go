@@ -56,6 +56,8 @@ type PlayedTarget struct {
 type Library interface {
 	Movie(ctx context.Context, userId uuid.UUID, tmdbId uint64) string
 	Series(ctx context.Context, userId uuid.UUID, tmdbId uint64) string
+	MovieIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string
+	SeriesIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string
 	Episodes(ctx context.Context, userId uuid.UUID, tmdbId uint64, season uint64) map[uint64]string
 	SetPlayed(ctx context.Context, userId uuid.UUID, target PlayedTarget)
 }
@@ -154,6 +156,36 @@ func (l *library) Series(ctx context.Context, userId uuid.UUID, tmdbId uint64) s
 	index, _ := l.index(ctx, userId)
 
 	return index.Series[strconv.FormatUint(tmdbId, 10)]
+}
+
+// MovieIds maps each of the TMDB ids with exactly one matched movie to its item id (one index read for a whole list)
+func (l *library) MovieIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string {
+	index, _ := l.index(ctx, userId)
+
+	ids := map[uint64]string{}
+
+	for _, tmdbId := range tmdbIds {
+		if id := index.Movies[strconv.FormatUint(tmdbId, 10)]; id != "" {
+			ids[tmdbId] = id
+		}
+	}
+
+	return ids
+}
+
+// SeriesIds maps each of the TMDB ids with exactly one matched series to its item id (one index read for a whole list)
+func (l *library) SeriesIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string {
+	index, _ := l.index(ctx, userId)
+
+	ids := map[uint64]string{}
+
+	for _, tmdbId := range tmdbIds {
+		if id := index.Series[strconv.FormatUint(tmdbId, 10)]; id != "" {
+			ids[tmdbId] = id
+		}
+	}
+
+	return ids
 }
 
 // Episodes maps each episode number of the season to its item id, nil when the series has no unique match
@@ -260,7 +292,7 @@ func (l *library) setPlayed(ctx context.Context, userId uuid.UUID, target Played
 			return
 		}
 
-		details, err := cache.Fetch(ctx, l.cache, l.log, fmt.Sprintf("tmdb:v1:tv:%d", target.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+		details, err := cache.Fetch(ctx, l.cache, l.log, fmt.Sprintf("tmdb:v2:tv:%d", target.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
 			return l.tmdb.FetchTvDetails(ctx, target.TmdbId)
 		})
 		if err != nil {

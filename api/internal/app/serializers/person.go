@@ -22,6 +22,7 @@ type PersonDetailsSerializer struct {
 	Id           uint64                  `json:"id"`
 	Name         string                  `json:"name"`
 	Birthday     string                  `json:"birthday,omitempty"`
+	Biography    string                  `json:"biography,omitempty"`
 	ProfilePath  string                  `json:"profilePath"`
 	Gender       int                     `json:"gender"`
 	MovieCredits []MovieCreditSerializer `json:"movieCredits"`

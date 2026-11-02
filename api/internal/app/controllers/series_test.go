@@ -34,7 +34,7 @@ func Test_SeriesController_HandleList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	series, _, _, _, controller := newSeriesController(ctrl)
+	series, _, _, library, controller := newSeriesController(ctrl)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -59,14 +59,19 @@ func Test_SeriesController_HandleList(t *testing.T) {
 			before: func() {
 				series.EXPECT().List(gomock.Any(), id, models.StateTypeWant, gomock.Any()).Return([]models.Series{
 					{TmdbId: 1399, Title: "Game of Thrones", PosterPath: "/g.jpg", Pinned: true, State: "want", EpisodesCount: 73, WatchedEpisodesCount: 10},
-				}, uint64(1), nil)
+					{TmdbId: 1396, Title: "Breaking Bad", PosterPath: "/b.jpg", State: "want", EpisodesCount: 62},
+				}, uint64(2), nil)
+				library.EXPECT().SeriesIds(gomock.Any(), id, []uint64{1399, 1396}).Return(map[uint64]string{1399: "jf-series"})
 			},
 			withUser: true,
 			target:   "/series",
 			expected: result{
 				response: serializers.PaginationResponse[serializers.SeriesSerializer]{
-					Data: []serializers.SeriesSerializer{{Id: 1399, Title: "Game of Thrones", PosterPath: "/g.jpg", Pinned: true, State: "want", EpisodesCount: 73, WatchedEpisodesCount: 10}},
-					Meta: serializers.PaginationMeta{Page: 1, Per: 24, Total: 1},
+					Data: []serializers.SeriesSerializer{
+						{Id: 1399, JellyfinId: "jf-series", Title: "Game of Thrones", PosterPath: "/g.jpg", Pinned: true, State: "want", EpisodesCount: 73, WatchedEpisodesCount: 10},
+						{Id: 1396, Title: "Breaking Bad", PosterPath: "/b.jpg", State: "want", EpisodesCount: 62},
+					},
+					Meta: serializers.PaginationMeta{Page: 1, Per: 24, Total: 2},
 				},
 				status: "200 OK",
 				code:   http.StatusOK,
@@ -76,6 +81,7 @@ func Test_SeriesController_HandleList(t *testing.T) {
 			name: "Success - Watching List",
 			before: func() {
 				series.EXPECT().List(gomock.Any(), id, models.StateTypeWatching, gomock.Any()).Return([]models.Series{}, uint64(0), nil)
+				library.EXPECT().SeriesIds(gomock.Any(), id, []uint64{}).Return(map[uint64]string{})
 			},
 			withUser: true,
 			target:   "/series?type=watching",
@@ -92,6 +98,7 @@ func Test_SeriesController_HandleList(t *testing.T) {
 			name: "Success - Watched List",
 			before: func() {
 				series.EXPECT().List(gomock.Any(), id, models.StateTypeWatched, gomock.Any()).Return([]models.Series{}, uint64(0), nil)
+				library.EXPECT().SeriesIds(gomock.Any(), id, []uint64{}).Return(map[uint64]string{})
 			},
 			withUser: true,
 			target:   "/series?type=watched",
@@ -621,6 +628,7 @@ func Test_SeriesController_HandleCreate(t *testing.T) {
 				response: serializers.SeriesDetailsSerializer{
 					Id:              1399,
 					State:           "watching",
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -751,6 +759,7 @@ func Test_SeriesController_HandleUpdate(t *testing.T) {
 					Id:              1399,
 					State:           "watched",
 					Pinned:          true,
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},

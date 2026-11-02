@@ -59,10 +59,18 @@ func (c *moviesController) HandleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tmdbIds := make([]uint64, 0, len(rows))
+	for _, row := range rows {
+		tmdbIds = append(tmdbIds, row.TmdbId)
+	}
+
+	jellyfinIds := c.library.MovieIds(r.Context(), user.ID, tmdbIds)
+
 	collection := make([]serializers.MovieSerializer, 0, len(rows))
 	for _, row := range rows {
 		collection = append(collection, serializers.MovieSerializer{
 			Id:         row.TmdbId,
+			JellyfinId: jellyfinIds[row.TmdbId],
 			Title:      row.Title,
 			PosterPath: row.PosterPath,
 			Pinned:     row.Pinned,
@@ -159,6 +167,7 @@ func (c *moviesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 		Id:              row.TmdbId,
 		Pinned:          row.Pinned,
 		State:           row.State,
+		Genres:          make([]string, 0),
 		Credits:         make([]serializers.PersonSerializer, 0),
 		Recommendations: make([]serializers.RecommendationSerializer, 0),
 		Videos:          make([]serializers.VideoSerializer, 0),
@@ -229,6 +238,7 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 		Id:              row.TmdbId,
 		Pinned:          row.Pinned,
 		State:           row.State,
+		Genres:          make([]string, 0),
 		Credits:         make([]serializers.PersonSerializer, 0),
 		Recommendations: make([]serializers.RecommendationSerializer, 0),
 		Videos:          make([]serializers.VideoSerializer, 0),

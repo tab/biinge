@@ -114,6 +114,11 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 		return c.Id
 	})
 
+	genres := make([]string, 0, len(movie.Genres))
+	for _, genre := range movie.Genres {
+		genres = append(genres, genre.Name)
+	}
+
 	return &MovieResponse{
 		Id:              movie.Id,
 		Title:           movie.Title,
@@ -124,6 +129,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 		ReleaseDate:     movie.ReleaseDate,
 		Runtime:         movie.Runtime,
 		Rating:          movie.VoteAverage,
+		Genres:          genres,
 		Credits:         uniqueCredits,
 		Recommendations: recommendations,
 		Videos:          videos,
@@ -266,6 +272,7 @@ func TransformPersonDetails(person *PersonDetails) *PersonResponse {
 		ImdbId:       person.ImdbId,
 		Name:         person.Name,
 		Birthday:     person.Birthday,
+		Biography:    person.Biography,
 		ProfilePath:  person.ProfilePath,
 		Gender:       person.Gender,
 		MovieCredits: movieCredits,
@@ -352,6 +359,11 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 		return c.Id
 	})
 
+	genres := make([]string, 0, len(tvShow.Genres))
+	for _, genre := range tvShow.Genres {
+		genres = append(genres, genre.Name)
+	}
+
 	seasons := make([]SeasonSummaryItem, 0, len(tvShow.Seasons))
 	for _, season := range tvShow.Seasons {
 		seasons = append(seasons, SeasonSummaryItem{
@@ -375,6 +387,7 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 		Rating:          tvShow.VoteAverage,
 		SeasonsCount:    tvShow.SeasonsCount,
 		EpisodesCount:   tvShow.EpisodesCount,
+		Genres:          genres,
 		Credits:         uniqueCredits,
 		Recommendations: recommendations,
 		Videos:          videos,

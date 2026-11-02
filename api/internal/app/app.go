@@ -19,6 +19,7 @@ import (
 	"biinge-api/internal/config/router"
 	"biinge-api/internal/config/server"
 	"biinge-api/pkg/igdb"
+	"biinge-api/pkg/jellyfin"
 	"biinge-api/pkg/jwt"
 	"biinge-api/pkg/sentry"
 	"biinge-api/pkg/tmdb"
@@ -39,6 +40,7 @@ var Module = fx.Options(
 
 	jwt.Module,
 	tmdb.Module,
+	jellyfin.Module,
 	igdb.Module,
 	worker.Module,
 	fx.Invoke(registerHooks),

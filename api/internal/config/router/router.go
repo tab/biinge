@@ -91,6 +91,10 @@ func NewRouter(
 
 				r.Post("/integrations/jellyfin", integrations.HandleCreateToken)
 				r.Delete("/integrations/jellyfin", integrations.HandleRevoke)
+
+				r.Put("/integrations/jellyfin/connection", integrations.HandleConnect)
+				r.Get("/integrations/jellyfin/connection", integrations.HandleStatus)
+				r.Delete("/integrations/jellyfin/connection", integrations.HandleDisconnect)
 			})
 
 			r.Route("/movies", func(r chi.Router) {

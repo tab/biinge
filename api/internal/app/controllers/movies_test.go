@@ -27,7 +27,8 @@ func Test_MoviesController_HandleList(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	controller := NewMoviesController(movies, provider)
+	library := services.NewMockLibrary(ctrl)
+	controller := NewMoviesController(movies, provider, library)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -52,14 +53,19 @@ func Test_MoviesController_HandleList(t *testing.T) {
 			before: func() {
 				movies.EXPECT().List(gomock.Any(), id, models.StateTypeWant, gomock.Any()).Return([]models.Movie{
 					{TmdbId: 550, Title: "Fight Club", PosterPath: "/f.jpg", Pinned: true, State: "want"},
-				}, uint64(1), nil)
+					{TmdbId: 603, Title: "The Matrix", PosterPath: "/m.jpg", State: "want"},
+				}, uint64(2), nil)
+				library.EXPECT().MovieIds(gomock.Any(), id, []uint64{550, 603}).Return(map[uint64]string{550: "jf-movie"})
 			},
 			withUser: true,
 			target:   "/movies",
 			expected: result{
 				response: serializers.PaginationResponse[serializers.MovieSerializer]{
-					Data: []serializers.MovieSerializer{{Id: 550, Title: "Fight Club", PosterPath: "/f.jpg", Pinned: true, State: "want"}},
-					Meta: serializers.PaginationMeta{Page: 1, Per: 24, Total: 1},
+					Data: []serializers.MovieSerializer{
+						{Id: 550, JellyfinId: "jf-movie", Title: "Fight Club", PosterPath: "/f.jpg", Pinned: true, State: "want"},
+						{Id: 603, Title: "The Matrix", PosterPath: "/m.jpg", State: "want"},
+					},
+					Meta: serializers.PaginationMeta{Page: 1, Per: 24, Total: 2},
 				},
 				status: "200 OK",
 				code:   http.StatusOK,
@@ -69,6 +75,7 @@ func Test_MoviesController_HandleList(t *testing.T) {
 			name: "Success - Watched List",
 			before: func() {
 				movies.EXPECT().List(gomock.Any(), id, models.StateTypeWatched, gomock.Any()).Return([]models.Movie{}, uint64(0), nil)
+				library.EXPECT().MovieIds(gomock.Any(), id, []uint64{}).Return(map[uint64]string{})
 			},
 			withUser: true,
 			target:   "/movies?type=watched",
@@ -154,7 +161,8 @@ func Test_MoviesController_HandleDetails(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	controller := NewMoviesController(movies, provider)
+	library := services.NewMockLibrary(ctrl)
+	controller := NewMoviesController(movies, provider, library)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -282,7 +290,8 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	controller := NewMoviesController(movies, provider)
+	library := services.NewMockLibrary(ctrl)
+	controller := NewMoviesController(movies, provider, library)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -316,6 +325,31 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 				response: serializers.MovieDetailsSerializer{
 					Id:              550,
 					State:           "want",
+					Genres:          []string{},
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Watched",
+			before: func() {
+				movies.EXPECT().Create(gomock.Any(), gomock.Any()).Return(&models.Movie{
+					TmdbId: 550,
+					State:  "watched",
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedMovie, TmdbId: 550, Played: true})
+			},
+			withUser: true,
+			body:     strings.NewReader(`{ "id": 550, "title": "Fight Club", "state": "watched" }`),
+			expected: result{
+				response: serializers.MovieDetailsSerializer{
+					Id:              550,
+					State:           "watched",
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -354,7 +388,7 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 				movies.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
 			},
 			withUser: true,
-			body:     strings.NewReader(`{ "id": 550, "title": "Fight Club", "state": "want" }`),
+			body:     strings.NewReader(`{ "id": 550, "title": "Fight Club", "state": "watched" }`),
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
 				status: "422 Unprocessable Entity",
@@ -399,6 +433,8 @@ func Test_MoviesController_HandleCreate(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }
@@ -409,7 +445,8 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	controller := NewMoviesController(movies, provider)
+	library := services.NewMockLibrary(ctrl)
+	controller := NewMoviesController(movies, provider, library)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -431,8 +468,63 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 		error    bool
 	}{
 		{
-			name: "Success",
+			name: "Success - Into Watched",
 			before: func() {
+				movies.EXPECT().FindByFilter(gomock.Any(), models.MovieFilter{UserId: id, TmdbIds: []uint64{550}}).Return([]models.Movie{{TmdbId: 550, State: "want"}}, nil)
+				movies.EXPECT().UpdateByTmdbId(gomock.Any(), gomock.Any()).Return(&models.Movie{
+					TmdbId: 550,
+					State:  "watched",
+					Pinned: true,
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedMovie, TmdbId: 550, Played: true})
+			},
+			withUser: true,
+			param:    "550",
+			body:     strings.NewReader(`{ "state": "watched", "pinned": true }`),
+			expected: result{
+				response: serializers.MovieDetailsSerializer{
+					Id:              550,
+					State:           "watched",
+					Pinned:          true,
+					Genres:          []string{},
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Out Of Watched",
+			before: func() {
+				movies.EXPECT().FindByFilter(gomock.Any(), models.MovieFilter{UserId: id, TmdbIds: []uint64{550}}).Return([]models.Movie{{TmdbId: 550, State: "watched"}}, nil)
+				movies.EXPECT().UpdateByTmdbId(gomock.Any(), gomock.Any()).Return(&models.Movie{
+					TmdbId: 550,
+					State:  "want",
+				}, nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedMovie, TmdbId: 550, Played: false})
+			},
+			withUser: true,
+			param:    "550",
+			body:     strings.NewReader(`{ "state": "want" }`),
+			expected: result{
+				response: serializers.MovieDetailsSerializer{
+					Id:              550,
+					State:           "want",
+					Genres:          []string{},
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Still Watched",
+			before: func() {
+				movies.EXPECT().FindByFilter(gomock.Any(), models.MovieFilter{UserId: id, TmdbIds: []uint64{550}}).Return([]models.Movie{{TmdbId: 550, State: "watched"}}, nil)
 				movies.EXPECT().UpdateByTmdbId(gomock.Any(), gomock.Any()).Return(&models.Movie{
 					TmdbId: 550,
 					State:  "watched",
@@ -447,6 +539,32 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 					Id:              550,
 					State:           "watched",
 					Pinned:          true,
+					Genres:          []string{},
+					Credits:         []serializers.PersonSerializer{},
+					Recommendations: []serializers.RecommendationSerializer{},
+					Videos:          []serializers.VideoSerializer{},
+				},
+				status: "200 OK",
+				code:   http.StatusOK,
+			},
+		},
+		{
+			name: "Success - Still Want",
+			before: func() {
+				movies.EXPECT().FindByFilter(gomock.Any(), models.MovieFilter{UserId: id, TmdbIds: []uint64{550}}).Return([]models.Movie{{TmdbId: 550, State: "want"}}, nil)
+				movies.EXPECT().UpdateByTmdbId(gomock.Any(), gomock.Any()).Return(&models.Movie{
+					TmdbId: 550,
+					State:  "want",
+				}, nil)
+			},
+			withUser: true,
+			param:    "550",
+			body:     strings.NewReader(`{ "state": "want" }`),
+			expected: result{
+				response: serializers.MovieDetailsSerializer{
+					Id:              550,
+					State:           "want",
+					Genres:          []string{},
 					Credits:         []serializers.PersonSerializer{},
 					Recommendations: []serializers.RecommendationSerializer{},
 					Videos:          []serializers.VideoSerializer{},
@@ -495,8 +613,24 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 			error: true,
 		},
 		{
+			name: "Find Error",
+			before: func() {
+				movies.EXPECT().FindByFilter(gomock.Any(), models.MovieFilter{UserId: id, TmdbIds: []uint64{550}}).Return(nil, assert.AnError)
+			},
+			withUser: true,
+			param:    "550",
+			body:     strings.NewReader(`{ "state": "watched" }`),
+			expected: result{
+				error:  serializers.ErrorSerializer{Error: "assert.AnError general error for testing"},
+				status: "422 Unprocessable Entity",
+				code:   http.StatusUnprocessableEntity,
+			},
+			error: true,
+		},
+		{
 			name: "Service Error",
 			before: func() {
+				movies.EXPECT().FindByFilter(gomock.Any(), models.MovieFilter{UserId: id, TmdbIds: []uint64{550}}).Return([]models.Movie{{TmdbId: 550, State: "want"}}, nil)
 				movies.EXPECT().UpdateByTmdbId(gomock.Any(), gomock.Any()).Return(nil, assert.AnError)
 			},
 			withUser: true,
@@ -546,6 +680,8 @@ func Test_MoviesController_HandleUpdate(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }
@@ -556,7 +692,8 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 
 	movies := services.NewMockMovies(ctrl)
 	provider := services.NewMockTmdbProvider(ctrl)
-	controller := NewMoviesController(movies, provider)
+	library := services.NewMockLibrary(ctrl)
+	controller := NewMoviesController(movies, provider, library)
 
 	id, err := uuid.NewRandom()
 	require.NoError(t, err)
@@ -579,6 +716,7 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 			name: "Success",
 			before: func() {
 				movies.EXPECT().Delete(gomock.Any(), uint64(550), id).Return(nil)
+				library.EXPECT().SetPlayed(gomock.Any(), id, services.PlayedTarget{Kind: services.PlayedMovie, TmdbId: 550, Played: false})
 			},
 			withUser: true,
 			param:    "550",
@@ -660,6 +798,8 @@ func Test_MoviesController_HandleDelete(t *testing.T) {
 
 			assert.Equal(t, tt.expected.code, resp.StatusCode)
 			assert.Equal(t, tt.expected.status, resp.Status)
+			// the played write returns nothing, so its expectation must be met within the case that set it
+			assert.True(t, ctrl.Satisfied())
 		})
 	}
 }

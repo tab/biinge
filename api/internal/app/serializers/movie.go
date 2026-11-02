@@ -30,6 +30,7 @@ type VideoSerializer struct {
 
 type MovieSerializer struct {
 	Id         uint64           `json:"id"`
+	JellyfinId string           `json:"jellyfinId,omitempty"`
 	Title      string           `json:"title"`
 	PosterPath string           `json:"posterPath"`
 	Pinned     bool             `json:"pinned"`
@@ -39,6 +40,7 @@ type MovieSerializer struct {
 type MovieDetailsSerializer struct {
 	Id              uint64                     `json:"id"`
 	ImdbId          string                     `json:"imdbId,omitempty"`
+	JellyfinId      string                     `json:"jellyfinId,omitempty"`
 	Title           string                     `json:"title"`
 	PosterPath      string                     `json:"posterPath"`
 	Pinned          bool                       `json:"pinned"`
@@ -48,6 +50,7 @@ type MovieDetailsSerializer struct {
 	ReleaseDate     string                     `json:"releaseDate,omitempty"`
 	Runtime         int                        `json:"runtime,omitempty"`
 	Rating          float64                    `json:"rating,omitempty"`
+	Genres          []string                   `json:"genres"`
 	Credits         []PersonSerializer         `json:"credits"`
 	Recommendations []RecommendationSerializer `json:"recommendations"`
 	Videos          []VideoSerializer          `json:"videos"`

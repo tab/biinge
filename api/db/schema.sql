@@ -131,9 +131,12 @@ CREATE TABLE public.integrations (
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
     user_id uuid NOT NULL,
     provider public.provider_type NOT NULL,
-    token_hash character(64) NOT NULL,
+    token_hash character(64),
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    jellyfin_user_id text,
+    jellyfin_username text,
+    jellyfin_token bytea
 );
 
 

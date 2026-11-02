@@ -110,6 +110,7 @@ func Test_TransformMovieDetails(t *testing.T) {
 				ReleaseDate: "1999-10-15",
 				Runtime:     139,
 				VoteAverage: 8.4,
+				Genres:      []Genre{{Id: 18, Name: "Drama"}, {Id: 53, Name: "Thriller"}},
 				Credits: Credits{
 					Cast: []PersonCast{
 						{Person: Person{Id: 1, Name: "Actor A", ProfilePath: "/a.jpg"}, Character: "Narrator"},
@@ -150,6 +151,7 @@ func Test_TransformMovieDetails(t *testing.T) {
 				ReleaseDate: "1999-10-15",
 				Runtime:     139,
 				Rating:      8.4,
+				Genres:      []string{"Drama", "Thriller"},
 				Credits: []CreditItem{
 					{Id: 3, ProfilePath: "/d.jpg", Name: "Director A", Description: "Director"},
 					{Id: 1, ProfilePath: "/a.jpg", Name: "Actor A", Description: "Narrator"},
@@ -163,6 +165,21 @@ func Test_TransformMovieDetails(t *testing.T) {
 				Videos: []VideoItem{
 					{Id: "v1", Key: "key1"},
 				},
+			},
+		},
+		{
+			name: "No genres produces empty slice",
+			movie: &MovieDetails{
+				Id:    1,
+				Title: "Untagged Movie",
+			},
+			expected: &MovieResponse{
+				Id:              1,
+				Title:           "Untagged Movie",
+				Genres:          []string{},
+				Credits:         []CreditItem{},
+				Recommendations: []RecommendationItem{},
+				Videos:          []VideoItem{},
 			},
 		},
 	}
@@ -200,6 +217,7 @@ func Test_TransformTvDetails(t *testing.T) {
 				VoteAverage:   9.2,
 				SeasonsCount:  8,
 				EpisodesCount: 73,
+				Genres:        []Genre{{Id: 18, Name: "Drama"}, {Id: 10765, Name: "Sci-Fi & Fantasy"}},
 				Credits: Credits{
 					Cast: []PersonCast{
 						{Person: Person{Id: 1, Name: "Actor A", ProfilePath: "/a.jpg"}, Character: "Jon Snow"},
@@ -243,6 +261,7 @@ func Test_TransformTvDetails(t *testing.T) {
 				Rating:        9.2,
 				SeasonsCount:  8,
 				EpisodesCount: 73,
+				Genres:        []string{"Drama", "Sci-Fi & Fantasy"},
 				Credits: []CreditItem{
 					{Id: 3, ProfilePath: "/d.jpg", Name: "Director A", Description: "Director"},
 					{Id: 1, ProfilePath: "/a.jpg", Name: "Actor A", Description: "Jon Snow"},
@@ -263,7 +282,7 @@ func Test_TransformTvDetails(t *testing.T) {
 			},
 		},
 		{
-			name: "Empty seasons produces empty slice",
+			name: "Empty seasons and genres produce empty slices",
 			tvShow: &TvDetails{
 				Id:    1,
 				Title: "Empty Show",
@@ -271,6 +290,7 @@ func Test_TransformTvDetails(t *testing.T) {
 			expected: &TvResponse{
 				Id:              1,
 				Title:           "Empty Show",
+				Genres:          []string{},
 				Credits:         []CreditItem{},
 				Recommendations: []RecommendationItem{},
 				Videos:          []VideoItem{},
@@ -587,6 +607,7 @@ func Test_TransformPersonDetails(t *testing.T) {
 				ImdbId:      "nm0000138",
 				Name:        "Leonardo DiCaprio",
 				Birthday:    "1974-11-11",
+				Biography:   "American actor.",
 				ProfilePath: "/profile.jpg",
 				Gender:      2,
 				Credits: PersonMovieCredits{
@@ -618,6 +639,7 @@ func Test_TransformPersonDetails(t *testing.T) {
 				ImdbId:      "nm0000138",
 				Name:        "Leonardo DiCaprio",
 				Birthday:    "1974-11-11",
+				Biography:   "American actor.",
 				ProfilePath: "/profile.jpg",
 				Gender:      2,
 				MovieCredits: []MovieCreditItem{

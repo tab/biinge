@@ -42,18 +42,32 @@ func (m *MockIntegrationRepository) EXPECT() *MockIntegrationRepositoryMockRecor
 	return m.recorder
 }
 
-// Delete mocks base method.
-func (m *MockIntegrationRepository) Delete(ctx context.Context, userId uuid.UUID, provider string) error {
+// ClearConnection mocks base method.
+func (m *MockIntegrationRepository) ClearConnection(ctx context.Context, userId uuid.UUID, provider string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, userId, provider)
+	ret := m.ctrl.Call(m, "ClearConnection", ctx, userId, provider)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Delete indicates an expected call of Delete.
-func (mr *MockIntegrationRepositoryMockRecorder) Delete(ctx, userId, provider any) *gomock.Call {
+// ClearConnection indicates an expected call of ClearConnection.
+func (mr *MockIntegrationRepositoryMockRecorder) ClearConnection(ctx, userId, provider any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIntegrationRepository)(nil).Delete), ctx, userId, provider)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearConnection", reflect.TypeOf((*MockIntegrationRepository)(nil).ClearConnection), ctx, userId, provider)
+}
+
+// ClearToken mocks base method.
+func (m *MockIntegrationRepository) ClearToken(ctx context.Context, userId uuid.UUID, provider string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClearToken", ctx, userId, provider)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ClearToken indicates an expected call of ClearToken.
+func (mr *MockIntegrationRepositoryMockRecorder) ClearToken(ctx, userId, provider any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearToken", reflect.TypeOf((*MockIntegrationRepository)(nil).ClearToken), ctx, userId, provider)
 }
 
 // FindByTokenHash mocks base method.
@@ -71,6 +85,21 @@ func (mr *MockIntegrationRepositoryMockRecorder) FindByTokenHash(ctx, hash, prov
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByTokenHash", reflect.TypeOf((*MockIntegrationRepository)(nil).FindByTokenHash), ctx, hash, provider)
 }
 
+// FindByUser mocks base method.
+func (m *MockIntegrationRepository) FindByUser(ctx context.Context, userId uuid.UUID, provider string) (*models.Integration, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByUser", ctx, userId, provider)
+	ret0, _ := ret[0].(*models.Integration)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByUser indicates an expected call of FindByUser.
+func (mr *MockIntegrationRepositoryMockRecorder) FindByUser(ctx, userId, provider any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUser", reflect.TypeOf((*MockIntegrationRepository)(nil).FindByUser), ctx, userId, provider)
+}
+
 // Upsert mocks base method.
 func (m *MockIntegrationRepository) Upsert(ctx context.Context, params *models.Integration) (*models.Integration, error) {
 	m.ctrl.T.Helper()
@@ -84,4 +113,19 @@ func (m *MockIntegrationRepository) Upsert(ctx context.Context, params *models.I
 func (mr *MockIntegrationRepositoryMockRecorder) Upsert(ctx, params any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upsert", reflect.TypeOf((*MockIntegrationRepository)(nil).Upsert), ctx, params)
+}
+
+// UpsertConnection mocks base method.
+func (m *MockIntegrationRepository) UpsertConnection(ctx context.Context, params *models.Integration) (*models.Integration, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertConnection", ctx, params)
+	ret0, _ := ret[0].(*models.Integration)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpsertConnection indicates an expected call of UpsertConnection.
+func (mr *MockIntegrationRepositoryMockRecorder) UpsertConnection(ctx, params any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertConnection", reflect.TypeOf((*MockIntegrationRepository)(nil).UpsertConnection), ctx, params)
 }

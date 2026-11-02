@@ -17,6 +17,7 @@ const (
 
 // Event is the subset of a Webhook plugin event a consumer reads (keys match case-insensitively; the plugin lowercases provider names)
 type Event struct {
+	ItemId       string `json:"ItemId"`
 	ItemType     string `json:"ItemType"`
 	SaveReason   string `json:"SaveReason"`
 	Played       bool   `json:"Played"`

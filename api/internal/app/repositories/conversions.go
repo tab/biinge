@@ -24,3 +24,12 @@ func timestampFromTime(t time.Time) pgtype.Timestamptz {
 
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
+
+// stringValue maps a nullable text column to a string (NULL → "")
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+
+	return *value
+}

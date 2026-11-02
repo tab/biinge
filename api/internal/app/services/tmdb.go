@@ -40,6 +40,7 @@ type tmdbProvider struct {
 	movies   Movies
 	series   Series
 	progress Progress
+	library  Library
 	cache    cache.Cache
 	log      *logger.Logger
 }
@@ -49,6 +50,7 @@ func NewTmdbProvider(
 	movies Movies,
 	series Series,
 	progress Progress,
+	library Library,
 	store cache.Cache,
 	log *logger.Logger,
 ) TmdbProvider {
@@ -57,6 +59,7 @@ func NewTmdbProvider(
 		movies:   movies,
 		series:   series,
 		progress: progress,
+		library:  library,
 		cache:    store,
 		log:      log.WithComponent("TmdbProvider"),
 	}
@@ -75,7 +78,7 @@ func toIdSet(ids []uint64) map[uint64]struct{} {
 func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error) {
 	p.log.Debug().Uint64("Id", id).Msg("Fetching movie details")
 
-	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:movie:%d", id), cache.DetailsTTL, func() (*tmdb.MovieDetails, error) {
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v2:movie:%d", id), cache.DetailsTTL, func() (*tmdb.MovieDetails, error) {
 		return p.client.FetchMovieDetails(ctx, id)
 	})
 	if err != nil {
@@ -171,6 +174,8 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 			ReleaseDate:     details.ReleaseDate,
 			Runtime:         details.Runtime,
 			Rating:          details.Rating,
+			Genres:          details.Genres,
+			JellyfinId:      p.library.Movie(ctx, userId, id),
 			Credits:         credits,
 			Recommendations: recommendations,
 			Videos:          videos,
@@ -205,6 +210,8 @@ func (p *tmdbProvider) FetchMovieDetails(ctx context.Context, id uint64, userId 
 		ReleaseDate:     details.ReleaseDate,
 		Runtime:         details.Runtime,
 		Rating:          details.Rating,
+		Genres:          details.Genres,
+		JellyfinId:      p.library.Movie(ctx, userId, id),
 		Credits:         credits,
 		Recommendations: recommendations,
 		Videos:          videos,
@@ -229,6 +236,8 @@ func (p *tmdbProvider) fallbackMovieDetails(ctx context.Context, id uint64, user
 		Title:           movie.Title,
 		PosterPath:      movie.PosterPath,
 		Runtime:         int(movie.Runtime),
+		JellyfinId:      p.library.Movie(ctx, userId, id),
+		Genres:          make([]string, 0),
 		Credits:         make([]serializers.PersonSerializer, 0),
 		Recommendations: make([]serializers.RecommendationSerializer, 0),
 		Videos:          make([]serializers.VideoSerializer, 0),
@@ -238,7 +247,7 @@ func (p *tmdbProvider) fallbackMovieDetails(ctx context.Context, id uint64, user
 func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error) {
 	p.log.Debug().Uint64("Id", id).Msg("Fetching tv details")
 
-	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d", id), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v2:tv:%d", id), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
 		return p.client.FetchTvDetails(ctx, id)
 	})
 	if err != nil {
@@ -347,6 +356,8 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 			SeasonsCount:    uint64(max(details.SeasonsCount, 0)),
 			EpisodesCount:   uint64(max(details.EpisodesCount, 0)),
 			Rating:          details.Rating,
+			Genres:          details.Genres,
+			JellyfinId:      p.library.Series(ctx, userId, id),
 			Credits:         credits,
 			Recommendations: recommendations,
 			Videos:          videos,
@@ -385,6 +396,8 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		SeasonsCount:    uint64(max(details.SeasonsCount, 0)),
 		EpisodesCount:   uint64(max(details.EpisodesCount, 0)),
 		Rating:          details.Rating,
+		Genres:          details.Genres,
+		JellyfinId:      p.library.Series(ctx, userId, id),
 		Credits:         credits,
 		Recommendations: recommendations,
 		Videos:          videos,
@@ -412,6 +425,8 @@ func (p *tmdbProvider) fallbackTvDetails(ctx context.Context, id uint64, userId 
 		PosterPath:      tvShow.PosterPath,
 		SeasonsCount:    tvShow.SeasonsCount,
 		EpisodesCount:   tvShow.EpisodesCount,
+		JellyfinId:      p.library.Series(ctx, userId, id),
+		Genres:          make([]string, 0),
 		Credits:         make([]serializers.PersonSerializer, 0),
 		Recommendations: make([]serializers.RecommendationSerializer, 0),
 		Videos:          make([]serializers.VideoSerializer, 0),
@@ -514,6 +529,7 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		Id:           id,
 		Name:         details.Name,
 		Birthday:     details.Birthday,
+		Biography:    details.Biography,
 		ProfilePath:  details.ProfilePath,
 		Gender:       details.Gender,
 		MovieCredits: movieCredits,
@@ -542,6 +558,7 @@ func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonN
 	watchedEpisodes := toIdSet(progress.WatchedEpisodes)
 
 	details := tmdb.TransformSeasonDetails(response)
+	jellyfinIds := p.library.Episodes(ctx, userId, showId, seasonNumber)
 
 	episodes := make([]serializers.SeasonEpisodeSerializer, 0, len(details.Episodes))
 	for _, item := range details.Episodes {
@@ -556,6 +573,7 @@ func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonN
 			Rating:     item.Rating,
 			AirDate:    item.AirDate,
 			Watched:    watched,
+			JellyfinId: jellyfinIds[item.Number],
 		})
 	}
 
@@ -633,6 +651,7 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 		Rating:     details.Rating,
 		AirDate:    details.AirDate,
 		Watched:    watched,
+		JellyfinId: p.library.Episodes(ctx, userId, showId, seasonNumber)[episodeNumber],
 		Credits:    credits,
 		Videos:     videos,
 	}, nil
@@ -908,7 +927,7 @@ func (p *tmdbProvider) upNextEpisodes(ctx context.Context, userId uuid.UUID) ([]
 
 // nextUnwatchedEpisode walks a show's seasons in order and returns the first unwatched episode that has aired (the resume point), skipping on any TMDB failure
 func (p *tmdbProvider) nextUnwatchedEpisode(ctx context.Context, userId uuid.UUID, show models.Series) *serializers.UpNextEpisodeSerializer {
-	detail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d", show.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+	detail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v2:tv:%d", show.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
 		return p.client.FetchTvDetails(ctx, show.TmdbId)
 	})
 	if err != nil {
@@ -1028,7 +1047,7 @@ func (p *tmdbProvider) upNextMovies(ctx context.Context, userId uuid.UUID) ([]se
 
 // releasedMovie resolves a want-list movie when it has been released, skipping on any TMDB failure
 func (p *tmdbProvider) releasedMovie(ctx context.Context, movie models.Movie, today time.Time) *serializers.UpNextMovieSerializer {
-	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:movie:%d", movie.TmdbId), cache.DetailsTTL, func() (*tmdb.MovieDetails, error) {
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v2:movie:%d", movie.TmdbId), cache.DetailsTTL, func() (*tmdb.MovieDetails, error) {
 		return p.client.FetchMovieDetails(ctx, movie.TmdbId)
 	})
 	if err != nil {

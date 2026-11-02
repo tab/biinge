@@ -11,17 +11,51 @@ import (
 	"github.com/google/uuid"
 )
 
-const deleteIntegration = `-- name: DeleteIntegration :exec
-DELETE FROM integrations WHERE user_id = $1 AND provider = $2
+const clearIntegrationToken = `-- name: ClearIntegrationToken :exec
+UPDATE integrations SET token_hash = NULL, updated_at = NOW() WHERE user_id = $1 AND provider = $2
 `
 
-type DeleteIntegrationParams struct {
+type ClearIntegrationTokenParams struct {
 	UserID   uuid.UUID
 	Provider ProviderType
 }
 
-func (q *Queries) DeleteIntegration(ctx context.Context, arg DeleteIntegrationParams) error {
-	_, err := q.db.Exec(ctx, deleteIntegration, arg.UserID, arg.Provider)
+func (q *Queries) ClearIntegrationToken(ctx context.Context, arg ClearIntegrationTokenParams) error {
+	_, err := q.db.Exec(ctx, clearIntegrationToken, arg.UserID, arg.Provider)
+	return err
+}
+
+const clearJellyfinConnection = `-- name: ClearJellyfinConnection :exec
+UPDATE integrations SET
+  jellyfin_user_id = NULL,
+  jellyfin_username = NULL,
+  jellyfin_token = NULL,
+  updated_at = NOW()
+WHERE user_id = $1 AND provider = $2
+`
+
+type ClearJellyfinConnectionParams struct {
+	UserID   uuid.UUID
+	Provider ProviderType
+}
+
+func (q *Queries) ClearJellyfinConnection(ctx context.Context, arg ClearJellyfinConnectionParams) error {
+	_, err := q.db.Exec(ctx, clearJellyfinConnection, arg.UserID, arg.Provider)
+	return err
+}
+
+const deleteEmptyIntegration = `-- name: DeleteEmptyIntegration :exec
+DELETE FROM integrations
+WHERE user_id = $1 AND provider = $2 AND token_hash IS NULL AND jellyfin_token IS NULL
+`
+
+type DeleteEmptyIntegrationParams struct {
+	UserID   uuid.UUID
+	Provider ProviderType
+}
+
+func (q *Queries) DeleteEmptyIntegration(ctx context.Context, arg DeleteEmptyIntegrationParams) error {
+	_, err := q.db.Exec(ctx, deleteEmptyIntegration, arg.UserID, arg.Provider)
 	return err
 }
 
@@ -32,14 +66,17 @@ SELECT
   i.provider,
   i.token_hash,
   i.created_at,
-  i.updated_at
+  i.updated_at,
+  i.jellyfin_user_id,
+  i.jellyfin_username,
+  i.jellyfin_token
 FROM integrations i
   JOIN users u ON u.id = i.user_id
 WHERE i.token_hash = $1 AND i.provider = $2 AND u.deleted_at IS NULL LIMIT 1
 `
 
 type FindIntegrationByTokenHashParams struct {
-	TokenHash string
+	TokenHash *string
 	Provider  ProviderType
 }
 
@@ -53,6 +90,46 @@ func (q *Queries) FindIntegrationByTokenHash(ctx context.Context, arg FindIntegr
 		&i.TokenHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.JellyfinUserID,
+		&i.JellyfinUsername,
+		&i.JellyfinToken,
+	)
+	return i, err
+}
+
+const findIntegrationByUser = `-- name: FindIntegrationByUser :one
+SELECT
+  id,
+  user_id,
+  provider,
+  token_hash,
+  created_at,
+  updated_at,
+  jellyfin_user_id,
+  jellyfin_username,
+  jellyfin_token
+FROM integrations
+WHERE user_id = $1 AND provider = $2
+`
+
+type FindIntegrationByUserParams struct {
+	UserID   uuid.UUID
+	Provider ProviderType
+}
+
+func (q *Queries) FindIntegrationByUser(ctx context.Context, arg FindIntegrationByUserParams) (Integration, error) {
+	row := q.db.QueryRow(ctx, findIntegrationByUser, arg.UserID, arg.Provider)
+	var i Integration
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Provider,
+		&i.TokenHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.JellyfinUserID,
+		&i.JellyfinUsername,
+		&i.JellyfinToken,
 	)
 	return i, err
 }
@@ -74,13 +151,16 @@ RETURNING
   provider,
   token_hash,
   created_at,
-  updated_at
+  updated_at,
+  jellyfin_user_id,
+  jellyfin_username,
+  jellyfin_token
 `
 
 type UpsertIntegrationParams struct {
 	UserID    uuid.UUID
 	Provider  ProviderType
-	TokenHash string
+	TokenHash *string
 }
 
 func (q *Queries) UpsertIntegration(ctx context.Context, arg UpsertIntegrationParams) (Integration, error) {
@@ -93,6 +173,67 @@ func (q *Queries) UpsertIntegration(ctx context.Context, arg UpsertIntegrationPa
 		&i.TokenHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.JellyfinUserID,
+		&i.JellyfinUsername,
+		&i.JellyfinToken,
+	)
+	return i, err
+}
+
+const upsertJellyfinConnection = `-- name: UpsertJellyfinConnection :one
+INSERT INTO integrations (
+  user_id,
+  provider,
+  jellyfin_user_id,
+  jellyfin_username,
+  jellyfin_token
+) VALUES (
+  $1, $2, $3, $4, $5
+)
+ON CONFLICT (user_id, provider) DO UPDATE SET
+  jellyfin_user_id = EXCLUDED.jellyfin_user_id,
+  jellyfin_username = EXCLUDED.jellyfin_username,
+  jellyfin_token = EXCLUDED.jellyfin_token,
+  updated_at = NOW()
+RETURNING
+  id,
+  user_id,
+  provider,
+  token_hash,
+  created_at,
+  updated_at,
+  jellyfin_user_id,
+  jellyfin_username,
+  jellyfin_token
+`
+
+type UpsertJellyfinConnectionParams struct {
+	UserID           uuid.UUID
+	Provider         ProviderType
+	JellyfinUserID   *string
+	JellyfinUsername *string
+	JellyfinToken    []byte
+}
+
+func (q *Queries) UpsertJellyfinConnection(ctx context.Context, arg UpsertJellyfinConnectionParams) (Integration, error) {
+	row := q.db.QueryRow(ctx, upsertJellyfinConnection,
+		arg.UserID,
+		arg.Provider,
+		arg.JellyfinUserID,
+		arg.JellyfinUsername,
+		arg.JellyfinToken,
+	)
+	var i Integration
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Provider,
+		&i.TokenHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.JellyfinUserID,
+		&i.JellyfinUsername,
+		&i.JellyfinToken,
 	)
 	return i, err
 }

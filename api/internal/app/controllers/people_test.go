@@ -50,6 +50,7 @@ func Test_PeopleController_HandleDetails(t *testing.T) {
 				provider.EXPECT().FetchPersonDetails(gomock.Any(), uint64(287), id).Return(&serializers.PersonDetailsSerializer{
 					Id:          287,
 					Name:        "Brad Pitt",
+					Biography:   "American actor.",
 					ProfilePath: "/p.jpg",
 					Gender:      2,
 				}, nil)
@@ -60,6 +61,7 @@ func Test_PeopleController_HandleDetails(t *testing.T) {
 				response: serializers.PersonDetailsSerializer{
 					Id:          287,
 					Name:        "Brad Pitt",
+					Biography:   "American actor.",
 					ProfilePath: "/p.jpg",
 					Gender:      2,
 				},

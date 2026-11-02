@@ -11,6 +11,7 @@ import (
 
 type SeriesSerializer struct {
 	Id                   uint64           `json:"id"`
+	JellyfinId           string           `json:"jellyfinId,omitempty"`
 	Title                string           `json:"title"`
 	PosterPath           string           `json:"posterPath"`
 	Pinned               bool             `json:"pinned"`
@@ -22,6 +23,7 @@ type SeriesSerializer struct {
 type SeriesDetailsSerializer struct {
 	Id              uint64                     `json:"id"`
 	ImdbId          string                     `json:"imdbId,omitempty"`
+	JellyfinId      string                     `json:"jellyfinId,omitempty"`
 	Title           string                     `json:"title"`
 	PosterPath      string                     `json:"posterPath"`
 	Pinned          bool                       `json:"pinned"`
@@ -32,6 +34,7 @@ type SeriesDetailsSerializer struct {
 	SeasonsCount    uint64                     `json:"seasonsCount,omitempty"`
 	EpisodesCount   uint64                     `json:"episodesCount,omitempty"`
 	Rating          float64                    `json:"rating,omitempty"`
+	Genres          []string                   `json:"genres"`
 	Credits         []PersonSerializer         `json:"credits"`
 	Recommendations []RecommendationSerializer `json:"recommendations"`
 	Videos          []VideoSerializer          `json:"videos"`

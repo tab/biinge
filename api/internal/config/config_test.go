@@ -142,6 +142,36 @@ func Test_Config_Validate(t *testing.T) {
 			name:   "Short JWT secret allowed in development",
 			mutate: func(c *Config) { c.AppEnv = DevelopmentEnv; c.JWTSecretKey = "SECRET" },
 		},
+		{
+			name: "Jellyfin with a 32-byte token key",
+			mutate: func(c *Config) {
+				c.Jellyfin = JellyfinConfig{BaseURL: "http://jellyfin:8096", TokenKey: "0123456789abcdef0123456789abcdef"}
+			},
+		},
+		{
+			name:    "Jellyfin without a token key",
+			mutate:  func(c *Config) { c.Jellyfin.BaseURL = "http://jellyfin:8096" },
+			wantErr: "JELLYFIN_TOKEN_KEY must be 32 bytes",
+		},
+		{
+			name: "Jellyfin with a 33-byte token key",
+			mutate: func(c *Config) {
+				c.Jellyfin = JellyfinConfig{BaseURL: "http://jellyfin:8096", TokenKey: "0123456789abcdef0123456789abcdef0"}
+			},
+			wantErr: "got 33",
+		},
+		{
+			name: "Jellyfin with a short token key in development",
+			mutate: func(c *Config) {
+				c.AppEnv = DevelopmentEnv
+				c.Jellyfin = JellyfinConfig{BaseURL: "http://jellyfin:8096", TokenKey: "SECRET"}
+			},
+			wantErr: "got 6",
+		},
+		{
+			name:   "Token key without Jellyfin is ignored",
+			mutate: func(c *Config) { c.Jellyfin.TokenKey = "SECRET" },
+		},
 	}
 
 	for _, tt := range tests {

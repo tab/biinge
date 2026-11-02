@@ -30,6 +30,8 @@ overrides it.
 | `TMDB_API_READ_ACCESS_TOKEN`            | TMDB v4 read token (required for detail/search/trending)     |
 | `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | Twitch app credentials for IGDB (required outside dev)       |
 | `JWT_SECRET_KEY`                        | token signing secret                                         |
+| `JELLYFIN_BASE_URL`                     | this instance's Jellyfin server (optional)                   |
+| `JELLYFIN_TOKEN_KEY`                    | 32-byte key for stored Jellyfin tokens (required with it)    |
 | `SENTRY_DSN`                            | error reporting (optional)                                   |
 
 ## Database

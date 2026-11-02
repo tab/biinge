@@ -3,6 +3,7 @@ package serializers
 // EpisodeDetailsSerializer is a TMDB-sourced episode with credits, trailers and the user's watched state
 type EpisodeDetailsSerializer struct {
 	Id         uint64             `json:"id"`
+	JellyfinId string             `json:"jellyfinId,omitempty"`
 	Title      string             `json:"title"`
 	Number     uint64             `json:"number"`
 	PosterPath string             `json:"posterPath"`

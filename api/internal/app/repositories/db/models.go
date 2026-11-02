@@ -218,12 +218,15 @@ type Game struct {
 }
 
 type Integration struct {
-	ID        uuid.UUID
-	UserID    uuid.UUID
-	Provider  ProviderType
-	TokenHash string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	ID               uuid.UUID
+	UserID           uuid.UUID
+	Provider         ProviderType
+	TokenHash        *string
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
+	JellyfinUserID   *string
+	JellyfinUsername *string
+	JellyfinToken    []byte
 }
 
 type Movie struct {

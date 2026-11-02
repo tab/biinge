@@ -21,6 +21,9 @@ const (
 // minJWTSecretLength is the minimum length for an HS256 signing key (256 bits)
 const minJWTSecretLength = 32
 
+// JellyfinTokenKeyLength is the exact length of the AES-256 key that encrypts stored Jellyfin tokens
+const JellyfinTokenKeyLength = 32
+
 // Sync worker defaults, tuned for a small library and calm TMDB usage
 const (
 	defaultSyncInterval         = 2 * time.Hour
@@ -45,6 +48,12 @@ type IGDBConfig struct {
 
 	ClientID     string
 	ClientSecret string
+}
+
+// JellyfinConfig holds the instance's Jellyfin server and the key for the tokens the API stores (an empty BaseURL turns Jellyfin off)
+type JellyfinConfig struct {
+	BaseURL  string
+	TokenKey string
 }
 
 // WorkerConfig tunes the background TMDB sync worker
@@ -75,6 +84,8 @@ type Config struct {
 
 	// named rather than embedded: BaseURL would collide with TMDBConfig
 	IGDB IGDBConfig
+
+	Jellyfin JellyfinConfig
 }
 
 func LoadConfig() *Config {
@@ -116,6 +127,11 @@ func LoadConfig() *Config {
 			TokenURL:     getEnvString("IGDB_TOKEN_URL"),
 			ClientID:     getEnvString("IGDB_CLIENT_ID"),
 			ClientSecret: getEnvString("IGDB_CLIENT_SECRET"),
+		},
+
+		Jellyfin: JellyfinConfig{
+			BaseURL:  getEnvString("JELLYFIN_BASE_URL"),
+			TokenKey: getEnvString("JELLYFIN_TOKEN_KEY"),
 		},
 
 		WorkerConfig: WorkerConfig{
@@ -163,6 +179,13 @@ func (c *Config) Validate() error {
 
 	if len(missing) > 0 {
 		return fmt.Errorf("missing required configuration: %s", strings.Join(missing, ", "))
+	}
+
+	if c.Jellyfin.BaseURL != "" && len(c.Jellyfin.TokenKey) != JellyfinTokenKeyLength {
+		return fmt.Errorf(
+			"JELLYFIN_TOKEN_KEY must be %d bytes when JELLYFIN_BASE_URL is set, got %d",
+			JellyfinTokenKeyLength, len(c.Jellyfin.TokenKey),
+		)
 	}
 
 	// Require a strong signing key outside local dev

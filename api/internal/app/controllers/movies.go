@@ -25,12 +25,14 @@ type MoviesController interface {
 type moviesController struct {
 	movies   services.Movies
 	provider services.TmdbProvider
+	library  services.Library
 }
 
-func NewMoviesController(movies services.Movies, provider services.TmdbProvider) MoviesController {
+func NewMoviesController(movies services.Movies, provider services.TmdbProvider, library services.Library) MoviesController {
 	return &moviesController{
 		movies:   movies,
 		provider: provider,
+		library:  library,
 	}
 }
 
@@ -57,10 +59,18 @@ func (c *moviesController) HandleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tmdbIds := make([]uint64, 0, len(rows))
+	for _, row := range rows {
+		tmdbIds = append(tmdbIds, row.TmdbId)
+	}
+
+	jellyfinIds := c.library.MovieIds(r.Context(), user.ID, tmdbIds)
+
 	collection := make([]serializers.MovieSerializer, 0, len(rows))
 	for _, row := range rows {
 		collection = append(collection, serializers.MovieSerializer{
 			Id:         row.TmdbId,
+			JellyfinId: jellyfinIds[row.TmdbId],
 			Title:      row.Title,
 			PosterPath: row.PosterPath,
 			Pinned:     row.Pinned,
@@ -146,12 +156,18 @@ func (c *moviesController) HandleCreate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// a movie added as watched marks its Jellyfin item played
+	if row.State == models.StateTypeWatched {
+		c.library.SetPlayed(r.Context(), user.ID, services.PlayedTarget{Kind: services.PlayedMovie, TmdbId: row.TmdbId, Played: true})
+	}
+
 	// the write acknowledges state only, but the spec marks these arrays required, and a nil slice
 	// encodes as null, which no client can decode into an array
 	response := serializers.MovieDetailsSerializer{
 		Id:              row.TmdbId,
 		Pinned:          row.Pinned,
 		State:           row.State,
+		Genres:          make([]string, 0),
 		Credits:         make([]serializers.PersonSerializer, 0),
 		Recommendations: make([]serializers.RecommendationSerializer, 0),
 		Videos:          make([]serializers.VideoSerializer, 0),
@@ -188,6 +204,15 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// the state before the write tells whether the mark changes what Jellyfin holds
+	stored, err := c.movies.FindByFilter(r.Context(), models.MovieFilter{UserId: user.ID, TmdbIds: []uint64{id}})
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
+
+		return
+	}
+
 	row, err := c.movies.UpdateByTmdbId(r.Context(), &models.Movie{
 		TmdbId: id,
 		UserId: user.ID,
@@ -201,12 +226,19 @@ func (c *moviesController) HandleUpdate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// only a mark into or out of watched writes Jellyfin (a pin or a repeated mark sends nothing)
+	wasWatched := len(stored) > 0 && stored[0].State == models.StateTypeWatched
+	if isWatched := row.State == models.StateTypeWatched; isWatched != wasWatched {
+		c.library.SetPlayed(r.Context(), user.ID, services.PlayedTarget{Kind: services.PlayedMovie, TmdbId: id, Played: isWatched})
+	}
+
 	// the write acknowledges state only, but the spec marks these arrays required, and a nil slice
 	// encodes as null, which no client can decode into an array
 	response := serializers.MovieDetailsSerializer{
 		Id:              row.TmdbId,
 		Pinned:          row.Pinned,
 		State:           row.State,
+		Genres:          make([]string, 0),
 		Credits:         make([]serializers.PersonSerializer, 0),
 		Recommendations: make([]serializers.RecommendationSerializer, 0),
 		Videos:          make([]serializers.VideoSerializer, 0),
@@ -242,6 +274,9 @@ func (c *moviesController) HandleDelete(w http.ResponseWriter, r *http.Request) 
 
 		return
 	}
+
+	// Jellyfin follows biinge, so a removed movie is unplayed whatever its state was
+	c.library.SetPlayed(r.Context(), user.ID, services.PlayedTarget{Kind: services.PlayedMovie, TmdbId: id, Played: false})
 
 	w.WriteHeader(http.StatusNoContent)
 }

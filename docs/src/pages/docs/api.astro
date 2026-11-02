@@ -22,6 +22,7 @@ const movieListJson = esc(`{
   "data": [
     {
       "id": 693134,
+      "jellyfinId": "4f1c9a3e7b2d48e6a0c5f19d83b72e64",
       "title": "Dune: Part Two",
       "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
       "pinned": true,
@@ -73,6 +74,11 @@ const upNextJson = esc(`{
 const jellyfinTokenJson = esc(`{
   "token": "3f9c2b1e8d7a6c5b4e3f2a1d0c9b8a7f..."
 }`);
+const jellyfinConnectionJson = esc(`{
+  "base_url": "https://jellyfin.example.com",
+  "connected": true,
+  "username": "alice"
+}`);
 const statsJson = esc(`{
   "period": "all",
   "movies": { "want": 131, "watched": 895, "minutes": 104760 },
@@ -85,6 +91,93 @@ const statsJson = esc(`{
   ]
 }`);
 
+const movieDetailsJson = esc(`{
+  "id": 693134,
+  "imdbId": "tt15239678",
+  "jellyfinId": "4f1c9a3e7b2d48e6a0c5f19d83b72e64",
+  "title": "Dune: Part Two",
+  "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
+  "pinned": true,
+  "state": "want",
+  "overview": "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen…",
+  "status": "Released",
+  "releaseDate": "2024-02-27",
+  "runtime": 167,
+  "rating": 8.1,
+  "genres": ["Science Fiction", "Adventure"],
+  "credits": […],
+  "recommendations": […],
+  "videos": […]
+}`);
+const seriesDetailsJson = esc(`{
+  "id": 125988,
+  "imdbId": "tt14688458",
+  "jellyfinId": "9d2e47b1c03a4f8e85b6d1a7e2c94f30",
+  "title": "Silo",
+  "posterPath": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+  "pinned": false,
+  "state": "watching",
+  "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground…",
+  "status": "Returning Series",
+  "releaseDate": "2023-05-04",
+  "seasonsCount": 3,
+  "episodesCount": 30,
+  "rating": 8.1,
+  "genres": ["Sci-Fi & Fantasy", "Drama"],
+  "credits": […],
+  "recommendations": […],
+  "videos": […],
+  "seasons": […]
+}`);
+const seasonDetailsJson = esc(`{
+  "id": 342410,
+  "tmdbShowId": 125988,
+  "title": "Season 1",
+  "number": 1,
+  "posterPath": "/zBx1X06G1OlndbXTCZI13FECNz2.jpg",
+  "airDate": "2023-05-04",
+  "overview": "",
+  "watched": false,
+  "episodes": [
+    {
+      "id": 4171851,
+      "jellyfinId": "c7e15a0d9b3f4e2a86d1f07b54a9e3c2",
+      "title": "Freedom Day",
+      "number": 1,
+      "posterPath": "/4LfxsCjAuRLdVTO6YIo0ZVUOHk6.jpg",
+      "runtime": 59,
+      "overview": "Sheriff Holston faces a choice that will change everything…",
+      "rating": 7.9,
+      "airDate": "2023-05-04",
+      "watched": true
+    },
+    {
+      "id": 4171852,
+      "title": "Holston's Pick",
+      "number": 2,
+      "posterPath": "/9z0iDOvCpdvDqKZqC1GhYbiWyU2.jpg",
+      "runtime": 50,
+      "overview": "Juliette is drawn into the investigation of a death in the silo…",
+      "rating": 7.7,
+      "airDate": "2023-05-04",
+      "watched": false
+    }
+  ]
+}`);
+const episodeDetailsJson = esc(`{
+  "id": 4171851,
+  "jellyfinId": "c7e15a0d9b3f4e2a86d1f07b54a9e3c2",
+  "title": "Freedom Day",
+  "number": 1,
+  "posterPath": "/4LfxsCjAuRLdVTO6YIo0ZVUOHk6.jpg",
+  "runtime": 59,
+  "overview": "Sheriff Holston faces a choice that will change everything…",
+  "rating": 7.9,
+  "airDate": "2023-05-04",
+  "watched": true,
+  "credits": […],
+  "videos": […]
+}`);
 interface QueryParam {
   name: string;
   // prefilled when the endpoint needs a value to answer at all, empty otherwise
@@ -95,7 +188,7 @@ interface QueryParam {
 interface Endpoint {
   id: string;
   group: string;
-  method: "GET" | "POST" | "PATCH" | "DELETE";
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   path: string;
   desc: string;
   // a second paragraph, for the endpoints whose parameters need more than a clause
@@ -145,7 +238,13 @@ const endpoints: Endpoint[] = [
 
   { id: "jellyfin-token", group: "Integrations", method: "POST", path: "/api/v1/accounts/integrations/jellyfin", desc: "Create a Jellyfin token for the current user. A second call replaces the first token.", note: "The token is shown once. The API stores only its SHA-256. It can add and remove watched marks in your library, so treat it as a password. The setup guide explains where it goes.", resp: jellyfinTokenJson, status: 201 },
   { id: "jellyfin-revoke", group: "Integrations", method: "DELETE", path: "/api/v1/accounts/integrations/jellyfin", desc: "Revoke the Jellyfin token. Events carrying it get 401 from then on. Also 204 when there was no token." },
-  { id: "jellyfin-webhook", group: "Integrations", method: "POST", path: "/api/v1/webhooks/jellyfin", desc: "The endpoint the Jellyfin Webhook plugin posts to. It takes the Jellyfin token, not the access token. A Jellyfin token can add and remove watched marks in its owner's library, so this page never sends it. Try the endpoint from your own machine against your own server.", note: "Played true with SaveReason PlaybackFinished or TogglePlayed adds a watched mark. Played false with SaveReason TogglePlayed takes one away. Every other save is dropped. A movie resolves through Provider_tmdb, an episode through Provider_tvdb or Provider_imdb. A title that is not in the library, or is already in the state the event asks for, is ignored with 204. A title biinge cannot resolve gets 422, a TMDB failure 502 and a database failure 503. Every accepted event is stored with its status.", curl: `curl -X POST <your API base>/api/v1/webhooks/jellyfin \\
+  { id: "jellyfin-connect", group: "Integrations", method: "PUT", path: "/api/v1/accounts/integrations/jellyfin/connection", desc: "Connect your Jellyfin account. The API signs in to this instance's Jellyfin server as you. Connecting again replaces the connection.", note: "The API never stores the password and never returns the Jellyfin token. A wrong username or password gets 422, an unreachable Jellyfin server 502. Either way the earlier connection stays. 404 means this instance has no Jellyfin server configured.", body: `{
+  "username": "alice",
+  "password": "your-jellyfin-password"
+}`, resp: jellyfinConnectionJson },
+  { id: "jellyfin-status", group: "Integrations", method: "GET", path: "/api/v1/accounts/integrations/jellyfin/connection", desc: "The Jellyfin server address, whether you are connected and your Jellyfin username. Never the token.", note: "404 means this instance has no Jellyfin server configured.", resp: jellyfinConnectionJson },
+  { id: "jellyfin-disconnect", group: "Integrations", method: "DELETE", path: "/api/v1/accounts/integrations/jellyfin/connection", desc: "Disconnect your Jellyfin account. The API signs the token out of Jellyfin and clears the connection, even when the sign-out fails. The Jellyfin webhook token stays. Also 204 when there was no connection." },
+  { id: "jellyfin-webhook", group: "Integrations", method: "POST", path: "/api/v1/webhooks/jellyfin", desc: "The endpoint the Jellyfin Webhook plugin posts to. It takes the Jellyfin token, not the access token. A Jellyfin token can add and remove watched marks in its owner's library, so this page never sends it. Try the endpoint from your own machine against your own server.", note: "Played true with SaveReason PlaybackFinished or TogglePlayed adds a watched mark. Played false with SaveReason TogglePlayed takes one away. Every other save is dropped. A movie resolves through Provider_tmdb, an episode through Provider_tvdb or Provider_imdb. A title that is not in the library, or is already in the state the event asks for, is ignored with 204. So is an event that repeats a played value the API wrote to that ItemId in the last 60 seconds, since it echoes that write. A title biinge cannot resolve gets 422, a TMDB failure 502 and a database failure 503. Every accepted event is stored with its status.", curl: `curl -X POST <your API base>/api/v1/webhooks/jellyfin \\
   -H "Authorization: Bearer <Jellyfin token>" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -157,20 +256,20 @@ const endpoints: Endpoint[] = [
     "Name": "Winter Is Coming"
   }'` },
 
-  { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | watched" }, ...paging], resp: movieListJson },
-  { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library. id is the TMDB movie id.", body: `{
+  { id: "movies-list", group: "Movies", method: "GET", path: "/api/v1/movies", desc: "Your movie library, one state at a time. type defaults to want.", note: "Each item carries jellyfinId by the same rule as movie details.", params: [{ name: "type", hint: "want | watched" }, ...paging], resp: movieListJson },
+  { id: "movies-create", group: "Movies", method: "POST", path: "/api/v1/movies", desc: "Add a movie to the library. id is the TMDB movie id.", note: "With your Jellyfin account connected, a movie added as watched is also marked played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{
   "id": 693134,
   "title": "Dune: Part Two",
   "posterPath": "/czembW0Rk1Ke7lCJGahbOhdCLZ.jpg",
   "runtime": 167,
   "state": "want"
 }` },
-  { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations." },
-  { id: "movie-update", group: "Movies", method: "PATCH", path: "/api/v1/movies/{id}", desc: "Change state or pin the movie.", body: `{
+  { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding and changing a movie never return it. genres lists TMDB's genre names. It is empty when TMDB lists none or does not answer.", resp: movieDetailsJson },
+  { id: "movie-update", group: "Movies", method: "PATCH", path: "/api/v1/movies/{id}", desc: "Change state or pin the movie.", note: "With your Jellyfin account connected, a change into watched also marks the movie played in Jellyfin, and a change out of watched marks it unplayed. A pin or the same state again sends nothing. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{
   "state": "watched",
   "pinned": true
 }` },
-  { id: "movie-delete", group: "Movies", method: "DELETE", path: "/api/v1/movies/{id}", desc: "Remove the movie from the library." },
+  { id: "movie-delete", group: "Movies", method: "DELETE", path: "/api/v1/movies/{id}", desc: "Remove the movie from the library.", note: "With your Jellyfin account connected, the movie is also marked unplayed in Jellyfin, whatever its state was. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
 
   { id: "games-list", group: "Games", method: "GET", path: "/api/v1/games", desc: "Your game library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | playing | played" }, ...paging] },
   { id: "games-create", group: "Games", method: "POST", path: "/api/v1/games", desc: "Add a game to the library. id is the IGDB game id, and posterPath is an IGDB cover image_id rather than a path.", body: `{
@@ -187,7 +286,7 @@ const endpoints: Endpoint[] = [
 }` },
   { id: "game-delete", group: "Games", method: "DELETE", path: "/api/v1/games/{id}", desc: "Remove the game from the library." },
 
-  { id: "series-list", group: "TV Series", method: "GET", path: "/api/v1/series", desc: "Your series library, one state at a time. type defaults to want.", params: [{ name: "type", hint: "want | watching | watched" }, ...paging] },
+  { id: "series-list", group: "TV Series", method: "GET", path: "/api/v1/series", desc: "Your series library, one state at a time. type defaults to want.", note: "Each item carries jellyfinId by the same rule as series details.", params: [{ name: "type", hint: "want | watching | watched" }, ...paging] },
   { id: "series-create", group: "TV Series", method: "POST", path: "/api/v1/series", desc: "Add a show to the library. id is the TMDB series id.", note: "status is TMDB's own, and it matters: a show left at Returning Series never derives to watched, however many episodes are ticked.", body: `{
   "id": 95396,
   "title": "Severance",
@@ -197,17 +296,17 @@ const endpoints: Endpoint[] = [
   "status": "Returning Series",
   "state": "want"
 }` },
-  { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons." },
+  { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding and changing a show never return it. genres lists TMDB's genre names. It is empty when TMDB lists none or does not answer.", resp: seriesDetailsJson },
   { id: "series-update", group: "TV Series", method: "PATCH", path: "/api/v1/series/{id}", desc: "Change state or pin the show.", body: `{
   "state": "watching",
   "pinned": true
 }` },
-  { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library." },
-  { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and episodes." },
-  { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details." },
+  { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library.", note: "With your Jellyfin account connected, the show and each of its matched episodes are also marked unplayed in Jellyfin, whatever its state was. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
+  { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and episodes.", note: "An episode's jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: seasonDetailsJson },
+  { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: episodeDetailsJson },
 
   { id: "progress-get", group: "Progress", method: "GET", path: "/api/v1/series/{id}/progress", desc: "Watched seasons and episodes for a show." },
-  { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark a show watched. Ids come from the URL, and the body carries the rows to write.", note: "Only the seasons and episodes you list are recorded, so a body without them marks nothing. The example lists two episodes of season one; a real client sends all nine, and every other season too.", body: `{
+  { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark a show watched. Ids come from the URL, and the body carries the rows to write.", note: "Only the seasons and episodes you list are recorded, so a body without them marks nothing. The example lists two episodes of season one; a real client sends all nine, and every other season too. With your Jellyfin account connected, a mark that changes your watched episodes also marks the show and each of its matched episodes played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{
   "series": {
     "title": "Severance",
     "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
@@ -228,8 +327,8 @@ const endpoints: Endpoint[] = [
     }
   ]
 }` },
-  { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show, dropping every season and episode recorded for it." },
-  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", note: "The episodes array is what actually gets recorded. Send the season's episodes in it — without them the show ends up with no watched episodes, and nothing is tracked.", body: `{
+  { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show, dropping every season and episode recorded for it.", note: "With your Jellyfin account connected, an unmark that changes your watched episodes also marks the show and each of its matched episodes unplayed in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
+  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", note: "The episodes array is what actually gets recorded. Send the season's episodes in it — without them the show ends up with no watched episodes, and nothing is tracked. With your Jellyfin account connected, a mark that changes your watched episodes also marks each matched episode of the season played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped.", body: `{
   "series": {
     "title": "Severance",
     "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
@@ -243,8 +342,8 @@ const endpoints: Endpoint[] = [
     { "id": 3396429, "title": "Half Loop", "posterPath": "/wIQP0P2tyE7VRIN3xR8Efq7UgKt.jpg", "runtime": 53, "airDate": "2022-02-17" }
   ]
 }` },
-  { id: "season-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Unmark a season and its episodes." },
-  { id: "episode-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Mark an episode as watched.", note: "The show and season rows are created from this body if they don't exist yet, so send their metadata alongside the episode.", body: `{
+  { id: "season-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Unmark a season and its episodes.", note: "With your Jellyfin account connected, an unmark that changes your watched episodes also marks each matched episode of the season unplayed in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped." },
+  { id: "episode-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Mark an episode as watched.", note: "The show and season rows are created from this body if they don't exist yet, so send their metadata alongside the episode. With your Jellyfin account connected, a mark that changes your watched episodes also marks the episode played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped.", body: `{
   "series": {
     "title": "Severance",
     "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
@@ -260,7 +359,7 @@ const endpoints: Endpoint[] = [
     "airDate": "2022-02-17"
   }
 }` },
-  { id: "episode-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Unmark an episode." },
+  { id: "episode-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", desc: "Unmark an episode.", note: "With your Jellyfin account connected, an unmark that changes your watched episodes also marks the episode unplayed in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped." },
 
   { id: "search-movies", group: "Search & Trending", method: "GET", path: "/api/v1/search/movies", desc: "Search movies. query is required.", params: [{ name: "query", value: "dune", hint: "search terms" }, { name: "page", hint: "1" }] },
   { id: "search-series", group: "Search & Trending", method: "GET", path: "/api/v1/search/series", desc: "Search TV shows. query is required.", params: [{ name: "query", value: "silo", hint: "search terms" }, { name: "page", hint: "1" }] },
@@ -459,16 +558,17 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
               <tbody>
                 <tr><td><code>400</code></td><td>Bad Request</td><td>Malformed JSON, an unparseable id, or a body that fails validation</td></tr>
                 <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid or expired access token, or wrong login credentials</td></tr>
+                <tr><td><code>404</code></td><td>Not Found</td><td>The Jellyfin connection routes, when this instance has no Jellyfin server configured</td></tr>
                 <tr><td><code>409</code></td><td>Conflict</td><td>Registering a login or email that is already taken</td></tr>
-                <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>The request was well formed but the work failed — including a title the upstream provider doesn't have</td></tr>
+                <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>The request was well formed but the work failed — including a title the upstream provider doesn't have, or a Jellyfin username and password that Jellyfin rejects</td></tr>
                 <tr><td><code>429</code></td><td>Too Many Requests</td><td>More than 5 requests a minute per IP to the public <code>/users</code> routes, 120 a minute per IP to the webhook, or 120 a minute per user everywhere else</td></tr>
-                <tr><td><code>500</code></td><td>Internal Server Error</td><td>Registration failed for a reason the API won't detail</td></tr>
-                <tr><td><code>502</code></td><td>Bad Gateway</td><td>TMDB failed while a Jellyfin event was being resolved</td></tr>
-                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable, from <code>/ready</code>, from the auth middleware or from the Jellyfin webhook</td></tr>
+                <tr><td><code>500</code></td><td>Internal Server Error</td><td>Registration or a Jellyfin connection route failed for a reason the API won't detail</td></tr>
+                <tr><td><code>502</code></td><td>Bad Gateway</td><td>TMDB failed while a Jellyfin event was being resolved, or the Jellyfin server could not be reached</td></tr>
+                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable, from <code>/ready</code>, from the auth middleware, from the Jellyfin webhook or from the Jellyfin connection routes</td></tr>
               </tbody>
             </table>
             <p class="errors-note">
-              There is no <code>404</code>: a title that isn't in your library, or
+              Titles never return <code>404</code>: a title that isn't in your library, or
               that TMDB and IGDB can't resolve, comes back as <code>422</code>.
             </p>
           </div>
@@ -670,6 +770,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
 
   .mb.get { color: #2ecc71; background: color-mix(in srgb, #27ae60 15%, transparent); }
   .mb.post { color: #34c7dc; background: color-mix(in srgb, #22b8cf 16%, transparent); }
+  .mb.put { color: #f5a524; background: color-mix(in srgb, #f59e0b 16%, transparent); }
   .mb.patch { color: #a78bfa; background: color-mix(in srgb, #8b5cf6 18%, transparent); }
   .mb.delete { color: #f0656a; background: color-mix(in srgb, #e5484d 15%, transparent); }
   .mb.err { color: #f0656a; background: color-mix(in srgb, #e5484d 15%, transparent); }

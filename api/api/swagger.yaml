@@ -353,6 +353,142 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
+  /api/v1/accounts/integrations/jellyfin/connection:
+    put:
+      summary: "Connect Jellyfin"
+      description: "Signs in to this instance's Jellyfin server as the user with the given username and password, and stores the connection. Connecting again replaces the connection and signs the earlier token out of Jellyfin. The API never stores the password and never returns the Jellyfin token. A failed sign-in keeps any earlier connection. 404 means this instance has no Jellyfin server configured"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JellyfinConnectionRequest"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JellyfinConnectionSerializer"
+        "400":
+          description: "Bad Request: malformed JSON, an empty username or an empty password"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "401":
+          description: "Unauthorized: missing, invalid or expired biinge access token. A Jellyfin failure never returns 401"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found: this instance has no Jellyfin server configured"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "422":
+          description: "Unprocessable Entity: Jellyfin rejected the username or password"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "502":
+          description: "Bad Gateway: the Jellyfin server could not be reached"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "503":
+          description: "Service Unavailable: the connection could not be read or written"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    get:
+      summary: "Jellyfin connection status"
+      description: "Returns this instance's Jellyfin server address, whether the user is connected and the Jellyfin username. It never returns the Jellyfin token. 404 means this instance has no Jellyfin server configured"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JellyfinConnectionSerializer"
+        "401":
+          description: "Unauthorized: missing, invalid or expired biinge access token. A Jellyfin failure never returns 401"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found: this instance has no Jellyfin server configured"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "503":
+          description: "Service Unavailable: the connection could not be read or written"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+    delete:
+      summary: "Disconnect Jellyfin"
+      description: "Signs the stored token out of Jellyfin and clears the connection. A failed sign-out still clears it. The webhook token stays. Also 204 when there was no connection. 404 means this instance has no Jellyfin server configured"
+      tags:
+        - integrations
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: "No Content"
+        "401":
+          description: "Unauthorized: missing, invalid or expired biinge access token. A Jellyfin failure never returns 401"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "404":
+          description: "Not Found: this instance has no Jellyfin server configured"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "503":
+          description: "Service Unavailable: the connection could not be read or written"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSerializer"
+
   /api/v1/movies:
     get:
       summary: "Movies list"
@@ -415,7 +551,7 @@ paths:
 
     post:
       summary: "Create movie"
-      description: "Adds a movie to the user's list"
+      description: "Adds a movie to the user's list. When the user has a Jellyfin connection, a movie added as watched also marks the matching Jellyfin item played, in the background after the biinge write. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - movies
       parameters:
@@ -532,7 +668,7 @@ paths:
 
     patch:
       summary: "Update movie"
-      description: "Updates a movie status and pinned state"
+      description: "Updates a movie status and pinned state. When the user has a Jellyfin connection, a change into watched also marks the matching Jellyfin item played and a change out of watched marks it unplayed, in the background after the biinge write; a pin or an unchanged state writes nothing. The current state is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - movies
       parameters:
@@ -590,7 +726,7 @@ paths:
 
     delete:
       summary: "Delete movie"
-      description: "Deletes a movie from user's lists"
+      description: "Deletes a movie from user's lists. When the user has a Jellyfin connection, it also marks the matching Jellyfin item unplayed, whatever the movie's state was, in the background after the biinge write. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - movies
       parameters:
@@ -1132,7 +1268,7 @@ paths:
 
     delete:
       summary: "Delete series"
-      description: "Removes a series from the user's lists"
+      description: "Removes a series from the user's lists. When the user has a Jellyfin connection, it also marks the matching Jellyfin series and each of its matched episodes unplayed, whatever the series state was, in the background after the biinge write. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - series
       parameters:
@@ -1222,7 +1358,7 @@ paths:
   /api/v1/series/{id}/watched:
     post:
       summary: "Mark whole show watched"
-      description: "Marks the series and all provided seasons and episodes as watched in a single transaction; the series state is derived (watched, or watching if still in production)"
+      description: "Marks the series and all provided seasons and episodes as watched in a single transaction; the series state is derived (watched, or watching if still in production). When the user has a Jellyfin connection, a mark that changes the watched episodes also marks the matching Jellyfin series and each of its matched episodes played, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1267,7 +1403,7 @@ paths:
                 $ref: "#/components/schemas/ErrorSerializer"
     delete:
       summary: "Unmark whole show watched"
-      description: "Removes the series and cascades deletion of its seasons and episodes; returns an empty (none) progress snapshot"
+      description: "Removes the series and cascades deletion of its seasons and episodes; returns an empty (none) progress snapshot. When the user has a Jellyfin connection, an unmark that changes the watched episodes also marks the matching Jellyfin series and each of its matched episodes unplayed, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1308,7 +1444,7 @@ paths:
   /api/v1/series/{id}/seasons/{seasonId}/watched:
     post:
       summary: "Mark season watched"
-      description: "Marks a season and all provided episodes as watched, then recomputes the series state"
+      description: "Marks a season and all provided episodes as watched, then recomputes the series state. When the user has a Jellyfin connection, a mark that changes the watched episodes also marks each matched Jellyfin episode of the season played, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1359,7 +1495,7 @@ paths:
                 $ref: "#/components/schemas/ErrorSerializer"
     delete:
       summary: "Unmark season watched"
-      description: "Deletes a season (cascading its episodes), then recomputes the series state"
+      description: "Deletes a season (cascading its episodes), then recomputes the series state. When the user has a Jellyfin connection, an unmark that changes the watched episodes also marks each matched Jellyfin episode of the season unplayed, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1406,7 +1542,7 @@ paths:
   /api/v1/series/{id}/seasons/{seasonId}/episodes/{episodeId}/watched:
     post:
       summary: "Mark episode watched"
-      description: "Marks a single episode watched, upserting its parent series and season, then recomputes the season and series state"
+      description: "Marks a single episode watched, upserting its parent series and season, then recomputes the season and series state. When the user has a Jellyfin connection, a mark that changes the watched episodes also marks the matching Jellyfin episode played, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1463,7 +1599,7 @@ paths:
                 $ref: "#/components/schemas/ErrorSerializer"
     delete:
       summary: "Unmark episode watched"
-      description: "Deletes a single watched episode, then recomputes the season and series state (untracking the show once it has no watched episodes left)"
+      description: "Deletes a single watched episode, then recomputes the season and series state (untracking the show once it has no watched episodes left). When the user has a Jellyfin connection, an unmark that changes the watched episodes also marks the matching Jellyfin episode unplayed, in the background after the biinge write. The progress is read first, and a failed read answers 422. The response never waits for Jellyfin or reports its result (a failure is only logged), and a title without exactly one library match is not written"
       tags:
         - progress
       parameters:
@@ -1548,6 +1684,29 @@ paths:
               schema:
                 type: object
                 description: "Person details from TMDB"
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  birthday:
+                    type: string
+                    description: "Omitted when TMDB has none"
+                  biography:
+                    type: string
+                    description: "The person's TMDB biography, omitted when TMDB has none"
+                  profilePath:
+                    type: string
+                  gender:
+                    type: integer
+                  movieCredits:
+                    type: array
+                    items:
+                      type: object
+                  tvCredits:
+                    type: array
+                    items:
+                      type: object
         "400":
           description: "Bad Request"
           content:
@@ -2010,7 +2169,7 @@ paths:
   /api/v1/webhooks/jellyfin:
     post:
       summary: "Jellyfin webhook"
-      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin. A played event marks the movie or episode watched when the token's owner tracks it and has not watched it yet. An unplayed toggle takes the mark away again: the movie goes back to want, the episode is unmarked through the progress cascade. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Only Played true with SaveReason PlaybackFinished or TogglePlayed, and Played false with SaveReason TogglePlayed, do anything; every other save is dropped with 204 before any work. Every other event is stored with its status. Limited to 120 requests a minute per IP, checked before the token"
+      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin. A played event marks the movie or episode watched when the token's owner tracks it and has not watched it yet. An unplayed toggle takes the mark away again: the movie goes back to want, the episode is unmarked through the progress cascade. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Only Played true with SaveReason PlaybackFinished or TogglePlayed, and Played false with SaveReason TogglePlayed, do anything; every other save is dropped with 204 before any work. Every other event is stored with its status. One that repeats a played value the API wrote to that ItemId in the last 60 seconds echoes that write, so it is stored as ignored with 204. Limited to 120 requests a minute per IP, checked before the token"
       tags:
         - integrations
       security:
@@ -2422,6 +2581,10 @@ components:
         imdbId:
           type: string
           description: "IMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this movie, by the same rule and from the same 10-minute library index as MovieDetailsSerializer.jellyfinId (omitted without a Jellyfin connection, without exactly one library item carrying its TMDB id, or when Jellyfin is unavailable)"
+          example: "4f1c9a3e7b2d48e6a0c5f19d83b72e64"
         title:
           type: string
           description: "Movie title"
@@ -2460,6 +2623,10 @@ components:
         imdbId:
           type: string
           description: "IMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this movie, present when the user has a Jellyfin connection and exactly one library item carries its TMDB id (omitted otherwise, also when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear). Only GET /api/v1/movies/{id} fills it"
+          example: "4f1c9a3e7b2d48e6a0c5f19d83b72e64"
         title:
           type: string
           description: "Movie title"
@@ -2490,6 +2657,12 @@ components:
           type: number
           format: float
           description: "Average rating"
+        genres:
+          type: array
+          description: "Genre names from TMDB (empty when TMDB lists none or is unavailable, and in the create and update responses)"
+          items:
+            type: string
+          example: ["Drama", "Thriller"]
         credits:
           type: object
           description: "Movie credits (cast and crew)"
@@ -2505,6 +2678,7 @@ components:
         - title
         - pinned
         - overview
+        - genres
 
     PaginationMeta:
       type: object
@@ -2649,6 +2823,10 @@ components:
           type: integer
           format: int64
           description: "TMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this series, by the same rule and from the same 10-minute library index as SeriesDetailsSerializer.jellyfinId (omitted without a Jellyfin connection, without exactly one library item carrying its TMDB id, or when Jellyfin is unavailable)"
+          example: "9d2e47b1c03a4f8e85b6d1a7e2c94f30"
         title:
           type: string
           description: "Series title"
@@ -2687,6 +2865,10 @@ components:
         imdbId:
           type: string
           description: "IMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this series, present when the user has a Jellyfin connection and exactly one library item carries its TMDB id (omitted otherwise, also when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear). Only GET /api/v1/series/{id} fills it"
+          example: "9d2e47b1c03a4f8e85b6d1a7e2c94f30"
         title:
           type: string
           description: "Series title"
@@ -2722,6 +2904,12 @@ components:
           type: number
           format: float
           description: "Average rating"
+        genres:
+          type: array
+          description: "Genre names from TMDB (empty when TMDB lists none or is unavailable, and in the create and update responses)"
+          items:
+            type: string
+          example: ["Drama", "Crime"]
         credits:
           type: array
           description: "Series credits (cast and crew)"
@@ -2748,6 +2936,7 @@ components:
         - pinned
         - state
         - overview
+        - genres
 
     CreateSeriesRequest:
       type: object
@@ -3005,6 +3194,10 @@ components:
           type: integer
           format: int64
           description: "Episode TMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this episode, present when the series matches one library item and that series holds exactly one episode with this season and episode number (omitted otherwise, also without a Jellyfin connection or when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear)"
+          example: "c7e15a0d9b3f4e2a86d1f07b54a9e3c2"
         title:
           type: string
           description: "Episode title"
@@ -3088,6 +3281,10 @@ components:
           type: integer
           format: int64
           description: "Episode TMDB ID"
+        jellyfinId:
+          type: string
+          description: "The user's Jellyfin item id for this episode, present when the series matches one library item and that series holds exactly one episode with this season and episode number (omitted otherwise, also without a Jellyfin connection or when Jellyfin is unavailable; the library index is cached for 10 minutes, so a new item can take that long to appear)"
+          example: "c7e15a0d9b3f4e2a86d1f07b54a9e3c2"
         title:
           type: string
           description: "Episode title"
@@ -3447,10 +3644,49 @@ components:
       required:
         - token
 
+    JellyfinConnectionRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: "Jellyfin username, trimmed"
+          example: "alice"
+        password:
+          type: string
+          description: "Jellyfin password, sent as is and used for one sign-in. The API never stores it"
+          example: "your-password"
+      required:
+        - username
+        - password
+
+    JellyfinConnectionSerializer:
+      type: object
+      description: "The user's Jellyfin connection. It never carries the Jellyfin token"
+      properties:
+        base_url:
+          type: string
+          description: "This instance's Jellyfin server address"
+          example: "https://jellyfin.example.com"
+        connected:
+          type: boolean
+          description: "Whether the user has a stored Jellyfin connection"
+          example: true
+        username:
+          type: string
+          description: "Jellyfin username, omitted when not connected"
+          example: "alice"
+      required:
+        - base_url
+        - connected
+
     JellyfinEvent:
       type: object
       description: "The JSON the Webhook plugin sends with Send All Properties on. Keys match case-insensitively and every key not listed here is ignored, but the whole body is stored"
       properties:
+        ItemId:
+          type: string
+          description: "Jellyfin item id, dashed or not; an event without it is never treated as an echo"
+          example: "a1b2c3d4e5f60718293a4b5c6d7e8f90"
         ItemType:
           type: string
           description: "Movie or Episode; anything else is ignored with 204"

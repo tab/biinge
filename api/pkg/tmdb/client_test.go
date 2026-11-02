@@ -78,7 +78,7 @@ func Test_Client_FetchMovieDetails(t *testing.T) {
 		{
 			name:       "Success",
 			statusCode: http.StatusOK,
-			body:       `{"id":550,"title":"Fight Club","overview":"desc","poster_path":"/poster.jpg","status":"Released","imdb_id":"tt0137523","release_date":"1999-10-15","runtime":139,"vote_average":8.4}`,
+			body:       `{"id":550,"title":"Fight Club","overview":"desc","poster_path":"/poster.jpg","status":"Released","imdb_id":"tt0137523","release_date":"1999-10-15","runtime":139,"vote_average":8.4,"genres":[{"id":18,"name":"Drama"}]}`,
 			expected: &MovieDetails{
 				Id:          550,
 				Title:       "Fight Club",
@@ -89,6 +89,7 @@ func Test_Client_FetchMovieDetails(t *testing.T) {
 				ReleaseDate: "1999-10-15",
 				Runtime:     139,
 				VoteAverage: 8.4,
+				Genres:      []Genre{{Id: 18, Name: "Drama"}},
 			},
 		},
 		{
@@ -196,7 +197,7 @@ func Test_Client_FetchTvDetails(t *testing.T) {
 		{
 			name:       "Success",
 			statusCode: http.StatusOK,
-			body:       `{"id":1399,"name":"Game of Thrones","overview":"desc","poster_path":"/poster.jpg","status":"Ended","imdb_id":"tt0944947","first_air_date":"2011-04-17","vote_average":9.2}`,
+			body:       `{"id":1399,"name":"Game of Thrones","overview":"desc","poster_path":"/poster.jpg","status":"Ended","imdb_id":"tt0944947","first_air_date":"2011-04-17","vote_average":9.2,"genres":[{"id":18,"name":"Drama"}]}`,
 			expected: &TvDetails{
 				Id:          1399,
 				Title:       "Game of Thrones",
@@ -206,6 +207,7 @@ func Test_Client_FetchTvDetails(t *testing.T) {
 				ImdbId:      "tt0944947",
 				ReleaseDate: "2011-04-17",
 				VoteAverage: 9.2,
+				Genres:      []Genre{{Id: 18, Name: "Drama"}},
 			},
 		},
 		{

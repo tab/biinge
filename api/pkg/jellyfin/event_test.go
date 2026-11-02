@@ -10,7 +10,7 @@ import (
 )
 
 func Test_ParseEvent(t *testing.T) {
-	const body = `{"ItemType":"Episode","SaveReason":"PlaybackFinished","Played":true,"Provider_tvdb":"3254641","Provider_imdb":"tt1480055","Name":"Winter Is Coming","SeriesName":"Game of Thrones","SeasonNumber":1}`
+	const body = `{"ItemId":"a1b2c3d4e5f60718293a4b5c6d7e8f90","ItemType":"Episode","SaveReason":"PlaybackFinished","Played":true,"Provider_tvdb":"3254641","Provider_imdb":"tt1480055","Name":"Winter Is Coming","SeriesName":"Game of Thrones","SeasonNumber":1}`
 
 	tests := []struct {
 		name     string
@@ -23,6 +23,7 @@ func Test_ParseEvent(t *testing.T) {
 			name: "Reads the typed keys and keeps the raw body with the rest",
 			body: body,
 			expected: &Event{
+				ItemId:       "a1b2c3d4e5f60718293a4b5c6d7e8f90",
 				ItemType:     "Episode",
 				SaveReason:   "PlaybackFinished",
 				Played:       true,

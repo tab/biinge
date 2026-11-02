@@ -42,7 +42,7 @@ func Test_Jellyfin_Handle(t *testing.T) {
 	movies := NewMockMovies(ctrl)
 	progress := NewMockProgress(ctrl)
 	webhooks := repositories.NewMockWebhookRepository(ctrl)
-	service := NewJellyfin(client, movies, progress, webhooks, cache.NewNoopCache(), newTestLogger())
+	service := NewJellyfin(client, movies, progress, webhooks, cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	link := &models.Integration{ID: uuid.New(), UserId: userId, Provider: models.JellyfinProvider}
@@ -496,6 +496,136 @@ func Test_Jellyfin_Handle(t *testing.T) {
 	}
 }
 
+func Test_Jellyfin_Handle_Echo(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	movies := NewMockMovies(ctrl)
+	webhooks := repositories.NewMockWebhookRepository(ctrl)
+
+	userId := uuid.New()
+	link := &models.Integration{ID: uuid.New(), UserId: userId, Provider: models.JellyfinProvider}
+	movieFilter := models.MovieFilter{UserId: userId, TmdbIds: []uint64{603}}
+
+	// toggle is a manual played or unplayed mark on the movie item, as Jellyfin sends for an API write
+	toggle := func(itemId string, played bool) *jellyfin.Event {
+		event := jellyfinEvent(jellyfin.ItemTypeMovie, map[string]string{"tmdb": "603"})
+		event.ItemId = itemId
+		event.SaveReason = jellyfin.SaveReasonTogglePlayed
+		event.Played = played
+
+		return event
+	}
+
+	type write struct {
+		itemId string
+		played bool
+	}
+
+	tests := []struct {
+		name     string
+		writes   []write
+		events   []*jellyfin.Event
+		writeErr error
+		readErr  error
+		before   func()
+		statuses []models.WebhookStatus
+	}{
+		{
+			name:     "Echoes of a Watched then Unwatched write arriving in reverse order leave the newer mark",
+			writes:   []write{{itemId: "a1b2c3d4", played: true}, {itemId: "a1b2c3d4", played: false}},
+			events:   []*jellyfin.Event{toggle("a1b2c3d4", false), toggle("a1b2c3d4", true)},
+			before:   func() {},
+			statuses: []models.WebhookStatus{models.WebhookStatusIgnored, models.WebhookStatusIgnored},
+		},
+		{
+			name:   "A Jellyfin change to the other value after an API write applies",
+			writes: []write{{itemId: "a1b2c3d4", played: true}},
+			events: []*jellyfin.Event{toggle("a1b2c3d4", false)},
+			before: func() {
+				movies.EXPECT().FindByFilter(ctx, movieFilter).Return([]models.Movie{{TmdbId: 603, State: models.StateTypeWatched}}, nil)
+				movies.EXPECT().UpdateByTmdbId(ctx, &models.Movie{TmdbId: 603, UserId: userId, State: models.StateTypeWant}).Return(&models.Movie{}, nil)
+			},
+			statuses: []models.WebhookStatus{models.WebhookStatusUnmarked},
+		},
+		{
+			name:   "An event without an item id applies as before",
+			writes: []write{{itemId: "a1b2c3d4", played: true}},
+			events: []*jellyfin.Event{toggle("", true)},
+			before: func() {
+				movies.EXPECT().FindByFilter(ctx, movieFilter).Return([]models.Movie{{TmdbId: 603, State: models.StateTypeWant}}, nil)
+				movies.EXPECT().UpdateByTmdbId(ctx, &models.Movie{TmdbId: 603, UserId: userId, State: models.StateTypeWatched}).Return(&models.Movie{}, nil)
+			},
+			statuses: []models.WebhookStatus{models.WebhookStatusMarked},
+		},
+		{
+			name:     "A dashed item id matches the API's undashed write",
+			writes:   []write{{itemId: "a1b2c3d4", played: true}},
+			events:   []*jellyfin.Event{toggle("A1B2-C3D4", true)},
+			before:   func() {},
+			statuses: []models.WebhookStatus{models.WebhookStatusIgnored},
+		},
+		{
+			name:     "Reverse-order echoes are still skipped when Redis fails the writes",
+			writes:   []write{{itemId: "a1b2c3d4", played: true}, {itemId: "a1b2c3d4", played: false}},
+			events:   []*jellyfin.Event{toggle("a1b2c3d4", false), toggle("a1b2c3d4", true)},
+			writeErr: assert.AnError,
+			before:   func() {},
+			statuses: []models.WebhookStatus{models.WebhookStatusIgnored, models.WebhookStatusIgnored},
+		},
+		{
+			name:     "An echo is still skipped when Redis fails the reads",
+			writes:   []write{{itemId: "a1b2c3d4", played: true}},
+			events:   []*jellyfin.Event{toggle("a1b2c3d4", true)},
+			readErr:  assert.AnError,
+			before:   func() {},
+			statuses: []models.WebhookStatus{models.WebhookStatusIgnored},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// a fresh store keeps each case's writes its own, and with no Redis the receipts live in process
+			store := cache.NewNoopCache()
+
+			if tt.writeErr != nil || tt.readErr != nil {
+				// a configured Redis that fails its writes or reads
+				failing := newMemoryCache()
+				failing.setErr = tt.writeErr
+				failing.getErr = tt.readErr
+				store = failing
+			}
+
+			receipts := NewEchoReceipts(store)
+
+			service := NewJellyfin(tmdb.NewMockClient(ctrl), movies, NewMockProgress(ctrl), webhooks, cache.NewNoopCache(), receipts, newTestLogger())
+
+			for _, w := range tt.writes {
+				require.ErrorIs(t, receipts.Set(ctx, echoKey(userId, w.itemId, w.played), []byte("1"), echoTTL), tt.writeErr)
+			}
+
+			tt.before()
+
+			var stored []models.WebhookStatus
+
+			webhooks.EXPECT().
+				Create(ctx, gomock.Any()).
+				DoAndReturn(func(_ context.Context, params *models.Webhook) error {
+					stored = append(stored, params.Status)
+					return nil
+				}).
+				Times(len(tt.events))
+
+			for _, event := range tt.events {
+				require.NoError(t, service.Handle(ctx, link, event))
+			}
+
+			assert.Equal(t, tt.statuses, stored)
+		})
+	}
+}
+
 func Test_Jellyfin_Handle_TraceFailure(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -505,7 +635,7 @@ func Test_Jellyfin_Handle_TraceFailure(t *testing.T) {
 	movies := NewMockMovies(ctrl)
 	progress := NewMockProgress(ctrl)
 	webhooks := repositories.NewMockWebhookRepository(ctrl)
-	service := NewJellyfin(client, movies, progress, webhooks, cache.NewNoopCache(), newTestLogger())
+	service := NewJellyfin(client, movies, progress, webhooks, cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	link := &models.Integration{ID: uuid.New(), UserId: userId}

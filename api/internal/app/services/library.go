@@ -6,6 +6,7 @@ import (
 	"maps"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,6 +33,14 @@ const playedTimeout = 30 * time.Second
 
 // playedQueue is how many played writes wait behind the one in flight before SetPlayed drops the next
 const playedQueue = 256
+
+// echoTTL is how long the webhook skips an event that repeats a played value the API wrote to that item
+const echoTTL = 60 * time.Second
+
+// echoKey is the cache key of an API played write to a Jellyfin item (the id without dashes, lowercased, since Jellyfin formats it either way)
+func echoKey(userId uuid.UUID, itemId string, played bool) string {
+	return fmt.Sprintf("jellyfin:v1:echo:%s:%s:%t", userId, strings.ToLower(strings.ReplaceAll(itemId, "-", "")), played)
+}
 
 // PlayedKind is the kind of title a played write targets
 type PlayedKind string
@@ -80,6 +89,7 @@ type library struct {
 	client     jellyfin.Client
 	tmdb       tmdb.Client
 	cache      cache.Cache
+	receipts   EchoReceipts
 	log        *logger.Logger
 
 	// jobs feeds the worker, which runs the played writes one at a time in the order SetPlayed queued them
@@ -98,6 +108,7 @@ func NewLibrary(
 	client jellyfin.Client,
 	tmdbClient tmdb.Client,
 	store cache.Cache,
+	receipts EchoReceipts,
 	log *logger.Logger,
 ) Library {
 	l := &library{
@@ -106,6 +117,7 @@ func NewLibrary(
 		client:     client,
 		tmdb:       tmdbClient,
 		cache:      store,
+		receipts:   receipts,
 		log:        log.WithComponent("LibraryService"),
 		jobs:       make(chan playedJob, playedQueue),
 		done:       make(chan struct{}),
@@ -333,6 +345,12 @@ func (l *library) setPlayed(ctx context.Context, userId uuid.UUID, target Played
 		// an empty id is a title without exactly one match
 		if item == "" {
 			continue
+		}
+
+		// recorded before the write, since Jellyfin can post the echo before it answers and a timed-out write may still land
+		if err := l.receipts.Set(ctx, echoKey(userId, item, target.Played), []byte("1"), echoTTL); err != nil {
+			// the receipt still lands in process, so only another API instance would apply the echo
+			l.log.Warn().Err(err).Str("ItemId", item).Msg("Failed to share the Jellyfin played write; only this instance will skip its echo")
 		}
 
 		if err := l.client.SetPlayed(ctx, *connection, jellyfin.PlayedState{ItemId: item, Played: target.Played}); err != nil {

@@ -42,7 +42,7 @@ func Test_Library_Movie(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -162,7 +162,7 @@ func Test_Library_Series(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -218,7 +218,7 @@ func Test_Library_MovieIds(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -275,7 +275,7 @@ func Test_Library_SeriesIds(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -332,7 +332,7 @@ func Test_Library_Episodes(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -449,7 +449,7 @@ func Test_Library_JellyfinNotConfigured(t *testing.T) {
 
 	ctx := context.Background()
 	cfg := &config.Config{Jellyfin: config.JellyfinConfig{TokenKey: testJellyfinKey}}
-	service := NewLibrary(fxtest.NewLifecycle(t), cfg, repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), cfg, repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 
@@ -469,7 +469,7 @@ func Test_Library_Cache(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	store := newMemoryCache()
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, newMemoryCache(), newTestLogger())
 
 	one := 1
 	series := []jellyfin.Item{{Id: "series", Type: jellyfin.ItemTypeSeries, TmdbId: "1399"}}
@@ -560,7 +560,7 @@ func Test_Library_Expiry(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	store := newMemoryCache()
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, newMemoryCache(), newTestLogger())
 
 	one, two := 1, 2
 	series := []jellyfin.Item{{Id: "series", Type: jellyfin.ItemTypeSeries, TmdbId: "1399"}}
@@ -871,13 +871,67 @@ func Test_Library_SetPlayed(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// a fresh cache keeps each case's Jellyfin and TMDB reads its own
-			service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, newMemoryCache(), newTestLogger())
+			service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, newMemoryCache(), newMemoryCache(), newTestLogger())
 
 			tt.before()
 
 			service.(*library).setPlayed(ctx, userId, tt.target)
 		})
 	}
+}
+
+func Test_Library_SetPlayed_Echo(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	repository := repositories.NewMockIntegrationRepository(ctrl)
+	client := jellyfin.NewMockClient(ctrl)
+	store := newMemoryCache()
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), store, newTestLogger())
+
+	userId := uuid.New()
+	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
+	key := fmt.Sprintf("jellyfin:v1:echo:%s:a1b2c3d4:true", userId)
+
+	// a failed write is recorded too, since it may have landed
+	repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+	client.EXPECT().Items(ctx, connection).Return([]jellyfin.Item{{Id: "A1B2-C3D4", Type: jellyfin.ItemTypeMovie, TmdbId: "603"}}, nil)
+	client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "A1B2-C3D4", Played: true}).Return(jellyfin.ErrUnavailable)
+
+	service.(*library).setPlayed(ctx, userId, PlayedTarget{Kind: PlayedMovie, TmdbId: 603, Played: true})
+
+	assert.Contains(t, store.store, key)
+	assert.Equal(t, 60*time.Second, store.ttls[key])
+}
+
+func Test_Library_SetPlayed_EchoRecordFailure(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	repository := repositories.NewMockIntegrationRepository(ctrl)
+	client := jellyfin.NewMockClient(ctrl)
+	store := newMemoryCache()
+	store.setErr = assert.AnError
+	receipts := NewEchoReceipts(store)
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), receipts, newTestLogger())
+
+	userId := uuid.New()
+	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
+
+	// a failing Redis still leaves the receipt in process, and the write goes out
+	repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+	client.EXPECT().Items(ctx, connection).Return([]jellyfin.Item{{Id: "a1b2c3d4", Type: jellyfin.ItemTypeMovie, TmdbId: "603"}}, nil)
+	client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "a1b2c3d4", Played: true}).Return(nil)
+
+	service.(*library).setPlayed(ctx, userId, PlayedTarget{Kind: PlayedMovie, TmdbId: 603, Played: true})
+
+	assert.Empty(t, store.store)
+
+	_, found, err := receipts.Get(ctx, fmt.Sprintf("jellyfin:v1:echo:%s:a1b2c3d4:true", userId))
+	require.NoError(t, err)
+	assert.True(t, found)
 }
 
 func Test_Library_SetPlayed_Order(t *testing.T) {
@@ -888,7 +942,7 @@ func Test_Library_SetPlayed_Order(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	lifecycle.RequireStart()
 	defer lifecycle.RequireStop()
@@ -959,7 +1013,7 @@ func Test_Library_SetPlayed_RequestCancelled(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -1002,7 +1056,7 @@ func Test_Library_SetPlayed_QueueFull(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	lifecycle.RequireStart()
 
@@ -1068,7 +1122,7 @@ func Test_Library_SetPlayed_Stop(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	lifecycle.RequireStart()
 
@@ -1117,7 +1171,7 @@ func Test_Library_SetPlayed_AfterStop(t *testing.T) {
 	defer ctrl.Finish()
 
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newMemoryCache(), newTestLogger())
 
 	lifecycle.RequireStart()
 	lifecycle.RequireStop()
@@ -1137,7 +1191,7 @@ func Test_Library_SetPlayed_TmdbCache(t *testing.T) {
 	client := jellyfin.NewMockClient(ctrl)
 	tmdbClient := tmdb.NewMockClient(ctrl)
 	store := newMemoryCache()
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, store, newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, store, newMemoryCache(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}

@@ -2169,7 +2169,7 @@ paths:
   /api/v1/webhooks/jellyfin:
     post:
       summary: "Jellyfin webhook"
-      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin. A played event marks the movie or episode watched when the token's owner tracks it and has not watched it yet. An unplayed toggle takes the mark away again: the movie goes back to want, the episode is unmarked through the progress cascade. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Only Played true with SaveReason PlaybackFinished or TogglePlayed, and Played false with SaveReason TogglePlayed, do anything; every other save is dropped with 204 before any work. Every other event is stored with its status. Limited to 120 requests a minute per IP, checked before the token"
+      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin. A played event marks the movie or episode watched when the token's owner tracks it and has not watched it yet. An unplayed toggle takes the mark away again: the movie goes back to want, the episode is unmarked through the progress cascade. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Only Played true with SaveReason PlaybackFinished or TogglePlayed, and Played false with SaveReason TogglePlayed, do anything; every other save is dropped with 204 before any work. Every other event is stored with its status. One that repeats a played value the API wrote to that ItemId in the last 60 seconds echoes that write, so it is stored as ignored with 204. Limited to 120 requests a minute per IP, checked before the token"
       tags:
         - integrations
       security:
@@ -3683,6 +3683,10 @@ components:
       type: object
       description: "The JSON the Webhook plugin sends with Send All Properties on. Keys match case-insensitively and every key not listed here is ignored, but the whole body is stored"
       properties:
+        ItemId:
+          type: string
+          description: "Jellyfin item id, dashed or not; an event without it is never treated as an echo"
+          example: "a1b2c3d4e5f60718293a4b5c6d7e8f90"
         ItemType:
           type: string
           description: "Movie or Episode; anything else is ignored with 204"

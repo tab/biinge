@@ -28,6 +28,7 @@ type jellyfinService struct {
 	progress Progress
 	webhooks repositories.WebhookRepository
 	cache    cache.Cache
+	receipts EchoReceipts
 	log      *logger.Logger
 }
 
@@ -37,6 +38,7 @@ func NewJellyfin(
 	progress Progress,
 	webhooks repositories.WebhookRepository,
 	store cache.Cache,
+	receipts EchoReceipts,
 	log *logger.Logger,
 ) Jellyfin {
 	return &jellyfinService{
@@ -45,11 +47,12 @@ func NewJellyfin(
 		progress: progress,
 		webhooks: webhooks,
 		cache:    store,
+		receipts: receipts,
 		log:      log.WithComponent("JellyfinService"),
 	}
 }
 
-// Handle drops progress saves before any work, then resolves and merges the event and stores it with its status
+// Handle drops progress saves before any work, then resolves and merges the event and stores it with its status (an echo of the API's own played write is ignored)
 func (j *jellyfinService) Handle(ctx context.Context, integration *models.Integration, event *jellyfin.Event) error {
 	if !event.Finished() && !event.Unplayed() {
 		return nil
@@ -58,12 +61,27 @@ func (j *jellyfinService) Handle(ctx context.Context, integration *models.Integr
 	var (
 		status models.WebhookStatus
 		err    error
+		echo   bool
 	)
 
-	switch event.ItemType {
-	case jellyfin.ItemTypeMovie:
+	// an event without an item id can't be told from an echo, so it applies as before
+	if event.ItemId != "" {
+		_, found, getErr := j.receipts.Get(ctx, echoKey(integration.UserId, event.ItemId, event.Played))
+		if getErr != nil {
+			// a failing Redis leaves found to this instance's in-process receipts, so only another instance's write goes unseen
+			j.log.Warn().Err(getErr).Msg("Failed to read the shared Jellyfin played writes; checked this instance's only")
+		}
+
+		echo = found
+	}
+
+	switch {
+	case echo:
+		// the API wrote this value to the item within echoTTL, and applying its late echo could undo a newer mark
+		status = models.WebhookStatusIgnored
+	case event.ItemType == jellyfin.ItemTypeMovie:
 		status, err = j.movie(ctx, integration.UserId, event)
-	case jellyfin.ItemTypeEpisode:
+	case event.ItemType == jellyfin.ItemTypeEpisode:
 		status, err = j.episode(ctx, integration.UserId, event)
 	default:
 		status = models.WebhookStatusIgnored

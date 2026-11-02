@@ -17,6 +17,8 @@ import (
 type memoryCache struct {
 	store     map[string][]byte
 	ttls      map[string]time.Duration
+	getErr    error
+	setErr    error
 	deleteErr error
 	deleted   []string
 }
@@ -26,12 +28,20 @@ func newMemoryCache() *memoryCache {
 }
 
 func (c *memoryCache) Get(_ context.Context, key string) ([]byte, bool, error) {
+	if c.getErr != nil {
+		return nil, false, c.getErr
+	}
+
 	data, ok := c.store[key]
 
 	return data, ok, nil
 }
 
 func (c *memoryCache) Set(_ context.Context, key string, value []byte, ttl time.Duration) error {
+	if c.setErr != nil {
+		return c.setErr
+	}
+
 	c.store[key] = value
 	c.ttls[key] = ttl
 

@@ -54,21 +54,12 @@ var (
 
 	ErrFailedToFetchStats = errors.New("failed to fetch stats")
 
-	ErrFailedToCreateIntegration       = errors.New("failed to create integration")
-	ErrFailedToDeleteIntegration       = errors.New("failed to delete integration")
-	ErrFailedToAuthenticateIntegration = errors.New("failed to authenticate integration")
-
 	ErrJellyfinNotConfigured            = errors.New("jellyfin is not configured")
 	ErrInvalidJellyfinCredentials       = errors.New("invalid jellyfin credentials")
 	ErrJellyfinUnavailable              = errors.New("jellyfin unavailable")
 	ErrFailedToSaveJellyfinConnection   = errors.New("failed to save jellyfin connection")
 	ErrFailedToFetchJellyfinConnection  = errors.New("failed to fetch jellyfin connection")
 	ErrFailedToDeleteJellyfinConnection = errors.New("failed to delete jellyfin connection")
-
-	ErrMissingProviderId      = errors.New("no usable provider id")
-	ErrTitleNotFound          = errors.New("title not found on tmdb")
-	ErrTmdbUnavailable        = errors.New("tmdb unavailable")
-	ErrFailedToProcessWebhook = errors.New("failed to process webhook")
 )
 
 var (

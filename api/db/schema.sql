@@ -64,19 +64,6 @@ CREATE TYPE public.state_types AS ENUM (
 );
 
 
---
--- Name: status_type; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.status_type AS ENUM (
-    'marked',
-    'ignored',
-    'unresolved',
-    'failed',
-    'unmarked'
-);
-
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -131,12 +118,11 @@ CREATE TABLE public.integrations (
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
     user_id uuid NOT NULL,
     provider public.provider_type NOT NULL,
-    token_hash character(64),
+    external_user_id text NOT NULL,
+    username text NOT NULL,
+    token bytea NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    jellyfin_user_id text,
-    jellyfin_username text,
-    jellyfin_token bytea
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -240,21 +226,6 @@ CREATE TABLE public.users (
 
 
 --
--- Name: webhooks; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.webhooks (
-    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
-    integration_id uuid NOT NULL,
-    payload jsonb NOT NULL,
-    status public.status_type NOT NULL,
-    error text,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-
---
 -- Name: episodes episodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -311,14 +282,6 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: webhooks webhooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.webhooks
-    ADD CONSTRAINT webhooks_pkey PRIMARY KEY (id);
-
-
---
 -- Name: episodes_season_id_air_at_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -365,13 +328,6 @@ CREATE INDEX games_user_id_played_at_idx ON public.games USING btree (user_id, p
 --
 
 CREATE INDEX games_user_id_state_pinned_created_idx ON public.games USING btree (user_id, state, pinned DESC, created_at DESC);
-
-
---
--- Name: integrations_token_hash_unique; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX integrations_token_hash_unique ON public.integrations USING btree (token_hash);
 
 
 --
@@ -452,13 +408,6 @@ CREATE UNIQUE INDEX users_login_key ON public.users USING btree (login) WHERE (d
 
 
 --
--- Name: webhooks_integration_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX webhooks_integration_id_created_at_idx ON public.webhooks USING btree (integration_id, created_at);
-
-
---
 -- Name: episodes episodes_season_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -504,14 +453,6 @@ ALTER TABLE ONLY public.seasons
 
 ALTER TABLE ONLY public.series
     ADD CONSTRAINT series_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
--- Name: webhooks webhooks_integration_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.webhooks
-    ADD CONSTRAINT webhooks_integration_id_fkey FOREIGN KEY (integration_id) REFERENCES public.integrations(id) ON DELETE CASCADE;
 
 
 --

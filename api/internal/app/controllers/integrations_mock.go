@@ -52,18 +52,6 @@ func (mr *MockIntegrationsControllerMockRecorder) HandleConnect(w, r any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleConnect", reflect.TypeOf((*MockIntegrationsController)(nil).HandleConnect), w, r)
 }
 
-// HandleCreateToken mocks base method.
-func (m *MockIntegrationsController) HandleCreateToken(w http.ResponseWriter, r *http.Request) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "HandleCreateToken", w, r)
-}
-
-// HandleCreateToken indicates an expected call of HandleCreateToken.
-func (mr *MockIntegrationsControllerMockRecorder) HandleCreateToken(w, r any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleCreateToken", reflect.TypeOf((*MockIntegrationsController)(nil).HandleCreateToken), w, r)
-}
-
 // HandleDisconnect mocks base method.
 func (m *MockIntegrationsController) HandleDisconnect(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()
@@ -74,30 +62,6 @@ func (m *MockIntegrationsController) HandleDisconnect(w http.ResponseWriter, r *
 func (mr *MockIntegrationsControllerMockRecorder) HandleDisconnect(w, r any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleDisconnect", reflect.TypeOf((*MockIntegrationsController)(nil).HandleDisconnect), w, r)
-}
-
-// HandleJellyfinWebhook mocks base method.
-func (m *MockIntegrationsController) HandleJellyfinWebhook(w http.ResponseWriter, r *http.Request) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "HandleJellyfinWebhook", w, r)
-}
-
-// HandleJellyfinWebhook indicates an expected call of HandleJellyfinWebhook.
-func (mr *MockIntegrationsControllerMockRecorder) HandleJellyfinWebhook(w, r any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleJellyfinWebhook", reflect.TypeOf((*MockIntegrationsController)(nil).HandleJellyfinWebhook), w, r)
-}
-
-// HandleRevoke mocks base method.
-func (m *MockIntegrationsController) HandleRevoke(w http.ResponseWriter, r *http.Request) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "HandleRevoke", w, r)
-}
-
-// HandleRevoke indicates an expected call of HandleRevoke.
-func (mr *MockIntegrationsControllerMockRecorder) HandleRevoke(w, r any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleRevoke", reflect.TypeOf((*MockIntegrationsController)(nil).HandleRevoke), w, r)
 }
 
 // HandleStatus mocks base method.

@@ -43,21 +43,6 @@ func (m *MockIntegrations) EXPECT() *MockIntegrationsMockRecorder {
 	return m.recorder
 }
 
-// Authenticate mocks base method.
-func (m *MockIntegrations) Authenticate(ctx context.Context, token string) (*models.Integration, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Authenticate", ctx, token)
-	ret0, _ := ret[0].(*models.Integration)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Authenticate indicates an expected call of Authenticate.
-func (mr *MockIntegrationsMockRecorder) Authenticate(ctx, token any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockIntegrations)(nil).Authenticate), ctx, token)
-}
-
 // Connect mocks base method.
 func (m *MockIntegrations) Connect(ctx context.Context, userId uuid.UUID, credentials jellyfin.Credentials) (*models.JellyfinConnection, error) {
 	m.ctrl.T.Helper()
@@ -73,21 +58,6 @@ func (mr *MockIntegrationsMockRecorder) Connect(ctx, userId, credentials any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Connect", reflect.TypeOf((*MockIntegrations)(nil).Connect), ctx, userId, credentials)
 }
 
-// CreateToken mocks base method.
-func (m *MockIntegrations) CreateToken(ctx context.Context, userId uuid.UUID) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateToken", ctx, userId)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateToken indicates an expected call of CreateToken.
-func (mr *MockIntegrationsMockRecorder) CreateToken(ctx, userId any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateToken", reflect.TypeOf((*MockIntegrations)(nil).CreateToken), ctx, userId)
-}
-
 // Disconnect mocks base method.
 func (m *MockIntegrations) Disconnect(ctx context.Context, userId uuid.UUID) error {
 	m.ctrl.T.Helper()
@@ -100,20 +70,6 @@ func (m *MockIntegrations) Disconnect(ctx context.Context, userId uuid.UUID) err
 func (mr *MockIntegrationsMockRecorder) Disconnect(ctx, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Disconnect", reflect.TypeOf((*MockIntegrations)(nil).Disconnect), ctx, userId)
-}
-
-// Revoke mocks base method.
-func (m *MockIntegrations) Revoke(ctx context.Context, userId uuid.UUID) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Revoke", ctx, userId)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Revoke indicates an expected call of Revoke.
-func (mr *MockIntegrationsMockRecorder) Revoke(ctx, userId any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockIntegrations)(nil).Revoke), ctx, userId)
 }
 
 // Status mocks base method.

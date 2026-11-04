@@ -56,35 +56,6 @@ func (mr *MockIntegrationRepositoryMockRecorder) ClearConnection(ctx, userId, pr
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearConnection", reflect.TypeOf((*MockIntegrationRepository)(nil).ClearConnection), ctx, userId, provider)
 }
 
-// ClearToken mocks base method.
-func (m *MockIntegrationRepository) ClearToken(ctx context.Context, userId uuid.UUID, provider string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClearToken", ctx, userId, provider)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ClearToken indicates an expected call of ClearToken.
-func (mr *MockIntegrationRepositoryMockRecorder) ClearToken(ctx, userId, provider any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearToken", reflect.TypeOf((*MockIntegrationRepository)(nil).ClearToken), ctx, userId, provider)
-}
-
-// FindByTokenHash mocks base method.
-func (m *MockIntegrationRepository) FindByTokenHash(ctx context.Context, hash, provider string) (*models.Integration, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByTokenHash", ctx, hash, provider)
-	ret0, _ := ret[0].(*models.Integration)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByTokenHash indicates an expected call of FindByTokenHash.
-func (mr *MockIntegrationRepositoryMockRecorder) FindByTokenHash(ctx, hash, provider any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByTokenHash", reflect.TypeOf((*MockIntegrationRepository)(nil).FindByTokenHash), ctx, hash, provider)
-}
-
 // FindByUser mocks base method.
 func (m *MockIntegrationRepository) FindByUser(ctx context.Context, userId uuid.UUID, provider string) (*models.Integration, error) {
 	m.ctrl.T.Helper()
@@ -98,21 +69,6 @@ func (m *MockIntegrationRepository) FindByUser(ctx context.Context, userId uuid.
 func (mr *MockIntegrationRepositoryMockRecorder) FindByUser(ctx, userId, provider any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUser", reflect.TypeOf((*MockIntegrationRepository)(nil).FindByUser), ctx, userId, provider)
-}
-
-// Upsert mocks base method.
-func (m *MockIntegrationRepository) Upsert(ctx context.Context, params *models.Integration) (*models.Integration, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Upsert", ctx, params)
-	ret0, _ := ret[0].(*models.Integration)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Upsert indicates an expected call of Upsert.
-func (mr *MockIntegrationRepositoryMockRecorder) Upsert(ctx, params any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upsert", reflect.TypeOf((*MockIntegrationRepository)(nil).Upsert), ctx, params)
 }
 
 // UpsertConnection mocks base method.

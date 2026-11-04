@@ -72,19 +72,19 @@ func (mr *MockSeriesProgressRepositoryMockRecorder) MarkSeasonWatched(ctx, userI
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkSeasonWatched", reflect.TypeOf((*MockSeriesProgressRepository)(nil).MarkSeasonWatched), ctx, userId, series, season)
 }
 
-// MarkShowWatched mocks base method.
-func (m *MockSeriesProgressRepository) MarkShowWatched(ctx context.Context, userId uuid.UUID, show models.ShowInput) (*models.SeriesProgress, error) {
+// MarkSeriesWatched mocks base method.
+func (m *MockSeriesProgressRepository) MarkSeriesWatched(ctx context.Context, userId uuid.UUID, input models.MarkSeriesInput) (*models.SeriesProgress, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MarkShowWatched", ctx, userId, show)
+	ret := m.ctrl.Call(m, "MarkSeriesWatched", ctx, userId, input)
 	ret0, _ := ret[0].(*models.SeriesProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// MarkShowWatched indicates an expected call of MarkShowWatched.
-func (mr *MockSeriesProgressRepositoryMockRecorder) MarkShowWatched(ctx, userId, show any) *gomock.Call {
+// MarkSeriesWatched indicates an expected call of MarkSeriesWatched.
+func (mr *MockSeriesProgressRepositoryMockRecorder) MarkSeriesWatched(ctx, userId, input any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkShowWatched", reflect.TypeOf((*MockSeriesProgressRepository)(nil).MarkShowWatched), ctx, userId, show)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkSeriesWatched", reflect.TypeOf((*MockSeriesProgressRepository)(nil).MarkSeriesWatched), ctx, userId, input)
 }
 
 // Progress mocks base method.
@@ -132,17 +132,17 @@ func (mr *MockSeriesProgressRepositoryMockRecorder) UnmarkSeasonWatched(ctx, use
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnmarkSeasonWatched", reflect.TypeOf((*MockSeriesProgressRepository)(nil).UnmarkSeasonWatched), ctx, userId, seriesTmdbId, seasonTmdbId)
 }
 
-// UnmarkShowWatched mocks base method.
-func (m *MockSeriesProgressRepository) UnmarkShowWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
+// UnmarkSeriesWatched mocks base method.
+func (m *MockSeriesProgressRepository) UnmarkSeriesWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UnmarkShowWatched", ctx, userId, seriesTmdbId)
+	ret := m.ctrl.Call(m, "UnmarkSeriesWatched", ctx, userId, seriesTmdbId)
 	ret0, _ := ret[0].(*models.SeriesProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UnmarkShowWatched indicates an expected call of UnmarkShowWatched.
-func (mr *MockSeriesProgressRepositoryMockRecorder) UnmarkShowWatched(ctx, userId, seriesTmdbId any) *gomock.Call {
+// UnmarkSeriesWatched indicates an expected call of UnmarkSeriesWatched.
+func (mr *MockSeriesProgressRepositoryMockRecorder) UnmarkSeriesWatched(ctx, userId, seriesTmdbId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnmarkShowWatched", reflect.TypeOf((*MockSeriesProgressRepository)(nil).UnmarkShowWatched), ctx, userId, seriesTmdbId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnmarkSeriesWatched", reflect.TypeOf((*MockSeriesProgressRepository)(nil).UnmarkSeriesWatched), ctx, userId, seriesTmdbId)
 }

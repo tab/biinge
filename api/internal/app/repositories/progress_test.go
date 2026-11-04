@@ -91,7 +91,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("mark single episode marks show watching, season not yet watched", func(t *testing.T) {
 		const seriesID uint64 = 100
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 		progress, err := repository.MarkEpisodeWatched(
 			ctx, userID,
@@ -109,7 +109,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("marking every episode of a finished show marks it watched", func(t *testing.T) {
 		const seriesID uint64 = 101
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 		for _, ep := range []uint64{1, 2, 3} {
 			_, err := repository.MarkEpisodeWatched(
@@ -132,7 +132,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("finishing every season marks a show watched even when the episode total drifts", func(t *testing.T) {
 		const seriesID uint64 = 109
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 		// the show-level episode total (99) is far above the two episodes that actually exist,
 		// mirroring TMDB's drifted number_of_episodes; completing the season must still win
@@ -154,11 +154,11 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("in-production show with all episodes watched stays watching", func(t *testing.T) {
 		const seriesID uint64 = 102
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 		progress, err := repository.MarkSeasonWatched(
 			ctx, userID,
-			seriesInput(seriesID, 2, models.TvInProductionStatus),
+			seriesInput(seriesID, 2, models.SeriesInProductionStatus),
 			seasonInput(300, 2, episodeInput(10), episodeInput(11)),
 		)
 		require.NoError(t, err)
@@ -171,9 +171,9 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("mark whole show watched cascades to seasons and episodes", func(t *testing.T) {
 		const seriesID uint64 = 103
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
-		progress, err := repository.MarkShowWatched(ctx, userID, models.ShowInput{
+		progress, err := repository.MarkSeriesWatched(ctx, userID, models.MarkSeriesInput{
 			Series: seriesInput(seriesID, 3, "Ended"),
 			Seasons: []models.SeasonInput{
 				seasonInput(400, 2, episodeInput(20), episodeInput(21)),
@@ -210,7 +210,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("unmarking the last episode reverts an explicitly tracked show to its chosen state", func(t *testing.T) {
 		const seriesID uint64 = 106
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 		createTrackedSeries(t, client, userID, seriesID, models.StateTypeWant)
 
@@ -235,7 +235,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("unmarking the whole show reverts an explicitly tracked show", func(t *testing.T) {
 		const seriesID uint64 = 107
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 		createTrackedSeries(t, client, userID, seriesID, models.StateTypeWatching)
 
@@ -246,7 +246,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		progress, err := repository.UnmarkShowWatched(ctx, userID, seriesID)
+		progress, err := repository.UnmarkSeriesWatched(ctx, userID, seriesID)
 		require.NoError(t, err)
 
 		assert.Equal(t, models.StateTypeWatching, progress.State)
@@ -265,7 +265,7 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		progress, err := repository.UnmarkShowWatched(ctx, userID, seriesID)
+		progress, err := repository.UnmarkSeriesWatched(ctx, userID, seriesID)
 		require.NoError(t, err)
 
 		assert.Equal(t, models.StateTypeNone, progress.State)
@@ -276,9 +276,9 @@ func Test_SeriesProgressRepository_Cascade(t *testing.T) {
 	t.Run("unmarking one episode downgrades a watched show to watching", func(t *testing.T) {
 		const seriesID uint64 = 105
 
-		defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+		defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
-		_, err := repository.MarkShowWatched(ctx, userID, models.ShowInput{
+		_, err := repository.MarkSeriesWatched(ctx, userID, models.MarkSeriesInput{
 			Series:  seriesInput(seriesID, 2, "Ended"),
 			Seasons: []models.SeasonInput{seasonInput(600, 2, episodeInput(50), episodeInput(51))},
 		})
@@ -314,7 +314,7 @@ func Test_SeriesProgressRepository_ConcurrentMarkUnmark(t *testing.T) {
 		newEpisode   uint64 = 2
 	)
 
-	defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+	defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 	series := seriesInput(seriesID, 2, "Ended")
 
@@ -370,7 +370,7 @@ func Test_SeriesProgressRepository_UpsertKeepsCountsOnZero(t *testing.T) {
 
 	const seriesID uint64 = 300
 
-	defer func() { _, _ = repository.UnmarkShowWatched(ctx, userID, seriesID) }()
+	defer func() { _, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID) }()
 
 	// the first mark carries real counts (seasonInput sets SeasonsCount to 1)
 	_, err = repository.MarkEpisodeWatched(ctx, userID, seriesInput(seriesID, 3, "Ended"), seasonInput(310, 3), episodeInput(1))

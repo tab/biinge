@@ -60,7 +60,7 @@ func Test_deriveSeriesState(t *testing.T) {
 			watchedEpisodes: 30,
 			watchedSeasons:  3,
 			totalSeasons:    3,
-			status:          models.TvInProductionStatus,
+			status:          models.SeriesInProductionStatus,
 			want:            models.StateTypeWatching,
 		},
 		{

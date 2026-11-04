@@ -30,8 +30,8 @@ func Test_NewStatsSerializer(t *testing.T) {
 		GamesPlayed:     10,
 		GamesMinutes:    4200,
 		Activity: []models.WatchBucket{
-			{Date: time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 240},
-			{Date: time.Date(2026, time.March, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 0, TvMinutes: 90},
+			{Date: time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, SeriesMinutes: 240},
+			{Date: time.Date(2026, time.March, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 0, SeriesMinutes: 90},
 		},
 	}
 
@@ -58,8 +58,8 @@ func Test_NewStatsSerializer(t *testing.T) {
 			Minutes: 4200,
 		},
 		Activity: []ActivityBucketSerializer{
-			{Date: "2026-02-01", MovieMinutes: 120, TvMinutes: 240},
-			{Date: "2026-03-01", MovieMinutes: 0, TvMinutes: 90},
+			{Date: "2026-02-01", MovieMinutes: 120, SeriesMinutes: 240},
+			{Date: "2026-03-01", MovieMinutes: 0, SeriesMinutes: 90},
 		},
 	}
 

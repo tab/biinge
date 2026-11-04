@@ -45,9 +45,9 @@ type Stats struct {
 
 // WatchBucket is watched runtime for one activity bucket, split by media kind
 type WatchBucket struct {
-	Date         time.Time
-	MovieMinutes uint64
-	TvMinutes    uint64
+	Date          time.Time
+	MovieMinutes  uint64
+	SeriesMinutes uint64
 }
 
 // NewStatsPeriod maps a raw request value to a supported period, defaulting to all

@@ -1325,7 +1325,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MarkShowRequest"
+              $ref: "#/components/schemas/MarkSeriesRequest"
       responses:
         "200":
           description: "OK"
@@ -1653,7 +1653,7 @@ paths:
                     type: array
                     items:
                       type: object
-                  tvCredits:
+                  seriesCredits:
                     type: array
                     items:
                       type: object
@@ -2299,14 +2299,14 @@ components:
                 type: integer
                 format: int64
                 description: "Total watched movie runtime in that bucket, in minutes"
-              tvMinutes:
+              seriesMinutes:
                 type: integer
                 format: int64
                 description: "Total watched episode runtime in that bucket, in minutes"
             required:
               - date
               - movieMinutes
-              - tvMinutes
+              - seriesMinutes
       required:
         - period
         - movies
@@ -3011,7 +3011,7 @@ components:
       required:
         - id
 
-    MarkShowRequest:
+    MarkSeriesRequest:
       type: object
       properties:
         series:
@@ -3131,7 +3131,7 @@ components:
           type: integer
           format: int64
           description: "Season TMDB ID"
-        tmdbShowId:
+        tmdbSeriesId:
           type: integer
           format: int64
           description: "Parent series TMDB ID"

@@ -13,7 +13,7 @@ import (
 	"biinge-api/internal/app/models"
 )
 
-func Test_MarkShowRequest_Validate(t *testing.T) {
+func Test_MarkSeriesRequest_Validate(t *testing.T) {
 	tests := []struct {
 		name     string
 		body     io.Reader
@@ -44,7 +44,7 @@ func Test_MarkShowRequest_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var params MarkShowRequestSerializer
+			var params MarkSeriesRequestSerializer
 
 			err := params.Validate(tt.body)
 
@@ -58,9 +58,9 @@ func Test_MarkShowRequest_Validate(t *testing.T) {
 	}
 }
 
-func Test_MarkShowRequest_ToInput(t *testing.T) {
+func Test_MarkSeriesRequest_ToInput(t *testing.T) {
 	t.Run("With seasons", func(t *testing.T) {
-		params := MarkShowRequestSerializer{
+		params := MarkSeriesRequestSerializer{
 			Series: ProgressSeriesSerializer{
 				Title:         " Show ",
 				PosterPath:    "/poster.jpg",
@@ -82,7 +82,7 @@ func Test_MarkShowRequest_ToInput(t *testing.T) {
 			},
 		}
 
-		expected := models.ShowInput{
+		expected := models.MarkSeriesInput{
 			Series: models.SeriesInput{
 				TmdbId:        123,
 				Title:         "Show",
@@ -109,7 +109,7 @@ func Test_MarkShowRequest_ToInput(t *testing.T) {
 	})
 
 	t.Run("No seasons", func(t *testing.T) {
-		params := MarkShowRequestSerializer{
+		params := MarkSeriesRequestSerializer{
 			Series: ProgressSeriesSerializer{Title: "Show"},
 		}
 

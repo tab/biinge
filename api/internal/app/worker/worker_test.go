@@ -123,11 +123,11 @@ func Test_Worker_SyncMovie_DefersOnFetchError(t *testing.T) {
 	w.syncMovie(ctx, movie)
 }
 
-func Test_Worker_SyncShow_PassesRawSnapshot(t *testing.T) {
+func Test_Worker_SyncSeries_PassesRawSnapshot(t *testing.T) {
 	w, repo, client := newTestWorker(t)
 	ctx := context.Background()
 
-	show := models.Series{ID: uuid.New(), UserId: uuid.New(), TmdbId: 1399, Status: "Ended", SeasonsCount: 2}
+	series := models.Series{ID: uuid.New(), UserId: uuid.New(), TmdbId: 1399, Status: "Ended", SeasonsCount: 2}
 
 	client.EXPECT().FetchTvDetails(ctx, uint64(1399)).Return(&tmdb.TvDetails{
 		Title:         "Reboot Show",
@@ -139,7 +139,7 @@ func Test_Worker_SyncShow_PassesRawSnapshot(t *testing.T) {
 	}, nil)
 
 	lastAirAt, _ := tmdb.ParseDate("2024-05-01")
-	repo.EXPECT().SyncSeries(ctx, show.UserId, uint64(1399), models.SeriesSyncInput{
+	repo.EXPECT().SyncSeries(ctx, series.UserId, uint64(1399), models.SeriesSyncInput{
 		Title:         "Reboot Show",
 		PosterPath:    "/reboot.jpg",
 		Status:        "Returning Series",
@@ -148,18 +148,18 @@ func Test_Worker_SyncShow_PassesRawSnapshot(t *testing.T) {
 		LastAirAt:     lastAirAt,
 	}).Return(nil)
 
-	w.syncShow(ctx, show)
+	w.syncSeries(ctx, series)
 }
 
-func Test_Worker_SyncShow_DefersOnFetchError(t *testing.T) {
+func Test_Worker_SyncSeries_DefersOnFetchError(t *testing.T) {
 	w, repo, client := newTestWorker(t)
 	ctx := context.Background()
 
-	show := models.Series{ID: uuid.New(), UserId: uuid.New(), TmdbId: 99}
+	series := models.Series{ID: uuid.New(), UserId: uuid.New(), TmdbId: 99}
 
 	client.EXPECT().FetchTvDetails(ctx, uint64(99)).Return(nil, errors.New("connection refused"))
-	repo.EXPECT().TouchSeriesSynced(ctx, show.ID).Return(nil)
+	repo.EXPECT().TouchSeriesSynced(ctx, series.ID).Return(nil)
 	// SyncSeries must not run when the fetch fails
 
-	w.syncShow(ctx, show)
+	w.syncSeries(ctx, series)
 }

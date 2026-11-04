@@ -188,7 +188,7 @@ func Test_Progress_InvalidatesStats(t *testing.T) {
 
 	ctx := context.Background()
 	userId := uuid.New()
-	show := models.SeriesInput{TmdbId: 300}
+	series := models.SeriesInput{TmdbId: 300}
 	season := models.SeasonInput{TmdbId: 400}
 	episode := models.EpisodeInput{TmdbId: 500}
 
@@ -200,10 +200,10 @@ func Test_Progress_InvalidatesStats(t *testing.T) {
 		{
 			name: "Marking a show watched",
 			before: func(repository *repositories.MockSeriesProgressRepository) {
-				repository.EXPECT().MarkShowWatched(ctx, userId, gomock.Any()).Return(&models.SeriesProgress{}, nil)
+				repository.EXPECT().MarkSeriesWatched(ctx, userId, gomock.Any()).Return(&models.SeriesProgress{}, nil)
 			},
 			call: func(service Progress) error {
-				_, err := service.MarkShow(ctx, userId, models.ShowInput{Series: show})
+				_, err := service.MarkSeries(ctx, userId, models.MarkSeriesInput{Series: series})
 
 				return err
 			},
@@ -211,10 +211,10 @@ func Test_Progress_InvalidatesStats(t *testing.T) {
 		{
 			name: "Unmarking a show",
 			before: func(repository *repositories.MockSeriesProgressRepository) {
-				repository.EXPECT().UnmarkShowWatched(ctx, userId, uint64(300)).Return(&models.SeriesProgress{}, nil)
+				repository.EXPECT().UnmarkSeriesWatched(ctx, userId, uint64(300)).Return(&models.SeriesProgress{}, nil)
 			},
 			call: func(service Progress) error {
-				_, err := service.UnmarkShow(ctx, userId, 300)
+				_, err := service.UnmarkSeries(ctx, userId, 300)
 
 				return err
 			},
@@ -222,10 +222,10 @@ func Test_Progress_InvalidatesStats(t *testing.T) {
 		{
 			name: "Marking a season watched",
 			before: func(repository *repositories.MockSeriesProgressRepository) {
-				repository.EXPECT().MarkSeasonWatched(ctx, userId, show, season).Return(&models.SeriesProgress{}, nil)
+				repository.EXPECT().MarkSeasonWatched(ctx, userId, series, season).Return(&models.SeriesProgress{}, nil)
 			},
 			call: func(service Progress) error {
-				_, err := service.MarkSeason(ctx, userId, show, season)
+				_, err := service.MarkSeason(ctx, userId, series, season)
 
 				return err
 			},
@@ -244,10 +244,10 @@ func Test_Progress_InvalidatesStats(t *testing.T) {
 		{
 			name: "Marking an episode watched",
 			before: func(repository *repositories.MockSeriesProgressRepository) {
-				repository.EXPECT().MarkEpisodeWatched(ctx, userId, show, season, episode).Return(&models.SeriesProgress{}, nil)
+				repository.EXPECT().MarkEpisodeWatched(ctx, userId, series, season, episode).Return(&models.SeriesProgress{}, nil)
 			},
 			call: func(service Progress) error {
-				_, err := service.MarkEpisode(ctx, userId, show, season, episode)
+				_, err := service.MarkEpisode(ctx, userId, series, season, episode)
 
 				return err
 			},

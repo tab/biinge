@@ -270,7 +270,7 @@ watched AS (
   WHERE mv.user_id = $3
     AND mv.watched_at >= (SELECT since FROM bound)
   UNION ALL
-  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'tv' AS kind
+  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'series' AS kind
   FROM episodes e
     JOIN seasons s ON e.season_id = s.id
     JOIN series t ON s.series_id = t.id
@@ -281,14 +281,14 @@ totals AS (
   SELECT
     date_trunc($2::text, w.watched_at) AS bucket,
     SUM(w.minutes) FILTER (WHERE w.kind = 'movie') AS movie_minutes,
-    SUM(w.minutes) FILTER (WHERE w.kind = 'tv') AS tv_minutes
+    SUM(w.minutes) FILTER (WHERE w.kind = 'series') AS series_minutes
   FROM watched w
   GROUP BY 1
 )
 SELECT
   b.bucket::date AS bucket,
   COALESCE(t.movie_minutes, 0)::bigint AS movie_minutes,
-  COALESCE(t.tv_minutes, 0)::bigint AS tv_minutes
+  COALESCE(t.series_minutes, 0)::bigint AS series_minutes
 FROM bound
   CROSS JOIN LATERAL generate_series(since, since + span - step, step) AS b(bucket)
   LEFT JOIN totals t ON t.bucket = b.bucket
@@ -302,9 +302,9 @@ type WatchActivityParams struct {
 }
 
 type WatchActivityRow struct {
-	Bucket       pgtype.Date
-	MovieMinutes int64
-	TvMinutes    int64
+	Bucket        pgtype.Date
+	MovieMinutes  int64
+	SeriesMinutes int64
 }
 
 // Watched minutes per bucket, split into movie and TV runtime and dense (buckets
@@ -320,7 +320,7 @@ func (q *Queries) WatchActivity(ctx context.Context, arg WatchActivityParams) ([
 	var items []WatchActivityRow
 	for rows.Next() {
 		var i WatchActivityRow
-		if err := rows.Scan(&i.Bucket, &i.MovieMinutes, &i.TvMinutes); err != nil {
+		if err := rows.Scan(&i.Bucket, &i.MovieMinutes, &i.SeriesMinutes); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -337,7 +337,7 @@ WITH watched AS (
   FROM movies mv
   WHERE mv.user_id = $1 AND mv.watched_at IS NOT NULL
   UNION ALL
-  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'tv' AS kind
+  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'series' AS kind
   FROM episodes e
     JOIN seasons s ON e.season_id = s.id
     JOIN series t ON s.series_id = t.id
@@ -347,7 +347,7 @@ totals AS (
   SELECT
     date_trunc('year', w.watched_at) AS bucket,
     SUM(w.minutes) FILTER (WHERE w.kind = 'movie') AS movie_minutes,
-    SUM(w.minutes) FILTER (WHERE w.kind = 'tv') AS tv_minutes
+    SUM(w.minutes) FILTER (WHERE w.kind = 'series') AS series_minutes
   FROM watched w
   GROUP BY 1
 ),
@@ -363,16 +363,16 @@ buckets AS (
 SELECT
   b.bucket::date AS bucket,
   COALESCE(t.movie_minutes, 0)::bigint AS movie_minutes,
-  COALESCE(t.tv_minutes, 0)::bigint AS tv_minutes
+  COALESCE(t.series_minutes, 0)::bigint AS series_minutes
 FROM buckets b
   LEFT JOIN totals t ON t.bucket = b.bucket
 ORDER BY b.bucket
 `
 
 type WatchActivityAllRow struct {
-	Bucket       pgtype.Date
-	MovieMinutes int64
-	TvMinutes    int64
+	Bucket        pgtype.Date
+	MovieMinutes  int64
+	SeriesMinutes int64
 }
 
 // Watched minutes per year across the whole history, dense and split by media kind
@@ -385,7 +385,7 @@ func (q *Queries) WatchActivityAll(ctx context.Context, userID uuid.UUID) ([]Wat
 	var items []WatchActivityAllRow
 	for rows.Next() {
 		var i WatchActivityAllRow
-		if err := rows.Scan(&i.Bucket, &i.MovieMinutes, &i.TvMinutes); err != nil {
+		if err := rows.Scan(&i.Bucket, &i.MovieMinutes, &i.SeriesMinutes); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

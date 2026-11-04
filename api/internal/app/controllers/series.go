@@ -24,8 +24,8 @@ type SeriesController interface {
 	HandleDelete(w http.ResponseWriter, r *http.Request)
 
 	HandleProgress(w http.ResponseWriter, r *http.Request)
-	HandleMarkShowWatched(w http.ResponseWriter, r *http.Request)
-	HandleUnmarkShowWatched(w http.ResponseWriter, r *http.Request)
+	HandleMarkSeriesWatched(w http.ResponseWriter, r *http.Request)
+	HandleUnmarkSeriesWatched(w http.ResponseWriter, r *http.Request)
 	HandleMarkSeasonWatched(w http.ResponseWriter, r *http.Request)
 	HandleUnmarkSeasonWatched(w http.ResponseWriter, r *http.Request)
 	HandleMarkEpisodeWatched(w http.ResponseWriter, r *http.Request)

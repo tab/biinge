@@ -19,7 +19,7 @@ import (
 var activeSeriesStatuses = []string{"Returning Series", "In Production", "Planned", "Pilot"}
 
 // Worker periodically refreshes stored movies and series from TMDB so derived state
-// (a revived show, a released film) tracks reality without a user opening the title
+// (a revived series, a released film) tracks reality without a user opening the title
 type Worker struct {
 	cfg   *config.Config
 	repo  repositories.SyncRepository
@@ -108,7 +108,7 @@ func (w *Worker) syncBatch(ctx context.Context) {
 
 	now := time.Now()
 	w.syncMovies(ctx, now)
-	w.syncSeries(ctx, now)
+	w.syncAllSeries(ctx, now)
 }
 
 func (w *Worker) syncMovies(ctx context.Context, now time.Time) {
@@ -168,30 +168,30 @@ func (w *Worker) syncMovie(ctx context.Context, movie models.Movie) {
 		Msg("Synced movie")
 }
 
-func (w *Worker) syncSeries(ctx context.Context, now time.Time) {
+func (w *Worker) syncAllSeries(ctx context.Context, now time.Time) {
 	staleBefore := now.Add(-w.cfg.SyncStaleness)
 	airCutoff := now.AddDate(0, 0, -w.cfg.SyncSeriesMaxAgeDays)
 
-	shows, err := w.repo.FindSeriesToSync(ctx, staleBefore, airCutoff, activeSeriesStatuses, w.cfg.SyncBatchSize)
+	seriesList, err := w.repo.FindSeriesToSync(ctx, staleBefore, airCutoff, activeSeriesStatuses, w.cfg.SyncBatchSize)
 	if err != nil {
 		w.log.Error().Err(err).Msg("Failed to list series to sync")
 
 		return
 	}
 
-	for _, show := range shows {
+	for _, series := range seriesList {
 		if ctx.Err() != nil {
 			return
 		}
 
-		w.syncShow(ctx, show)
+		w.syncSeries(ctx, series)
 	}
 }
 
-func (w *Worker) syncShow(ctx context.Context, show models.Series) {
-	details, err := w.tmdb.FetchTvDetails(ctx, show.TmdbId)
+func (w *Worker) syncSeries(ctx context.Context, series models.Series) {
+	details, err := w.tmdb.FetchTvDetails(ctx, series.TmdbId)
 	if err != nil {
-		w.deferShow(ctx, show, err)
+		w.deferSeries(ctx, series, err)
 
 		return
 	}
@@ -207,15 +207,15 @@ func (w *Worker) syncShow(ctx context.Context, show models.Series) {
 		LastAirAt:     lastAirAt,
 	}
 
-	if err := w.repo.SyncSeries(ctx, show.UserId, show.TmdbId, in); err != nil {
-		w.log.Error().Err(err).Uint64("tmdbId", show.TmdbId).Msg("Failed to sync series")
+	if err := w.repo.SyncSeries(ctx, series.UserId, series.TmdbId, in); err != nil {
+		w.log.Error().Err(err).Uint64("tmdbId", series.TmdbId).Msg("Failed to sync series")
 
 		return
 	}
 
 	w.log.Info().
-		Uint64("tmdbId", show.TmdbId).
-		Str("title", show.Title).
+		Uint64("tmdbId", series.TmdbId).
+		Str("title", series.Title).
 		Str("status", in.Status).
 		Uint64("seasons", in.SeasonsCount).
 		Uint64("episodes", in.EpisodesCount).
@@ -236,16 +236,16 @@ func (w *Worker) deferMovie(ctx context.Context, movie models.Movie, cause error
 	}
 }
 
-// deferShow pushes a show to the back of the queue so a failing title never starves the batch
-func (w *Worker) deferShow(ctx context.Context, show models.Series, cause error) {
+// deferSeries pushes a series to the back of the queue so a failing title never starves the batch
+func (w *Worker) deferSeries(ctx context.Context, series models.Series, cause error) {
 	if ctx.Err() != nil {
 		return
 	}
 
-	w.log.Warn().Err(cause).Uint64("tmdbId", show.TmdbId).Msg("Series sync fetch failed, deferring")
+	w.log.Warn().Err(cause).Uint64("tmdbId", series.TmdbId).Msg("Series sync fetch failed, deferring")
 
-	if err := w.repo.TouchSeriesSynced(ctx, show.ID); err != nil {
-		w.log.Error().Err(err).Uint64("tmdbId", show.TmdbId).Msg("Failed to defer series sync")
+	if err := w.repo.TouchSeriesSynced(ctx, series.ID); err != nil {
+		w.log.Error().Err(err).Uint64("tmdbId", series.TmdbId).Msg("Failed to defer series sync")
 	}
 }
 

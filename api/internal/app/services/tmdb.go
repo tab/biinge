@@ -21,8 +21,8 @@ import (
 type TmdbProvider interface {
 	FetchMovieDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.MovieDetailsSerializer, error)
 	FetchTvDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.SeriesDetailsSerializer, error)
-	FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error)
-	FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64, userId uuid.UUID) (*serializers.EpisodeDetailsSerializer, error)
+	FetchTvSeasonDetails(ctx context.Context, seriesId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error)
+	FetchTvEpisodeDetails(ctx context.Context, seriesId, seasonNumber, episodeNumber uint64, userId uuid.UUID) (*serializers.EpisodeDetailsSerializer, error)
 	FetchPersonDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.PersonDetailsSerializer, error)
 
 	SearchMovies(ctx context.Context, query string, page uint64, userId uuid.UUID) (*serializers.PaginationResponse[serializers.SearchMovieSerializer], error)
@@ -270,7 +270,7 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		recommendationIds = append(recommendationIds, item.Id)
 	}
 
-	tvShowsList, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: recommendationIds})
+	storedSeries, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: recommendationIds})
 	if err != nil {
 		p.log.Error().
 			Err(err).
@@ -280,15 +280,15 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 	}
 
 	recommendationStatesMap := make(map[uint64]models.StateType)
-	for _, tvShow := range tvShowsList {
-		recommendationStatesMap[tvShow.TmdbId] = tvShow.State
+	for _, series := range storedSeries {
+		recommendationStatesMap[series.TmdbId] = series.State
 	}
 
 	recommendations := make([]serializers.RecommendationSerializer, 0, len(details.Recommendations))
 	for _, item := range details.Recommendations {
 		state := models.StateTypeNone
-		if tvShowState, exists := recommendationStatesMap[item.Id]; exists {
-			state = tvShowState
+		if seriesState, exists := recommendationStatesMap[item.Id]; exists {
+			state = seriesState
 		}
 
 		recommendations = append(recommendations, serializers.RecommendationSerializer{
@@ -365,19 +365,19 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 		}, nil
 	}
 
-	tvShow := stored[0]
+	series := stored[0]
 
 	// Read-repair the stored poster/title/status (see FetchMovieDetails), leaving counts, state and pinned untouched
-	if details.PosterPath != "" && details.PosterPath != tvShow.PosterPath {
-		title := cmp.Or(details.Title, tvShow.Title)
-		status := cmp.Or(details.Status, tvShow.Status)
+	if details.PosterPath != "" && details.PosterPath != series.PosterPath {
+		title := cmp.Or(details.Title, series.Title)
+		status := cmp.Or(details.Status, series.Status)
 
 		if _, updateErr := p.series.Update(ctx, &models.Series{
-			ID:            tvShow.ID,
+			ID:            series.ID,
 			Title:         title,
 			PosterPath:    details.PosterPath,
-			SeasonsCount:  tvShow.SeasonsCount,
-			EpisodesCount: tvShow.EpisodesCount,
+			SeasonsCount:  series.SeasonsCount,
+			EpisodesCount: series.EpisodesCount,
 			Status:        status,
 		}); updateErr != nil {
 			p.log.Warn().Err(updateErr).Uint64("Id", id).Msg("Failed to refresh stored series poster")
@@ -386,8 +386,8 @@ func (p *tmdbProvider) FetchTvDetails(ctx context.Context, id uint64, userId uui
 
 	return &serializers.SeriesDetailsSerializer{
 		Id:              id,
-		Pinned:          tvShow.Pinned,
-		State:           tvShow.State,
+		Pinned:          series.Pinned,
+		State:           series.State,
 		Status:          details.Status,
 		Title:           details.Title,
 		PosterPath:      details.PosterPath,
@@ -412,19 +412,19 @@ func (p *tmdbProvider) fallbackTvDetails(ctx context.Context, id uint64, userId 
 		return nil, tmdb.ErrFailedToFetchTvDetails
 	}
 
-	tvShow := stored[0]
+	series := stored[0]
 
 	p.log.Warn().Uint64("Id", id).Msg("Serving stored series details while TMDB is unavailable")
 
 	return &serializers.SeriesDetailsSerializer{
 		Id:              id,
-		Pinned:          tvShow.Pinned,
-		State:           tvShow.State,
-		Status:          tvShow.Status,
-		Title:           tvShow.Title,
-		PosterPath:      tvShow.PosterPath,
-		SeasonsCount:    tvShow.SeasonsCount,
-		EpisodesCount:   tvShow.EpisodesCount,
+		Pinned:          series.Pinned,
+		State:           series.State,
+		Status:          series.Status,
+		Title:           series.Title,
+		PosterPath:      series.PosterPath,
+		SeasonsCount:    series.SeasonsCount,
+		EpisodesCount:   series.EpisodesCount,
 		JellyfinId:      p.library.Series(ctx, userId, id),
 		Genres:          make([]string, 0),
 		Credits:         make([]serializers.PersonSerializer, 0),
@@ -490,33 +490,33 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 		})
 	}
 
-	tvCreditIds := make([]uint64, 0, len(details.TvCredits))
+	seriesCreditIds := make([]uint64, 0, len(details.TvCredits))
 	for _, item := range details.TvCredits {
-		tvCreditIds = append(tvCreditIds, uint64(item.Id))
+		seriesCreditIds = append(seriesCreditIds, uint64(item.Id))
 	}
 
-	seriesList, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: tvCreditIds})
+	seriesList, err := p.series.FindByFilter(ctx, models.SeriesFilter{UserId: userId, TmdbIds: seriesCreditIds})
 	if err != nil {
 		p.log.Error().
 			Err(err).
-			Msg("Failed to fetch tv credit states")
+			Msg("Failed to fetch series credit states")
 
 		return nil, errors.ErrFailedToFetchResults
 	}
 
-	tvCreditStatesMap := make(map[uint64]models.StateType)
-	for _, tvShow := range seriesList {
-		tvCreditStatesMap[tvShow.TmdbId] = tvShow.State
+	seriesCreditStatesMap := make(map[uint64]models.StateType)
+	for _, series := range seriesList {
+		seriesCreditStatesMap[series.TmdbId] = series.State
 	}
 
-	tvCredits := make([]serializers.TvCreditSerializer, 0, len(details.TvCredits))
+	seriesCredits := make([]serializers.SeriesCreditSerializer, 0, len(details.TvCredits))
 	for _, item := range details.TvCredits {
 		state := models.StateTypeNone
-		if tvShowState, exists := tvCreditStatesMap[uint64(item.Id)]; exists {
-			state = tvShowState
+		if seriesState, exists := seriesCreditStatesMap[uint64(item.Id)]; exists {
+			state = seriesState
 		}
 
-		tvCredits = append(tvCredits, serializers.TvCreditSerializer{
+		seriesCredits = append(seriesCredits, serializers.SeriesCreditSerializer{
 			Id:            uint64(item.Id),
 			Title:         item.Title,
 			PosterPath:    item.PosterPath,
@@ -526,31 +526,31 @@ func (p *tmdbProvider) FetchPersonDetails(ctx context.Context, id uint64, userId
 	}
 
 	return &serializers.PersonDetailsSerializer{
-		Id:           id,
-		Name:         details.Name,
-		Birthday:     details.Birthday,
-		Biography:    details.Biography,
-		ProfilePath:  details.ProfilePath,
-		Gender:       details.Gender,
-		MovieCredits: movieCredits,
-		TvCredits:    tvCredits,
+		Id:            id,
+		Name:          details.Name,
+		Birthday:      details.Birthday,
+		Biography:     details.Biography,
+		ProfilePath:   details.ProfilePath,
+		Gender:        details.Gender,
+		MovieCredits:  movieCredits,
+		SeriesCredits: seriesCredits,
 	}, nil
 }
 
-func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error) {
-	p.log.Debug().Uint64("ShowId", showId).Uint64("SeasonNumber", seasonNumber).Msg("Fetching tv season details")
+func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, seriesId, seasonNumber uint64, userId uuid.UUID) (*serializers.SeasonDetailsSerializer, error) {
+	p.log.Debug().Uint64("SeriesId", seriesId).Uint64("SeasonNumber", seasonNumber).Msg("Fetching tv season details")
 
-	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d", showId, seasonNumber), cache.DetailsTTL, func() (*tmdb.SeasonDetails, error) {
-		return p.client.FetchTvSeasonDetails(ctx, showId, seasonNumber)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d", seriesId, seasonNumber), cache.DetailsTTL, func() (*tmdb.SeasonDetails, error) {
+		return p.client.FetchTvSeasonDetails(ctx, seriesId, seasonNumber)
 	})
 	if err != nil {
-		p.log.Error().Err(err).Uint64("ShowId", showId).Uint64("SeasonNumber", seasonNumber).Msg("Failed to fetch tv season details")
+		p.log.Error().Err(err).Uint64("SeriesId", seriesId).Uint64("SeasonNumber", seasonNumber).Msg("Failed to fetch tv season details")
 		return nil, tmdb.ErrFailedToFetchSeasonDetails
 	}
 
-	progress, err := p.progress.Get(ctx, userId, showId)
+	progress, err := p.progress.Get(ctx, userId, seriesId)
 	if err != nil {
-		p.log.Error().Err(err).Uint64("ShowId", showId).Msg("Failed to fetch watched state for season details")
+		p.log.Error().Err(err).Uint64("SeriesId", seriesId).Msg("Failed to fetch watched state for season details")
 		return nil, tmdb.ErrFailedToFetchSeasonDetails
 	}
 
@@ -558,7 +558,7 @@ func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonN
 	watchedEpisodes := toIdSet(progress.WatchedEpisodes)
 
 	details := tmdb.TransformSeasonDetails(response)
-	jellyfinIds := p.library.Episodes(ctx, userId, showId, seasonNumber)
+	jellyfinIds := p.library.Episodes(ctx, userId, seriesId, seasonNumber)
 
 	episodes := make([]serializers.SeasonEpisodeSerializer, 0, len(details.Episodes))
 	for _, item := range details.Episodes {
@@ -580,32 +580,32 @@ func (p *tmdbProvider) FetchTvSeasonDetails(ctx context.Context, showId, seasonN
 	_, seasonWatched := watchedSeasons[details.Id]
 
 	return &serializers.SeasonDetailsSerializer{
-		Id:         details.Id,
-		TmdbShowId: showId,
-		Title:      details.Title,
-		Number:     details.Number,
-		PosterPath: details.PosterPath,
-		AirDate:    details.AirDate,
-		Overview:   details.Overview,
-		Watched:    seasonWatched,
-		Episodes:   episodes,
+		Id:           details.Id,
+		TmdbSeriesId: seriesId,
+		Title:        details.Title,
+		Number:       details.Number,
+		PosterPath:   details.PosterPath,
+		AirDate:      details.AirDate,
+		Overview:     details.Overview,
+		Watched:      seasonWatched,
+		Episodes:     episodes,
 	}, nil
 }
 
-func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, seasonNumber, episodeNumber uint64, userId uuid.UUID) (*serializers.EpisodeDetailsSerializer, error) {
+func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, seriesId, seasonNumber, episodeNumber uint64, userId uuid.UUID) (*serializers.EpisodeDetailsSerializer, error) {
 	p.log.Debug().
-		Uint64("ShowId", showId).
+		Uint64("SeriesId", seriesId).
 		Uint64("SeasonNumber", seasonNumber).
 		Uint64("EpisodeNumber", episodeNumber).
 		Msg("Fetching tv episode details")
 
-	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d:episode:%d", showId, seasonNumber, episodeNumber), cache.DetailsTTL, func() (*tmdb.EpisodeDetails, error) {
-		return p.client.FetchTvEpisodeDetails(ctx, showId, seasonNumber, episodeNumber)
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d:episode:%d", seriesId, seasonNumber, episodeNumber), cache.DetailsTTL, func() (*tmdb.EpisodeDetails, error) {
+		return p.client.FetchTvEpisodeDetails(ctx, seriesId, seasonNumber, episodeNumber)
 	})
 	if err != nil {
 		p.log.Error().
 			Err(err).
-			Uint64("ShowId", showId).
+			Uint64("SeriesId", seriesId).
 			Uint64("SeasonNumber", seasonNumber).
 			Uint64("EpisodeNumber", episodeNumber).
 			Msg("Failed to fetch tv episode details")
@@ -613,9 +613,9 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 		return nil, tmdb.ErrFailedToFetchEpisodeDetails
 	}
 
-	progress, err := p.progress.Get(ctx, userId, showId)
+	progress, err := p.progress.Get(ctx, userId, seriesId)
 	if err != nil {
-		p.log.Error().Err(err).Uint64("ShowId", showId).Msg("Failed to fetch watched state for episode details")
+		p.log.Error().Err(err).Uint64("SeriesId", seriesId).Msg("Failed to fetch watched state for episode details")
 		return nil, tmdb.ErrFailedToFetchEpisodeDetails
 	}
 
@@ -651,7 +651,7 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, showId, season
 		Rating:     details.Rating,
 		AirDate:    details.AirDate,
 		Watched:    watched,
-		JellyfinId: p.library.Episodes(ctx, userId, showId, seasonNumber)[episodeNumber],
+		JellyfinId: p.library.Episodes(ctx, userId, seriesId, seasonNumber)[episodeNumber],
 		Credits:    credits,
 		Videos:     videos,
 	}, nil
@@ -901,14 +901,14 @@ func (p *tmdbProvider) upNextEpisodes(ctx context.Context, userId uuid.UUID) ([]
 	}
 
 	pinned := make([]models.Series, 0, len(watching))
-	for _, show := range watching {
-		if show.Pinned {
-			pinned = append(pinned, show)
+	for _, series := range watching {
+		if series.Pinned {
+			pinned = append(pinned, series)
 		}
 	}
 
-	entries := boundedMap(pinned, upNextConcurrency, func(show models.Series) *serializers.UpNextEpisodeSerializer {
-		return p.nextUnwatchedEpisode(ctx, userId, show)
+	entries := boundedMap(pinned, upNextConcurrency, func(series models.Series) *serializers.UpNextEpisodeSerializer {
+		return p.nextUnwatchedEpisode(ctx, userId, series)
 	})
 
 	episodes := make([]serializers.UpNextEpisodeSerializer, 0, len(pinned))
@@ -926,18 +926,18 @@ func (p *tmdbProvider) upNextEpisodes(ctx context.Context, userId uuid.UUID) ([]
 }
 
 // nextUnwatchedEpisode walks a show's seasons in order and returns the first unwatched episode that has aired (the resume point), skipping on any TMDB failure
-func (p *tmdbProvider) nextUnwatchedEpisode(ctx context.Context, userId uuid.UUID, show models.Series) *serializers.UpNextEpisodeSerializer {
-	detail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v2:tv:%d", show.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
-		return p.client.FetchTvDetails(ctx, show.TmdbId)
+func (p *tmdbProvider) nextUnwatchedEpisode(ctx context.Context, userId uuid.UUID, series models.Series) *serializers.UpNextEpisodeSerializer {
+	detail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v2:tv:%d", series.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+		return p.client.FetchTvDetails(ctx, series.TmdbId)
 	})
 	if err != nil {
-		p.log.Warn().Err(err).Uint64("ShowId", show.TmdbId).Msg("Skipping show in up-next; TMDB details unavailable")
+		p.log.Warn().Err(err).Uint64("SeriesId", series.TmdbId).Msg("Skipping series in up-next; TMDB details unavailable")
 		return nil
 	}
 
-	progress, err := p.progress.Get(ctx, userId, show.TmdbId)
+	progress, err := p.progress.Get(ctx, userId, series.TmdbId)
 	if err != nil {
-		p.log.Warn().Err(err).Uint64("ShowId", show.TmdbId).Msg("Skipping show in up-next; progress unavailable")
+		p.log.Warn().Err(err).Uint64("SeriesId", series.TmdbId).Msg("Skipping series in up-next; progress unavailable")
 		return nil
 	}
 
@@ -960,11 +960,11 @@ func (p *tmdbProvider) nextUnwatchedEpisode(ctx context.Context, userId uuid.UUI
 			continue // fully watched, skip without fetching
 		}
 
-		seasonDetail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d", show.TmdbId, season.SeasonNumber), cache.DetailsTTL, func() (*tmdb.SeasonDetails, error) {
-			return p.client.FetchTvSeasonDetails(ctx, show.TmdbId, uint64(season.SeasonNumber))
+		seasonDetail, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("tmdb:v1:tv:%d:season:%d", series.TmdbId, season.SeasonNumber), cache.DetailsTTL, func() (*tmdb.SeasonDetails, error) {
+			return p.client.FetchTvSeasonDetails(ctx, series.TmdbId, uint64(season.SeasonNumber))
 		})
 		if err != nil {
-			p.log.Warn().Err(err).Uint64("ShowId", show.TmdbId).Int("Season", season.SeasonNumber).Msg("Skipping show in up-next; season details unavailable")
+			p.log.Warn().Err(err).Uint64("SeriesId", series.TmdbId).Int("Season", season.SeasonNumber).Msg("Skipping series in up-next; season details unavailable")
 			return nil
 		}
 
@@ -975,7 +975,7 @@ func (p *tmdbProvider) nextUnwatchedEpisode(ctx context.Context, userId uuid.UUI
 
 			// the first unwatched episode is the resume point: suggest it only if it has aired
 			if airedOnOrBefore(episode.AirDate, today) {
-				entry := upNextEpisodeEntry(show, episode)
+				entry := upNextEpisodeEntry(series, episode)
 				return &entry
 			}
 
@@ -997,11 +997,11 @@ func airedOnOrBefore(airDate string, day time.Time) bool {
 }
 
 // upNextEpisodeEntry builds an up-next row from a show and one of its episodes
-func upNextEpisodeEntry(show models.Series, episode tmdb.Episode) serializers.UpNextEpisodeSerializer {
+func upNextEpisodeEntry(series models.Series, episode tmdb.Episode) serializers.UpNextEpisodeSerializer {
 	return serializers.UpNextEpisodeSerializer{
-		SeriesId:         show.TmdbId,
-		SeriesTitle:      show.Title,
-		SeriesPosterPath: show.PosterPath,
+		SeriesId:         series.TmdbId,
+		SeriesTitle:      series.Title,
+		SeriesPosterPath: series.PosterPath,
 		Id:               uint64(episode.ID),
 		Title:            episode.Name,
 		SeasonNumber:     uint64(episode.SeasonNumber),

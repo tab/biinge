@@ -106,13 +106,13 @@ func (e ProgressEpisodeMetaSerializer) toInput(tmdbId uint64) models.EpisodeInpu
 	}
 }
 
-// MarkShowRequestSerializer is the payload for marking a whole show watched
-type MarkShowRequestSerializer struct {
+// MarkSeriesRequestSerializer is the payload for marking a whole series watched
+type MarkSeriesRequestSerializer struct {
 	Series  ProgressSeriesSerializer   `json:"series"`
 	Seasons []ProgressSeasonSerializer `json:"seasons"`
 }
 
-func (params *MarkShowRequestSerializer) Validate(body io.Reader) error {
+func (params *MarkSeriesRequestSerializer) Validate(body io.Reader) error {
 	if err := json.NewDecoder(body).Decode(params); err != nil {
 		return err
 	}
@@ -124,13 +124,13 @@ func (params *MarkShowRequestSerializer) Validate(body io.Reader) error {
 	return nil
 }
 
-func (params *MarkShowRequestSerializer) ToInput(seriesTmdbId uint64) models.ShowInput {
+func (params *MarkSeriesRequestSerializer) ToInput(seriesTmdbId uint64) models.MarkSeriesInput {
 	seasons := make([]models.SeasonInput, 0, len(params.Seasons))
 	for _, season := range params.Seasons {
 		seasons = append(seasons, season.toInput())
 	}
 
-	return models.ShowInput{
+	return models.MarkSeriesInput{
 		Series:  params.Series.toInput(seriesTmdbId),
 		Seasons: seasons,
 	}

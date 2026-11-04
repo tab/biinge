@@ -106,8 +106,8 @@ func NewRouter(
 				r.Get("/{id}/season/{seasonNumber}/episode/{episodeNumber}", series.HandleEpisodeDetails)
 
 				r.Get("/{id}/progress", series.HandleProgress)
-				r.Post("/{id}/watched", series.HandleMarkShowWatched)
-				r.Delete("/{id}/watched", series.HandleUnmarkShowWatched)
+				r.Post("/{id}/watched", series.HandleMarkSeriesWatched)
+				r.Delete("/{id}/watched", series.HandleUnmarkSeriesWatched)
 				r.Post("/{id}/seasons/{seasonId}/watched", series.HandleMarkSeasonWatched)
 				r.Delete("/{id}/seasons/{seasonId}/watched", series.HandleUnmarkSeasonWatched)
 				r.Post("/{id}/seasons/{seasonId}/episodes/{episodeId}/watched", series.HandleMarkEpisodeWatched)

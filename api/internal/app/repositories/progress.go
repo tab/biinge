@@ -14,8 +14,8 @@ import (
 
 // SeriesProgressRepository keeps a show's series/season/episode rows and their derived watched state consistent
 type SeriesProgressRepository interface {
-	MarkShowWatched(ctx context.Context, userId uuid.UUID, show models.ShowInput) (*models.SeriesProgress, error)
-	UnmarkShowWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error)
+	MarkSeriesWatched(ctx context.Context, userId uuid.UUID, input models.MarkSeriesInput) (*models.SeriesProgress, error)
+	UnmarkSeriesWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error)
 	MarkSeasonWatched(ctx context.Context, userId uuid.UUID, series models.SeriesInput, season models.SeasonInput) (*models.SeriesProgress, error)
 	UnmarkSeasonWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId, seasonTmdbId uint64) (*models.SeriesProgress, error)
 	MarkEpisodeWatched(ctx context.Context, userId uuid.UUID, series models.SeriesInput, season models.SeasonInput, episode models.EpisodeInput) (*models.SeriesProgress, error)
@@ -47,16 +47,16 @@ func (r *seriesProgress) withTx(ctx context.Context, fn func(q *db.Queries) erro
 	return tx.Commit(ctx)
 }
 
-func (r *seriesProgress) MarkShowWatched(ctx context.Context, userId uuid.UUID, show models.ShowInput) (*models.SeriesProgress, error) {
+func (r *seriesProgress) MarkSeriesWatched(ctx context.Context, userId uuid.UUID, input models.MarkSeriesInput) (*models.SeriesProgress, error) {
 	var progress *models.SeriesProgress
 
 	err := r.withTx(ctx, func(q *db.Queries) error {
-		series, err := upsertSeries(ctx, q, userId, show.Series)
+		series, err := upsertSeries(ctx, q, userId, input.Series)
 		if err != nil {
 			return err
 		}
 
-		for _, season := range show.Seasons {
+		for _, season := range input.Seasons {
 			if err = markSeason(ctx, q, series.ID, season); err != nil {
 				return err
 			}
@@ -66,7 +66,7 @@ func (r *seriesProgress) MarkShowWatched(ctx context.Context, userId uuid.UUID, 
 			return err
 		}
 
-		progress, err = buildProgress(ctx, q, userId, show.Series.TmdbId)
+		progress, err = buildProgress(ctx, q, userId, input.Series.TmdbId)
 
 		return err
 	})
@@ -133,7 +133,7 @@ func (r *seriesProgress) MarkEpisodeWatched(ctx context.Context, userId uuid.UUI
 	return progress, err
 }
 
-func (r *seriesProgress) UnmarkShowWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
+func (r *seriesProgress) UnmarkSeriesWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
 	var progress *models.SeriesProgress
 
 	err := r.withTx(ctx, func(q *db.Queries) error {
@@ -358,7 +358,7 @@ func deriveSeriesState(watchedEpisodes, watchedSeasons, totalSeasons uint64, sta
 		return models.StateTypeNone
 	}
 
-	if totalSeasons > 0 && watchedSeasons >= totalSeasons && status != models.TvInProductionStatus {
+	if totalSeasons > 0 && watchedSeasons >= totalSeasons && status != models.SeriesInProductionStatus {
 		return models.StateTypeWatched
 	}
 

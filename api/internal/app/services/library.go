@@ -296,7 +296,7 @@ func (l *library) setPlayed(ctx context.Context, userId uuid.UUID, target Played
 			return l.tmdb.FetchTvDetails(ctx, target.TmdbId)
 		})
 		if err != nil {
-			l.log.Warn().Err(err).Uint64("ShowId", target.TmdbId).Msg("Skipping the Jellyfin played write; TMDB details unavailable")
+			l.log.Warn().Err(err).Uint64("SeriesId", target.TmdbId).Msg("Skipping the Jellyfin played write; TMDB details unavailable")
 			return
 		}
 
@@ -317,7 +317,7 @@ func (l *library) setPlayed(ctx context.Context, userId uuid.UUID, target Played
 			return l.tmdb.FetchTvSeasonDetails(ctx, target.TmdbId, uint64(seasonNumber))
 		})
 		if err != nil {
-			l.log.Warn().Err(err).Uint64("ShowId", target.TmdbId).Int("Season", seasonNumber).Msg("Skipping the Jellyfin played write; TMDB season details unavailable")
+			l.log.Warn().Err(err).Uint64("SeriesId", target.TmdbId).Int("Season", seasonNumber).Msg("Skipping the Jellyfin played write; TMDB season details unavailable")
 			return
 		}
 

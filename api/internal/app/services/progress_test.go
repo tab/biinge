@@ -14,7 +14,7 @@ import (
 	"biinge-api/internal/app/repositories"
 )
 
-func Test_Progress_MarkShow(t *testing.T) {
+func Test_Progress_MarkSeries(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -23,7 +23,7 @@ func Test_Progress_MarkShow(t *testing.T) {
 	service := NewProgress(repository, newTestStatsCache(), newTestLogger())
 
 	userId := uuid.New()
-	show := models.ShowInput{
+	series := models.MarkSeriesInput{
 		Series: models.SeriesInput{TmdbId: 300, Title: "Breaking Bad", SeasonsCount: 5, EpisodesCount: 62},
 		Seasons: []models.SeasonInput{
 			{TmdbId: 50, Number: 1, EpisodesCount: 7},
@@ -39,7 +39,7 @@ func Test_Progress_MarkShow(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().MarkShowWatched(ctx, userId, show).Return(&models.SeriesProgress{
+				repository.EXPECT().MarkSeriesWatched(ctx, userId, series).Return(&models.SeriesProgress{
 					SeriesTmdbId: 300,
 					State:        "watched",
 				}, nil)
@@ -52,7 +52,7 @@ func Test_Progress_MarkShow(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().MarkShowWatched(ctx, userId, show).Return(nil, assert.AnError)
+				repository.EXPECT().MarkSeriesWatched(ctx, userId, series).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToUpdateProgress,
@@ -63,7 +63,7 @@ func Test_Progress_MarkShow(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := service.MarkShow(ctx, userId, show)
+			result, err := service.MarkSeries(ctx, userId, series)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)
@@ -76,7 +76,7 @@ func Test_Progress_MarkShow(t *testing.T) {
 	}
 }
 
-func Test_Progress_UnmarkShow(t *testing.T) {
+func Test_Progress_UnmarkSeries(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -95,7 +95,7 @@ func Test_Progress_UnmarkShow(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				repository.EXPECT().UnmarkShowWatched(ctx, userId, uint64(300)).Return(&models.SeriesProgress{
+				repository.EXPECT().UnmarkSeriesWatched(ctx, userId, uint64(300)).Return(&models.SeriesProgress{
 					SeriesTmdbId: 300,
 					State:        "want",
 					TrackedState: "want",
@@ -110,7 +110,7 @@ func Test_Progress_UnmarkShow(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				repository.EXPECT().UnmarkShowWatched(ctx, userId, uint64(300)).Return(nil, assert.AnError)
+				repository.EXPECT().UnmarkSeriesWatched(ctx, userId, uint64(300)).Return(nil, assert.AnError)
 			},
 			expected: nil,
 			error:    errors.ErrFailedToUpdateProgress,
@@ -121,7 +121,7 @@ func Test_Progress_UnmarkShow(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.before()
 
-			result, err := service.UnmarkShow(ctx, userId, 300)
+			result, err := service.UnmarkSeries(ctx, userId, 300)
 
 			if tt.error != nil {
 				require.ErrorIs(t, err, tt.error)

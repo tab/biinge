@@ -907,7 +907,7 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 				MovieCredits: []serializers.MovieCreditSerializer{
 					{Id: 600, Title: "The Matrix", PosterPath: "/m.jpg", State: "watched", Type: "Neo"},
 				},
-				TvCredits: []serializers.TvCreditSerializer{
+				SeriesCredits: []serializers.SeriesCreditSerializer{
 					{Id: 700, Title: "Some Show", PosterPath: "/tv.jpg", State: "want", EpisodesCount: 10},
 				},
 			},
@@ -930,7 +930,7 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 				MovieCredits: []serializers.MovieCreditSerializer{
 					{Id: 600, Title: "The Matrix", PosterPath: "/m.jpg", State: "none", Type: "Neo"},
 				},
-				TvCredits: []serializers.TvCreditSerializer{
+				SeriesCredits: []serializers.SeriesCreditSerializer{
 					{Id: 700, Title: "Some Show", PosterPath: "/tv.jpg", State: "none", EpisodesCount: 10},
 				},
 			},
@@ -954,7 +954,7 @@ func Test_Tmdb_FetchPersonDetails(t *testing.T) {
 			error:    errors.ErrFailedToFetchResults,
 		},
 		{
-			name: "Tv credit state lookup error",
+			name: "Series credit state lookup error",
 			before: func() {
 				client.EXPECT().FetchPersonDetails(ctx, uint64(500)).Return(samplePersonDetails(), nil)
 
@@ -1014,14 +1014,14 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(nil)
 			},
 			expected: &serializers.SeasonDetailsSerializer{
-				Id:         50,
-				TmdbShowId: 300,
-				Title:      "Season 1",
-				Number:     1,
-				PosterPath: "/s1.jpg",
-				AirDate:    "2008-01-20",
-				Overview:   "The first season.",
-				Watched:    true,
+				Id:           50,
+				TmdbSeriesId: 300,
+				Title:        "Season 1",
+				Number:       1,
+				PosterPath:   "/s1.jpg",
+				AirDate:      "2008-01-20",
+				Overview:     "The first season.",
+				Watched:      true,
 				Episodes: []serializers.SeasonEpisodeSerializer{
 					{Id: 80, Title: "Pilot", Number: 1, PosterPath: "/e1.jpg", Runtime: 58, Overview: "The pilot.", Rating: 8.0, AirDate: "2008-01-20", Watched: true},
 				},
@@ -1042,13 +1042,13 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(map[uint64]string{1: "jf-e1", 3: "jf-e3", 9: "jf-e9"}).Times(1)
 			},
 			expected: &serializers.SeasonDetailsSerializer{
-				Id:         50,
-				TmdbShowId: 300,
-				Title:      "Season 1",
-				Number:     1,
-				PosterPath: "/s1.jpg",
-				AirDate:    "2008-01-20",
-				Overview:   "The first season.",
+				Id:           50,
+				TmdbSeriesId: 300,
+				Title:        "Season 1",
+				Number:       1,
+				PosterPath:   "/s1.jpg",
+				AirDate:      "2008-01-20",
+				Overview:     "The first season.",
 				Episodes: []serializers.SeasonEpisodeSerializer{
 					{Id: 80, Title: "Pilot", Number: 1, PosterPath: "/e1.jpg", Runtime: 58, Overview: "The pilot.", Rating: 8.0, AirDate: "2008-01-20", JellyfinId: "jf-e1"},
 					{Id: 81, Title: "Cat's in the Bag", Number: 2, PosterPath: "/e2.jpg", Runtime: 48, Overview: "The second.", Rating: 7.5, AirDate: "2008-01-27"},
@@ -1065,14 +1065,14 @@ func Test_Tmdb_FetchTvSeasonDetails(t *testing.T) {
 				library.EXPECT().Episodes(ctx, userId, uint64(300), uint64(1)).Return(map[uint64]string{})
 			},
 			expected: &serializers.SeasonDetailsSerializer{
-				Id:         50,
-				TmdbShowId: 300,
-				Title:      "Season 1",
-				Number:     1,
-				PosterPath: "/s1.jpg",
-				AirDate:    "2008-01-20",
-				Overview:   "The first season.",
-				Watched:    false,
+				Id:           50,
+				TmdbSeriesId: 300,
+				Title:        "Season 1",
+				Number:       1,
+				PosterPath:   "/s1.jpg",
+				AirDate:      "2008-01-20",
+				Overview:     "The first season.",
+				Watched:      false,
 				Episodes: []serializers.SeasonEpisodeSerializer{
 					{Id: 80, Title: "Pilot", Number: 1, PosterPath: "/e1.jpg", Runtime: 58, Overview: "The pilot.", Rating: 8.0, AirDate: "2008-01-20", Watched: false},
 				},

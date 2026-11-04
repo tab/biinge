@@ -125,7 +125,7 @@ watched AS (
   WHERE mv.user_id = sqlc.arg(user_id)
     AND mv.watched_at >= (SELECT since FROM bound)
   UNION ALL
-  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'tv' AS kind
+  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'series' AS kind
   FROM episodes e
     JOIN seasons s ON e.season_id = s.id
     JOIN series t ON s.series_id = t.id
@@ -136,14 +136,14 @@ totals AS (
   SELECT
     date_trunc(sqlc.arg(bucket_unit)::text, w.watched_at) AS bucket,
     SUM(w.minutes) FILTER (WHERE w.kind = 'movie') AS movie_minutes,
-    SUM(w.minutes) FILTER (WHERE w.kind = 'tv') AS tv_minutes
+    SUM(w.minutes) FILTER (WHERE w.kind = 'series') AS series_minutes
   FROM watched w
   GROUP BY 1
 )
 SELECT
   b.bucket::date AS bucket,
   COALESCE(t.movie_minutes, 0)::bigint AS movie_minutes,
-  COALESCE(t.tv_minutes, 0)::bigint AS tv_minutes
+  COALESCE(t.series_minutes, 0)::bigint AS series_minutes
 FROM bound
   CROSS JOIN LATERAL generate_series(since, since + span - step, step) AS b(bucket)
   LEFT JOIN totals t ON t.bucket = b.bucket
@@ -156,7 +156,7 @@ WITH watched AS (
   FROM movies mv
   WHERE mv.user_id = sqlc.arg(user_id) AND mv.watched_at IS NOT NULL
   UNION ALL
-  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'tv' AS kind
+  SELECT e.watched_at AS watched_at, e.runtime AS minutes, 'series' AS kind
   FROM episodes e
     JOIN seasons s ON e.season_id = s.id
     JOIN series t ON s.series_id = t.id
@@ -166,7 +166,7 @@ totals AS (
   SELECT
     date_trunc('year', w.watched_at) AS bucket,
     SUM(w.minutes) FILTER (WHERE w.kind = 'movie') AS movie_minutes,
-    SUM(w.minutes) FILTER (WHERE w.kind = 'tv') AS tv_minutes
+    SUM(w.minutes) FILTER (WHERE w.kind = 'series') AS series_minutes
   FROM watched w
   GROUP BY 1
 ),
@@ -182,7 +182,7 @@ buckets AS (
 SELECT
   b.bucket::date AS bucket,
   COALESCE(t.movie_minutes, 0)::bigint AS movie_minutes,
-  COALESCE(t.tv_minutes, 0)::bigint AS tv_minutes
+  COALESCE(t.series_minutes, 0)::bigint AS series_minutes
 FROM buckets b
   LEFT JOIN totals t ON t.bucket = b.bucket
 ORDER BY b.bucket;

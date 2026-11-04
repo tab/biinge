@@ -17,5 +17,4 @@ var Module = fx.Options(
 	fx.Provide(NewUserRepository),
 	fx.Provide(NewSyncRepository),
 	fx.Provide(NewIntegrationRepository),
-	fx.Provide(NewWebhookRepository),
 )

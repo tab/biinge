@@ -2,8 +2,8 @@ package models
 
 import "time"
 
-// TvInProductionStatus is the TMDB status of a show still airing; such a show is never derived "watched"
-const TvInProductionStatus = "Returning Series"
+// SeriesInProductionStatus is the TMDB status of a series still airing; such a series is never derived "watched"
+const SeriesInProductionStatus = "Returning Series"
 
 // SeriesInput carries the show-level fields needed to upsert a series row
 type SeriesInput struct {
@@ -43,8 +43,8 @@ type EpisodeInput struct {
 	AirAt      time.Time
 }
 
-// ShowInput is the payload for marking an entire show watched
-type ShowInput struct {
+// MarkSeriesInput is the payload for marking an entire series watched
+type MarkSeriesInput struct {
 	Series  SeriesInput
 	Seasons []SeasonInput
 }

@@ -9,17 +9,15 @@ import (
 // JellyfinProvider is the provider value of a Jellyfin link
 const JellyfinProvider = "jellyfin"
 
-// Integration links a user to an external media server (an empty TokenHash means no webhook token, a nil JellyfinToken no connection)
+// Integration is the API's sign-in to a user's external media server
 type Integration struct {
-	ID        uuid.UUID
-	UserId    uuid.UUID
-	Provider  string
-	TokenHash string
-
-	JellyfinUserId   string
-	JellyfinUsername string
-	// JellyfinToken is the connection's access token, AES-GCM encrypted under JELLYFIN_TOKEN_KEY
-	JellyfinToken []byte
+	ID             uuid.UUID
+	UserId         uuid.UUID
+	Provider       string
+	ExternalUserId string
+	Username       string
+	// Token is the provider's access token, AES-GCM encrypted under JELLYFIN_TOKEN_KEY
+	Token []byte
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

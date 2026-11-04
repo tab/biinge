@@ -147,7 +147,7 @@ func Test_SeriesController_HandleProgress(t *testing.T) {
 	}
 }
 
-func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
+func Test_SeriesController_HandleMarkSeriesWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -176,7 +176,7 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 			name: "Success - Changed",
 			before: func() {
 				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
-				progress.EXPECT().MarkShow(gomock.Any(), id, gomock.Any()).Return(&models.SeriesProgress{
+				progress.EXPECT().MarkSeries(gomock.Any(), id, gomock.Any()).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "watched",
 					WatchedSeasons:  []uint64{1},
@@ -202,7 +202,7 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 			name: "Success - Unchanged",
 			before: func() {
 				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
-				progress.EXPECT().MarkShow(gomock.Any(), id, gomock.Any()).Return(&models.SeriesProgress{
+				progress.EXPECT().MarkSeries(gomock.Any(), id, gomock.Any()).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "watched",
 					WatchedSeasons:  []uint64{1},
@@ -266,7 +266,7 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 			name: "Service Error",
 			before: func() {
 				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
-				progress.EXPECT().MarkShow(gomock.Any(), id, gomock.Any()).Return(nil, assert.AnError)
+				progress.EXPECT().MarkSeries(gomock.Any(), id, gomock.Any()).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			param:    "1399",
@@ -308,7 +308,7 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			r := chi.NewRouter()
-			r.Post("/series/{id}/watched", controller.HandleMarkShowWatched)
+			r.Post("/series/{id}/watched", controller.HandleMarkSeriesWatched)
 			r.ServeHTTP(w, req)
 
 			resp := w.Result()
@@ -336,7 +336,7 @@ func Test_SeriesController_HandleMarkShowWatched(t *testing.T) {
 	}
 }
 
-func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
+func Test_SeriesController_HandleUnmarkSeriesWatched(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -364,7 +364,7 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 			name: "Success - Changed",
 			before: func() {
 				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
-				progress.EXPECT().UnmarkShow(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{
+				progress.EXPECT().UnmarkSeries(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "want",
 					WatchedSeasons:  []uint64{},
@@ -389,7 +389,7 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 			name: "Success - Unchanged",
 			before: func() {
 				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "none"}, nil)
-				progress.EXPECT().UnmarkShow(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{
+				progress.EXPECT().UnmarkSeries(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{
 					SeriesTmdbId:    1399,
 					State:           "want",
 					WatchedSeasons:  []uint64{},
@@ -437,7 +437,7 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 			name: "Service Error",
 			before: func() {
 				progress.EXPECT().Get(gomock.Any(), id, uint64(1399)).Return(&models.SeriesProgress{SeriesTmdbId: 1399, State: "watching", WatchedEpisodes: []uint64{101}}, nil)
-				progress.EXPECT().UnmarkShow(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
+				progress.EXPECT().UnmarkSeries(gomock.Any(), id, uint64(1399)).Return(nil, assert.AnError)
 			},
 			withUser: true,
 			param:    "1399",
@@ -477,7 +477,7 @@ func Test_SeriesController_HandleUnmarkShowWatched(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			r := chi.NewRouter()
-			r.Delete("/series/{id}/watched", controller.HandleUnmarkShowWatched)
+			r.Delete("/series/{id}/watched", controller.HandleUnmarkSeriesWatched)
 			r.ServeHTTP(w, req)
 
 			resp := w.Result()

@@ -8,11 +8,6 @@ import (
 	"biinge-api/internal/app/errors"
 )
 
-// IntegrationTokenSerializer carries a freshly generated integration token, shown once
-type IntegrationTokenSerializer struct {
-	Token string `json:"token"`
-}
-
 // JellyfinConnectionRequestSerializer carries the Jellyfin username and password for one sign-in (the password is never stored)
 type JellyfinConnectionRequestSerializer struct {
 	Username string `json:"username"`

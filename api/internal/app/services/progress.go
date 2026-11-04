@@ -13,8 +13,8 @@ import (
 
 // Progress orchestrates the cascading watched-state changes for a show
 type Progress interface {
-	MarkShow(ctx context.Context, userId uuid.UUID, show models.ShowInput) (*models.SeriesProgress, error)
-	UnmarkShow(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error)
+	MarkSeries(ctx context.Context, userId uuid.UUID, input models.MarkSeriesInput) (*models.SeriesProgress, error)
+	UnmarkSeries(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error)
 	MarkSeason(ctx context.Context, userId uuid.UUID, series models.SeriesInput, season models.SeasonInput) (*models.SeriesProgress, error)
 	UnmarkSeason(ctx context.Context, userId uuid.UUID, seriesTmdbId, seasonTmdbId uint64) (*models.SeriesProgress, error)
 	MarkEpisode(ctx context.Context, userId uuid.UUID, series models.SeriesInput, season models.SeasonInput, episode models.EpisodeInput) (*models.SeriesProgress, error)
@@ -36,10 +36,10 @@ func NewProgress(repository repositories.SeriesProgressRepository, stats StatsCa
 	}
 }
 
-func (p *progress) MarkShow(ctx context.Context, userId uuid.UUID, show models.ShowInput) (*models.SeriesProgress, error) {
-	result, err := p.repository.MarkShowWatched(ctx, userId, show)
+func (p *progress) MarkSeries(ctx context.Context, userId uuid.UUID, input models.MarkSeriesInput) (*models.SeriesProgress, error) {
+	result, err := p.repository.MarkSeriesWatched(ctx, userId, input)
 	if err != nil {
-		p.log.Error().Err(err).Msg("Failed to mark show watched")
+		p.log.Error().Err(err).Msg("Failed to mark series watched")
 		return nil, errors.ErrFailedToUpdateProgress
 	}
 
@@ -48,10 +48,10 @@ func (p *progress) MarkShow(ctx context.Context, userId uuid.UUID, show models.S
 	return result, nil
 }
 
-func (p *progress) UnmarkShow(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
-	result, err := p.repository.UnmarkShowWatched(ctx, userId, seriesTmdbId)
+func (p *progress) UnmarkSeries(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
+	result, err := p.repository.UnmarkSeriesWatched(ctx, userId, seriesTmdbId)
 	if err != nil {
-		p.log.Error().Err(err).Msg("Failed to unmark show watched")
+		p.log.Error().Err(err).Msg("Failed to unmark series watched")
 		return nil, errors.ErrFailedToUpdateProgress
 	}
 

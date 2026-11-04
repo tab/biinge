@@ -24,7 +24,7 @@ what you're in the middle of and what you've finished.
 - **Episode-level progress**: mark individual episodes and seasons, and the show's state follows
 - **Up Next**: aired episodes you haven't watched, plus released movies and games, from the titles you pin
 - **Search & trending**: movies, shows and people from TMDB, games from IGDB
-- **Jellyfin sync**: played and unplayed marks in Jellyfin carry over (one way, library titles only)
+- **Jellyfin sync**: a watched mark or a finished play in the app shows the same state in Jellyfin
 - **Statistics**: watch-time totals and a monthly activity chart
 - **Pinning & themes**: pin favorites to the top, with dark, light or system appearance
 

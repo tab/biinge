@@ -2,8 +2,6 @@ package services
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"testing"
 
 	"github.com/google/uuid"
@@ -26,204 +24,6 @@ const testJellyfinKey = "0123456789abcdef0123456789abcdef"
 func newTestJellyfinConfig() *config.Config {
 	return &config.Config{
 		Jellyfin: config.JellyfinConfig{BaseURL: "http://jellyfin.test", TokenKey: testJellyfinKey},
-	}
-}
-
-func Test_Integrations_CreateToken(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockIntegrationRepository(ctrl)
-	service := NewIntegrations(newTestJellyfinConfig(), repository, jellyfin.NewMockClient(ctrl), newTestLogger())
-
-	userId := uuid.New()
-
-	tests := []struct {
-		name   string
-		before func() *string
-		error  error
-	}{
-		{
-			name: "Success stores the hash and returns the plaintext",
-			before: func() *string {
-				stored := new(string)
-
-				repository.EXPECT().
-					Upsert(ctx, gomock.Any()).
-					DoAndReturn(func(_ context.Context, params *models.Integration) (*models.Integration, error) {
-						assert.Equal(t, userId, params.UserId)
-						assert.Equal(t, models.JellyfinProvider, params.Provider)
-
-						*stored = params.TokenHash
-
-						return params, nil
-					})
-
-				return stored
-			},
-		},
-		{
-			name: "Error",
-			before: func() *string {
-				repository.EXPECT().Upsert(ctx, gomock.Any()).Return(nil, assert.AnError)
-
-				return nil
-			},
-			error: errors.ErrFailedToCreateIntegration,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			stored := tt.before()
-
-			token, err := service.CreateToken(ctx, userId)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-				assert.Empty(t, token)
-
-				return
-			}
-
-			require.NoError(t, err)
-			assert.Len(t, token, 64)
-			assert.Regexp(t, "^[0-9a-f]{64}$", token)
-
-			sum := sha256.Sum256([]byte(token))
-			assert.Equal(t, hex.EncodeToString(sum[:]), *stored)
-			assert.NotEqual(t, token, *stored)
-		})
-	}
-}
-
-func Test_Integrations_CreateToken_IsRandom(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockIntegrationRepository(ctrl)
-	service := NewIntegrations(newTestJellyfinConfig(), repository, jellyfin.NewMockClient(ctrl), newTestLogger())
-
-	repository.EXPECT().Upsert(ctx, gomock.Any()).Times(2).DoAndReturn(func(_ context.Context, params *models.Integration) (*models.Integration, error) {
-		return params, nil
-	})
-
-	first, err := service.CreateToken(ctx, uuid.New())
-	require.NoError(t, err)
-
-	second, err := service.CreateToken(ctx, uuid.New())
-	require.NoError(t, err)
-
-	assert.NotEqual(t, first, second)
-}
-
-func Test_Integrations_Revoke(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockIntegrationRepository(ctrl)
-	service := NewIntegrations(newTestJellyfinConfig(), repository, jellyfin.NewMockClient(ctrl), newTestLogger())
-
-	userId := uuid.New()
-
-	tests := []struct {
-		name   string
-		before func()
-		error  error
-	}{
-		{
-			name: "Success",
-			before: func() {
-				repository.EXPECT().ClearToken(ctx, userId, models.JellyfinProvider).Return(nil)
-			},
-		},
-		{
-			name: "Error",
-			before: func() {
-				repository.EXPECT().ClearToken(ctx, userId, models.JellyfinProvider).Return(assert.AnError)
-			},
-			error: errors.ErrFailedToDeleteIntegration,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			err := service.Revoke(ctx, userId)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-				return
-			}
-
-			require.NoError(t, err)
-		})
-	}
-}
-
-func Test_Integrations_Authenticate(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ctx := context.Background()
-	repository := repositories.NewMockIntegrationRepository(ctrl)
-	service := NewIntegrations(newTestJellyfinConfig(), repository, jellyfin.NewMockClient(ctrl), newTestLogger())
-
-	const token = "0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
-
-	sum := sha256.Sum256([]byte(token))
-	hash := hex.EncodeToString(sum[:])
-	link := &models.Integration{ID: uuid.New(), UserId: uuid.New(), Provider: models.JellyfinProvider, TokenHash: hash}
-
-	tests := []struct {
-		name     string
-		before   func()
-		expected *models.Integration
-		error    error
-	}{
-		{
-			name: "Success looks the row up by hash",
-			before: func() {
-				repository.EXPECT().FindByTokenHash(ctx, hash, models.JellyfinProvider).Return(link, nil)
-			},
-			expected: link,
-		},
-		{
-			name: "Unknown, revoked or soft-deleted owner is unauthorized",
-			before: func() {
-				repository.EXPECT().FindByTokenHash(ctx, hash, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
-			},
-			error: errors.ErrUnauthorized,
-		},
-		{
-			name: "Repository failure",
-			before: func() {
-				repository.EXPECT().FindByTokenHash(ctx, hash, models.JellyfinProvider).Return(nil, assert.AnError)
-			},
-			error: errors.ErrFailedToAuthenticateIntegration,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.before()
-
-			result, err := service.Authenticate(ctx, token)
-
-			if tt.error != nil {
-				require.ErrorIs(t, err, tt.error)
-				assert.Nil(t, result)
-
-				return
-			}
-
-			require.NoError(t, err)
-			assert.Equal(t, tt.expected, result)
-		})
 	}
 }
 
@@ -264,9 +64,9 @@ func Test_Integrations_Connect(t *testing.T) {
 	credentials := jellyfin.Credentials{Username: "alice", Password: "secret"}
 	session := &jellyfin.Session{AccessToken: "new-token", UserId: "jellyfin-user", UserName: "Alice"}
 	earlier := &models.Integration{
-		UserId:        userId,
-		Provider:      models.JellyfinProvider,
-		JellyfinToken: encryptToken([]byte(testJellyfinKey), "old-token"),
+		UserId:   userId,
+		Provider: models.JellyfinProvider,
+		Token:    encryptToken([]byte(testJellyfinKey), "old-token"),
 	}
 	connected := &models.JellyfinConnection{BaseURL: "http://jellyfin.test", Connected: true, Username: "Alice"}
 
@@ -277,11 +77,11 @@ func Test_Integrations_Connect(t *testing.T) {
 			DoAndReturn(func(_ context.Context, params *models.Integration) (*models.Integration, error) {
 				assert.Equal(t, userId, params.UserId)
 				assert.Equal(t, models.JellyfinProvider, params.Provider)
-				assert.Equal(t, "jellyfin-user", params.JellyfinUserId)
-				assert.Equal(t, "Alice", params.JellyfinUsername)
-				assert.NotContains(t, string(params.JellyfinToken), "new-token")
+				assert.Equal(t, "jellyfin-user", params.ExternalUserId)
+				assert.Equal(t, "Alice", params.Username)
+				assert.NotContains(t, string(params.Token), "new-token")
 
-				token, err := decryptToken([]byte(testJellyfinKey), params.JellyfinToken)
+				token, err := decryptToken([]byte(testJellyfinKey), params.Token)
 				require.NoError(t, err)
 				assert.Equal(t, "new-token", token)
 
@@ -299,17 +99,6 @@ func Test_Integrations_Connect(t *testing.T) {
 			name: "First connect signs in with the user's device id and stores the encrypted token",
 			before: func() {
 				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
-				client.EXPECT().SignIn(ctx, deviceId, credentials).Return(session, nil)
-				expectUpsert()
-			},
-			expected: connected,
-		},
-		{
-			name: "Row with only a webhook token signs nothing out",
-			before: func() {
-				repository.EXPECT().
-					FindByUser(ctx, userId, models.JellyfinProvider).
-					Return(&models.Integration{UserId: userId, TokenHash: "hash"}, nil)
 				client.EXPECT().SignIn(ctx, deviceId, credentials).Return(session, nil)
 				expectUpsert()
 			},
@@ -342,7 +131,7 @@ func Test_Integrations_Connect(t *testing.T) {
 			before: func() {
 				repository.EXPECT().
 					FindByUser(ctx, userId, models.JellyfinProvider).
-					Return(&models.Integration{UserId: userId, JellyfinToken: []byte("not a sealed token")}, nil)
+					Return(&models.Integration{UserId: userId, Token: []byte("not a sealed token")}, nil)
 				client.EXPECT().SignIn(ctx, deviceId, credentials).Return(session, nil)
 				expectUpsert()
 			},
@@ -426,24 +215,15 @@ func Test_Integrations_Status(t *testing.T) {
 			expected: &models.JellyfinConnection{BaseURL: "http://jellyfin.test"},
 		},
 		{
-			name: "Row with only a webhook token is disconnected",
-			before: func() {
-				repository.EXPECT().
-					FindByUser(ctx, userId, models.JellyfinProvider).
-					Return(&models.Integration{UserId: userId, TokenHash: "hash"}, nil)
-			},
-			expected: &models.JellyfinConnection{BaseURL: "http://jellyfin.test"},
-		},
-		{
 			name: "Connected row returns the username",
 			before: func() {
 				repository.EXPECT().
 					FindByUser(ctx, userId, models.JellyfinProvider).
 					Return(&models.Integration{
-						UserId:           userId,
-						JellyfinUserId:   "jellyfin-user",
-						JellyfinUsername: "Alice",
-						JellyfinToken:    []byte("sealed"),
+						UserId:         userId,
+						ExternalUserId: "jellyfin-user",
+						Username:       "Alice",
+						Token:          []byte("sealed"),
 					}, nil)
 			},
 			expected: &models.JellyfinConnection{BaseURL: "http://jellyfin.test", Connected: true, Username: "Alice"},
@@ -488,9 +268,9 @@ func Test_Integrations_Disconnect(t *testing.T) {
 	userId := uuid.MustParse("11111111-2222-3333-4444-555555555555")
 	deviceId := "biinge-api-11111111-2222-3333-4444-555555555555"
 	connected := &models.Integration{
-		UserId:        userId,
-		Provider:      models.JellyfinProvider,
-		JellyfinToken: encryptToken([]byte(testJellyfinKey), "token"),
+		UserId:   userId,
+		Provider: models.JellyfinProvider,
+		Token:    encryptToken([]byte(testJellyfinKey), "token"),
 	}
 
 	tests := []struct {
@@ -502,14 +282,6 @@ func Test_Integrations_Disconnect(t *testing.T) {
 			name: "No row is a no-op",
 			before: func() {
 				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
-			},
-		},
-		{
-			name: "Row with only a webhook token is a no-op",
-			before: func() {
-				repository.EXPECT().
-					FindByUser(ctx, userId, models.JellyfinProvider).
-					Return(&models.Integration{UserId: userId, TokenHash: "hash"}, nil)
 			},
 		},
 		{

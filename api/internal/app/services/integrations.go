@@ -4,9 +4,6 @@ import (
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/hex"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -19,11 +16,8 @@ import (
 	"biinge-api/pkg/jellyfin"
 )
 
-// Integrations issues, revokes and checks the webhook bearer tokens, and holds each user's Jellyfin connection
+// Integrations holds each user's Jellyfin connection
 type Integrations interface {
-	CreateToken(ctx context.Context, userId uuid.UUID) (string, error)
-	Revoke(ctx context.Context, userId uuid.UUID) error
-	Authenticate(ctx context.Context, token string) (*models.Integration, error)
 	Connect(ctx context.Context, userId uuid.UUID, credentials jellyfin.Credentials) (*models.JellyfinConnection, error)
 	Status(ctx context.Context, userId uuid.UUID) (*models.JellyfinConnection, error)
 	Disconnect(ctx context.Context, userId uuid.UUID) error
@@ -48,52 +42,6 @@ func NewIntegrations(
 		client:     client,
 		log:        log.WithComponent("IntegrationsService"),
 	}
-}
-
-// CreateToken links Jellyfin to the user with a fresh token, replacing any earlier one, and returns the plaintext once
-func (i *integrations) CreateToken(ctx context.Context, userId uuid.UUID) (string, error) {
-	// crypto/rand.Read never returns an error (it stops the process instead)
-	raw := make([]byte, 32)
-	_, _ = rand.Read(raw)
-
-	token := hex.EncodeToString(raw)
-
-	if _, err := i.repository.Upsert(ctx, &models.Integration{
-		UserId:    userId,
-		Provider:  models.JellyfinProvider,
-		TokenHash: hashToken(token),
-	}); err != nil {
-		i.log.Error().Err(err).Msg("Failed to create integration token")
-		return "", errors.ErrFailedToCreateIntegration
-	}
-
-	return token, nil
-}
-
-func (i *integrations) Revoke(ctx context.Context, userId uuid.UUID) error {
-	if err := i.repository.ClearToken(ctx, userId, models.JellyfinProvider); err != nil {
-		i.log.Error().Err(err).Msg("Failed to revoke integration")
-		return errors.ErrFailedToDeleteIntegration
-	}
-
-	return nil
-}
-
-// Authenticate finds the live link holding the token, ErrUnauthorized when none (the token itself is never logged)
-func (i *integrations) Authenticate(ctx context.Context, token string) (*models.Integration, error) {
-	result, err := i.repository.FindByTokenHash(ctx, hashToken(token), models.JellyfinProvider)
-	if err != nil {
-		// an unknown or revoked token is the ordinary failure, not a datastore one
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.ErrUnauthorized
-		}
-
-		i.log.Error().Err(err).Msg("Failed to authenticate integration")
-
-		return nil, errors.ErrFailedToAuthenticateIntegration
-	}
-
-	return result, nil
 }
 
 // Connect signs the user in to Jellyfin, stores the encrypted token and signs out any earlier one (a failed sign-in keeps the earlier connection)
@@ -128,11 +76,11 @@ func (i *integrations) Connect(
 	key := []byte(i.cfg.Jellyfin.TokenKey)
 
 	if _, err = i.repository.UpsertConnection(ctx, &models.Integration{
-		UserId:           userId,
-		Provider:         models.JellyfinProvider,
-		JellyfinUserId:   session.UserId,
-		JellyfinUsername: session.UserName,
-		JellyfinToken:    encryptToken(key, session.AccessToken),
+		UserId:         userId,
+		Provider:       models.JellyfinProvider,
+		ExternalUserId: session.UserId,
+		Username:       session.UserName,
+		Token:          encryptToken(key, session.AccessToken),
 	}); err != nil {
 		i.log.Error().Err(err).Msg("Failed to save Jellyfin connection")
 
@@ -150,12 +98,12 @@ func (i *integrations) Connect(
 		Username:  session.UserName,
 	}
 
-	if existing == nil || len(existing.JellyfinToken) == 0 {
+	if existing == nil {
 		return connection, nil
 	}
 
 	// best-effort, the new connection is stored either way
-	token, err := decryptToken(key, existing.JellyfinToken)
+	token, err := decryptToken(key, existing.Token)
 	if err == nil {
 		err = i.client.SignOut(ctx, deviceId, token)
 	}
@@ -184,19 +132,14 @@ func (i *integrations) Status(ctx context.Context, userId uuid.UUID) (*models.Je
 		return nil, errors.ErrFailedToFetchJellyfinConnection
 	}
 
-	// a row with only the webhook token is not a connection
-	if len(result.JellyfinToken) == 0 {
-		return &models.JellyfinConnection{BaseURL: i.cfg.Jellyfin.BaseURL}, nil
-	}
-
 	return &models.JellyfinConnection{
 		BaseURL:   i.cfg.Jellyfin.BaseURL,
 		Connected: true,
-		Username:  result.JellyfinUsername,
+		Username:  result.Username,
 	}, nil
 }
 
-// Disconnect signs the token out of Jellyfin best-effort and clears the connection, keeping the webhook token
+// Disconnect signs the token out of Jellyfin best-effort and clears the connection
 func (i *integrations) Disconnect(ctx context.Context, userId uuid.UUID) error {
 	if i.cfg.Jellyfin.BaseURL == "" {
 		return errors.ErrJellyfinNotConfigured
@@ -213,12 +156,8 @@ func (i *integrations) Disconnect(ctx context.Context, userId uuid.UUID) error {
 		return errors.ErrFailedToDeleteJellyfinConnection
 	}
 
-	if len(result.JellyfinToken) == 0 {
-		return nil
-	}
-
 	// a failed sign-out still clears the connection, leaving only a stale device on the server
-	token, signOutErr := decryptToken([]byte(i.cfg.Jellyfin.TokenKey), result.JellyfinToken)
+	token, signOutErr := decryptToken([]byte(i.cfg.Jellyfin.TokenKey), result.Token)
 	if signOutErr == nil {
 		signOutErr = i.client.SignOut(ctx, "biinge-api-"+userId.String(), token)
 	}
@@ -257,10 +196,4 @@ func decryptToken(key []byte, sealed []byte) (string, error) {
 	}
 
 	return string(token), nil
-}
-
-// hashToken is the SHA-256 hex digest stored in place of the plaintext token
-func hashToken(token string) string {
-	sum := sha256.Sum256([]byte(token))
-	return hex.EncodeToString(sum[:])
 }

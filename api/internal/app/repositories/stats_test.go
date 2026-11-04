@@ -291,14 +291,14 @@ func Test_StatsRepository_Get_Periods(t *testing.T) {
 			assert.Equal(t, tt.firstBucket.Format(time.DateOnly), dates[0])
 			assert.Equal(t, tt.lastBucket.Format(time.DateOnly), dates[len(dates)-1])
 
-			var movieMinutes, tvMinutes uint64
+			var movieMinutes, seriesMinutes uint64
 			for _, bucket := range result.Activity {
 				movieMinutes += bucket.MovieMinutes
-				tvMinutes += bucket.TvMinutes
+				seriesMinutes += bucket.SeriesMinutes
 			}
 
 			assert.Equal(t, tt.moviesMinutes, movieMinutes)
-			assert.Equal(t, tt.episodesMinutes, tvMinutes)
+			assert.Equal(t, tt.episodesMinutes, seriesMinutes)
 		})
 	}
 
@@ -367,7 +367,7 @@ func Test_StatsRepository_Get_MonthStartsOnTheFirst(t *testing.T) {
 	})
 }
 
-func Test_StatsRepository_Get_CountsAShowOncePerPeriod(t *testing.T) {
+func Test_StatsRepository_Get_CountsASeriesOncePerPeriod(t *testing.T) {
 	ctx := context.Background()
 	client := newRepoTestClient(t)
 	repository := NewStatsRepository(client)

@@ -39,7 +39,7 @@ func (c *seriesController) HandleProgress(w http.ResponseWriter, r *http.Request
 	writeProgress(w, progress)
 }
 
-func (c *seriesController) HandleMarkShowWatched(w http.ResponseWriter, r *http.Request) {
+func (c *seriesController) HandleMarkSeriesWatched(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	user, ok := middlewares.CurrentUserFromContext(r.Context())
@@ -54,7 +54,7 @@ func (c *seriesController) HandleMarkShowWatched(w http.ResponseWriter, r *http.
 		return
 	}
 
-	var params serializers.MarkShowRequestSerializer
+	var params serializers.MarkSeriesRequestSerializer
 	if err = params.Validate(r.Body); err != nil {
 		writeError(w, http.StatusBadRequest, err)
 		return
@@ -67,7 +67,7 @@ func (c *seriesController) HandleMarkShowWatched(w http.ResponseWriter, r *http.
 		return
 	}
 
-	progress, err := c.progress.MarkShow(r.Context(), user.ID, params.ToInput(seriesTmdbId))
+	progress, err := c.progress.MarkSeries(r.Context(), user.ID, params.ToInput(seriesTmdbId))
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, err)
 		return
@@ -81,7 +81,7 @@ func (c *seriesController) HandleMarkShowWatched(w http.ResponseWriter, r *http.
 	writeProgress(w, progress)
 }
 
-func (c *seriesController) HandleUnmarkShowWatched(w http.ResponseWriter, r *http.Request) {
+func (c *seriesController) HandleUnmarkSeriesWatched(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	user, ok := middlewares.CurrentUserFromContext(r.Context())
@@ -103,7 +103,7 @@ func (c *seriesController) HandleUnmarkShowWatched(w http.ResponseWriter, r *htt
 		return
 	}
 
-	progress, err := c.progress.UnmarkShow(r.Context(), user.ID, seriesTmdbId)
+	progress, err := c.progress.UnmarkSeries(r.Context(), user.ID, seriesTmdbId)
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, err)
 		return

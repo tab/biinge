@@ -124,16 +124,16 @@ func (mr *MockSeriesControllerMockRecorder) HandleMarkSeasonWatched(w, r any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleMarkSeasonWatched", reflect.TypeOf((*MockSeriesController)(nil).HandleMarkSeasonWatched), w, r)
 }
 
-// HandleMarkShowWatched mocks base method.
-func (m *MockSeriesController) HandleMarkShowWatched(w http.ResponseWriter, r *http.Request) {
+// HandleMarkSeriesWatched mocks base method.
+func (m *MockSeriesController) HandleMarkSeriesWatched(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "HandleMarkShowWatched", w, r)
+	m.ctrl.Call(m, "HandleMarkSeriesWatched", w, r)
 }
 
-// HandleMarkShowWatched indicates an expected call of HandleMarkShowWatched.
-func (mr *MockSeriesControllerMockRecorder) HandleMarkShowWatched(w, r any) *gomock.Call {
+// HandleMarkSeriesWatched indicates an expected call of HandleMarkSeriesWatched.
+func (mr *MockSeriesControllerMockRecorder) HandleMarkSeriesWatched(w, r any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleMarkShowWatched", reflect.TypeOf((*MockSeriesController)(nil).HandleMarkShowWatched), w, r)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleMarkSeriesWatched", reflect.TypeOf((*MockSeriesController)(nil).HandleMarkSeriesWatched), w, r)
 }
 
 // HandleProgress mocks base method.
@@ -184,16 +184,16 @@ func (mr *MockSeriesControllerMockRecorder) HandleUnmarkSeasonWatched(w, r any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleUnmarkSeasonWatched", reflect.TypeOf((*MockSeriesController)(nil).HandleUnmarkSeasonWatched), w, r)
 }
 
-// HandleUnmarkShowWatched mocks base method.
-func (m *MockSeriesController) HandleUnmarkShowWatched(w http.ResponseWriter, r *http.Request) {
+// HandleUnmarkSeriesWatched mocks base method.
+func (m *MockSeriesController) HandleUnmarkSeriesWatched(w http.ResponseWriter, r *http.Request) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "HandleUnmarkShowWatched", w, r)
+	m.ctrl.Call(m, "HandleUnmarkSeriesWatched", w, r)
 }
 
-// HandleUnmarkShowWatched indicates an expected call of HandleUnmarkShowWatched.
-func (mr *MockSeriesControllerMockRecorder) HandleUnmarkShowWatched(w, r any) *gomock.Call {
+// HandleUnmarkSeriesWatched indicates an expected call of HandleUnmarkSeriesWatched.
+func (mr *MockSeriesControllerMockRecorder) HandleUnmarkSeriesWatched(w, r any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleUnmarkShowWatched", reflect.TypeOf((*MockSeriesController)(nil).HandleUnmarkShowWatched), w, r)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleUnmarkSeriesWatched", reflect.TypeOf((*MockSeriesController)(nil).HandleUnmarkSeriesWatched), w, r)
 }
 
 // HandleUpdate mocks base method.

@@ -10,7 +10,7 @@ type MovieCreditSerializer struct {
 	Type       string           `json:"type,omitempty"`
 }
 
-type TvCreditSerializer struct {
+type SeriesCreditSerializer struct {
 	Id            uint64           `json:"id"`
 	Title         string           `json:"title"`
 	PosterPath    string           `json:"posterPath"`
@@ -19,12 +19,12 @@ type TvCreditSerializer struct {
 }
 
 type PersonDetailsSerializer struct {
-	Id           uint64                  `json:"id"`
-	Name         string                  `json:"name"`
-	Birthday     string                  `json:"birthday,omitempty"`
-	Biography    string                  `json:"biography,omitempty"`
-	ProfilePath  string                  `json:"profilePath"`
-	Gender       int                     `json:"gender"`
-	MovieCredits []MovieCreditSerializer `json:"movieCredits"`
-	TvCredits    []TvCreditSerializer    `json:"tvCredits"`
+	Id            uint64                   `json:"id"`
+	Name          string                   `json:"name"`
+	Birthday      string                   `json:"birthday,omitempty"`
+	Biography     string                   `json:"biography,omitempty"`
+	ProfilePath   string                   `json:"profilePath"`
+	Gender        int                      `json:"gender"`
+	MovieCredits  []MovieCreditSerializer  `json:"movieCredits"`
+	SeriesCredits []SeriesCreditSerializer `json:"seriesCredits"`
 }

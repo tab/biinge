@@ -372,7 +372,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					EpisodesWatched: 42,
 					EpisodesMinutes: 1800,
 					Activity: []models.WatchBucket{
-						{Date: time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 300},
+						{Date: time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, SeriesMinutes: 300},
 					},
 				}, nil)
 			},
@@ -384,7 +384,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					Series:   serializers.SeriesStatsSerializer{Want: 1, Watching: &seriesWatching, Watched: 4},
 					Episodes: serializers.EpisodeStatsSerializer{Watched: 42, Minutes: 1800},
 					Activity: []serializers.ActivityBucketSerializer{
-						{Date: "2026-01-01", MovieMinutes: 120, TvMinutes: 300},
+						{Date: "2026-01-01", MovieMinutes: 120, SeriesMinutes: 300},
 					},
 				},
 				status: "200 OK",
@@ -402,7 +402,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					EpisodesWatched: 3,
 					EpisodesMinutes: 90,
 					Activity: []models.WatchBucket{
-						{Date: time.Date(2026, time.January, 20, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, TvMinutes: 90},
+						{Date: time.Date(2026, time.January, 20, 0, 0, 0, 0, time.UTC), MovieMinutes: 120, SeriesMinutes: 90},
 					},
 				}, nil)
 			},
@@ -413,7 +413,7 @@ func Test_AccountsController_HandleStats(t *testing.T) {
 					Movies:   serializers.MovieStatsSerializer{Watched: 1, Minutes: 120},
 					Episodes: serializers.EpisodeStatsSerializer{Watched: 3, Minutes: 90},
 					Activity: []serializers.ActivityBucketSerializer{
-						{Date: "2026-01-20", MovieMinutes: 120, TvMinutes: 90},
+						{Date: "2026-01-20", MovieMinutes: 120, SeriesMinutes: 90},
 					},
 				},
 				status: "200 OK",

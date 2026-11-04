@@ -17,8 +17,6 @@ import (
 type memoryCache struct {
 	store     map[string][]byte
 	ttls      map[string]time.Duration
-	getErr    error
-	setErr    error
 	deleteErr error
 	deleted   []string
 }
@@ -28,20 +26,12 @@ func newMemoryCache() *memoryCache {
 }
 
 func (c *memoryCache) Get(_ context.Context, key string) ([]byte, bool, error) {
-	if c.getErr != nil {
-		return nil, false, c.getErr
-	}
-
 	data, ok := c.store[key]
 
 	return data, ok, nil
 }
 
 func (c *memoryCache) Set(_ context.Context, key string, value []byte, ttl time.Duration) error {
-	if c.setErr != nil {
-		return c.setErr
-	}
-
 	c.store[key] = value
 	c.ttls[key] = ttl
 
@@ -107,7 +97,7 @@ func Test_StatsCache_Fetch(t *testing.T) {
 		_, err := statsCache.Fetch(ctx, userId, models.StatsPeriodWeek, func() (*models.Stats, error) {
 			return &models.Stats{
 				Period:   models.StatsPeriodWeek,
-				Activity: []models.WatchBucket{{Date: day, MovieMinutes: 120, TvMinutes: 42}},
+				Activity: []models.WatchBucket{{Date: day, MovieMinutes: 120, SeriesMinutes: 42}},
 			}, nil
 		})
 		require.NoError(t, err)
@@ -121,7 +111,7 @@ func Test_StatsCache_Fetch(t *testing.T) {
 		require.Len(t, result.Activity, 1)
 		assert.True(t, day.Equal(result.Activity[0].Date))
 		assert.Equal(t, uint64(120), result.Activity[0].MovieMinutes)
-		assert.Equal(t, uint64(42), result.Activity[0].TvMinutes)
+		assert.Equal(t, uint64(42), result.Activity[0].SeriesMinutes)
 	})
 
 	t.Run("Periods are cached separately", func(t *testing.T) {
@@ -205,6 +195,6 @@ func Test_StatsCache_Invalidate(t *testing.T) {
 func Test_StatsCacheKey(t *testing.T) {
 	userId := uuid.MustParse("11111111-2222-3333-4444-555555555555")
 
-	assert.Equal(t, "stats:v1:11111111-2222-3333-4444-555555555555:week", statsCacheKey(userId, models.StatsPeriodWeek))
-	assert.Equal(t, "stats:v1:11111111-2222-3333-4444-555555555555:all", statsCacheKey(userId, models.StatsPeriodAll))
+	assert.Equal(t, "stats:v3:11111111-2222-3333-4444-555555555555:week", statsCacheKey(userId, models.StatsPeriodWeek))
+	assert.Equal(t, "stats:v3:11111111-2222-3333-4444-555555555555:all", statsCacheKey(userId, models.StatsPeriodAll))
 }

@@ -75,9 +75,9 @@ func (s *stats) allTime(ctx context.Context, userId uuid.UUID) (*models.Stats, e
 	buckets := make([]models.WatchBucket, 0, len(activity))
 	for _, row := range activity {
 		buckets = append(buckets, models.WatchBucket{
-			Date:         row.Bucket.Time,
-			MovieMinutes: uint64(row.MovieMinutes),
-			TvMinutes:    uint64(row.TvMinutes),
+			Date:          row.Bucket.Time,
+			MovieMinutes:  uint64(row.MovieMinutes),
+			SeriesMinutes: uint64(row.SeriesMinutes),
 		})
 	}
 
@@ -151,9 +151,9 @@ func (s *stats) forPeriod(ctx context.Context, userId uuid.UUID, period models.S
 	buckets := make([]models.WatchBucket, 0, len(activity))
 	for _, row := range activity {
 		buckets = append(buckets, models.WatchBucket{
-			Date:         row.Bucket.Time,
-			MovieMinutes: uint64(row.MovieMinutes),
-			TvMinutes:    uint64(row.TvMinutes),
+			Date:          row.Bucket.Time,
+			MovieMinutes:  uint64(row.MovieMinutes),
+			SeriesMinutes: uint64(row.SeriesMinutes),
 		})
 	}
 

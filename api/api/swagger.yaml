@@ -303,56 +303,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
-  /api/v1/accounts/integrations/jellyfin:
-    post:
-      summary: "Create a Jellyfin token"
-      description: "Links Jellyfin to the current user with a fresh token, replacing any earlier one. The plaintext is returned once and never again; only its SHA-256 is stored"
-      tags:
-        - integrations
-      security:
-        - BearerAuth: []
-      responses:
-        "201":
-          description: "Created"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IntegrationTokenSerializer"
-        "401":
-          description: "Unauthorized"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-        "422":
-          description: "Unprocessable Entity"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-    delete:
-      summary: "Revoke the Jellyfin token"
-      description: "Removes the Jellyfin link. Events carrying the old token get 401 from then on. Also 204 when there was no link"
-      tags:
-        - integrations
-      security:
-        - BearerAuth: []
-      responses:
-        "204":
-          description: "No Content"
-        "401":
-          description: "Unauthorized"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-        "422":
-          description: "Unprocessable Entity"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-
   /api/v1/accounts/integrations/jellyfin/connection:
     put:
       summary: "Connect Jellyfin"
@@ -456,7 +406,7 @@ paths:
                 $ref: "#/components/schemas/ErrorSerializer"
     delete:
       summary: "Disconnect Jellyfin"
-      description: "Signs the stored token out of Jellyfin and clears the connection. A failed sign-out still clears it. The webhook token stays. Also 204 when there was no connection. 404 means this instance has no Jellyfin server configured"
+      description: "Signs the stored token out of Jellyfin and clears the connection. A failed sign-out still clears it. Also 204 when there was no connection. 404 means this instance has no Jellyfin server configured"
       tags:
         - integrations
       security:
@@ -1375,7 +1325,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MarkShowRequest"
+              $ref: "#/components/schemas/MarkSeriesRequest"
       responses:
         "200":
           description: "OK"
@@ -1703,7 +1653,7 @@ paths:
                     type: array
                     items:
                       type: object
-                  tvCredits:
+                  seriesCredits:
                     type: array
                     items:
                       type: object
@@ -2166,69 +2116,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorSerializer"
 
-  /api/v1/webhooks/jellyfin:
-    post:
-      summary: "Jellyfin webhook"
-      description: "Receives a User Data Saved event from the Jellyfin Webhook plugin. A played event marks the movie or episode watched when the token's owner tracks it and has not watched it yet. An unplayed toggle takes the mark away again: the movie goes back to want, the episode is unmarked through the progress cascade. Authenticates with the Jellyfin token from POST /api/v1/accounts/integrations/jellyfin, not the access token. Only Played true with SaveReason PlaybackFinished or TogglePlayed, and Played false with SaveReason TogglePlayed, do anything; every other save is dropped with 204 before any work. Every other event is stored with its status. One that repeats a played value the API wrote to that ItemId in the last 60 seconds echoes that write, so it is stored as ignored with 204. Limited to 120 requests a minute per IP, checked before the token"
-      tags:
-        - integrations
-      security:
-        - JellyfinToken: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/JellyfinEvent"
-      responses:
-        "204":
-          description: "No Content: a mark was written or taken away, or the event was ignored"
-        "400":
-          description: "Bad Request: the body is not valid JSON, is JSON but not an object, has a listed key with the wrong JSON type, or is over 1 MiB"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-        "401":
-          description: "Unauthorized: missing, unknown or revoked token"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-        "422":
-          description: "Unprocessable Entity: a movie without Provider_tmdb, an episode without Provider_tvdb and Provider_imdb, or an id TMDB does not know"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-        "429":
-          description: "Too Many Requests"
-          content:
-            text/plain:
-              schema:
-                type: string
-        "502":
-          description: "Bad Gateway: TMDB failed for a reason other than not found"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-        "503":
-          description: "Service Unavailable: the token lookup, the library write or the event insert failed in the database"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorSerializer"
-
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
-    JellyfinToken:
-      type: http
-      scheme: bearer
-      description: "The 64-character hex token from POST /api/v1/accounts/integrations/jellyfin, sent as Authorization: Bearer by the Jellyfin Webhook plugin"
 
   schemas:
     HealthSerializer:
@@ -2407,14 +2299,14 @@ components:
                 type: integer
                 format: int64
                 description: "Total watched movie runtime in that bucket, in minutes"
-              tvMinutes:
+              seriesMinutes:
                 type: integer
                 format: int64
                 description: "Total watched episode runtime in that bucket, in minutes"
             required:
               - date
               - movieMinutes
-              - tvMinutes
+              - seriesMinutes
       required:
         - period
         - movies
@@ -3119,7 +3011,7 @@ components:
       required:
         - id
 
-    MarkShowRequest:
+    MarkSeriesRequest:
       type: object
       properties:
         series:
@@ -3239,7 +3131,7 @@ components:
           type: integer
           format: int64
           description: "Season TMDB ID"
-        tmdbShowId:
+        tmdbSeriesId:
           type: integer
           format: int64
           description: "Parent series TMDB ID"
@@ -3634,16 +3526,6 @@ components:
         - data
         - meta
 
-    IntegrationTokenSerializer:
-      type: object
-      properties:
-        token:
-          type: string
-          description: "Jellyfin token, 32 random bytes as hex, shown once"
-          example: "3f9c2b1e8d7a6c5b4e3f2a1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b"
-      required:
-        - token
-
     JellyfinConnectionRequest:
       type: object
       properties:
@@ -3678,39 +3560,3 @@ components:
       required:
         - base_url
         - connected
-
-    JellyfinEvent:
-      type: object
-      description: "The JSON the Webhook plugin sends with Send All Properties on. Keys match case-insensitively and every key not listed here is ignored, but the whole body is stored"
-      properties:
-        ItemId:
-          type: string
-          description: "Jellyfin item id, dashed or not; an event without it is never treated as an echo"
-          example: "a1b2c3d4e5f60718293a4b5c6d7e8f90"
-        ItemType:
-          type: string
-          description: "Movie or Episode; anything else is ignored with 204"
-          example: "Episode"
-        SaveReason:
-          type: string
-          description: "Must be PlaybackFinished or TogglePlayed"
-          example: "PlaybackFinished"
-        Played:
-          type: boolean
-          description: "Must be true"
-          example: true
-        Provider_tmdb:
-          type: string
-          description: "Movie TMDB id"
-          example: "603"
-        Provider_tvdb:
-          type: string
-          description: "Episode TVDB id, tried first for episodes"
-          example: "3254641"
-        Provider_imdb:
-          type: string
-          description: "Episode IMDb id, used when the TVDB id is missing"
-          example: "tt1480055"
-        Name:
-          type: string
-          description: "Logging only"

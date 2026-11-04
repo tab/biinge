@@ -50,7 +50,7 @@ func Test_SyncRepository_SyncSeries_Revival(t *testing.T) {
 	const tmdbID uint64 = 900001
 
 	// a two-season show, every season watched, marked finished -> derives watched
-	_, err := progressRepo.MarkShowWatched(ctx, userID, models.ShowInput{
+	_, err := progressRepo.MarkSeriesWatched(ctx, userID, models.MarkSeriesInput{
 		Series: models.SeriesInput{
 			TmdbId:        tmdbID,
 			Title:         "Revival",
@@ -75,7 +75,7 @@ func Test_SyncRepository_SyncSeries_Revival(t *testing.T) {
 	err = syncRepo.SyncSeries(ctx, userID, tmdbID, models.SeriesSyncInput{
 		Title:         "Revival",
 		PosterPath:    "/new.jpg",
-		Status:        models.TvInProductionStatus,
+		Status:        models.SeriesInProductionStatus,
 		SeasonsCount:  3,
 		EpisodesCount: 30,
 		LastAirAt:     lastAir,
@@ -86,7 +86,7 @@ func Test_SyncRepository_SyncSeries_Revival(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, db.StateTypesWatching, after.State, "a revived show should leave watched")
-	assert.Equal(t, models.TvInProductionStatus, after.Status)
+	assert.Equal(t, models.SeriesInProductionStatus, after.Status)
 	assert.Equal(t, uint64(3), after.SeasonsCount)
 	assert.Equal(t, "/new.jpg", after.PosterPath)
 	assert.True(t, after.SyncedAt.Valid, "synced_at should be stamped")
@@ -105,7 +105,7 @@ func Test_SyncRepository_SyncSeries_UnchangedKeepsState(t *testing.T) {
 
 	const tmdbID uint64 = 900002
 
-	_, err := progressRepo.MarkShowWatched(ctx, userID, models.ShowInput{
+	_, err := progressRepo.MarkSeriesWatched(ctx, userID, models.MarkSeriesInput{
 		Series: models.SeriesInput{TmdbId: tmdbID, Title: "Done", PosterPath: "/p.jpg", SeasonsCount: 1, EpisodesCount: 1, Status: "Ended"},
 		Seasons: []models.SeasonInput{
 			{TmdbId: 1, Title: "S1", Number: 1, EpisodesCount: 1, Episodes: []models.EpisodeInput{{TmdbId: 11, Title: "E1"}}},
@@ -152,15 +152,15 @@ func Test_SyncRepository_FindSeriesToSync_Eligibility(t *testing.T) {
 		return row.ID
 	}
 
-	dueNeverSynced := seed(910001, "Ended", nil, nil)                         // never synced -> due
-	frozenOldEnded := seed(910002, "Ended", nil, ptrTime(old))                // ended long ago -> skip
-	airingOld := seed(910003, models.TvInProductionStatus, nil, ptrTime(old)) // still airing -> due despite age
-	freshlySynced := seed(910004, "Ended", ptrTime(recent), nil)              // synced yesterday -> not due
+	dueNeverSynced := seed(910001, "Ended", nil, nil)                             // never synced -> due
+	frozenOldEnded := seed(910002, "Ended", nil, ptrTime(old))                    // ended long ago -> skip
+	airingOld := seed(910003, models.SeriesInProductionStatus, nil, ptrTime(old)) // still airing -> due despite age
+	freshlySynced := seed(910004, "Ended", ptrTime(recent), nil)                  // synced yesterday -> not due
 
 	staleBefore := now.Add(-72 * time.Hour)
 	airCutoff := now.AddDate(-4, 0, 0)
 
-	results, err := repo.FindSeriesToSync(ctx, staleBefore, airCutoff, []string{models.TvInProductionStatus, "In Production", "Planned", "Pilot"}, 100)
+	results, err := repo.FindSeriesToSync(ctx, staleBefore, airCutoff, []string{models.SeriesInProductionStatus, "In Production", "Planned", "Pilot"}, 100)
 	require.NoError(t, err)
 
 	got := make(map[uuid.UUID]bool, len(results))

@@ -22,7 +22,8 @@ const (
 	episodesPath = "/Shows/{seriesId}/Episodes"
 	playedPath   = "/UserPlayedItems/{itemId}"
 
-	// ItemTypeSeries sits beside ItemTypeMovie (event.go) as the other type Items returns
+	// ItemTypeMovie and ItemTypeSeries are the item types Items returns
+	ItemTypeMovie  = "Movie"
 	ItemTypeSeries = "Series"
 
 	// authorization names the API as a Jellyfin client on a device (device id, then app version)

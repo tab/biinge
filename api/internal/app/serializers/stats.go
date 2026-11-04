@@ -38,9 +38,9 @@ type GameStatsSerializer struct {
 }
 
 type ActivityBucketSerializer struct {
-	Date         string `json:"date"`
-	MovieMinutes uint64 `json:"movieMinutes"`
-	TvMinutes    uint64 `json:"tvMinutes"`
+	Date          string `json:"date"`
+	MovieMinutes  uint64 `json:"movieMinutes"`
+	SeriesMinutes uint64 `json:"seriesMinutes"`
 }
 
 type StatsSerializer struct {
@@ -56,9 +56,9 @@ func NewStatsSerializer(stats *models.Stats) StatsSerializer {
 	activity := make([]ActivityBucketSerializer, 0, len(stats.Activity))
 	for _, bucket := range stats.Activity {
 		activity = append(activity, ActivityBucketSerializer{
-			Date:         bucket.Date.Format(time.DateOnly),
-			MovieMinutes: bucket.MovieMinutes,
-			TvMinutes:    bucket.TvMinutes,
+			Date:          bucket.Date.Format(time.DateOnly),
+			MovieMinutes:  bucket.MovieMinutes,
+			SeriesMinutes: bucket.SeriesMinutes,
 		})
 	}
 

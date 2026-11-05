@@ -55,8 +55,8 @@ Walk `ios/CLAUDE.md`:
 
 - anything that changes library state goes through a store, so every screen sees
   it. Screens call `APIClient` directly only for read-through data
-- `Networking/APIClient.swift` is the single seam to the API
-- `Models/` match the serializer shapes in `api/api/swagger.yaml`. A shape
+- `Core/Networking/APIClient.swift` is the single seam to the API
+- `Core/Models/` match the serializer shapes in `api/api/swagger.yaml`. A shape
   inferred from a neighbouring model or from a runtime response is a finding
 - hosts and keys are read from `Config`, never hardcoded in a view or a client
 - sentry-cocoa stays confined to `Monitoring.swift`

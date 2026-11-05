@@ -8,6 +8,8 @@
 	<string>$(SENTRY_DSN)</string>
 	<key>SENTRY_ENABLED</key>
 	<string>$(SENTRY_ENABLED)</string>
+	<key>ATSApplicationFontsPath</key>
+	<string>.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

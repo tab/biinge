@@ -22,6 +22,7 @@ Thumbs.db
 # working notes and the screenshot sources behind the README's uploaded images
 FIX.md
 assets/
+!ios/Biinge/App/DesktopAppIcon.icon/Assets/
 
 # === iOS / Xcode (ios/) ===
 build/
@@ -36,3 +37,8 @@ xcuserdata/
 Packages/
 Package.resolved
 Pods/
+
+# === jellyfin/ ===
+# jellyfin config, cache and data folders
+
+/jellyfin/

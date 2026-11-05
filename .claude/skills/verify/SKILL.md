@@ -43,11 +43,13 @@ from the steps that happened to pass.
 
 ```bash
 cd ios
-make lint     # SwiftLint, skipped with a notice if not installed
-make test     # BiingeTests on a simulator, needs Xcode 26 and an iOS 26 runtime
+make lint     # doc comments, platform depth, then SwiftLint (skipped with a notice if not installed)
+make test     # BiingeTests on iOS, macOS and tvOS, needs Xcode 26 and the iOS 26 and tvOS 26 runtimes
 ```
 
-`make build` when the change is UI-only and you just need it to compile.
+`make build` when the change is UI-only and you just need it to compile. While
+working, `make test:macos` and `make build:macos` run one platform, and `ios` and
+`tvos` have the same targets. See the table in `ios/README.md` for what runs when.
 
 ## docs
 

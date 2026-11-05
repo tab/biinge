@@ -1,9 +1,10 @@
 SCHEME      = Biinge
 PROJECT     = Biinge.xcodeproj
 DERIVED     = build/dd
-DESTINATION_ios   = platform=iOS Simulator,name=iPhone 17 Pro
+DESTINATION_ios   = platform=iOS Simulator,name=iPhone 17
 DESTINATION_macos = platform=macOS
-DESTINATION_tvos  = platform=tvOS Simulator,name=Apple TV 4K (3rd generation)
+# the newest runtime's last Apple TV simulator (simctl lists runtimes oldest first, and the device names change between Xcode releases)
+DESTINATION_tvos  = platform=tvOS Simulator,name=$(shell xcrun simctl list devices available tvOS | sed -n 's/^ *\(Apple TV.*\) ([0-9A-F-]*) .*/\1/p' | tail -n 1)
 SWIFTLINT_ARGS ?=
 
 # build and test call each platform through recursive $(MAKE), because an

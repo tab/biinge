@@ -24,7 +24,7 @@ make -C api db:migrate
 docker compose up -d api`;
 
 const app = `# compile the app against your API
-make -C ios build`;
+make -C ios build:ios`;
 
 const config = [
   { name: "GO_ENV", purpose: "Selects the environment file and validation rules; defaults to development" },

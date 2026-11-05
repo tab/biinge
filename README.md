@@ -22,8 +22,10 @@ what you're in the middle of and what you've finished.
 
 - **Track movies, TV shows and games**: want / watching / watched lists, and want / playing / played for games
 - **Episode-level progress**: mark individual episodes and seasons, and the show's state follows
-- **Up Next**: aired episodes you haven't watched, plus released movies and games, from the titles you pin
+- **Up Next**: aired episodes you haven't watched, plus released movies and games, from the titles you pin.
+  On iPhone, Jellyfin's Continue Watching and Next Up come first
 - **Search & trending**: movies, shows and people from TMDB, games from IGDB
+- **Jellyfin playback**: connect a Jellyfin server, then play what it holds on iPhone, Mac and Apple TV, with resume and the next episode
 - **Jellyfin sync**: a watched mark or a finished play in the app shows the same state in Jellyfin
 - **Statistics**: watch-time totals and a monthly activity chart
 - **Pinning & themes**: pin favorites to the top, with dark, light or system appearance
@@ -53,7 +55,7 @@ Or boot the API with a readiness wait via [fuku](https://github.com/tab/fuku): `
 **2. Run the app** (details in [ios/README.md](ios/README.md)):
 
 ```sh
-make -C ios build     # or open ios/Biinge.xcodeproj in Xcode 26
+make -C ios build:ios     # or open ios/Biinge.xcodeproj in Xcode 26
 ```
 
 The app targets `http://localhost:8080/api/v1` by default. Library lists are

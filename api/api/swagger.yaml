@@ -2555,6 +2555,12 @@ components:
           items:
             type: string
           example: ["Drama", "Thriller"]
+        directors:
+          type: array
+          description: "Director names from TMDB in its order, each listed once, with or without a photo (omitted when TMDB lists none or is unavailable, and in the create and update responses)"
+          items:
+            type: string
+          example: ["Lana Wachowski", "Lilly Wachowski"]
         credits:
           type: object
           description: "Movie credits (cast and crew)"
@@ -2679,6 +2685,12 @@ components:
           items:
             type: string
           description: "Platforms the game released on, shortened: PlayStation keeps its generation (PS4, PS5), other families collapse to the family name (Xbox, Nintendo, PC)"
+        developers:
+          type: array
+          description: "Names of the companies IGDB flags as developer, in its order, each listed once (omitted when IGDB lists none or is unavailable, and in the create and update responses)"
+          items:
+            type: string
+          example: ["CD Projekt RED"]
         recommendations:
           type: array
           description: "IGDB similar games, kept to those playable on a PlayStation and ordered by how widely rated they are"
@@ -2802,6 +2814,12 @@ components:
           items:
             type: string
           example: ["Drama", "Crime"]
+        creators:
+          type: array
+          description: "Creator names from TMDB (omitted when TMDB lists none or is unavailable, and in the create and update responses)"
+          items:
+            type: string
+          example: ["Vince Gilligan"]
         credits:
           type: array
           description: "Series credits (cast and crew)"
@@ -3205,6 +3223,12 @@ components:
         watched:
           type: boolean
           description: "Whether the current user has marked this episode watched"
+        directors:
+          type: array
+          description: "Director names from TMDB in its order, each listed once, with or without a photo (omitted when TMDB lists none)"
+          items:
+            type: string
+          example: ["Vince Gilligan"]
         credits:
           type: array
           description: "Episode cast and crew"

@@ -32,6 +32,10 @@ func sampleGameDetails() *igdb.GameDetails {
 			Genres:           []igdb.Genre{{Name: "RPG"}},
 			Platforms:        []igdb.Platform{{Name: "PlayStation 5"}},
 			ReleaseDates:     []igdb.ReleaseDate{{Date: ps5Release, Platform: igdb.PlatformPlayStation5}},
+			InvolvedCompanies: []igdb.InvolvedCompany{
+				{Company: igdb.Company{Id: 908, Name: "CD Projekt RED"}, Developer: true},
+				{Company: igdb.Company{Id: 1633, Name: "Bandai Namco"}},
+			},
 			SimilarGames: []igdb.SimilarGame{
 				{
 					Id: 26192, Name: "The Last of Us Part II", Cover: igdb.Cover{ImageId: "co2"},
@@ -94,6 +98,7 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		assert.InDelta(t, 9.46, result.Rating, 0.001)
 		assert.Equal(t, uint64(3000), result.Runtime)
 		assert.Equal(t, uint64(6360), result.RuntimeCompleted)
+		assert.Equal(t, []string{"CD Projekt RED"}, result.Developers)
 		assert.Equal(t, models.StateTypeNone, result.State)
 		assert.False(t, result.Pinned)
 	})
@@ -118,8 +123,33 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		result, err := provider.FetchGameDetails(ctx, 1942, userId)
 		require.NoError(t, err)
 
+		assert.Equal(t, []string{"CD Projekt RED"}, result.Developers)
 		assert.Equal(t, models.StateTypePlayed, result.State)
 		assert.True(t, result.Pinned)
+	})
+
+	t.Run("A cached game keeps its developers under the versioned key", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		client := igdb.NewMockClient(ctrl)
+		gamesSvc := NewMockGames(ctrl)
+		store := newMemoryCache()
+		provider := NewIgdbProvider(client, gamesSvc, store, newTestLogger())
+
+		// the client answers once, so the second read comes from the cache
+		client.EXPECT().FetchGameDetails(ctx, uint64(1942)).Return(sampleGameDetails(), nil)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{26192, 19561}}).Return(nil, nil).Times(2)
+		gamesSvc.EXPECT().FindByFilter(ctx, models.GameFilter{UserId: userId, IgdbIds: []uint64{1942}}).Return([]models.Game{}, nil).Times(2)
+
+		_, err := provider.FetchGameDetails(ctx, 1942, userId)
+		require.NoError(t, err)
+
+		result, err := provider.FetchGameDetails(ctx, 1942, userId)
+		require.NoError(t, err)
+
+		assert.Contains(t, store.store, "igdb:v2:game:1942")
+		assert.Equal(t, []string{"CD Projekt RED"}, result.Developers)
 	})
 
 	t.Run("Read-repairs a stale stored cover", func(t *testing.T) {
@@ -233,6 +263,7 @@ func Test_IgdbProvider_FetchGameDetails(t *testing.T) {
 		assert.Equal(t, models.StateTypePlayed, result.State)
 		assert.Empty(t, result.Genres)
 		assert.Empty(t, result.Platforms)
+		assert.Empty(t, result.Developers)
 	})
 
 	t.Run("Unavailable IGDB and an untracked game is an error", func(t *testing.T) {
@@ -279,6 +310,27 @@ func Test_IgdbProvider_FetchUpNextGames(t *testing.T) {
 		assert.Equal(t, "2023-03-01", result[0].ReleaseDate)
 		assert.Equal(t, uint64(3000), result[0].Runtime)
 		assert.InDelta(t, 9.46, result[0].Rating, 0.001)
+	})
+
+	t.Run("Caches a game under the versioned key", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		client := igdb.NewMockClient(ctrl)
+		gamesSvc := NewMockGames(ctrl)
+		store := newMemoryCache()
+		provider := NewIgdbProvider(client, gamesSvc, store, newTestLogger())
+
+		gamesSvc.EXPECT().List(gomock.Any(), userId, models.StateTypeWant, gomock.Any()).Return([]models.Game{
+			{IgdbId: 1942, Pinned: true},
+		}, uint64(1), nil)
+
+		client.EXPECT().FetchGameDetails(gomock.Any(), uint64(1942)).Return(sampleGameDetails(), nil)
+
+		_, err := provider.FetchUpNextGames(ctx, userId)
+		require.NoError(t, err)
+
+		assert.Contains(t, store.store, "igdb:v2:game:1942")
 	})
 
 	t.Run("Skips a game IGDB cannot resolve", func(t *testing.T) {

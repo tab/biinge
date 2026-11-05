@@ -12,6 +12,7 @@ type EpisodeDetailsSerializer struct {
 	Rating     float64            `json:"rating,omitempty"`
 	AirDate    string             `json:"airDate,omitempty"`
 	Watched    bool               `json:"watched"`
+	Directors  []string           `json:"directors,omitempty"`
 	Credits    []PersonSerializer `json:"credits"`
 	Videos     []VideoSerializer  `json:"videos"`
 }

@@ -109,6 +109,31 @@ func Test_Client_FetchGameDetails(t *testing.T) {
 		// the recommendations rail is filtered in Go, so the nested rows carry what it tests
 		assert.Contains(t, body, "similar_games.cover.image_id")
 		assert.Contains(t, body, "similar_games.platforms")
+		assert.Contains(t, body, "involved_companies.company.name")
+		assert.Contains(t, body, "involved_companies.developer")
+	})
+
+	t.Run("Decodes the involved companies", func(t *testing.T) {
+		stub := newStubServer(t, map[string]string{
+			"/v4/multiquery": `[
+				{"name":"game","result":[{"id":1942,"name":"The Witcher 3","involved_companies":[
+					{"id":25,"company":{"id":908,"name":"CD Projekt RED"},"developer":true,"publisher":false,"porting":false},
+					{"id":26,"company":{"id":1633,"name":"Bandai Namco"},"developer":false,"publisher":true,"porting":false},
+					{"id":27,"company":{"id":421,"name":"Saber Interactive"},"developer":false,"publisher":false,"porting":true}
+				]}]},
+				{"name":"time","result":[]}
+			]`,
+		})
+
+		result, err := newTestClient(t, stub).FetchGameDetails(context.Background(), 1942)
+		require.NoError(t, err)
+
+		assert.Equal(t, []InvolvedCompany{
+			{Id: 25, Company: Company{Id: 908, Name: "CD Projekt RED"}, Developer: true},
+			{Id: 26, Company: Company{Id: 1633, Name: "Bandai Namco"}},
+			{Id: 27, Company: Company{Id: 421, Name: "Saber Interactive"}},
+		}, result.Game.InvolvedCompanies)
+		assert.Equal(t, []string{"CD Projekt RED"}, TransformGameDetails(result).Developers)
 	})
 
 	t.Run("Missing completion times leave the game intact", func(t *testing.T) {

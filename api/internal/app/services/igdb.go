@@ -44,7 +44,7 @@ func NewIgdbProvider(client igdb.Client, games Games, store cache.Cache, log *lo
 func (p *igdbProvider) FetchGameDetails(ctx context.Context, id uint64, userId uuid.UUID) (*serializers.GameDetailsSerializer, error) {
 	p.log.Debug().Uint64("Id", id).Msg("Fetching game details")
 
-	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("igdb:v1:game:%d", id), cache.DetailsTTL, func() (*igdb.GameDetails, error) {
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("igdb:v2:game:%d", id), cache.DetailsTTL, func() (*igdb.GameDetails, error) {
 		return p.client.FetchGameDetails(ctx, id)
 	})
 	if err != nil {
@@ -110,6 +110,7 @@ func (p *igdbProvider) FetchGameDetails(ctx context.Context, id uint64, userId u
 			Rating:           details.Rating,
 			Genres:           details.Genres,
 			Platforms:        details.Platforms,
+			Developers:       details.Developers,
 			Recommendations:  recommendations,
 		}, nil
 	}
@@ -146,6 +147,7 @@ func (p *igdbProvider) FetchGameDetails(ctx context.Context, id uint64, userId u
 		Rating:           details.Rating,
 		Genres:           details.Genres,
 		Platforms:        details.Platforms,
+		Developers:       details.Developers,
 		Recommendations:  recommendations,
 	}, nil
 }
@@ -205,7 +207,7 @@ func (p *igdbProvider) FetchUpNextGames(ctx context.Context, userId uuid.UUID) (
 
 // releasedGame resolves a want-list game when it is out, skipping on any IGDB failure
 func (p *igdbProvider) releasedGame(ctx context.Context, game models.Game) *serializers.UpNextGameSerializer {
-	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("igdb:v1:game:%d", game.IgdbId), cache.DetailsTTL, func() (*igdb.GameDetails, error) {
+	response, err := cache.Fetch(ctx, p.cache, p.log, fmt.Sprintf("igdb:v2:game:%d", game.IgdbId), cache.DetailsTTL, func() (*igdb.GameDetails, error) {
 		return p.client.FetchGameDetails(ctx, game.IgdbId)
 	})
 	if err != nil {

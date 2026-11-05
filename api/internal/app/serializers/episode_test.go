@@ -10,26 +10,40 @@ import (
 
 func Test_EpisodeDetailsSerializer_Marshal(t *testing.T) {
 	tests := []struct {
-		name       string
-		jellyfinId string
-		expected   string
+		name              string
+		jellyfinId        string
+		directors         []string
+		expected          string
+		expectedDirectors string
 	}{
 		{
-			name:       "With a Jellyfin id",
-			jellyfinId: "jf-1",
-			expected:   `"jellyfinId":"jf-1"`,
+			name:              "With a Jellyfin id and directors",
+			jellyfinId:        "jf-1",
+			directors:         []string{"Vince Gilligan"},
+			expected:          `"jellyfinId":"jf-1"`,
+			expectedDirectors: `"directors":["Vince Gilligan"]`,
 		},
 		{
-			name:       "Without a Jellyfin id",
+			name:       "Without a Jellyfin id or directors",
 			jellyfinId: "",
+		},
+		{
+			name:      "Empty directors are omitted",
+			directors: []string{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := json.Marshal(EpisodeDetailsSerializer{Id: 1, JellyfinId: tt.jellyfinId})
+			data, err := json.Marshal(EpisodeDetailsSerializer{Id: 1, JellyfinId: tt.jellyfinId, Directors: tt.directors})
 
 			require.NoError(t, err)
+
+			if tt.expectedDirectors == "" {
+				assert.NotContains(t, string(data), "directors")
+			} else {
+				assert.Contains(t, string(data), tt.expectedDirectors)
+			}
 
 			if tt.expected == "" {
 				assert.NotContains(t, string(data), "jellyfinId")

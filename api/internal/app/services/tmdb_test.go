@@ -64,6 +64,7 @@ func sampleTvDetails() *tmdb.TvDetails {
 		SeasonsCount:  5,
 		EpisodesCount: 62,
 		Genres:        []tmdb.Genre{{Id: 18, Name: "Drama"}},
+		CreatedBy:     []tmdb.Person{{Id: 6, Name: "Vince Gilligan"}},
 		Credits: tmdb.Credits{
 			Cast: []tmdb.PersonCast{
 				{Person: tmdb.Person{Id: 5, Name: "Bryan Cranston", ProfilePath: "/bc.jpg"}, Character: "Walter White"},
@@ -140,6 +141,7 @@ func sampleEpisodeDetails() *tmdb.EpisodeDetails {
 			},
 			Crew: []tmdb.PersonCrew{
 				{Person: tmdb.Person{Id: 6, Name: "Vince Gilligan", ProfilePath: "/vg.jpg"}, Job: tmdb.TMDBJobDirector},
+				{Person: tmdb.Person{Id: 7, Name: "Michelle MacLaren"}, Job: tmdb.TMDBJobDirector},
 			},
 		},
 		Videos: tmdb.Videos{
@@ -269,6 +271,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Rating:          8.7,
 				JellyfinId:      "jf-movie",
 				Genres:          []string{"Action", "Science Fiction"},
+				Directors:       []string{"Lana Wachowski"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("want"),
 				Videos:          expectedMovieVideos(),
@@ -298,6 +301,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Runtime:         136,
 				Rating:          8.7,
 				Genres:          []string{"Action", "Science Fiction"},
+				Directors:       []string{"Lana Wachowski"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("none"),
 				Videos:          expectedMovieVideos(),
@@ -335,6 +339,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Runtime:         0,
 				Rating:          8.7,
 				Genres:          []string{"Action", "Science Fiction"},
+				Directors:       []string{"Lana Wachowski"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("none"),
 				Videos:          expectedMovieVideos(),
@@ -365,6 +370,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Runtime:         136,
 				Rating:          8.7,
 				Genres:          []string{"Action", "Science Fiction"},
+				Directors:       []string{"Lana Wachowski"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("none"),
 				Videos:          expectedMovieVideos(),
@@ -395,6 +401,7 @@ func Test_Tmdb_FetchMovieDetails(t *testing.T) {
 				Rating:          8.7,
 				JellyfinId:      "jf-movie",
 				Genres:          []string{"Action", "Science Fiction"},
+				Directors:       []string{"Lana Wachowski"},
 				Credits:         expectedMovieCredits(),
 				Recommendations: expectedMovieRecommendations("want"),
 				Videos:          expectedMovieVideos(),
@@ -587,6 +594,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				Rating:          9.5,
 				JellyfinId:      "jf-series",
 				Genres:          []string{"Drama"},
+				Creators:        []string{"Vince Gilligan"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("want"),
 				Videos:          expectedTvVideos(),
@@ -618,6 +626,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				EpisodesCount:   62,
 				Rating:          9.5,
 				Genres:          []string{"Drama"},
+				Creators:        []string{"Vince Gilligan"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("none"),
 				Videos:          expectedTvVideos(),
@@ -657,6 +666,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				EpisodesCount:   62,
 				Rating:          9.5,
 				Genres:          []string{"Drama"},
+				Creators:        []string{"Vince Gilligan"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("none"),
 				Videos:          expectedTvVideos(),
@@ -689,6 +699,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				EpisodesCount:   62,
 				Rating:          9.5,
 				Genres:          []string{"Drama"},
+				Creators:        []string{"Vince Gilligan"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("none"),
 				Videos:          expectedTvVideos(),
@@ -721,6 +732,7 @@ func Test_Tmdb_FetchTvDetails(t *testing.T) {
 				Rating:          9.5,
 				JellyfinId:      "jf-series",
 				Genres:          []string{"Drama"},
+				Creators:        []string{"Vince Gilligan"},
 				Credits:         expectedTvCredits(),
 				Recommendations: expectedTvRecommendations("want"),
 				Videos:          expectedTvVideos(),
@@ -859,8 +871,8 @@ func Test_Tmdb_FetchTvDetails_PerUser(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result.JellyfinId)
-			assert.Contains(t, store.store, "tmdb:v2:tv:300")
-			assert.NotContains(t, string(store.store["tmdb:v2:tv:300"]), "jf-")
+			assert.Contains(t, store.store, "tmdb:v3:tv:300")
+			assert.NotContains(t, string(store.store["tmdb:v3:tv:300"]), "jf-")
 		})
 	}
 }
@@ -1156,6 +1168,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				AirDate:    "2008-01-20",
 				Watched:    true,
 				JellyfinId: "jf-e1",
+				Directors:  []string{"Vince Gilligan", "Michelle MacLaren"},
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -1184,6 +1197,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				Rating:     8.0,
 				AirDate:    "2008-01-20",
 				Watched:    false,
+				Directors:  []string{"Vince Gilligan", "Michelle MacLaren"},
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -1215,6 +1229,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				Overview:   "The pilot.",
 				Rating:     8.0,
 				AirDate:    "2008-01-20",
+				Directors:  []string{"Vince Gilligan", "Michelle MacLaren"},
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -1371,6 +1386,7 @@ func Test_Tmdb_FetchTvEpisodeDetails_PerUser(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result.JellyfinId)
+			assert.Equal(t, []string{"Vince Gilligan", "Michelle MacLaren"}, result.Directors)
 			assert.Contains(t, store.store, "tmdb:v1:tv:300:season:1:episode:1")
 			assert.NotContains(t, string(store.store["tmdb:v1:tv:300:season:1:episode:1"]), "jf-")
 		})
@@ -1920,4 +1936,30 @@ func Test_Tmdb_FetchUpNext(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_Tmdb_FetchUpNext_SharedCache(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	client := tmdb.NewMockClient(ctrl)
+	moviesSvc := NewMockMovies(ctrl)
+	seriesSvc := NewMockSeries(ctrl)
+	progressSvc := NewMockProgress(ctrl)
+	store := newMemoryCache()
+	provider := NewTmdbProvider(client, moviesSvc, seriesSvc, progressSvc, NewMockLibrary(ctrl), store, newTestLogger())
+	userId := uuid.New()
+
+	seriesSvc.EXPECT().List(ctx, userId, models.StateTypeWatching, gomock.Any()).Return([]models.Series{
+		{TmdbId: 300, Title: "Breaking Bad", Pinned: true},
+	}, uint64(1), nil)
+	client.EXPECT().FetchTvDetails(ctx, uint64(300)).Return(&tmdb.TvDetails{Id: 300}, nil)
+	progressSvc.EXPECT().Get(ctx, userId, uint64(300)).Return(&models.SeriesProgress{}, nil)
+	moviesSvc.EXPECT().List(ctx, userId, models.StateTypeWant, gomock.Any()).Return([]models.Movie{}, uint64(0), nil)
+
+	_, err := provider.FetchUpNext(ctx, userId)
+
+	require.NoError(t, err)
+	assert.Contains(t, store.store, "tmdb:v3:tv:300")
 }

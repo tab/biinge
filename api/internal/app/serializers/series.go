@@ -35,6 +35,7 @@ type SeriesDetailsSerializer struct {
 	EpisodesCount   uint64                     `json:"episodesCount,omitempty"`
 	Rating          float64                    `json:"rating,omitempty"`
 	Genres          []string                   `json:"genres"`
+	Creators        []string                   `json:"creators,omitempty"`
 	Credits         []PersonSerializer         `json:"credits"`
 	Recommendations []RecommendationSerializer `json:"recommendations"`
 	Videos          []VideoSerializer          `json:"videos"`

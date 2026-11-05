@@ -106,6 +106,31 @@ func Test_TransformGameDetails(t *testing.T) {
 		)
 	})
 
+	t.Run("Lists each developer once in IGDB order, without publishers or porting companies", func(t *testing.T) {
+		result := TransformGameDetails(&GameDetails{
+			Game: Game{
+				Id: 1942,
+				InvolvedCompanies: []InvolvedCompany{
+					{Company: Company{Id: 2, Name: "Second Studio"}, Developer: true},
+					{Company: Company{Id: 3, Name: "Publisher Only"}},
+					{Company: Company{Id: 1, Name: "First Studio"}, Developer: true},
+					{Company: Company{Id: 4, Name: "Porting Only"}},
+					{Company: Company{Id: 2, Name: "Second Studio"}, Developer: true},
+				},
+			},
+		})
+
+		require.NotNil(t, result)
+		assert.Equal(t, []string{"Second Studio", "First Studio"}, result.Developers)
+	})
+
+	t.Run("A game with no developer has an empty list", func(t *testing.T) {
+		result := TransformGameDetails(&GameDetails{Game: Game{Id: 1942}})
+
+		require.NotNil(t, result)
+		assert.Empty(t, result.Developers)
+	})
+
 	t.Run("Keeps the PlayStation-playable similar games, best known first", func(t *testing.T) {
 		result := TransformGameDetails(&GameDetails{
 			Game: Game{

@@ -101,6 +101,7 @@ const movieDetailsJson = esc(`{
   "runtime": 167,
   "rating": 8.1,
   "genres": ["Science Fiction", "Adventure"],
+  "directors": ["Denis Villeneuve"],
   "credits": […],
   "recommendations": […],
   "videos": […]
@@ -120,6 +121,7 @@ const seriesDetailsJson = esc(`{
   "episodesCount": 30,
   "rating": 8.1,
   "genres": ["Sci-Fi & Fantasy", "Drama"],
+  "creators": ["Graham Yost"],
   "credits": […],
   "recommendations": […],
   "videos": […],
@@ -171,6 +173,7 @@ const episodeDetailsJson = esc(`{
   "rating": 7.9,
   "airDate": "2023-05-04",
   "watched": true,
+  "directors": ["Morten Tyldum"],
   "credits": […],
   "videos": […]
 }`);
@@ -243,7 +246,7 @@ const endpoints: Endpoint[] = [
   "runtime": 167,
   "state": "want"
 }` },
-  { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding and changing a movie never return it. genres lists TMDB's genre names. It is empty when TMDB lists none or does not answer.", resp: movieDetailsJson },
+  { id: "movie-get", group: "Movies", method: "GET", path: "/api/v1/movies/{id}", desc: "Movie details, credits, and recommendations.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding and changing a movie never return it. genres lists TMDB's genre names. It is empty when TMDB lists none or does not answer. directors lists TMDB's director names. It is left out when TMDB lists none or does not answer.", resp: movieDetailsJson },
   { id: "movie-update", group: "Movies", method: "PATCH", path: "/api/v1/movies/{id}", desc: "Change state or pin the movie.", note: "With your Jellyfin account connected, a change into watched also marks the movie played in Jellyfin, and a change out of watched marks it unplayed. A pin or the same state again sends nothing. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{
   "state": "watched",
   "pinned": true
@@ -258,7 +261,7 @@ const endpoints: Endpoint[] = [
   "runtime": 3000,
   "state": "want"
 }` },
-  { id: "game-get", group: "Games", method: "GET", path: "/api/v1/games/{id}", desc: "Game details from IGDB, with similar games and IGDB's estimated time for a main playthrough and for 100% completion, both in minutes." },
+  { id: "game-get", group: "Games", method: "GET", path: "/api/v1/games/{id}", desc: "Game details from IGDB, with similar games and IGDB's estimated time for a main playthrough and for 100% completion, both in minutes.", note: "developers lists the companies IGDB flags as developer. It is left out when IGDB lists none or does not answer." },
   { id: "game-update", group: "Games", method: "PATCH", path: "/api/v1/games/{id}", desc: "Change state or pin the game.", body: `{
   "state": "played",
   "pinned": true
@@ -275,14 +278,14 @@ const endpoints: Endpoint[] = [
   "status": "Returning Series",
   "state": "want"
 }` },
-  { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding and changing a show never return it. genres lists TMDB's genre names. It is empty when TMDB lists none or does not answer.", resp: seriesDetailsJson },
+  { id: "series-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}", desc: "Series details with seasons.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected and exactly one library item has this TMDB id. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. Adding and changing a show never return it. genres lists TMDB's genre names. It is empty when TMDB lists none or does not answer. creators lists TMDB's creator names. It is left out when TMDB lists none or does not answer.", resp: seriesDetailsJson },
   { id: "series-update", group: "TV Series", method: "PATCH", path: "/api/v1/series/{id}", desc: "Change state or pin the show.", body: `{
   "state": "watching",
   "pinned": true
 }` },
   { id: "series-delete", group: "TV Series", method: "DELETE", path: "/api/v1/series/{id}", desc: "Remove the show from the library.", note: "With your Jellyfin account connected, the show and each of its matched episodes are also marked unplayed in Jellyfin, whatever its state was. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
   { id: "season-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}", desc: "Season details and episodes.", note: "An episode's jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: seasonDetailsJson },
-  { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear.", resp: episodeDetailsJson },
+  { id: "episode-get", group: "TV Series", method: "GET", path: "/api/v1/series/{id}/season/{seasonNumber}/episode/{episodeNumber}", desc: "Single episode details.", note: "jellyfinId is the matching item in your Jellyfin library. It appears when your Jellyfin account is connected, the show matches one library item and that show holds exactly one episode with this season and episode number. Without that, or when Jellyfin does not answer, the field is left out. A new library item can take up to 10 minutes to appear. directors lists TMDB's director names. It is left out when TMDB lists none.", resp: episodeDetailsJson },
 
   { id: "progress-get", group: "Progress", method: "GET", path: "/api/v1/series/{id}/progress", desc: "Watched seasons and episodes for a show." },
   { id: "show-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/watched", desc: "Mark a show watched. Ids come from the URL, and the body carries the rows to write.", note: "Only the seasons and episodes you list are recorded, so a body without them marks nothing. The example lists two episodes of season one; a real client sends all nine, and every other season too. With your Jellyfin account connected, a mark that changes your watched episodes also marks the show and each of its matched episodes played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped.", body: `{

@@ -152,6 +152,7 @@ func Test_TransformMovieDetails(t *testing.T) {
 				Runtime:     139,
 				Rating:      8.4,
 				Genres:      []string{"Drama", "Thriller"},
+				Directors:   []string{"Director A", "Director B"},
 				Credits: []CreditItem{
 					{Id: 3, ProfilePath: "/d.jpg", Name: "Director A", Description: "Director"},
 					{Id: 1, ProfilePath: "/a.jpg", Name: "Actor A", Description: "Narrator"},
@@ -177,7 +178,35 @@ func Test_TransformMovieDetails(t *testing.T) {
 				Id:              1,
 				Title:           "Untagged Movie",
 				Genres:          []string{},
+				Directors:       []string{},
 				Credits:         []CreditItem{},
+				Recommendations: []RecommendationItem{},
+				Videos:          []VideoItem{},
+			},
+		},
+		{
+			name: "Lists a director without a photo and a repeated director once",
+			movie: &MovieDetails{
+				Id:    2,
+				Title: "Two Directors",
+				Credits: Credits{
+					Crew: []PersonCrew{
+						{Person: Person{Id: 9, Name: "With Photo", ProfilePath: "/p.jpg"}, Job: TMDBJobDirector},
+						{Person: Person{Id: 8, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 8, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 11, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 10, Name: "Editor", ProfilePath: "/e.jpg"}, Job: "Editor"},
+					},
+				},
+			},
+			expected: &MovieResponse{
+				Id:        2,
+				Title:     "Two Directors",
+				Genres:    []string{},
+				Directors: []string{"With Photo", "No Photo", "No Photo"},
+				Credits: []CreditItem{
+					{Id: 9, ProfilePath: "/p.jpg", Name: "With Photo", Description: "Director"},
+				},
 				Recommendations: []RecommendationItem{},
 				Videos:          []VideoItem{},
 			},
@@ -218,6 +247,7 @@ func Test_TransformTvDetails(t *testing.T) {
 				SeasonsCount:  8,
 				EpisodesCount: 73,
 				Genres:        []Genre{{Id: 18, Name: "Drama"}, {Id: 10765, Name: "Sci-Fi & Fantasy"}},
+				CreatedBy:     []Person{{Id: 20, Name: "Creator A"}, {Id: 21, Name: "Creator B"}},
 				Credits: Credits{
 					Cast: []PersonCast{
 						{Person: Person{Id: 1, Name: "Actor A", ProfilePath: "/a.jpg"}, Character: "Jon Snow"},
@@ -262,6 +292,7 @@ func Test_TransformTvDetails(t *testing.T) {
 				SeasonsCount:  8,
 				EpisodesCount: 73,
 				Genres:        []string{"Drama", "Sci-Fi & Fantasy"},
+				Creators:      []string{"Creator A", "Creator B"},
 				Credits: []CreditItem{
 					{Id: 3, ProfilePath: "/d.jpg", Name: "Director A", Description: "Director"},
 					{Id: 1, ProfilePath: "/a.jpg", Name: "Actor A", Description: "Jon Snow"},
@@ -291,6 +322,7 @@ func Test_TransformTvDetails(t *testing.T) {
 				Id:              1,
 				Title:           "Empty Show",
 				Genres:          []string{},
+				Creators:        []string{},
 				Credits:         []CreditItem{},
 				Recommendations: []RecommendationItem{},
 				Videos:          []VideoItem{},
@@ -408,13 +440,14 @@ func Test_TransformEpisodeDetails(t *testing.T) {
 				},
 			},
 			expected: &EpisodeResponse{
-				Id:       100,
-				Title:    "Winter Is Coming",
-				Number:   1,
-				Runtime:  0,
-				Overview: "Ep1",
-				Rating:   8.1,
-				AirDate:  "2011-04-17",
+				Id:        100,
+				Title:     "Winter Is Coming",
+				Number:    1,
+				Runtime:   0,
+				Overview:  "Ep1",
+				Rating:    8.1,
+				AirDate:   "2011-04-17",
+				Directors: []string{"Director A"},
 				Credits: []CreditItem{
 					{Id: 3, ProfilePath: "/d.jpg", Name: "Director A", Description: "Director"},
 					{Id: 1, ProfilePath: "/a.jpg", Name: "Actor A", Description: "Jon Snow"},
@@ -425,6 +458,31 @@ func Test_TransformEpisodeDetails(t *testing.T) {
 			},
 		},
 		{
+			name: "Lists a director without a photo and a repeated director once",
+			episode: &EpisodeDetails{
+				ID:   300,
+				Name: "Two Directors",
+				Credits: Credits{
+					Crew: []PersonCrew{
+						{Person: Person{Id: 9, Name: "With Photo", ProfilePath: "/p.jpg"}, Job: TMDBJobDirector},
+						{Person: Person{Id: 8, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 8, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 11, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 10, Name: "Editor", ProfilePath: "/e.jpg"}, Job: "Editor"},
+					},
+				},
+			},
+			expected: &EpisodeResponse{
+				Id:        300,
+				Title:     "Two Directors",
+				Directors: []string{"With Photo", "No Photo", "No Photo"},
+				Credits: []CreditItem{
+					{Id: 9, ProfilePath: "/p.jpg", Name: "With Photo", Description: "Director"},
+				},
+				Videos: []VideoItem{},
+			},
+		},
+		{
 			name: "Empty credits and videos produce empty slices",
 			episode: &EpisodeDetails{
 				ID:      200,
@@ -432,11 +490,12 @@ func Test_TransformEpisodeDetails(t *testing.T) {
 				Runtime: 55,
 			},
 			expected: &EpisodeResponse{
-				Id:      200,
-				Title:   "The Kingsroad",
-				Runtime: 55,
-				Credits: []CreditItem{},
-				Videos:  []VideoItem{},
+				Id:        200,
+				Title:     "The Kingsroad",
+				Runtime:   55,
+				Directors: []string{},
+				Credits:   []CreditItem{},
+				Videos:    []VideoItem{},
 			},
 		},
 	}

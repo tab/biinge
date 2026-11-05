@@ -197,7 +197,7 @@ func Test_Client_FetchTvDetails(t *testing.T) {
 		{
 			name:       "Success",
 			statusCode: http.StatusOK,
-			body:       `{"id":1399,"name":"Game of Thrones","overview":"desc","poster_path":"/poster.jpg","status":"Ended","imdb_id":"tt0944947","first_air_date":"2011-04-17","vote_average":9.2,"genres":[{"id":18,"name":"Drama"}]}`,
+			body:       `{"id":1399,"name":"Game of Thrones","overview":"desc","poster_path":"/poster.jpg","status":"Ended","imdb_id":"tt0944947","first_air_date":"2011-04-17","vote_average":9.2,"genres":[{"id":18,"name":"Drama"}],"created_by":[{"id":9813,"credit_id":"5256c8c219c2956ff6046e77","name":"David Benioff","gender":2,"profile_path":null}]}`,
 			expected: &TvDetails{
 				Id:          1399,
 				Title:       "Game of Thrones",
@@ -208,6 +208,7 @@ func Test_Client_FetchTvDetails(t *testing.T) {
 				ReleaseDate: "2011-04-17",
 				VoteAverage: 9.2,
 				Genres:      []Genre{{Id: 18, Name: "Drama"}},
+				CreatedBy:   []Person{{Id: 9813, Name: "David Benioff"}},
 			},
 		},
 		{

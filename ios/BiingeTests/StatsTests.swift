@@ -183,7 +183,7 @@ struct StatsTests {
         (7 * 1440, "1w 0d"),
         (13 * 1440 + 7 * 60, "1w 6d 7h"),
         (25 * 1440, "3w 4d"),
-    ])
+    ] as [(Int, String)])
     func durationsReadInTheLargestUnits(minutes: Int, expected: String) {
         #expect(AccountStats.duration(minutes) == expected)
     }
@@ -225,7 +225,7 @@ struct StatsTests {
         (35 * 60, 40),
         (460 * 60, 500),
         (801 * 60, 1000),
-    ])
+    ] as [(Int, Int)])
     func theChartTopSnapsToAStepWithAWholeHalf(tallest: Int, expected: Int) {
         let buckets = [AccountStats.Bucket(date: "2026-11-02", movieMinutes: tallest / 2, seriesMinutes: tallest - tallest / 2)]
 

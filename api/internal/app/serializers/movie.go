@@ -51,6 +51,7 @@ type MovieDetailsSerializer struct {
 	Runtime         int                        `json:"runtime,omitempty"`
 	Rating          float64                    `json:"rating,omitempty"`
 	Genres          []string                   `json:"genres"`
+	Directors       []string                   `json:"directors,omitempty"`
 	Credits         []PersonSerializer         `json:"credits"`
 	Recommendations []RecommendationSerializer `json:"recommendations"`
 	Videos          []VideoSerializer          `json:"videos"`

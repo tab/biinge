@@ -119,6 +119,24 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 		genres = append(genres, genre.Name)
 	}
 
+	// every director counts here, photo or not (the credits row keeps only those with a photo)
+	directorCrew := make([]PersonCrew, 0)
+
+	for _, crew := range movie.Credits.Crew {
+		if crew.Job == TMDBJobDirector {
+			directorCrew = append(directorCrew, crew)
+		}
+	}
+
+	uniqueDirectors := UniqById(directorCrew, func(c PersonCrew) int {
+		return c.Id
+	})
+
+	directors := make([]string, 0, len(uniqueDirectors))
+	for _, director := range uniqueDirectors {
+		directors = append(directors, director.Name)
+	}
+
 	return &MovieResponse{
 		Id:              movie.Id,
 		Title:           movie.Title,
@@ -130,6 +148,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 		Runtime:         movie.Runtime,
 		Rating:          movie.VoteAverage,
 		Genres:          genres,
+		Directors:       directors,
 		Credits:         uniqueCredits,
 		Recommendations: recommendations,
 		Videos:          videos,
@@ -364,6 +383,11 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 		genres = append(genres, genre.Name)
 	}
 
+	creators := make([]string, 0, len(tvShow.CreatedBy))
+	for _, creator := range tvShow.CreatedBy {
+		creators = append(creators, creator.Name)
+	}
+
 	seasons := make([]SeasonSummaryItem, 0, len(tvShow.Seasons))
 	for _, season := range tvShow.Seasons {
 		seasons = append(seasons, SeasonSummaryItem{
@@ -388,6 +412,7 @@ func TransformTvDetails(tvShow *TvDetails) *TvResponse {
 		SeasonsCount:    tvShow.SeasonsCount,
 		EpisodesCount:   tvShow.EpisodesCount,
 		Genres:          genres,
+		Creators:        creators,
 		Credits:         uniqueCredits,
 		Recommendations: recommendations,
 		Videos:          videos,

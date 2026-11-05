@@ -169,6 +169,7 @@ type MovieResponse struct {
 	Runtime         int                  `json:"runtime"`
 	Rating          float64              `json:"rating"`
 	Genres          []string             `json:"genres"`
+	Directors       []string             `json:"directors"`
 	Credits         []CreditItem         `json:"credits"`
 	Recommendations []RecommendationItem `json:"recommendations"`
 	Videos          []VideoItem          `json:"videos"`
@@ -215,6 +216,7 @@ type TvDetails struct {
 	SeasonsCount    int             `json:"number_of_seasons"`
 	EpisodesCount   int             `json:"number_of_episodes"`
 	Genres          []Genre         `json:"genres"`
+	CreatedBy       []Person        `json:"created_by"`
 	Credits         Credits         `json:"credits"`
 	Recommendations Recommendations `json:"recommendations"`
 	Videos          Videos          `json:"videos"`
@@ -233,6 +235,7 @@ type TvResponse struct {
 	SeasonsCount    int                  `json:"number_of_seasons"`
 	EpisodesCount   int                  `json:"number_of_episodes"`
 	Genres          []string             `json:"genres"`
+	Creators        []string             `json:"creators"`
 	Credits         []CreditItem         `json:"credits"`
 	Recommendations []RecommendationItem `json:"recommendations"`
 	Videos          []VideoItem          `json:"videos"`

@@ -292,7 +292,7 @@ func (l *library) setPlayed(ctx context.Context, userId uuid.UUID, target Played
 			return
 		}
 
-		details, err := cache.Fetch(ctx, l.cache, l.log, fmt.Sprintf("tmdb:v2:tv:%d", target.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
+		details, err := cache.Fetch(ctx, l.cache, l.log, fmt.Sprintf("tmdb:v3:tv:%d", target.TmdbId), cache.DetailsTTL, func() (*tmdb.TvDetails, error) {
 			return l.tmdb.FetchTvDetails(ctx, target.TmdbId)
 		})
 		if err != nil {

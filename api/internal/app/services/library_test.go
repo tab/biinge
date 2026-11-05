@@ -1150,6 +1150,6 @@ func Test_Library_SetPlayed_TmdbCache(t *testing.T) {
 	writer.setPlayed(ctx, userId, target)
 
 	// the keys and TTL TmdbProvider uses, so the two share entries
-	assert.Equal(t, cache.DetailsTTL, store.ttls["tmdb:v2:tv:1399"])
+	assert.Equal(t, cache.DetailsTTL, store.ttls["tmdb:v3:tv:1399"])
 	assert.Equal(t, cache.DetailsTTL, store.ttls["tmdb:v1:tv:1399:season:1"])
 }

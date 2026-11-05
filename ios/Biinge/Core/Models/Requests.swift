@@ -55,6 +55,12 @@ struct UpdateAccountBody: Encodable, Sendable {
     }
 }
 
+/// The Jellyfin username and password the API signs in with once (it never stores the password)
+struct JellyfinConnectionRequest: Encodable, Sendable {
+    let username: String
+    let password: String
+}
+
 // Progress payloads carry metadata so the server can materialize series/season/episode rows
 
 struct ProgressSeries: Encodable, Sendable {
@@ -84,6 +90,20 @@ struct ProgressEpisodeMeta: Encodable, Sendable {
     let posterPath: String
     let runtime: Int
     let airDate: String
+}
+
+/// A season with its episodes, inside a whole-show mark
+struct ProgressSeason: Encodable, Sendable {
+    let id: Int
+    let title: String
+    let number: Int
+    let episodesCount: Int
+    let episodes: [ProgressEpisode]
+}
+
+struct MarkSeriesBody: Encodable, Sendable {
+    let series: ProgressSeries
+    let seasons: [ProgressSeason]
 }
 
 struct MarkSeasonBody: Encodable, Sendable {

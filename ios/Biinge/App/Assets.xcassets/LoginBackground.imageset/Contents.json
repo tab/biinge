@@ -14,6 +14,26 @@
       "filename" : "background@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
+    },
+    {
+      "filename" : "background-tv.jpg",
+      "idiom" : "tv",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "background-tv@2x.jpg",
+      "idiom" : "tv",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "background-mac.jpg",
+      "idiom" : "mac",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "background-mac@2x.jpg",
+      "idiom" : "mac",
+      "scale" : "2x"
     }
   ],
   "info" : {

@@ -3,16 +3,18 @@ import Foundation
 /// Thread-safe HTTP client for the biinge API; refreshes the token pair once on 401
 actor APIClient {
     private let baseURL: URL
-    private let authManager: AuthManager
+    /// The session the requests authenticate with (the stores read it to drop a deferred write once its session ends)
+    let authManager: AuthManager
     private let session: URLSession
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
-    init(baseURL: URL, authManager: AuthManager) {
+    /// Creates the client (tests pass a configuration with a stub URL protocol)
+    init(baseURL: URL, authManager: AuthManager, configuration: URLSessionConfiguration = .default) {
         self.baseURL = baseURL
         self.authManager = authManager
         // fail fast instead of the 60s default so an unreachable server errors in seconds
-        let config = URLSessionConfiguration.default
+        let config = configuration
         config.timeoutIntervalForRequest = 15
         config.timeoutIntervalForResource = 30
         self.session = URLSession(configuration: config)
@@ -50,12 +52,16 @@ actor APIClient {
 
     // MARK: - Jellyfin
 
-    func createJellyfinToken() async throws -> JellyfinToken {
-        try await post("/accounts/integrations/jellyfin")
+    func jellyfinConnection() async throws -> JellyfinConnectionStatus {
+        try await get("/accounts/integrations/jellyfin/connection")
     }
 
-    func revokeJellyfin() async throws {
-        try await delete("/accounts/integrations/jellyfin")
+    func connectJellyfin(_ body: JellyfinConnectionRequest) async throws -> JellyfinConnectionStatus {
+        try await send("PUT", "/accounts/integrations/jellyfin/connection", body: body)
+    }
+
+    func disconnectJellyfin() async throws {
+        try await delete("/accounts/integrations/jellyfin/connection")
     }
 
     // MARK: - Search & trending
@@ -143,12 +149,12 @@ actor APIClient {
         try await get("/series/\(id)")
     }
 
-    func seasonDetails(showId: Int, season: Int) async throws -> SeasonDetails {
-        try await get("/series/\(showId)/season/\(season)")
+    func seasonDetails(seriesId: Int, season: Int) async throws -> SeasonDetails {
+        try await get("/series/\(seriesId)/season/\(season)")
     }
 
-    func episodeDetails(showId: Int, season: Int, episode: Int) async throws -> EpisodeDetails {
-        try await get("/series/\(showId)/season/\(season)/episode/\(episode)")
+    func episodeDetails(seriesId: Int, season: Int, episode: Int) async throws -> EpisodeDetails {
+        try await get("/series/\(seriesId)/season/\(season)/episode/\(episode)")
     }
 
     func gameDetails(id: Int) async throws -> GameDetails {
@@ -169,8 +175,8 @@ actor APIClient {
         try await send("PATCH", "/movies/\(id)", body: body)
     }
 
-    func deleteMovie(id: Int) async throws {
-        try await delete("/movies/\(id)")
+    func deleteMovie(id: Int, session: Int) async throws {
+        try await delete("/movies/\(id)", session: session)
     }
 
     // MARK: - Series mutations
@@ -183,8 +189,8 @@ actor APIClient {
         try await send("PATCH", "/series/\(id)", body: body)
     }
 
-    func deleteSeries(id: Int) async throws {
-        try await delete("/series/\(id)")
+    func deleteSeries(id: Int, session: Int) async throws {
+        try await delete("/series/\(id)", session: session)
     }
 
     // MARK: - Game mutations
@@ -197,30 +203,34 @@ actor APIClient {
         try await send("PATCH", "/games/\(id)", body: body)
     }
 
-    func deleteGame(id: Int) async throws {
-        try await delete("/games/\(id)")
+    func deleteGame(id: Int, session: Int) async throws {
+        try await delete("/games/\(id)", session: session)
     }
 
     // MARK: - Progress
 
-    func progress(showId: Int) async throws -> WatchProgress {
-        try await get("/series/\(showId)/progress")
+    func progress(seriesId: Int) async throws -> WatchProgress {
+        try await get("/series/\(seriesId)/progress")
     }
 
-    func markSeason(showId: Int, seasonId: Int, _ body: MarkSeasonBody) async throws -> WatchProgress {
-        try await send("POST", "/series/\(showId)/seasons/\(seasonId)/watched", body: body)
+    func markSeries(seriesId: Int, _ body: MarkSeriesBody) async throws -> WatchProgress {
+        try await send("POST", "/series/\(seriesId)/watched", body: body)
     }
 
-    func unmarkSeason(showId: Int, seasonId: Int) async throws -> WatchProgress {
-        try await deleteReturning("/series/\(showId)/seasons/\(seasonId)/watched")
+    func markSeason(seriesId: Int, seasonId: Int, _ body: MarkSeasonBody) async throws -> WatchProgress {
+        try await send("POST", "/series/\(seriesId)/seasons/\(seasonId)/watched", body: body)
     }
 
-    func markEpisode(showId: Int, seasonId: Int, episodeId: Int, _ body: MarkEpisodeBody) async throws -> WatchProgress {
-        try await send("POST", "/series/\(showId)/seasons/\(seasonId)/episodes/\(episodeId)/watched", body: body)
+    func unmarkSeason(seriesId: Int, seasonId: Int) async throws -> WatchProgress {
+        try await deleteReturning("/series/\(seriesId)/seasons/\(seasonId)/watched")
     }
 
-    func unmarkEpisode(showId: Int, seasonId: Int, episodeId: Int) async throws -> WatchProgress {
-        try await deleteReturning("/series/\(showId)/seasons/\(seasonId)/episodes/\(episodeId)/watched")
+    func markEpisode(seriesId: Int, seasonId: Int, episodeId: Int, _ body: MarkEpisodeBody) async throws -> WatchProgress {
+        try await send("POST", "/series/\(seriesId)/seasons/\(seasonId)/episodes/\(episodeId)/watched", body: body)
+    }
+
+    func unmarkEpisode(seriesId: Int, seasonId: Int, episodeId: Int) async throws -> WatchProgress {
+        try await deleteReturning("/series/\(seriesId)/seasons/\(seasonId)/episodes/\(episodeId)/watched")
     }
 
     // MARK: - Generic verbs
@@ -242,15 +252,10 @@ actor APIClient {
         return try decode(data)
     }
 
-    func post<Response: Decodable & Sendable>(_ path: String) async throws -> Response {
-        let request = makeRequest("POST", path, query: [], body: nil)
-        let data = try await perform(request, authenticated: true, retried: false)
-        return try decode(data)
-    }
-
-    func delete(_ path: String) async throws {
+    /// Sends a DELETE, bound to `session` when one is given (a value of `AuthManager.sessionsEnded`)
+    func delete(_ path: String, session: Int? = nil) async throws {
         let request = makeRequest("DELETE", path, query: [], body: nil)
-        _ = try await perform(request, authenticated: true, retried: false)
+        _ = try await perform(request, authenticated: true, retried: false, authSession: session)
     }
 
     func deleteReturning<Response: Decodable & Sendable>(_ path: String) async throws -> Response {
@@ -261,13 +266,13 @@ actor APIClient {
 
     // MARK: - Request plumbing
 
-    /// Client identifier sent on every request, e.g. "Biinge/1.0.0 (build 12; iOS 26.0.0)"
-    private static let userAgent: String = {
+    /// Client identifier sent on every request, e.g. "Biinge/1.0.0 (build 12; iOS 26.0.0)", naming the platform it runs on
+    static let userAgent: String = {
         let info = Bundle.main.infoDictionary
         let version = info?["CFBundleShortVersionString"] as? String ?? "0"
         let build = info?["CFBundleVersion"] as? String ?? "0"
         let os = ProcessInfo.processInfo.operatingSystemVersion
-        return "Biinge/\(version) (build \(build); iOS \(os.majorVersion).\(os.minorVersion).\(os.patchVersion))"
+        return "Biinge/\(version) (build \(build); \(DeviceInfo.osName) \(os.majorVersion).\(os.minorVersion).\(os.patchVersion))"
     }()
 
     private func makeRequest(_ method: String, _ path: String, query: [URLQueryItem], body: Data?) -> URLRequest {
@@ -286,10 +291,16 @@ actor APIClient {
         return request
     }
 
-    private func perform(_ original: URLRequest, authenticated: Bool, retried: Bool) async throws -> Data {
+    /// Sends the request, refreshing the tokens and retrying once on 401 (a request bound to `authSession` throws unauthorized instead of sending or retrying once that session has ended)
+    private func perform(_ original: URLRequest, authenticated: Bool, retried: Bool, authSession: Int? = nil) async throws -> Data {
         var request = original
-        if authenticated, let token = await authManager.accessToken {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if authenticated {
+            // one hop reads both, so the token always belongs to the session checked
+            let (token, current) = await MainActor.run { [authManager] in (authManager.accessToken, authManager.sessionsEnded) }
+            if let authSession, authSession != current { throw APIError.unauthorized }
+            if let token {
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            }
         }
 
         let data: Data
@@ -308,8 +319,10 @@ actor APIClient {
         case 200..<300:
             return data
         case 401 where authenticated && !retried:
+            // the next account's tokens never refresh for a bound request, and the retry checks the session again after the refresh
+            if let authSession, await authManager.sessionsEnded != authSession { throw APIError.unauthorized }
             try await authManager.refreshTokens(using: self)
-            return try await perform(original, authenticated: authenticated, retried: true)
+            return try await perform(original, authenticated: authenticated, retried: true, authSession: authSession)
         case 401:
             throw APIError.unauthorized
         case 400, 422:

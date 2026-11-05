@@ -1,6 +1,6 @@
 import Foundation
 
-/// Library resources use camelCase JSON matching Swift property names, so no CodingKeys
+/// Library resources use camelCase JSON matching Swift property names, so only jellyfinId needs a CodingKey
 
 /// The shared state vocabulary: movies use want/watched, series add watching, games use want/playing/played
 enum WatchState: String, Codable, Sendable {
@@ -18,6 +18,13 @@ struct LibraryMovie: Decodable, Sendable, Identifiable, Equatable {
     let posterPath: String
     let pinned: Bool
     let state: WatchState
+    /// The user's Jellyfin item for this movie (nil unless exactly one library item matches)
+    let jellyfinID: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, posterPath, pinned, state
+        case jellyfinID = "jellyfinId"
+    }
 }
 
 struct LibrarySeries: Decodable, Sendable, Identifiable, Equatable {
@@ -28,6 +35,13 @@ struct LibrarySeries: Decodable, Sendable, Identifiable, Equatable {
     let state: WatchState
     let episodesCount: Int
     let watchedEpisodesCount: Int
+    /// The user's Jellyfin item for this series (nil unless exactly one library item matches)
+    let jellyfinID: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, posterPath, pinned, state, episodesCount, watchedEpisodesCount
+        case jellyfinID = "jellyfinId"
+    }
 
     /// Share of episodes watched across all seasons, clamped to 0...1
     var progress: Double {

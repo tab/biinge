@@ -12,9 +12,18 @@ struct TokenPair: Decodable, Sendable {
     }
 }
 
-/// A freshly generated Jellyfin token; the API shows it once and stores only its hash
-struct JellyfinToken: Decodable, Sendable {
-    let token: String
+/// The account's Jellyfin connection as the API reports it (never the Jellyfin token)
+struct JellyfinConnectionStatus: Decodable, Sendable {
+    /// This biinge instance's Jellyfin server address
+    let baseURL: String
+    let connected: Bool
+    /// The Jellyfin username, nil while not connected
+    let username: String?
+
+    enum CodingKeys: String, CodingKey {
+        case connected, username
+        case baseURL = "base_url"
+    }
 }
 
 struct User: Decodable, Sendable, Identifiable, Equatable {

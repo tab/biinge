@@ -1,22 +1,19 @@
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#endif
 
 /// Full-bleed brand artwork (login and splash) with a darkening bottom gradient
 struct BrandBackground: View {
-    // seed synchronously from the asset cache so the splash shows the artwork immediately,
-    // then upgrade to the off-thread-decoded copy in .task
-    @State private var image: UIImage? = UIImage(named: "LoginBackground")
+    /// The artwork, shown from the asset catalog at once (UIKit then swaps in a copy decoded off the main thread)
+    @State private var image = Image("LoginBackground")
 
     var body: some View {
         ZStack {
             Color.black
-
-            if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            }
-
+            image
+                .resizable()
+                .scaledToFill()
             LinearGradient(
                 colors: [.black.opacity(0), .black.opacity(0.55), .black],
                 startPoint: .top,
@@ -25,8 +22,12 @@ struct BrandBackground: View {
         }
         .ignoresSafeArea()
         .task {
+            #if canImport(UIKit)
             // pre-decode the full-screen PNG off the main thread to avoid a first-render hitch
-            image = await UIImage(named: "LoginBackground")?.byPreparingForDisplay()
+            if let decoded = await UIImage(named: "LoginBackground")?.byPreparingForDisplay() {
+                image = Image(uiImage: decoded)
+            }
+            #endif
         }
     }
 }

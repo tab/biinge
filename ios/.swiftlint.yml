@@ -72,5 +72,5 @@ large_tuple:
   error: 5
 
 function_parameter_count:
-  warning: 7        # TvStore.toggle carries a cohesive series-to-track payload
+  warning: 7        # SeriesStore.toggle carries a cohesive series-to-track payload
   error: 10

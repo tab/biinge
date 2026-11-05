@@ -1,9 +1,14 @@
 import SwiftUI
 
+/// The app's shared state (each platform's scenes come from its `*Scenes.swift`)
 @main
 struct BiingeApp: App {
-    @State private var authManager: AuthManager
-    @State private var apiClient: APIClient
+    @State var authManager: AuthManager
+    @State var apiClient: APIClient
+    @State var jellyfin = JellyfinConnection(deviceID: { JellyfinConnection.storedDeviceID() })
+    #if os(iOS)
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    #endif
 
     init() {
         Monitoring.start()
@@ -11,27 +16,22 @@ struct BiingeApp: App {
         _authManager = State(initialValue: authManager)
         _apiClient = State(initialValue: APIClient(baseURL: Config.baseURL, authManager: authManager))
     }
-
-    var body: some Scene {
-        WindowGroup {
-            RootContainer(authManager: authManager, apiClient: apiClient)
-        }
-    }
 }
 
-/// Splash while restoring the session, then the login or authenticated shell
+/// Splash while restoring the session, then the login or authenticated shell (each platform's `*Scenes.swift` supplies `shell` and `login`)
 struct RootContainer: View {
     let authManager: AuthManager
     let apiClient: APIClient
+    let jellyfin: JellyfinConnection
 
     var body: some View {
         Group {
             if authManager.isRestoring {
                 SplashView()
             } else if authManager.isAuthenticated {
-                RootView(authManager: authManager, apiClient: apiClient)
+                shell
             } else {
-                LoginView(authManager: authManager, apiClient: apiClient)
+                login
             }
         }
         .task {
@@ -39,8 +39,18 @@ struct RootContainer: View {
             #if DEBUG
             await debugAutoLoginIfNeeded()
             #endif
+            // a session that ended while the app was closed leaves no Jellyfin session on this device behind
+            // (only the device's: without a biinge token there's no API call, so the account stays connected)
+            if !authManager.isAuthenticated {
+                await jellyfin.disconnect()
+            }
         }
-        .preferredColorScheme(authManager.colorScheme)
+        .onChange(of: authManager.isAuthenticated) { _, isAuthenticated in
+            // Log out ends only this device's Jellyfin session, as the biinge token is already gone
+            if !isAuthenticated {
+                Task { await jellyfin.disconnect() }
+            }
+        }
     }
 
     #if DEBUG

@@ -32,9 +32,20 @@ struct MovieDetails: Decodable, Sendable {
     let releaseDate: String?
     let runtime: Int?
     let rating: Double?
+    /// TMDB genre names (empty when TMDB lists none)
+    let genres: [String]
+    /// TMDB director names (nil when the API omits them, as on a write response)
+    let directors: [String]?
     let credits: [CreditPerson]
     let recommendations: [Recommendation]
     let videos: [Video]
+    /// The user's Jellyfin item for this movie (nil unless exactly one library item matches)
+    let jellyfinID: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, posterPath, pinned, state, overview, status, releaseDate, runtime, rating, genres, directors, credits, recommendations, videos
+        case jellyfinID = "jellyfinId"
+    }
 }
 
 /// IGDB-sourced game detail; runtime is minutes to beat normally, runtimeCompleted minutes to reach 100%
@@ -52,11 +63,13 @@ struct GameDetails: Decodable, Sendable {
     let rating: Double?
     let genres: [String]
     let platforms: [String]
+    /// IGDB developer names (nil when the API omits them, as on a write response)
+    let developers: [String]?
     let recommendations: [Recommendation]
 
     private enum CodingKeys: String, CodingKey {
         case id, title, posterPath, pinned, state, overview, status, releaseDate
-        case runtime, runtimeCompleted, rating, genres, platforms, recommendations
+        case runtime, runtimeCompleted, rating, genres, platforms, developers, recommendations
     }
 
     // recommendations default to empty so an API that predates the field still decodes
@@ -75,6 +88,7 @@ struct GameDetails: Decodable, Sendable {
         rating = try c.decodeIfPresent(Double.self, forKey: .rating)
         genres = try c.decode([String].self, forKey: .genres)
         platforms = try c.decode([String].self, forKey: .platforms)
+        developers = try c.decodeIfPresent([String].self, forKey: .developers)
         recommendations = try c.decodeIfPresent([Recommendation].self, forKey: .recommendations) ?? []
     }
 }
@@ -100,10 +114,22 @@ struct SeriesDetails: Decodable, Sendable {
     let seasonsCount: Int?
     let episodesCount: Int?
     let rating: Double?
+    /// TMDB genre names (empty when TMDB lists none)
+    let genres: [String]
+    /// TMDB creator names (nil when the API omits them, as on a write response)
+    var creators: [String]?
     let credits: [CreditPerson]
     let recommendations: [Recommendation]
     let videos: [Video]
     let seasons: [SeasonSummary]
+    /// The user's Jellyfin item for this series (nil unless exactly one library item matches)
+    let jellyfinID: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, posterPath, pinned, state, overview, status, releaseDate, seasonsCount, episodesCount, rating, genres, creators
+        case credits, recommendations, videos, seasons
+        case jellyfinID = "jellyfinId"
+    }
 }
 
 extension SeriesDetails {
@@ -128,9 +154,12 @@ struct EpisodeSummary: Decodable, Sendable, Identifiable {
     let rating: Double?
     let airDate: String?
     let watched: Bool
+    /// The user's Jellyfin item for this episode (nil unless exactly one library item matches)
+    let jellyfinID: String?
 
     private enum CodingKeys: String, CodingKey {
         case id, title, number, posterPath, runtime, overview, rating, airDate, watched
+        case jellyfinID = "jellyfinId"
     }
 
     // watched defaults to false so an API that predates the field still decodes
@@ -145,6 +174,7 @@ struct EpisodeSummary: Decodable, Sendable, Identifiable {
         rating = try c.decodeIfPresent(Double.self, forKey: .rating)
         airDate = try c.decodeIfPresent(String.self, forKey: .airDate)
         watched = try c.decodeIfPresent(Bool.self, forKey: .watched) ?? false
+        jellyfinID = try c.decodeIfPresent(String.self, forKey: .jellyfinID)
     }
 }
 
@@ -186,11 +216,16 @@ struct EpisodeDetails: Decodable, Sendable {
     let rating: Double?
     let airDate: String?
     let watched: Bool
+    /// TMDB director names (nil when the API omits them)
+    let directors: [String]?
     let credits: [CreditPerson]
     let videos: [Video]
+    /// The user's Jellyfin item for this episode (nil unless exactly one library item matches)
+    let jellyfinID: String?
 
     private enum CodingKeys: String, CodingKey {
-        case id, title, number, posterPath, runtime, overview, rating, airDate, watched, credits, videos
+        case id, title, number, posterPath, runtime, overview, rating, airDate, watched, directors, credits, videos
+        case jellyfinID = "jellyfinId"
     }
 
     // watched defaults to false so an API that predates the field still decodes
@@ -205,8 +240,10 @@ struct EpisodeDetails: Decodable, Sendable {
         rating = try c.decodeIfPresent(Double.self, forKey: .rating)
         airDate = try c.decodeIfPresent(String.self, forKey: .airDate)
         watched = try c.decodeIfPresent(Bool.self, forKey: .watched) ?? false
+        directors = try c.decodeIfPresent([String].self, forKey: .directors)
         credits = try c.decode([CreditPerson].self, forKey: .credits)
         videos = try c.decode([Video].self, forKey: .videos)
+        jellyfinID = try c.decodeIfPresent(String.self, forKey: .jellyfinID)
     }
 }
 
@@ -218,7 +255,7 @@ struct MovieCredit: Decodable, Sendable, Identifiable {
     let type: String?
 }
 
-struct TvCredit: Decodable, Sendable, Identifiable {
+struct SeriesCredit: Decodable, Sendable, Identifiable {
     let id: Int
     let title: String
     let posterPath: String
@@ -229,25 +266,28 @@ struct PersonDetails: Decodable, Sendable {
     let id: Int
     let name: String
     let birthday: String?
+    /// The TMDB biography (nil when the API omits an empty one)
+    let biography: String?
     let profilePath: String
     let gender: Int
     let movieCredits: [MovieCredit]
-    let tvCredits: [TvCredit]
+    let seriesCredits: [SeriesCredit]
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, birthday, profilePath, gender, movieCredits, tvCredits
+        case id, name, birthday, biography, profilePath, gender, movieCredits, seriesCredits
     }
 
-    // Credits default to empty so an API without tvCredits (not yet deployed) still decodes
+    // Credits default to empty so an API without seriesCredits (not yet deployed) still decodes
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         birthday = try container.decodeIfPresent(String.self, forKey: .birthday)
+        biography = try container.decodeIfPresent(String.self, forKey: .biography)
         profilePath = try container.decode(String.self, forKey: .profilePath)
         gender = try container.decode(Int.self, forKey: .gender)
         movieCredits = try container.decodeIfPresent([MovieCredit].self, forKey: .movieCredits) ?? []
-        tvCredits = try container.decodeIfPresent([TvCredit].self, forKey: .tvCredits) ?? []
+        seriesCredits = try container.decodeIfPresent([SeriesCredit].self, forKey: .seriesCredits) ?? []
     }
 }
 
@@ -265,7 +305,7 @@ struct WatchProgress: Decodable, Sendable {
 /// Local approximations of the server's derived progress, replaced by the server response
 extension WatchProgress {
     /// TMDB status of a show still airing; never derived "watched" (mirrors the server)
-    static let tvInProductionStatus = "Returning Series"
+    static let seriesInProductionStatus = "Returning Series"
 
     /// Progress after toggling one episode; a known `seasonEpisodes` list also flips season completeness
     func togglingEpisode(
@@ -274,7 +314,7 @@ extension WatchProgress {
         seasonId: Int,
         seasonEpisodes: [EpisodeSummary] = [],
         totalSeasons: Int? = nil,
-        showStatus: String? = nil
+        seriesStatus: String? = nil
     ) -> WatchProgress {
         var episodes = Set(watchedEpisodes)
         var seasons = Set(watchedSeasons)
@@ -287,7 +327,7 @@ extension WatchProgress {
             episodes.remove(episodeId)
             seasons.remove(seasonId)
         }
-        return replacing(seasons: seasons, episodes: episodes, totalSeasons: totalSeasons, showStatus: showStatus)
+        return replacing(seasons: seasons, episodes: episodes, totalSeasons: totalSeasons, seriesStatus: seriesStatus)
     }
 
     /// Progress after marking/unmarking a whole season
@@ -296,7 +336,7 @@ extension WatchProgress {
         episodeIds: [Int],
         watched: Bool,
         totalSeasons: Int? = nil,
-        showStatus: String? = nil
+        seriesStatus: String? = nil
     ) -> WatchProgress {
         var episodes = Set(watchedEpisodes)
         var seasons = Set(watchedSeasons)
@@ -307,17 +347,17 @@ extension WatchProgress {
             episodes.subtract(episodeIds)
             seasons.remove(seasonId)
         }
-        return replacing(seasons: seasons, episodes: episodes, totalSeasons: totalSeasons, showStatus: showStatus)
+        return replacing(seasons: seasons, episodes: episodes, totalSeasons: totalSeasons, seriesStatus: seriesStatus)
     }
 
-    private func replacing(seasons: Set<Int>, episodes: Set<Int>, totalSeasons: Int?, showStatus: String?) -> WatchProgress {
+    private func replacing(seasons: Set<Int>, episodes: Set<Int>, totalSeasons: Int?, seriesStatus: String?) -> WatchProgress {
         WatchProgress(
             id: id,
             state: derivedState(
                 watchedEpisodesCount: episodes.count,
                 watchedSeasonsCount: seasons.count,
                 totalSeasons: totalSeasons,
-                status: showStatus
+                status: seriesStatus
             ),
             trackedState: trackedState,
             watchedSeasons: Array(seasons),
@@ -328,7 +368,7 @@ extension WatchProgress {
     /// Mirrors the server's deriveSeriesState: watched once every regular season is watched, not by episode totals
     private func derivedState(watchedEpisodesCount: Int, watchedSeasonsCount: Int, totalSeasons: Int?, status: String?) -> WatchState {
         if watchedEpisodesCount == 0 { return trackedState ?? .none }
-        if let totalSeasons, totalSeasons > 0, watchedSeasonsCount >= totalSeasons, status != Self.tvInProductionStatus {
+        if let totalSeasons, totalSeasons > 0, watchedSeasonsCount >= totalSeasons, status != Self.seriesInProductionStatus {
             return .watched
         }
         return .watching

@@ -11,9 +11,9 @@ struct WatchProgressTests {
         WatchProgress(id: 1, state: state, trackedState: trackedState, watchedSeasons: seasons, watchedEpisodes: episodes)
     }
 
-    @Test func finishingEverySeasonMarksEndedShowWatched() {
+    @Test func finishingEverySeasonMarksEndedSeriesWatched() {
         // the episode total drifts far above the two real episodes; season completeness must still win
-        let progress = base().togglingSeason(id: 10, episodeIds: [1, 2], watched: true, totalSeasons: 1, showStatus: "Ended")
+        let progress = base().togglingSeason(id: 10, episodeIds: [1, 2], watched: true, totalSeasons: 1, seriesStatus: "Ended")
 
         #expect(progress.state == .watched)
         #expect(progress.watchedSeasons == [10])
@@ -21,14 +21,14 @@ struct WatchProgressTests {
     }
 
     @Test func partialSeasonStaysWatching() {
-        let progress = base().togglingEpisode(id: 1, watched: true, seasonId: 10, totalSeasons: 2, showStatus: "Ended")
+        let progress = base().togglingEpisode(id: 1, watched: true, seasonId: 10, totalSeasons: 2, seriesStatus: "Ended")
 
         #expect(progress.state == .watching)
     }
 
     @Test func returningSeriesNeverDerivesWatched() {
         let progress = base().togglingSeason(
-            id: 10, episodeIds: [1, 2], watched: true, totalSeasons: 1, showStatus: WatchProgress.tvInProductionStatus
+            id: 10, episodeIds: [1, 2], watched: true, totalSeasons: 1, seriesStatus: WatchProgress.seriesInProductionStatus
         )
 
         #expect(progress.state == .watching)
@@ -36,7 +36,7 @@ struct WatchProgressTests {
 
     @Test func unmarkingLastEpisodeRevertsToTrackedState() {
         let progress = base(state: .watching, trackedState: .want, episodes: [1])
-            .togglingEpisode(id: 1, watched: false, seasonId: 10, totalSeasons: 1, showStatus: "Ended")
+            .togglingEpisode(id: 1, watched: false, seasonId: 10, totalSeasons: 1, seriesStatus: "Ended")
 
         #expect(progress.state == .want)
         #expect(progress.watchedEpisodes.isEmpty)
@@ -44,19 +44,19 @@ struct WatchProgressTests {
 
     @Test func unmarkingLastEpisodeUntracksWhenNothingWasTracked() {
         let progress = base(state: .watching, episodes: [1])
-            .togglingEpisode(id: 1, watched: false, seasonId: 10, totalSeasons: 1, showStatus: "Ended")
+            .togglingEpisode(id: 1, watched: false, seasonId: 10, totalSeasons: 1, seriesStatus: "Ended")
 
         #expect(progress.state == .none)
     }
 
     @Test func togglingSeasonAddsThenRemovesItsEpisodes() {
-        let marked = base().togglingSeason(id: 10, episodeIds: [1, 2, 3], watched: true, totalSeasons: 2, showStatus: "Ended")
+        let marked = base().togglingSeason(id: 10, episodeIds: [1, 2, 3], watched: true, totalSeasons: 2, seriesStatus: "Ended")
 
         #expect(marked.watchedSeasons == [10])
         #expect(Set(marked.watchedEpisodes) == [1, 2, 3])
         #expect(marked.state == .watching)
 
-        let cleared = marked.togglingSeason(id: 10, episodeIds: [1, 2, 3], watched: false, totalSeasons: 2, showStatus: "Ended")
+        let cleared = marked.togglingSeason(id: 10, episodeIds: [1, 2, 3], watched: false, totalSeasons: 2, seriesStatus: "Ended")
 
         #expect(cleared.watchedSeasons.isEmpty)
         #expect(cleared.watchedEpisodes.isEmpty)

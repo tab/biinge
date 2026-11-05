@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block"><script src="biinge-theme.js"></script><style>@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}body{margin:0;background:#141418;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased}a{color:#f4f4f2;text-decoration:none}a:hover{color:#eec01e}</style></helmet>
+<div style="min-width:1680px;padding:56px 64px 160px;display:flex;flex-direction:column;gap:64px;background:#141418;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;">
+
+<div style="display:flex;flex-direction:column;gap:14px;max-width:1100px;">
+  <div style="font-size:14px;font-weight:600;color:rgba(244,244,242,.5);">Biinge for iPhone, macOS and Apple TV</div>
+  <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:56px;letter-spacing:-.035em;line-height:1;">Design system and components</div>
+  <div style="font-size:17px;line-height:1.55;color:rgba(244,244,242,.7);max-width:880px;text-wrap:pretty;">Shared foundations first, then each platform’s components at real size, lifted from the live prototypes. Use the Tweaks panel to switch the platform boards to the light theme or hide the spec lines.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:13.5px;">
+    <a href="#foundations" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">Foundations</a>
+    <a href="#ios" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">iOS</a>
+    <a href="#macos" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">macOS</a>
+    <a href="#tvos" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">tvOS</a>
+  </div>
+</div>
+
+<section id="foundations" data-screen-label="Foundations" style="display:flex;flex-direction:column;gap:28px;padding-top:48px;border-top:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:880px;">
+    <div style="display:flex;align-items:center;gap:10px;"><span style="font:600 12px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">01</span><span style="font-size:14px;font-weight:600;color:rgba(244,244,242,.5);">All platforms</span></div>
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;line-height:1;">Foundations</div>
+    <div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.65);text-wrap:pretty;">Dark is the source theme; light values are derived from it (see <a href="Biinge%20Themes.dc.html" style="text-decoration:underline;">Biinge Themes</a>). Scrims, badges and controls that sit on artwork or video keep their dark values in both themes. There is no brand accent colour: white carries emphasis.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;align-items:start;">
+
+    <div style="grid-column:span 7;display:flex;flex-direction:column;gap:20px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Colour tokens · dark / light</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">Theme.swift</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 22px;">
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#101014;"></div><div style="width:28px;height:36px;background:#f3f3f1;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">bg</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#101014 · #f3f3f1</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#17171d;"></div><div style="width:28px;height:36px;background:#eaeae7;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">surface</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#17171d · #eaeae7</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#1b1b20;"></div><div style="width:28px;height:36px;background:#ffffff;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">surface-raised</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#1b1b20 · #ffffff</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#282828;"></div><div style="width:28px;height:36px;background:#deded9;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">placeholder</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#282828 · #deded9</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#f4f4f2;"></div><div style="width:28px;height:36px;background:#16161a;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">text</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#f4f4f2 · #16161a</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#91919a;"></div><div style="width:28px;height:36px;background:#62626a;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">text-secondary</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#91919a · #62626a</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#64646d;"></div><div style="width:28px;height:36px;background:#8c8c94;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">text-tertiary</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#64646d · #8c8c94</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#34c46f;"></div><div style="width:28px;height:36px;background:#1f9a52;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">watched · success</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#34c46f · #1f9a52</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#eec01e;"></div><div style="width:28px;height:36px;background:#a77d00;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">new · rating</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#eec01e · #a77d00</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:28px;height:36px;background:#ff8a8d;"></div><div style="width:28px;height:36px;background:#c8383d;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">error</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#ff8a8d · #c8383d</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:56px;height:36px;background:#3a72e8;"></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">menu highlight</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">#3a72e8 · macOS only</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:56px;height:36px;background:rgba(0,0,0,.6);background-image:url(assets/posters/drive.jpg);background-size:cover;"><div style="width:100%;height:100%;background:rgba(0,0,0,.6);"></div></div></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">media scrim</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">rgba(0,0,0,.6) · both</span></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="font-size:13px;font-weight:600;color:#91919a;">Fills · white α on dark, black 0.75α on light</div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:44px;border-radius:10px;background:rgba(255,255,255,.04);"></div><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">.04 group</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:44px;border-radius:10px;background:rgba(255,255,255,.06);"></div><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">.06 control well</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:44px;border-radius:10px;background:rgba(255,255,255,.08);"></div><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">.08 chip</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:44px;border-radius:10px;background:rgba(255,255,255,.12);"></div><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">.12 selected</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:44px;border-radius:10px;background:rgba(255,255,255,.14);"></div><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">.14 secondary</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:44px;border-radius:10px;background:rgba(255,255,255,.2);"></div><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">.20 hover</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 5;display:flex;flex-direction:column;gap:20px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Typefaces</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">Typography.swift</span></div>
+      <div style="display:flex;gap:22px;align-items:flex-start;">
+        <div style="flex:none;width:118px;font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:96px;line-height:.9;letter-spacing:-.04em;">Aa</div>
+        <div style="display:flex;flex-direction:column;gap:6px;padding-top:6px;"><div style="font-size:17px;font-weight:600;">Archivo · display</div><div style="font-size:14.5px;line-height:1.5;color:#91919a;">Page, hero and section titles, person initials. Weight 620–660, tracking −2% to −3.5%, line height 1.0–1.02.</div></div>
+      </div>
+      <div style="display:flex;gap:22px;align-items:flex-start;padding-top:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="flex:none;width:118px;font-size:92px;font-weight:500;line-height:.9;letter-spacing:-.03em;">Aa</div>
+        <div style="display:flex;flex-direction:column;gap:6px;padding-top:6px;"><div style="font-size:17px;font-weight:600;">SF Pro · text</div><div style="font-size:14.5px;line-height:1.5;color:#91919a;">Everything else: body, labels, buttons, metadata. 400 body, 500 controls, 600 labels and buttons. Tabular numbers for time.</div></div>
+      </div>
+      <div style="display:flex;gap:22px;align-items:flex-start;padding-top:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="flex:none;width:118px;font:500 40px ui-monospace,Menlo,monospace;line-height:1.1;color:#91919a;">M05</div>
+        <div style="display:flex;flex-direction:column;gap:6px;padding-top:4px;"><div style="font-size:17px;font-weight:600;">SF Mono · annotations</div><div style="font-size:14.5px;line-height:1.5;color:#91919a;">Design docs only: screen IDs and spec lines. Never in the apps.</div></div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 5;display:flex;flex-direction:column;gap:20px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Icons</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">Material Symbols Rounded</span></div>
+      <div style="font-size:14.5px;line-height:1.5;color:#91919a;">Outline at weight 400 by default. FILL 1 marks the active or applied state: the selected tab, a title already in a list, a pin.</div>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 8px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">play_arrow</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">bookmark_add</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">bookmark_add</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1;">bookmark</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">bookmark ●</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">check_circle</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">check_circle</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1;color:#34c46f;">check_circle</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">watched ●</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">push_pin 25°</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">more_horiz</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">more_horiz</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">search</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">search</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1;color:#eec01e;">star</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">star ●</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">hide_source</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">hide_source</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">dns</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">dns</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">link_off</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">link_off</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">subtitles</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">subtitles</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">replay_10</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">replay_10</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">movie</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">movie</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">tv</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">tv</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">video_library</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">video_library</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">error</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">error</span></div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 3;display:flex;flex-direction:column;gap:20px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Corner radius</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">pt at 1×</span></div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 14px;">
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;flex:none;border-radius:5px;background:rgba(255,255,255,.1);"></div><div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;">5</span><span style="font-size:12.5px;color:#91919a;">badge</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;flex:none;border-radius:10px;background:rgba(255,255,255,.1);"></div><div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;">10</span><span style="font-size:12.5px;color:#91919a;">poster</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;flex:none;border-radius:12px;background:rgba(255,255,255,.1);"></div><div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;">12</span><span style="font-size:12.5px;color:#91919a;">still, menu</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;flex:none;border-radius:14px;background:rgba(255,255,255,.1);"></div><div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;">14</span><span style="font-size:12.5px;color:#91919a;">field, group</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;flex:none;border-radius:18px;background:rgba(255,255,255,.1);"></div><div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;">18</span><span style="font-size:12.5px;color:#91919a;">sidebar</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;flex:none;border-radius:22px;background:rgba(255,255,255,.1);"></div><div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;">22–24</span><span style="font-size:12.5px;color:#91919a;">sheet, panel</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:44px;height:44px;flex:none;border-radius:999px;background:rgba(255,255,255,.1);"></div><div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:14px;font-weight:600;">999</span><span style="font-size:12.5px;color:#91919a;">button, pill</span></div></div>
+      </div>
+      <div style="font-size:13px;line-height:1.45;color:#64646d;">Apple TV doubles these: poster 16, sheet button 20, field 26.</div>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:20px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Materials</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">over artwork</span></div>
+      <div style="position:relative;height:250px;border-radius:16px;overflow:hidden;">
+        <img src="assets/posters/blade-runner-2049.jpg" alt="" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.2) brightness(.8);">
+        <div style="position:absolute;left:16px;top:16px;right:16px;display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;height:56px;padding:0 18px;border-radius:999px;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);"><span style="font-size:15px;font-weight:600;flex:1;">Glass chrome</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.7);">36,36,42 .5 · blur 24</span></div>
+          <div style="display:flex;align-items:center;gap:12px;height:56px;padding:0 18px;border-radius:14px;background:rgba(40,40,46,.72);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.5);"><span style="font-size:15px;font-weight:600;flex:1;">Menu glass</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.7);">40,40,46 .72 · blur 30</span></div>
+          <div style="display:flex;align-items:center;gap:12px;height:56px;padding:0 18px;border-radius:14px;background:rgba(0,0,0,.6);"><span style="font-size:15px;font-weight:600;flex:1;color:#fff;">Media scrim</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:rgba(255,255,255,.7);">0,0,0 .6 · no blur</span></div>
+        </div>
+      </div>
+      <div style="font-size:13px;line-height:1.45;color:#64646d;">Glass rings: 1px inset at 12% white, plus a 1px top highlight at 16–18%.</div>
+    </div>
+
+    <div style="grid-column:span 12;display:flex;align-items:center;gap:48px;padding:24px 26px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+      <div style="flex:none;width:360px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Data colours</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">Statistics only</span></div>
+        <div style="font-size:14.5px;line-height:1.5;color:#91919a;text-wrap:pretty;">Same lightness and chroma, hue varies, so no category reads louder. Only for chart marks: bars, dots, split bars and the category badge. Never text or buttons. Unchanged in the light theme.</div>
+      </div>
+      <div style="display:flex;gap:28px;">
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:52px;height:52px;border-radius:14px;background:oklch(0.70 0.16 295);"></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">movies</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">oklch .70 .16 295</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:52px;height:52px;border-radius:14px;background:oklch(0.80 0.12 210);"></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">tv</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">oklch .80 .12 210</span></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:52px;height:52px;border-radius:14px;background:oklch(0.80 0.13 65);"></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14px;font-weight:600;">games</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#91919a;">oklch .80 .13 65</span></div></div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:200px;">
+        <div style="display:flex;height:10px;gap:3px;"><div style="width:18%;border-radius:999px;background:oklch(0.70 0.16 295);"></div><div style="flex:1;border-radius:999px;background:oklch(0.80 0.12 210);"></div></div>
+        <div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">badge tint: same colour at 20% alpha · unselected bars 40% opacity</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="ios" data-screen-label="iOS components" style="display:flex;flex-direction:column;gap:28px;padding-top:48px;border-top:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:880px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="font:600 12px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">02</span><span style="font-size:14px;font-weight:600;color:rgba(244,244,242,.5);">iPhone · 393 × 852 · touch</span></div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;line-height:1;">iOS</div>
+      <div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.65);text-wrap:pretty;">The macOS and Apple TV set at touch sizes. Hit targets never go below 44pt. Chrome is glass and floats over content; pill filters replace the system segmented control.</div>
+    </div>
+    <div style="display:flex;gap:8px;font-size:13.5px;flex:none;"><a href="Biinge%20iOS.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">iOS screens</a><a href="Biinge%20iOS%20Player.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">iOS player</a></div>
+  </div>
+  <div data-theme="{{ theme }}" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;align-items:start;">
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Type scale</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">pt</span></div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:34px;letter-spacing:-.03em;line-height:1;">Movies</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">large title · Archivo 34/640</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:24px;letter-spacing:-.025em;line-height:1.05;">La La Land</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">title · Archivo 24/640</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:22px;letter-spacing:-.02em;">Next Up</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">section · Archivo 22/620</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:17px;font-weight:600;">Resume</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">headline · 17/600</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:15px;line-height:1.45;color:#91919a;">2016 · 2h 8m · Romance</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">body · 15/400</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:13.5px;font-weight:600;color:rgba(244,244,242,.7);">Not on Living Room</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">footnote · 13.5/600</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:12px;font-weight:600;">Movies</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">tab label · 12/600</span></sc-if></div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Buttons</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">PillButton · RoundButton</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:50px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-active="transform:scale(.97);opacity:.85"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Resume</div>
+          <div style="width:50px;height:50px;flex:none;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">bookmark</span></div>
+          <div style="width:50px;height:50px;flex:none;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;color:#34c46f;">check_circle</span></div>
+          <div style="width:50px;height:50px;flex:none;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;">more_horiz</span></div>
+        </div>
+        <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">primary 50h fill · round 50 · .14 fill · pressed scale .97</div></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;gap:6px;height:42px;padding:0 20px 0 16px;border-radius:999px;background:rgba(255,255,255,.14);font-size:15px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">search</span>Search Biinge</div>
+          <div style="display:flex;align-items:center;height:42px;padding:0 20px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:15px;font-weight:600;">Connect</div>
+        </div>
+        <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">compact 42h · 15/600 · empty states, banners</div></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div data-media="" style="position:relative;height:76px;border-radius:14px;overflow:hidden;">
+          <img src="assets/posters/la-la-land.jpg" alt="" style="position:absolute;left:0;top:-40px;width:100%;height:220px;object-fit:cover;filter:blur(20px) brightness(.7);">
+          <div style="position:relative;height:100%;display:flex;align-items:center;gap:12px;padding:0 16px;color:#f4f4f2;">
+            <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">chevron_left</span></div>
+            <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">close</span></div>
+            <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">swap_vert</span></div>
+            <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18);"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">close</span></div>
+          </div>
+        </div>
+        <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">GlassButton 44 · nav bar back, close, sort · 36 in sheets</div></sc-if>
+      </div>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Tab bar</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">RootView</span></div>
+      <div style="position:relative;height:150px;border-radius:16px;overflow:hidden;">
+        <img src="assets/posters/dune-part-two.jpg" alt="" style="position:absolute;left:0;top:-120px;width:100%;height:400px;object-fit:cover;filter:brightness(.75);">
+        <div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(180deg,rgba(16,16,20,0),rgba(16,16,20,.9) 70%);"></div>
+        <div style="position:absolute;left:12px;right:12px;bottom:18px;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:62px;border-radius:999px;display:flex;align-items:center;padding:4px;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);">
+            <div style="flex:1;height:54px;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:rgba(255,255,255,.12);color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1;">movie</span><span style="font-size:12px;font-weight:600;">Movies</span></div>
+            <div style="flex:1;height:54px;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:rgba(244,244,242,.6);"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">tv</span><span style="font-size:12px;font-weight:600;">TV</span></div>
+            <div style="flex:1;height:54px;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:rgba(244,244,242,.6);"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">sports_esports</span><span style="font-size:12px;font-weight:600;">Games</span></div>
+            <div style="flex:1;height:54px;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:rgba(244,244,242,.6);"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">account_circle</span><span style="font-size:12px;font-weight:600;">Profile</span></div>
+          </div>
+          <div style="width:62px;height:62px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;">search</span></div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">capsule 62h · tab 54h · selected .12 fill + FILL icon · search is its own 62 circle · fade 150 under</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;padding-top:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="font-size:13px;font-weight:600;color:#91919a;">Filter pills</div>
+        <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+          <div style="flex:1 1 auto;height:34px;padding:0 8px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14.5px;font-weight:600;background:rgba(255,255,255,.14);color:#f4f4f2;">All</div>
+          <div style="flex:1 1 auto;height:34px;padding:0 8px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14.5px;font-weight:600;color:#91919a;">Unwatched</div>
+          <div style="flex:1 1 auto;height:34px;padding:0 8px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14.5px;font-weight:600;color:#91919a;">Watched</div>
+        </div>
+        <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">PillFilter · well .06 · segment 34h · selected .14</div></sc-if>
+      </div>
+    </div>
+
+    <div style="grid-column:span 8;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Poster and overlays</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">PosterImage · Badges</span></div>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;">
+        <div style="display:flex;flex-direction:column;gap:8px;"><div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><img src="assets/posters/la-la-land.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div><span style="font-size:13px;color:#91919a;">Rest</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><img src="assets/posters/aftersun.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;top:8px;left:8px;width:26px;height:26px;border-radius:6px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'wght' 700;">check</span></div></div><span style="font-size:13px;color:#91919a;">Watched</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><img src="assets/posters/severance.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;top:10px;left:10px;width:22px;height:22px;border-radius:50%;box-shadow:0 0 0 2px #f4f4f2,0 2px 6px rgba(0,0,0,.4);background:conic-gradient(#f4f4f2 0 40%,rgba(0,0,0,.55) 40% 100%);"></div></div><span style="font-size:13px;color:#91919a;">Show in progress</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><img src="assets/posters/zodiac.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div><div style="position:absolute;left:10px;right:10px;bottom:10px;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;"><div style="width:76%;height:100%;background:#f4f4f2;"></div></div></div><span style="font-size:13px;color:#91919a;">Pinned · resume</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><img src="assets/posters/drive.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.5) brightness(.75);"><div style="position:absolute;left:8px;bottom:8px;height:26px;padding:0 9px 0 7px;border-radius:999px;background:rgba(0,0,0,.62);display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.9);"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1;">hide_source</span>Not on server</div></div><span style="font-size:13px;color:#91919a;">Not on server</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div style="position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;font-size:16px;line-height:1.3;color:#6e6969;">Perfect Days</div><div data-media="" style="position:absolute;top:9px;right:9px;padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.6);font-size:12px;font-weight:700;letter-spacing:.04em;color:#eec01e;">NEW</div></div><span style="font-size:13px;color:#91919a;">No art · new</span></div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">2:3 · r12 · 2-column grid, 12 gap · badges on media scrim, 8 inset · progress 4h · pie 22 with 2pt ring</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Action sheet</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">confirmationDialog</span></div>
+      <div style="position:relative;border-radius:16px;overflow:hidden;padding:60px 8px 10px;background:#17171d;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="border-radius:22px;overflow:hidden;background:rgba(44,44,50,.92);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);">
+            <div style="padding:16px 20px 14px;text-align:center;display:flex;flex-direction:column;gap:4px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.08);"><div style="font-size:14px;font-weight:600;color:rgba(244,244,242,.75);">Disconnect Jellyfin?</div><div style="font-size:13px;line-height:1.4;color:rgba(244,244,242,.6);">This iPhone stops playing from Living Room. You stay logged in to Biinge, and your lists stay.</div></div>
+            <div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#ff6b6b;">Disconnect</div>
+          </div>
+          <div style="height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;background:rgba(44,44,50,.92);">Cancel</div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">group r22 · row 56h · destructive in error red · Cancel separate, r18, 600</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Continue Watching card</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">UpNextView</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:280px;">
+        <div data-media="" style="position:relative;width:280px;height:158px;border-radius:12px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);">
+          <img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.75) 100%);"></div>
+          <div style="position:absolute;left:12px;bottom:20px;font-size:13.5px;font-weight:600;color:#fff;">24 min left</div>
+          <div style="position:absolute;left:12px;right:12px;bottom:10px;height:4px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden;"><div style="width:48%;height:100%;border-radius:2px;background:#f4f4f2;"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:16px;font-weight:600;">Mr. Robot</div><div style="font-size:13.5px;color:#91919a;">S1 · E4 · eps1.3_da3m0ns.mp4</div></div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">16:9 still · r12 · bottom scrim 45→75% · time left over bar</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Empty state</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">EmptyState</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 20px 8px;text-align:center;">
+        <span style="font-family:'Material Symbols Rounded';font-size:44px;line-height:1;color:#64646d;">bookmark</span>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:22px;letter-spacing:-.02em;">Nothing here yet</div>
+        <div style="font-size:15px;line-height:1.45;color:#91919a;max-width:260px;">Titles you add to Want to Watch on any device show up here.</div>
+        <div style="display:flex;align-items:center;gap:6px;height:42px;padding:0 20px 0 16px;margin-top:8px;border-radius:999px;background:rgba(255,255,255,.14);font-size:15px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">search</span>Search Biinge</div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">icon 44 tertiary · Archivo 22 · body 15 · one compact action</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 12;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Statistics</span><div style="display:flex;align-items:baseline;gap:14px;"><a href="Biinge%20Profile%20Stats.dc.html#P03" style="font-size:13px;text-decoration:underline;color:#91919a;">In use: Profile, Statistics, macOS, Apple TV</a><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">StatHero · ActivityChart · StatTile · CategoryCard · RankRow</span></div></div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.2fr);gap:28px;align-items:start;">
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:22px;background:#17171d;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:14px;font-weight:600;color:#91919a;">2026</div>
+              <div style="display:flex;align-items:baseline;gap:10px;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:56px;letter-spacing:-.04em;line-height:1;"><span style="display:flex;align-items:baseline;gap:2px;">1<span style="font-size:28px;font-weight:620;color:#91919a;">w</span></span><span style="display:flex;align-items:baseline;gap:2px;">2<span style="font-size:28px;font-weight:620;color:#91919a;">d</span></span><span style="display:flex;align-items:baseline;gap:2px;">1<span style="font-size:28px;font-weight:620;color:#91919a;">h</span></span></div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:14px;color:#91919a;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">trending_up</span>+17% vs 2025</div>
+            </div>
+            <div style="display:flex;height:10px;gap:3px;"><div style="width:18%;border-radius:999px;background:oklch(0.70 0.16 295);"></div><div style="flex:1;border-radius:999px;background:oklch(0.80 0.12 210);"></div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:3px;"><div style="display:flex;align-items:center;gap:7px;font-size:14px;color:#91919a;"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.70 0.16 295);"></span>Movies · 18%</div><div style="font-size:17px;font-weight:600;padding-left:16px;">1d 16h</div></div>
+              <div style="display:flex;flex-direction:column;gap:3px;"><div style="display:flex;align-items:center;gap:7px;font-size:14px;color:#91919a;"><span style="width:9px;height:9px;border-radius:50%;background:oklch(0.80 0.12 210);"></span>TV · 82%</div><div style="font-size:17px;font-weight:600;padding-left:16px;">1w 0d 9h</div></div>
+            </div>
+          </div>
+          <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">StatHero · Archivo 56/660, units 28 secondary · delta vs previous period, neutral · split bar 10h, 3 gap</div></sc-if>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:22px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;"><div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:13px;color:#91919a;">Saturday, Oct 31</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:22px;letter-spacing:-.02em;">5h 42m</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:13px;color:#91919a;"><span style="display:flex;align-items:center;gap:6px;">2h 36m<span style="width:8px;height:8px;border-radius:50%;background:oklch(0.70 0.16 295);"></span></span><span style="display:flex;align-items:center;gap:6px;">3h 6m<span style="width:8px;height:8px;border-radius:50%;background:oklch(0.80 0.12 210);"></span></span></div></div>
+            <div style="position:relative;height:120px;">
+              <div style="position:absolute;left:0;right:0;top:0;height:1px;background:rgba(255,255,255,.07);"></div><div style="position:absolute;left:0;right:0;top:60px;height:1px;background:rgba(255,255,255,.07);"></div><div style="position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(255,255,255,.14);"></div>
+              <div style="position:absolute;right:0;top:4px;font-size:11px;color:#64646d;">6h</div><div style="position:absolute;right:0;top:64px;font-size:11px;color:#64646d;">3h</div>
+              <div style="position:absolute;left:0;right:32px;top:0;bottom:0;display:flex;align-items:flex-end;gap:12px;">
+                <div style="flex:1;opacity:.4;display:flex;flex-direction:column;"><div style="height:30px;border-radius:3px 3px 0 0;background:oklch(0.80 0.12 210);"></div></div>
+                <div style="flex:1;opacity:.4;display:flex;flex-direction:column;gap:2px;"><div style="height:16px;border-radius:3px 3px 0 0;background:oklch(0.80 0.12 210);"></div><div style="height:44px;background:oklch(0.70 0.16 295);"></div></div>
+                <div style="flex:1;opacity:.4;display:flex;flex-direction:column;"><div style="height:52px;border-radius:3px 3px 0 0;background:oklch(0.80 0.12 210);"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px;"><div style="height:62px;border-radius:3px 3px 0 0;background:oklch(0.80 0.12 210);"></div><div style="height:52px;background:oklch(0.70 0.16 295);"></div></div>
+                <div style="flex:1;opacity:.4;display:flex;flex-direction:column;"><div style="height:84px;border-radius:3px 3px 0 0;background:oklch(0.80 0.12 210);"></div></div>
+                <div style="flex:1;opacity:.4;display:flex;flex-direction:column;"><div style="height:22px;border-radius:3px 3px 0 0;background:oklch(0.80 0.12 210);"></div></div>
+                <div style="flex:1;opacity:.4;display:flex;flex-direction:column;"><div style="height:18px;border-radius:3px 3px 0 0;background:oklch(0.80 0.12 210);"></div></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-right:32px;font-size:11px;font-weight:600;color:#64646d;"><span style="flex:1;text-align:center;">W</span><span style="flex:1;text-align:center;">T</span><span style="flex:1;text-align:center;">F</span><span style="flex:1;text-align:center;color:#f4f4f2;">S</span><span style="flex:1;text-align:center;">S</span><span style="flex:1;text-align:center;">M</span><span style="flex:1;text-align:center;">T</span></div>
+          </div>
+          <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">ActivityChart · stacked, TV over Movies · r3 top · peak selected by default, tap (iOS), hover (Mac), focus (TV) · callout above, never a tooltip</div></sc-if>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#91919a;">local_fire_department</span><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:24px;letter-spacing:-.02em;">18 days</span><span style="font-size:13px;color:#91919a;">Longest streak</span></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#91919a;">schedule</span><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:24px;letter-spacing:-.02em;">42 min</span><span style="font-size:13px;color:#91919a;">Daily average</span></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:22px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+            <div style="display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:oklch(0.80 0.13 65 / 0.2);"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:oklch(0.80 0.13 65);font-variation-settings:'FILL' 1;">sports_esports</span></div><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:22px;letter-spacing:-.02em;">Games</span></div><span style="font-size:14px;color:#91919a;">1w 6d 7h to beat</span></div>
+            <div style="display:flex;gap:28px;"><div style="display:flex;flex-direction:column;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:30px;letter-spacing:-.03em;line-height:1.05;">12</span><span style="font-size:13px;color:#91919a;">Played</span></div><div style="display:flex;flex-direction:column;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:30px;letter-spacing:-.03em;line-height:1.05;">5</span><span style="font-size:13px;color:#91919a;">Finished</span></div><div style="display:flex;flex-direction:column;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:30px;letter-spacing:-.03em;line-height:1.05;">26</span><span style="font-size:13px;color:#91919a;">Added</span></div></div>
+          </div>
+          <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">StatTile r18 · Archivo 24 · CategoryCard r22 · badge 30 tinted · numbers Archivo 30 · poster strip 62×93 r9 below</div></sc-if>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:22px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+            <div style="display:flex;align-items:center;gap:12px;"><span style="width:14px;font-size:15px;font-weight:600;color:#64646d;text-align:center;">1</span><img src="assets/posters/mr-robot.jpg" alt="" style="width:40px;height:60px;border-radius:7px;object-fit:cover;"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;"><div style="display:flex;justify-content:space-between;"><span style="font-size:15.5px;font-weight:600;">Mr. Robot</span><span style="font-size:14px;font-weight:600;">1d 8h</span></div><div style="height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;"><div style="width:100%;height:100%;background:oklch(0.80 0.12 210);"></div></div><span style="font-size:12.5px;color:#91919a;">38 episodes</span></div></div>
+            <div style="display:flex;align-items:center;gap:12px;"><span style="width:14px;font-size:15px;font-weight:600;color:#64646d;text-align:center;">2</span><img src="assets/posters/breaking-bad.jpg" alt="" style="width:40px;height:60px;border-radius:7px;object-fit:cover;"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;"><div style="display:flex;justify-content:space-between;"><span style="font-size:15.5px;font-weight:600;">Breaking Bad</span><span style="font-size:14px;font-weight:600;">1d 2h</span></div><div style="height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;"><div style="width:84%;height:100%;background:oklch(0.80 0.12 210);"></div></div><span style="font-size:12.5px;color:#91919a;">33 episodes</span></div></div>
+          </div>
+          <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">RankRow · rank tertiary · poster 40×60 r7 · bar 4h relative to #1 · Mac: 5-up grid · TV: focus shelf 170×255</div></sc-if>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="macos" data-screen-label="macOS components" style="display:flex;flex-direction:column;gap:28px;padding-top:48px;border-top:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:880px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="font:600 12px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">03</span><span style="font-size:14px;font-weight:600;color:rgba(244,244,242,.5);">Mac · 1440 × 900 window · pointer and keyboard</span></div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;line-height:1;">macOS</div>
+      <div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.65);text-wrap:pretty;">Pointer first: every control has rest, hover and pressed states (hover the specimens). The sidebar and menus use glass; the blue menu highlight is the only colour accent on any platform.</div>
+    </div>
+    <div style="display:flex;gap:8px;font-size:13.5px;flex:none;"><a href="Biinge%20Mac.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">Mac screens</a><a href="Biinge%20Mac%20Player.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">Mac player</a><a href="Biinge%20Mac%20Settings.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">Mac settings</a></div>
+  </div>
+  <div data-theme="{{ theme }}" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;align-items:start;">
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Type scale</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">pt</span></div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:64px;letter-spacing:-.035em;line-height:1;">Arrival</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">hero / detail title · Archivo 80 (56–80 by length)/640</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;line-height:1;">Movies</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">page · Archivo 44/640</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Recently Added</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">section · Archivo 28/620</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:18px;line-height:1.55;color:rgba(244,244,242,.82);">A linguist is recruited…</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">overview · 18/1.55</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:15px;font-weight:600;">Blade Runner 2049</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">card title · 15/600</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:13.5px;color:#91919a;">2017 · 2h 44m</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">card meta · 13.5 secondary</span></sc-if></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;"><span style="font-size:12px;font-weight:600;color:rgba(244,244,242,.45);">My Lists</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">group header · 12/600 .45</span></sc-if></div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 5;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Buttons</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">DetailComponents</span></div>
+      <div style="display:grid;grid-template-columns:72px repeat(3,minmax(0,1fr));gap:12px 14px;align-items:center;">
+        <span></span><span style="font-size:12.5px;font-weight:600;color:#64646d;">Rest</span><span style="font-size:12.5px;font-weight:600;color:#64646d;">Hover</span><span style="font-size:12.5px;font-weight:600;color:#64646d;">Pressed</span>
+        <span style="font-size:13px;color:#91919a;">Primary</span>
+        <div style="justify-self:start;display:flex;align-items:center;gap:6px;height:48px;padding:0 26px 0 20px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;transition:transform .12s,background .15s;" style-hover="background:#ffffff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Play</div>
+        <div style="justify-self:start;display:flex;align-items:center;gap:6px;height:48px;padding:0 26px 0 20px;border-radius:999px;background:#ffffff;color:#101014;font-size:17px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Play</div>
+        <div style="justify-self:start;display:flex;align-items:center;gap:6px;height:48px;padding:0 26px 0 20px;border-radius:999px;background:#ffffff;color:#101014;font-size:17px;font-weight:600;transform:scale(.97);"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Play</div>
+        <span style="font-size:13px;color:#91919a;">List</span>
+        <div style="justify-self:start;display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;" style-hover="background:rgba(255,255,255,.22)" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+        <div style="justify-self:start;display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:rgba(255,255,255,.22);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+        <div style="justify-self:start;display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:rgba(255,255,255,.22);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;transform:scale(.97);"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+        <span style="font-size:13px;color:#91919a;">More</span>
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.22)" style-active="transform:scale(.95)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">more_horiz</span></div>
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;cursor:default;transition:background .15s;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">more_horiz</span></div>
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;cursor:default;transition:background .15s;transform:scale(.95);"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">more_horiz</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:7px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Resume · 1h 12m left</div>
+          <div style="display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:rgba(255,255,255,.14);color:#f4f4f2;font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;margin-left:2px;">push_pin</span><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+          <div style="display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:rgba(255,255,255,.14);color:#f4f4f2;font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">add</span>Add to List<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+          <div style="display:flex;align-items:center;gap:7px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:rgba(255,255,255,.07);color:rgba(244,244,242,.38);font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Play</div>
+          <div style="width:1px;height:28px;background:rgba(255,255,255,.1);margin:0 4px;"></div>
+          <div style="height:32px;padding:0 14px;display:flex;align-items:center;gap:6px;border-radius:9px;background:rgba(255,255,255,.1);font-size:14px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.15)"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;">refresh</span>Reconnect</div>
+          <div style="height:32px;padding:0 14px;display:flex;align-items:center;border-radius:9px;background:#f4f4f2;color:#101014;font-size:14px;font-weight:600;cursor:default;" style-hover="background:#fff">Connect Jellyfin</div>
+        </div>
+        <div style="font-size:13px;line-height:1.5;color:#91919a;text-wrap:pretty;">Action row: white button for the next step, a list button that names the list (chevron = opens Lists), then •••. Only ••• is icon-only. Disabled Play when the server can’t be reached. See <a href="Biinge%20Actions.dc.html" style="color:#f4f4f2;text-decoration:underline;">Actions</a>.</div>
+        <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">48h · 17/600 · applied = FILL 1 (watched turns green) · small 32h r9 14/500 for settings rows · hover +.06 · pressed .97</div></sc-if>
+      </div>
+    </div>
+
+    <div style="grid-column:span 3;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Badges</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">Badges.swift</span></div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;gap:8px;"><span style="font-size:12px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:5px;box-shadow:inset 0 0 0 1.5px rgba(244,244,242,.45);color:rgba(244,244,242,.88);">4K</span><span style="font-size:12px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:5px;box-shadow:inset 0 0 0 1.5px rgba(244,244,242,.45);color:rgba(244,244,242,.88);">HDR</span><span style="font-size:12px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:5px;box-shadow:inset 0 0 0 1.5px rgba(244,244,242,.45);color:rgba(244,244,242,.88);">ATMOS</span></div><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">quality · 12/700 · 1.5 outline</span></sc-if></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><span style="display:flex;align-items:center;gap:5px;font-size:16px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>7.9</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">rating · star FILL in new/rating</span></sc-if></div>
+        <div data-media="" style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:#3a3a42;color:#f4f4f2;">
+          <div style="width:24px;height:24px;border-radius:5px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'wght' 700;">check</span></div>
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div>
+          <div style="padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.6);font-size:12px;font-weight:700;letter-spacing:.04em;color:#eec01e;">NEW</div>
+          <div style="width:22px;height:22px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,.4);background:conic-gradient(#f4f4f2 0 65%,rgba(0,0,0,.55) 65% 100%);"></div>
+        </div>
+        <div data-media="" style="display:flex;align-items:center;padding:10px;border-radius:12px;background:#3a3a42;"><div style="height:24px;padding:0 8px 0 6px;border-radius:999px;background:rgba(0,0,0,.62);display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.88);"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;">hide_source</span>Not on server</div></div>
+        <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">on artwork · media scrim .6 · keep dark in light theme</span></sc-if>
+      </div>
+    </div>
+
+    <div style="grid-column:span 3;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Sidebar</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">248w glass</span></div>
+      <div style="position:relative;height:560px;border-radius:16px;overflow:hidden;">
+        <img src="assets/posters/la-la-land.jpg" alt="" style="position:absolute;left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(50px) saturate(1.5) brightness(.55);">
+        <div style="position:absolute;left:8px;top:8px;bottom:8px;width:248px;border-radius:18px;background:rgba(30,30,36,.52);backdrop-filter:blur(32px) saturate(1.7);-webkit-backdrop-filter:blur(32px) saturate(1.7);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 1px 0 rgba(255,255,255,.16),0 12px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;padding:12px 10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;height:34px;padding:0 2px 0 8px;">
+            <div style="display:flex;gap:8px;"><div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div><div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div><div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div></div>
+            <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(244,244,242,.7);cursor:default;" style-hover="background:rgba(255,255,255,.08);color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;">left_panel_close</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;margin-top:12px;">
+            <div style="font-size:12px;font-weight:600;color:rgba(244,244,242,.45);padding:16px 10px 6px;">Library</div>
+            <div style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.13);color:#ffffff;font-size:15px;font-weight:500;"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;font-variation-settings:'FILL' 1;">home</span><span style="flex:1;">Home</span></div>
+            <div style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;color:rgba(244,244,242,.82);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;">movie</span><span style="flex:1;">Movies</span></div>
+            <div style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;color:rgba(244,244,242,.82);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;">tv</span><span style="flex:1;">TV Shows</span></div>
+            <div style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;color:rgba(244,244,242,.82);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;">video_library</span><span style="flex:1;">Collections</span></div>
+            <div style="font-size:12px;font-weight:600;color:rgba(244,244,242,.45);padding:16px 10px 6px;">My Lists</div>
+            <div style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;color:rgba(244,244,242,.82);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;">bookmark</span><span style="flex:1;">Want to Watch</span><span style="font-size:12.5px;color:rgba(244,244,242,.4);">12</span></div>
+            <div style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;color:rgba(244,244,242,.82);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;">check_circle</span><span style="flex:1;">Watched</span><span style="font-size:12.5px;color:rgba(244,244,242,.4);">48</span></div>
+          </div>
+          <div style="flex:1;"></div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:12px;background:rgba(255,255,255,.05);">
+            <span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;color:#ff8a8d;margin-top:1px;">error</span>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;"><div style="font-size:13.5px;line-height:1.35;color:rgba(244,244,242,.85);">Can’t reach Living Room.</div><div style="font-size:13px;font-weight:600;color:#f4f4f2;cursor:default;" style-hover="text-decoration:underline">Try Again</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;color:rgba(244,244,242,.82);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;">settings</span><span style="flex:1;">Settings</span><span style="font-size:12.5px;color:rgba(244,244,242,.4);">⌘,</span></div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">row 36h r10 15/500 · selected .13 + FILL · hover .07 · issue card pinned above Settings</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 6;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Poster card</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">PosterGrid</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:30px 22px;">
+        <div style="display:flex;flex-direction:column;gap:10px;cursor:default;min-width:0;">
+          <div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);transition:transform .2s,box-shadow .2s;" style-hover="transform:translateY(-3px);box-shadow:0 0 0 1px rgba(255,255,255,.2),0 16px 34px rgba(0,0,0,.45)"><img src="assets/posters/blade-runner-2049.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+          <div style="display:flex;flex-direction:column;gap:3px;min-width:0;"><div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Blade Runner 2049</div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13.5px;color:#91919a;"><span>2017</span><span style="display:flex;align-items:center;gap:3px;"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>7.6</span></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;cursor:default;min-width:0;">
+          <div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#282828;transform:translateY(-3px);box-shadow:0 0 0 1px rgba(255,255,255,.2),0 16px 34px rgba(0,0,0,.45);"><img src="assets/posters/la-la-land.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;left:8px;right:8px;bottom:8px;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;"><div style="width:44%;height:100%;background:#f4f4f2;"></div></div></div>
+          <div style="display:flex;flex-direction:column;gap:3px;min-width:0;"><div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">La La Land</div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13.5px;color:#91919a;"><span>Hover · resume</span><span style="display:flex;align-items:center;gap:3px;"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>7.9</span></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;cursor:default;min-width:0;">
+          <div data-media="" style="position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);transition:transform .2s,box-shadow .2s;" style-hover="transform:translateY(-3px);box-shadow:0 0 0 1px rgba(255,255,255,.2),0 16px 34px rgba(0,0,0,.45)"><img src="assets/posters/arrival.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.5) brightness(.75);"><div style="position:absolute;left:8px;bottom:8px;height:24px;padding:0 8px 0 6px;border-radius:999px;background:rgba(0,0,0,.62);display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.88);"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;">hide_source</span>Not on server</div><div style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:3px;min-width:0;"><div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Arrival</div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13.5px;color:#91919a;"><span>Pinned, off server</span><span style="display:flex;align-items:center;gap:3px;"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>7.9</span></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;cursor:default;min-width:0;">
+          <div style="position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;text-align:center;font-size:15px;line-height:1.3;color:#6e6969;">Anatomy of a Fall</div></div>
+          <div style="display:flex;flex-direction:column;gap:3px;min-width:0;"><div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Anatomy of a Fall</div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13.5px;color:#91919a;"><span>No artwork</span><span style="display:flex;align-items:center;gap:3px;"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>7.6</span></div></div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">grid minmax(160,1fr) · gap 30/22 · r10 · hover lifts 3 + ring .2 · double-click plays · right-click opens the context menu · off server desaturates .5</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 3;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Menus</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">context · sort</span></div>
+      <div style="position:relative;border-radius:16px;overflow:hidden;padding:18px;display:flex;flex-direction:column;gap:14px;align-items:flex-start;">
+        <img src="assets/posters/poor-things.jpg" alt="" style="position:absolute;left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(40px) saturate(1.4) brightness(.5);">
+        <div style="position:relative;width:236px;padding:6px;border-radius:12px;background:rgba(40,40,46,.74);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.5);font-size:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 10px;border-radius:7px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span>Play</span><span style="font-size:12.5px;opacity:.5;">↩</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 10px;border-radius:7px;background:#3a72e8;color:#fff;"><span>Open Details</span><span style="font-size:12.5px;opacity:.5;">⌘I</span></div>
+          <div style="height:1px;margin:5px 8px;background:rgba(255,255,255,.1);"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 10px;border-radius:7px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span>Add to Want to Watch</span><span style="font-size:12.5px;opacity:.5;">⌘D</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 10px;border-radius:7px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span>Mark as Watched</span><span style="font-size:12.5px;opacity:.5;">⇧⌘W</span></div>
+        </div>
+        <div style="position:relative;width:200px;padding:6px;border-radius:14px;background:rgba(40,40,46,.72);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.5);">
+          <div style="font-size:12px;font-weight:600;color:rgba(244,244,242,.45);padding:6px 10px 4px;">Sort by</div>
+          <div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:14px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;width:18px;font-variation-settings:'wght' 600;">check</span>Date Added</div>
+          <div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:14px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;width:18px;opacity:0;">check</span>Title</div>
+          <div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:14px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;width:18px;opacity:0;">check</span>Rating</div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">menu glass r12–14 · row 30–32h r7 · highlight #3a72e8 · shortcut .5</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 6;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Library toolbar</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">filters · menus · view</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+            <div style="height:32px;padding:0 15px;display:flex;align-items:center;border-radius:999px;font-size:14px;font-weight:500;background:rgba(255,255,255,.16);color:#fff;">All</div>
+            <div style="height:32px;padding:0 15px;display:flex;align-items:center;border-radius:999px;font-size:14px;font-weight:500;color:rgba(244,244,242,.72);cursor:default;" style-hover="color:#fff">Unwatched</div>
+            <div style="height:32px;padding:0 15px;display:flex;align-items:center;border-radius:999px;font-size:14px;font-weight:500;color:rgba(244,244,242,.72);cursor:default;" style-hover="color:#fff">Watched</div>
+          </div>
+          <div style="height:38px;padding:0 12px 0 15px;display:flex;align-items:center;gap:4px;border-radius:999px;font-size:14px;font-weight:500;color:rgba(244,244,242,.85);background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);cursor:default;" style-hover="background:rgba(255,255,255,.1)">Genre<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#91919a;">expand_more</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="height:38px;padding:0 12px 0 13px;display:flex;align-items:center;gap:7px;border-radius:999px;font-size:14px;font-weight:500;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#91919a;">swap_vert</span>Date Added<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#91919a;">expand_more</span></div>
+          <div style="display:flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+            <div style="width:38px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">grid_view</span></div>
+            <div style="width:38px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">view_list</span></div>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">well .06 + 1px ring · segment 32h 14/500 · selected .16 · dropdown 38h · season tabs reuse the filter</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="font-size:13px;font-weight:600;color:#91919a;">Inline banner</div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 12px 12px 16px;border-radius:14px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+          <span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#91919a;">link_off</span>
+          <div style="flex:1;font-size:15px;line-height:1.45;color:rgba(244,244,242,.85);">Connect Jellyfin to see what Living Room holds. Your lists still work.</div>
+          <div style="height:34px;padding:0 16px;display:flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.12);font-size:14px;font-weight:600;cursor:default;white-space:nowrap;" style-hover="background:rgba(255,255,255,.18)">Connect</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 6;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Search panel</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">⌘K · 760w</span></div>
+      <div style="position:relative;border-radius:16px;overflow:hidden;padding:18px;">
+        <img src="assets/posters/sicario.jpg" alt="" style="position:absolute;left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(50px) saturate(1.3) brightness(.45);">
+        <div style="position:relative;border-radius:24px;background:rgba(34,34,40,.72);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),inset 0 1px 0 rgba(255,255,255,.18),0 40px 100px rgba(0,0,0,.6);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:12px;height:68px;padding:0 20px 0 22px;">
+            <span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;color:rgba(244,244,242,.6);">search</span>
+            <span style="flex:1;font-size:22px;">gosling</span>
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;">close</span></div>
+            <span style="font-size:12.5px;font-weight:600;color:rgba(244,244,242,.5);padding:3px 8px;border-radius:7px;background:rgba(255,255,255,.08);">esc</span>
+          </div>
+          <div style="height:1px;background:rgba(255,255,255,.08);"></div>
+          <div style="padding:10px 10px 12px;">
+            <div style="padding:10px 12px 6px;font-size:13px;font-weight:600;color:rgba(244,244,242,.45);">Movies</div>
+            <div style="display:flex;align-items:center;gap:14px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.08);">
+              <div style="flex:none;width:44px;height:66px;border-radius:6px;overflow:hidden;background:#282828;"><img src="assets/posters/drive.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;"><div style="font-size:16.5px;font-weight:600;">Drive</div><div style="font-size:14px;color:rgba(244,244,242,.6);">2011 · Movie</div></div>
+              <span style="font-size:13px;color:rgba(244,244,242,.5);">Open ↩</span>
+            </div>
+            <div style="padding:10px 12px 6px;font-size:13px;font-weight:600;color:rgba(244,244,242,.45);">People</div>
+            <div style="display:flex;align-items:center;gap:14px;padding:8px 12px;border-radius:12px;">
+              <div style="flex:none;width:44px;height:66px;display:flex;align-items:center;justify-content:center;"><div style="width:44px;height:44px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#8a8a92;">RG</div></div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;"><div style="font-size:16.5px;font-weight:600;">Ryan Gosling</div><div style="font-size:14px;color:rgba(244,244,242,.6);">Acting</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">field 68h 22/400 · groups 13/600 .45 · row r12, hover/arrow-key .08 · ↩ hint only on the active row</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 3;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Text fields</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">Setup</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <input placeholder="Email" style="height:50px;padding:0 16px;border-radius:14px;border:0;outline:0;background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);color:#f4f4f2;font-size:17px;font-family:inherit;" style-focus="box-shadow:inset 0 0 0 2px rgba(244,244,242,.6)">
+        <input type="password" value="password" style="height:50px;padding:0 16px;border-radius:14px;border:0;outline:0;background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1.5px rgba(255,138,141,.7);color:#f4f4f2;font-size:17px;font-family:inherit;">
+        <div style="display:flex;align-items:flex-start;gap:8px;font-size:14.5px;line-height:1.45;color:#ff8a8d;"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">error</span>That email and password don’t match a Biinge account.</div>
+        <div style="display:flex;align-items:center;justify-content:center;height:52px;margin-top:4px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.98)">Log In</div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">50h r14 · well black .35 · focus 2px ring · error ring + message below, values kept</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 3;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Toast</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">2.4 s</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;">
+        <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 8px 0 16px;border-radius:999px;background:rgba(40,40,46,.8);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 40px rgba(0,0,0,.45);font-size:15px;font-weight:500;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#34c46f;font-variation-settings:'FILL' 1;">bookmark_added</span>Added to Want to Watch<span style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:650;">Undo</span></div>
+        <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 8px 0 16px;border-radius:999px;background:rgba(40,40,46,.8);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 40px rgba(0,0,0,.45);font-size:15px;font-weight:500;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#34c46f;font-variation-settings:'FILL' 1;">check_circle</span>Moved to Watched<span style="color:rgba(244,244,242,.55);font-weight:400;">Also marked played on Living Room</span><span style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:650;">Undo</span></div>
+        <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 20px 0 16px;border-radius:999px;background:rgba(40,40,46,.8);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 40px rgba(0,0,0,.45);font-size:15px;font-weight:500;"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#ff8a8d;font-variation-settings:'FILL' 1;">error</span>Saved in Biinge. Couldn’t update Living Room.</div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">46h glass pill · bottom-centre 28 · icon green or error red · Undo on every list change</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 6;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Player controls</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">on video · stays dark</span></div>
+      <div data-media="" style="position:relative;height:270px;border-radius:14px;overflow:hidden;background:#000;color:#f4f4f2;">
+        <img src="assets/posters/la-la-land.jpg" alt="" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center 72%;">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.8) 100%);"></div>
+        <div style="position:absolute;left:28px;right:28px;bottom:18px;display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span style="font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;width:60px;color:rgba(244,244,242,.75);">56:12</span>
+            <div style="position:relative;flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.22);"><div style="width:44%;height:100%;border-radius:3px;background:#f4f4f2;"></div><div style="position:absolute;left:44%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);"></div></div>
+            <span style="font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;width:60px;text-align:right;color:rgba(244,244,242,.75);">−1:11:48</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:27px;line-height:1;">replay_10</span></div>
+              <div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;font-variation-settings:'FILL' 1;">pause</span></div>
+              <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:27px;line-height:1;">forward_10</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="display:flex;align-items:center;gap:8px;padding:0 10px 0 6px;"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;">volume_up</span><div style="width:96px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:70%;height:100%;background:#f4f4f2;"></div></div></div>
+              <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.12);"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1;">subtitles</span></div>
+              <div style="height:42px;min-width:48px;padding:0 8px;border-radius:21px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;cursor:default;" style-hover="background:rgba(255,255,255,.12)">1×</div>
+              <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;">fullscreen</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">track 5h · knob 14 · times tabular 14/500 · buttons 42, play 52 · open panel = .12 fill</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 6;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Settings group</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">SettingsView</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(244,244,242,.5);padding-left:4px;">Jellyfin</div>
+        <div style="display:flex;flex-direction:column;border-radius:14px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+          <div style="display:flex;align-items:center;gap:14px;padding:16px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.06);">
+            <div style="position:relative;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex:none;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">dns</span><div style="position:absolute;right:-3px;bottom:-3px;width:13px;height:13px;border-radius:50%;background:#34c46f;box-shadow:0 0 0 3px #101014;"></div></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:20px;letter-spacing:-.02em;">Living Room</div><div style="font-size:13.5px;color:#34c46f;">Connected</div></div>
+            <div style="height:32px;padding:0 14px;display:flex;align-items:center;gap:6px;border-radius:9px;background:rgba(255,255,255,.1);font-size:14px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.15)"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;">refresh</span>Reconnect</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:46px;padding:0 16px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.06);font-size:14px;"><span>Server</span><span style="color:rgba(244,244,242,.6);">jellyfin.home.arpa · set on your Biinge server</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:46px;padding:0 16px;font-size:14px;"><span>Jellyfin account</span><span style="color:rgba(244,244,242,.6);">tom</span></div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">group .04 + ring .07 r14 · header 13/600 .5 · row 46h, hairline .06 · status dot green / error</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 6;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Rows and people</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">Next Up · Cast &amp; Crew</span></div>
+      <div style="display:flex;align-items:center;gap:18px;padding:10px;margin:0 -10px;border-radius:14px;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.05)">
+        <div data-media="" style="flex:none;width:192px;height:108px;border-radius:10px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);"><img src="assets/posters/slow-horses.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;"></div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;"><div style="font-size:14px;font-weight:600;color:#91919a;">Slow Horses</div><div style="font-size:17px;font-weight:600;">Failure’s Contagious</div><div style="font-size:14px;color:#64646d;">S1 · E2 · 48 min</div></div>
+        <div style="flex:none;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;" style-hover="background:#f4f4f2;color:#101014"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span></div>
+      </div>
+      <div style="display:flex;gap:18px;padding-top:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="width:112px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:8px 0;border-radius:14px;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.06)"><div style="width:88px;height:88px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#6e6969;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">RG</div><div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:14.5px;font-weight:600;">Ryan Gosling</div><div style="font-size:13.5px;color:#91919a;">Sebastian</div></div></div>
+        <div style="width:112px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:8px 0;border-radius:14px;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.06)"><div style="width:88px;height:88px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#6e6969;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">ES</div><div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:14.5px;font-weight:600;">Emma Stone</div><div style="font-size:13.5px;color:#91919a;">Mia</div></div></div>
+        <div style="width:112px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:8px 0;border-radius:14px;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.06)"><div style="width:88px;height:88px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#6e6969;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">DC</div><div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:14.5px;font-weight:600;">Damien Chazelle</div><div style="font-size:13.5px;color:#91919a;">Director</div></div></div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">row still 192×108 r10 · hover .05 · play 40 turns solid on hover · avatar 88, initials until photos exist</div></sc-if>
+    </div>
+
+  </div>
+</section>
+
+<section id="tvos" data-screen-label="tvOS components" style="display:flex;flex-direction:column;gap:28px;padding-top:48px;border-top:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:880px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="font:600 12px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">04</span><span style="font-size:14px;font-weight:600;color:rgba(244,244,242,.5);">Apple TV · 1920 × 1080 · Siri Remote</span></div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;line-height:1;">tvOS</div>
+      <div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.65);text-wrap:pretty;">Built for ten feet and the remote, shown at 1×. Nothing has hover and exactly one element is focused. Focus turns a control solid white and lifts it; posters scale 1.1 with a deep shadow.</div>
+    </div>
+    <div style="display:flex;gap:8px;font-size:13.5px;flex:none;"><a href="Biinge%20TV.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">TV screens</a><a href="Biinge%20TV%20Player.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">TV player</a><a href="Biinge%20TV%20Settings.dc.html" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">TV settings</a></div>
+  </div>
+  <div data-theme="{{ theme }}" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;align-items:start;">
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Type scale</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">pt at 1920</span></div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:88px;letter-spacing:-.035em;line-height:1;">My Lists</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">page · Archivo 88/640</span></sc-if></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:40px;letter-spacing:-.02em;line-height:1.1;">Want to Watch</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">row title · Archivo 40/620</span></sc-if></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.82);">Thirty years on, a new…</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">overview · 30/1.45, 2–3 line clamp</span></sc-if></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:29px;font-weight:600;">Blade Runner 2049</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">card title · 29/600 (.78 rest, white focused)</span></sc-if></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-size:25px;color:rgba(244,244,242,.55);">2017 · 2h 44m</span><sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">meta · 25 .55</span></sc-if></div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 8;display:flex;flex-direction:column;gap:22px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Buttons · rest and focused</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">TVButton</span></div>
+      <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:10px 0;">
+        <div style="display:flex;align-items:center;gap:10px;height:76px;padding:0 40px 0 32px;border-radius:999px;font-size:31px;font-weight:600;white-space:nowrap;background:#f4f4f2;color:#101014;transform:scale(1.08);box-shadow:0 18px 40px rgba(0,0,0,.45);"><span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Resume  ·  1h 12m left</div>
+        <div style="display:flex;align-items:center;gap:10px;height:76px;padding:0 24px 0 32px;border-radius:999px;font-size:31px;font-weight:600;white-space:nowrap;background:rgba(255,255,255,.16);color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:38px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">bookmark</span>Want to Watch<span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;opacity:.6;margin-left:-6px;">expand_more</span></div>
+        <div style="width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);"><span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;">more_horiz</span></div>
+        <div style="display:flex;align-items:center;gap:10px;height:76px;padding:0 40px 0 32px;border-radius:999px;font-size:31px;font-weight:600;white-space:nowrap;background:rgba(244,244,242,.88);color:#101014;"><span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Play</div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">76h · 31/600 · primary rests at .88 white, others .16 · list button opens a full-screen Lists sheet · focused #f4f4f2 on bg, scale 1.08, shadow 0 18 40 .45 · .22s cubic-bezier(.2,.7,.2,1)</div></sc-if>
+      <div style="display:flex;gap:28px;padding-top:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);">
+        <div style="flex:1;display:flex;flex-direction:column;gap:16px;">
+          <div style="font-size:13px;font-weight:600;color:#91919a;">Sheet buttons · resume action</div>
+          <div style="display:flex;align-items:center;gap:16px;height:82px;padding:0 32px;border-radius:20px;font-size:31px;font-weight:600;background:#f4f4f2;color:#101014;transform:scale(1.05);box-shadow:0 18px 40px rgba(0,0,0,.4);"><span style="font-family:'Material Symbols Rounded';font-size:38px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>Resume from 56:12</div>
+          <div style="display:flex;align-items:center;gap:16px;height:82px;padding:0 32px;border-radius:20px;font-size:31px;font-weight:600;background:rgba(255,255,255,.12);"><span style="font-family:'Material Symbols Rounded';font-size:38px;line-height:1;font-variation-settings:'FILL' 1;">replay</span>Start Over</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:16px;">
+          <div style="font-size:13px;font-weight:600;color:#91919a;">Settings rows</div>
+          <div style="min-height:88px;display:flex;align-items:center;gap:20px;padding:0 32px;border-radius:22px;font-size:30px;font-weight:600;background:#f4f4f2;color:#101014;transform:scale(1.05);box-shadow:0 18px 40px rgba(0,0,0,.4);"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;">refresh</span><span style="flex:1;">Reconnect</span></div>
+          <div style="min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 26px;font-size:28px;"><span>Server</span><span style="color:rgba(244,244,242,.55);">jellyfin.home.arpa</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="grid-column:span 12;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Tab bar</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">top, hides on scroll</span></div>
+      <div style="position:relative;height:200px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+        <img src="assets/posters/dune-part-two.jpg" alt="" style="position:absolute;left:0;top:-300px;width:100%;height:900px;object-fit:cover;filter:brightness(.7);">
+        <div style="position:relative;display:flex;align-items:center;gap:6px;height:84px;padding:0 10px;border-radius:999px;background:rgba(36,36,42,.45);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),inset 0 1px 0 rgba(255,255,255,.2),0 14px 40px rgba(0,0,0,.35);">
+          <div style="display:flex;align-items:center;justify-content:center;height:64px;width:64px;border-radius:999px;color:rgba(244,244,242,.9);"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;">search</span></div>
+          <div style="display:flex;align-items:center;height:64px;padding:0 30px;border-radius:999px;font-size:29px;font-weight:600;background:rgba(255,255,255,.18);color:rgba(244,244,242,.9);">Home</div>
+          <div style="display:flex;align-items:center;height:64px;padding:0 30px;border-radius:999px;font-size:29px;font-weight:600;background:#f4f4f2;color:#101014;transform:scale(1.06);">Movies</div>
+          <div style="display:flex;align-items:center;height:64px;padding:0 30px;border-radius:999px;font-size:29px;font-weight:600;color:rgba(244,244,242,.9);">TV Shows</div>
+          <div style="display:flex;align-items:center;height:64px;padding:0 30px;border-radius:999px;font-size:29px;font-weight:600;color:rgba(244,244,242,.9);">Collections</div>
+          <div style="display:flex;align-items:center;height:64px;padding:0 30px;border-radius:999px;font-size:29px;font-weight:600;color:rgba(244,244,242,.9);">My Lists</div>
+          <div style="display:flex;align-items:center;justify-content:center;height:64px;width:64px;border-radius:999px;color:rgba(244,244,242,.9);"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;">settings</span></div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">glass 84h · tab 64h 29/600 · current tab .18 · focused tab solid, scale 1.06 · search and settings are icon-only 64</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 8;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Poster card · rest and focused</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">TVPosterCard</span></div>
+      <div style="display:flex;gap:48px;align-items:flex-start;padding:24px 20px 10px;">
+        <div style="flex:none;width:260px;display:flex;flex-direction:column;gap:22px;">
+          <div data-media="" style="position:relative;width:260px;height:390px;border-radius:16px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 10px 24px rgba(0,0,0,.3);"><img src="assets/posters/nightcrawler.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;top:12px;left:12px;width:40px;height:40px;border-radius:8px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'wght' 700;">check</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:29px;font-weight:600;color:rgba(244,244,242,.78);">Nightcrawler</div><div style="font-size:25px;color:rgba(244,244,242,.55);">Rest · watched</div></div>
+        </div>
+        <div style="flex:none;width:260px;display:flex;flex-direction:column;gap:22px;">
+          <div data-media="" style="position:relative;width:260px;height:390px;border-radius:16px;overflow:hidden;background:#282828;transform:scale(1.1) translateY(-4px);box-shadow:0 0 0 1px rgba(255,255,255,.25),0 36px 70px rgba(0,0,0,.65);"><img src="assets/posters/the-bear.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 40%);"></div></div>
+          <div style="display:flex;flex-direction:column;gap:4px;transform:translateY(25px);"><div style="font-size:29px;font-weight:600;color:#ffffff;">The Bear</div><div style="font-size:25px;color:rgba(244,244,242,.55);">Focused</div></div>
+        </div>
+        <div style="flex:none;width:260px;display:flex;flex-direction:column;gap:22px;">
+          <div data-media="" style="position:relative;width:260px;height:390px;border-radius:16px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 10px 24px rgba(0,0,0,.3);"><img src="assets/posters/prisoners.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.5) brightness(.75);"><div style="position:absolute;left:14px;bottom:14px;width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;color:rgba(255,255,255,.92);">hide_source</span></div><div style="position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:29px;font-weight:600;color:rgba(244,244,242,.78);">Prisoners</div><div style="font-size:25px;color:rgba(244,244,242,.55);">Pinned, off server</div></div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">260×390 r16 · gap 48 · focus scale 1.1 + lift 4 · shadow 0 36 70 .65 + ring .25 · glare · caption drops 5% of height · .28s</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Up Next card</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">16:9</span></div>
+      <div style="display:flex;flex-direction:column;gap:22px;padding:14px 18px 0;">
+        <div data-media="" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#282828;transform:scale(1.06);box-shadow:0 0 0 1px rgba(255,255,255,.25),0 36px 70px rgba(0,0,0,.65);color:#f4f4f2;">
+          <img src="assets/posters/severance.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,.75) 100%);"></div>
+          <div style="position:absolute;left:16px;top:16px;padding:5px 12px;border-radius:8px;background:rgba(0,0,0,.6);font-size:22px;font-weight:700;">S2 · E3</div>
+          <div style="position:absolute;left:22px;bottom:34px;font-size:24px;font-weight:600;">31 min left</div>
+          <div style="position:absolute;left:22px;right:22px;bottom:18px;height:7px;border-radius:4px;background:rgba(255,255,255,.3);overflow:hidden;"><div style="width:38%;height:100%;background:#f4f4f2;"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:29px;font-weight:600;">Severance</div><div style="font-size:25px;color:rgba(244,244,242,.55);">Who Is Alive?</div></div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;line-height:1.5;">r16 · code chip 22/700 · progress 7h · time left 24/600</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 8;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Search field and keyboard</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">single-row keyboard</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:30px;padding:10px 0;">
+        <div style="display:flex;align-items:center;gap:20px;width:100%;max-width:1000px;height:100px;padding:0 36px;border-radius:26px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12);font-size:44px;box-sizing:border-box;"><span style="font-family:'Material Symbols Rounded';font-size:48px;line-height:1;color:rgba(244,244,242,.55);">search</span><span>gos</span><span style="width:3px;height:52px;background:#f4f4f2;border-radius:2px;margin-left:-14px;"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">a</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">b</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">c</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">d</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">e</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">f</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">g</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">h</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:#f4f4f2;color:#101014;transform:scale(1.15);">l</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">m</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">n</div>
+          <div style="width:56px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:rgba(255,255,255,.08);">o</div>
+          <div style="width:120px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;">space_bar</span></div>
+          <div style="width:84px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;">backspace</span></div>
+        </div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">field 100h r26 44/400 · keys 68h r14 32/600 · focused key scale 1.15 · row is a–z, space, delete (excerpt)</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 4;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Cast · rest and focused</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">160 circle</span></div>
+      <div style="display:flex;gap:36px;justify-content:center;padding:18px 0 6px;">
+        <div style="width:180px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;"><div style="width:160px;height:160px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:600;color:#6e6969;">AA</div><div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:26px;font-weight:600;color:rgba(244,244,242,.85);">Amy Adams</div><div style="font-size:23px;color:rgba(244,244,242,.55);">Louise Banks</div></div></div>
+        <div style="width:180px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;"><div style="width:160px;height:160px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:600;color:#6e6969;transform:scale(1.12);box-shadow:0 0 0 1px rgba(255,255,255,.25),0 36px 70px rgba(0,0,0,.65);">JR</div><div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:26px;font-weight:600;color:#fff;">Jeremy Renner</div><div style="font-size:23px;color:rgba(244,244,242,.55);">Ian Donnelly</div></div></div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">focus scale 1.12 · name .85 → white</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 5;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Badges and notes</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">detail header</span></div>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;align-items:center;gap:14px;"><span style="font-size:21px;font-weight:700;letter-spacing:.04em;padding:3px 12px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(244,244,242,.5);color:rgba(244,244,242,.9);">4K</span><span style="font-size:21px;font-weight:700;letter-spacing:.04em;padding:3px 12px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(244,244,242,.5);color:rgba(244,244,242,.9);">HDR</span><span style="font-size:21px;font-weight:700;letter-spacing:.04em;padding:3px 12px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(244,244,242,.5);color:rgba(244,244,242,.9);">ATMOS</span><span style="display:flex;align-items:center;gap:6px;font-size:29px;font-weight:600;margin-left:8px;"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>8.1</span></div>
+        <div style="display:flex;align-items:center;gap:14px;font-size:28px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;">dns</span>Not on Living Room</div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">quality 21/700 · 2pt outline r7 · note 28 with 34 icon</div></sc-if>
+    </div>
+
+    <div style="grid-column:span 7;display:flex;flex-direction:column;gap:18px;padding:24px 26px 28px;border-radius:20px;background:#101014;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);color:#f4f4f2;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;"><span style="font-size:15px;font-weight:600;">Toast</span><span style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">bottom-centre 64</span></div>
+      <div style="display:flex;justify-content:center;padding:8px 0;">
+        <div style="display:flex;align-items:center;gap:16px;height:84px;padding:0 40px 0 30px;border-radius:999px;background:rgba(40,40,46,.8);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 24px 60px rgba(0,0,0,.5);font-size:30px;font-weight:500;"><span style="font-family:'Material Symbols Rounded';font-size:38px;line-height:1;color:#34c46f;font-variation-settings:'FILL' 1;">check_circle</span>Marked watched in Biinge and Jellyfin</div>
+      </div>
+      <sc-if value="{{ showSpecs }}" hint-placeholder-val="{{ true }}"><div style="font:500 12px ui-monospace,Menlo,monospace;color:#64646d;">84h glass pill · 30/500 · same copy and colours as macOS</div></sc-if>
+    </div>
+
+  </div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;showSpecs&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Display&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'dark', showSpecs: this.props.showSpecs ?? true };
+  }
+}
+</script>
+</body>
+</html>

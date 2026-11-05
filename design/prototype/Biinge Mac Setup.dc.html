@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}
+@keyframes bspin{to{transform:rotate(360deg)}}
+a{color:#f4f4f2;text-decoration:none}a:hover{color:#fff}
+</style>
+<script src="biinge-theme.js"></script>
+</helmet>
+<div data-theme="{{ theme }}" data-screen-label="{{ label }}" style="width:1440px;height:900px;position:relative;overflow:hidden;border-radius:24px;background:#000;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 50px 120px rgba(0,0,0,.55);">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+  <dc-import name="Biinge Mac" screen="home" data-state="{{ homeState }}" hint-size="1440px,900px"></dc-import>
+</sc-if>
+
+<sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+  <img src="../../docs/public/screens/poster-wall.jpg" alt="" data-light-filter="brightness(.95) saturate(.8)" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.65) saturate(.95);transform:scale(1.04);">
+  <div data-light-background="radial-gradient(ellipse at 50% 50%,rgba(243,243,241,.9) 0%,rgba(243,243,241,.6) 45%,rgba(243,243,241,.2) 100%)" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.75) 0%,rgba(0,0,0,.55) 45%,rgba(0,0,0,.3) 100%);"></div>
+  <div data-light-background="linear-gradient(180deg,rgba(243,243,241,0) 0%,rgba(243,243,241,0) 70%,rgba(243,243,241,.6) 100%)" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 70%,rgba(0,0,0,.6) 100%);"></div>
+  <div style="position:absolute;top:20px;left:22px;display:flex;gap:8px;"><div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div><div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div><div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div></div>
+
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+    <div style="width:520px;padding:40px 44px 36px;border-radius:30px;background:rgba(28,28,34,.55);backdrop-filter:blur(40px) saturate(1.7);-webkit-backdrop-filter:blur(40px) saturate(1.7);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.2),0 40px 100px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:24px;">
+
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:600;">
+        <div style="display:flex;align-items:center;gap:7px;color:{{ s1.color }};"><span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ s1.bg }};color:{{ s1.fg }};font-size:12px;font-weight:700;"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;font-variation-settings:'wght' 700;display:{{ s1.checkDisplay }};">check</span><span style="display:{{ s1.numDisplay }};">1</span></span>Biinge account</div>
+        <div style="width:36px;height:1.5px;background:rgba(255,255,255,.2);"></div>
+        <div style="display:flex;align-items:center;gap:7px;color:{{ s2.color }};"><span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ s2.bg }};color:{{ s2.fg }};font-size:12px;font-weight:700;">2</span>Jellyfin</div>
+      </div>
+
+      <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="M01 Biinge Login" style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;">
+          <img src="../../docs/public/icon.png" alt="Biinge" style="width:84px;height:84px;border-radius:20px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 16px 40px rgba(0,0,0,.5);">
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:40px;line-height:1;letter-spacing:-.035em;">Log in to Biinge</div>
+          <div style="font-size:16px;line-height:1.5;color:rgba(244,244,242,.65);max-width:380px;">Use the Biinge account you have on iPhone. Your lists and watched history come with it.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input value="{{ email }}" onChange="{{ onEmail }}" placeholder="Email" style="height:50px;padding:0 16px;border-radius:14px;border:0;outline:0;background:rgba(0,0,0,.35);box-shadow:{{ loginRing }};color:#f4f4f2;font-size:17px;font-family:inherit;">
+          <input type="password" value="{{ password }}" onChange="{{ onPassword }}" onKeyDown="{{ onLoginKey }}" placeholder="Password" style="height:50px;padding:0 16px;border-radius:14px;border:0;outline:0;background:rgba(0,0,0,.35);box-shadow:{{ loginRing }};color:#f4f4f2;font-size:17px;font-family:inherit;">
+          <sc-if value="{{ loginFailed }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="M01 Biinge Login Error" style="display:flex;align-items:flex-start;gap:8px;font-size:14.5px;line-height:1.45;color:#ff8a8d;padding-top:2px;"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">error</span>That email and password don’t match a Biinge account. Check them and try again.</div>
+          </sc-if>
+        </div>
+        <div onClick="{{ logIn }}" style="display:flex;align-items:center;justify-content:center;height:52px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.98)">Log In</div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isConnect }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="M02 Connect Jellyfin" style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:36px;letter-spacing:-.03em;">Connect Jellyfin</div>
+          <div style="font-size:16px;line-height:1.5;color:rgba(244,244,242,.65);">Sign in with your Jellyfin account once. It links Living Room to your Biinge account and this Mac, so you won’t sign in to Jellyfin anywhere else in the app.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+          <div style="width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex:none;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">dns</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;"><div style="font-size:16px;font-weight:600;">Living Room</div><div style="font-size:13.5px;color:rgba(244,244,242,.55);">jellyfin.home.arpa · set on your Biinge server</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input value="{{ jfUser }}" onChange="{{ onJfUser }}" placeholder="Jellyfin username" style="height:50px;padding:0 16px;border-radius:14px;border:0;outline:0;background:rgba(0,0,0,.35);box-shadow:{{ jfRing }};color:#f4f4f2;font-size:17px;font-family:inherit;">
+          <input type="password" value="{{ jfPassword }}" onChange="{{ onJfPassword }}" onKeyDown="{{ onJfKey }}" placeholder="Jellyfin password" style="height:50px;padding:0 16px;border-radius:14px;border:0;outline:0;background:rgba(0,0,0,.35);box-shadow:{{ jfRing }};color:#f4f4f2;font-size:17px;font-family:inherit;">
+          <sc-if value="{{ jfFailed }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="M03 Jellyfin Sign-in Error" style="display:flex;align-items:flex-start;gap:8px;font-size:14.5px;line-height:1.45;color:#ff8a8d;padding-top:2px;"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">error</span>Living Room didn’t accept that username and password. Check them, or ask whoever runs the server.</div>
+          </sc-if>
+        </div>
+        <div onClick="{{ connect }}" style="display:flex;align-items:center;justify-content:center;height:52px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.98)">Connect</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:14px;color:rgba(244,244,242,.55);">
+          <span>Logged in as tom@example.com · <span onClick="{{ logOut }}" style="color:rgba(244,244,242,.85);cursor:default;" style-hover="color:#fff">Log Out</span></span>
+          <span onClick="{{ skip }}" style="color:rgba(244,244,242,.85);font-weight:500;cursor:default;" style-hover="color:#fff">Not Now</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isConnecting }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="M03 Connecting" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:24px 0 8px;">
+        <div style="width:52px;height:52px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:#f4f4f2;animation:bspin .9s linear infinite;"></div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:30px;letter-spacing:-.03em;margin-top:6px;">Connecting to Living Room</div>
+        <div style="font-size:15.5px;color:rgba(244,244,242,.6);">Signing in as {{ jfUser }}</div>
+        <div onClick="{{ cancel }}" style="margin-top:10px;display:flex;align-items:center;height:44px;padding:0 24px;border-radius:999px;background:rgba(255,255,255,.12);font-size:16px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.18)">Cancel</div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isServerError }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="M22 Connection Error" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding-top:4px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(229,72,77,.15);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;color:#ff8a8d;">cloud_off</span></div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:32px;letter-spacing:-.03em;">Can’t reach Living Room</div>
+        <div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.7);max-width:400px;">Biinge couldn’t get through to jellyfin.home.arpa. The server may be off, or out of reach from this network.</div>
+        <div style="display:flex;gap:12px;width:100%;margin-top:8px;">
+          <div onClick="{{ retry }}" style="flex:1;display:flex;align-items:center;justify-content:center;height:52px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.98)">Try Again</div>
+          <div onClick="{{ skip }}" style="flex:1;display:flex;align-items:center;justify-content:center;height:52px;border-radius:999px;background:rgba(255,255,255,.12);font-size:17px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.18)">Not Now</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="M04 Loading Library" style="display:flex;flex-direction:column;gap:22px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:36px;letter-spacing:-.03em;">Loading your library</div>
+          <div style="font-size:16px;line-height:1.5;color:rgba(244,244,242,.65);">{{ loadText }}</div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <sc-for list="{{ loadPosters }}" as="p" hint-placeholder-count="6">
+          <div style="flex:1;aspect-ratio:2/3;border-radius:8px;overflow:hidden;background:rgba(255,255,255,.07);"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;opacity:{{ p.opacity }};transition:opacity .5s;"></div>
+          </sc-for>
+        </div>
+        <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;"><div style="width:{{ loadPct }}%;height:100%;background:#f4f4f2;transition:width .4s;"></div></div>
+      </div>
+      </sc-if>
+
+    </div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;},&quot;step&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;login-error&quot;,&quot;connect&quot;,&quot;connect-error&quot;,&quot;connecting&quot;,&quot;server-error&quot;,&quot;loading&quot;,&quot;home&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;freeze&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onDone&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(result?: string) =&gt; void&quot;}}">
+const POSTERS = ['blade-runner-2049', 'la-la-land', 'mr-robot', 'dune-part-two', 'the-bear', 'aftersun'];
+
+class Component extends DCLogic {
+  state = { step: null, email: 'tom@example.com', password: '••••••••', jfUser: 'tom', jfPassword: '••••••••', loginFailed: null, jfFailed: null, progress: 0, skipped: false };
+
+  step() { return this.state.step ?? this.props.step ?? 'login'; }
+  componentDidMount() { this.maybeStart(); }
+  componentDidUpdate() { this.maybeStart(); }
+  componentWillUnmount() { clearTimeout(this.t); clearInterval(this.li); }
+  maybeStart() {
+    const s = this.step();
+    if (this.props.freeze && this.state.step == null) return;
+    if (s === 'connecting' && this.started !== 'connecting') {
+      this.started = 'connecting';
+      clearTimeout(this.t);
+      this.t = setTimeout(() => this.setState({ step: this.state.jfPassword === 'wrong' ? 'connect' : 'loading', jfFailed: this.state.jfPassword === 'wrong', progress: 0 }), 1600);
+    }
+    if (s === 'loading' && this.started !== 'loading') {
+      this.started = 'loading';
+      clearInterval(this.li);
+      this.li = setInterval(() => {
+        const p = this.state.progress + 0.08;
+        if (p >= 1) { clearInterval(this.li); this.setState({ progress: 1 }); this.t = setTimeout(() => (this.props.onDone ? this.props.onDone() : this.setState({ step: 'home' })), 450); }
+        else this.setState({ progress: p });
+      }, 200);
+    }
+    if (s !== 'connecting' && s !== 'loading') this.started = null;
+  }
+  go = (step, extra = {}) => this.setState({ step, ...extra });
+
+  renderVals() {
+    const s = this.step();
+    const loginFailed = this.state.loginFailed ?? s === 'login-error';
+    const jfFailed = this.state.jfFailed ?? s === 'connect-error';
+    const p = this.props.freeze && this.state.step == null && s === 'loading' ? 0.62 : this.state.progress;
+    const loggedIn = !['login', 'login-error'].includes(s);
+    const done = s === 'loading' || s === 'home';
+    const dot = (on, past) => ({ color: on || past ? '#f4f4f2' : 'rgba(244,244,242,.45)', bg: past ? '#34c46f' : on ? '#f4f4f2' : 'rgba(255,255,255,.12)', fg: past ? '#101014' : on ? '#101014' : 'rgba(244,244,242,.6)', checkDisplay: past ? 'inline' : 'none', numDisplay: past ? 'none' : 'inline' });
+    const logIn = () => {
+      if (s === 'login-error' && this.state.loginFailed == null) return this.go('connect', { loginFailed: false });
+      if (!this.state.password || this.state.password === 'wrong') return this.setState({ loginFailed: true });
+      this.go('connect', { loginFailed: false });
+    };
+    const connect = () => {
+      if (s === 'connect-error' && this.state.jfFailed == null) return this.go('connecting', { jfFailed: false, jfPassword: '••••••••' });
+      this.go('connecting', { jfFailed: false });
+    };
+    return {
+      label: { login: 'M01 Biinge Login', 'login-error': 'M01 Biinge Login Error', connect: 'M02 Connect Jellyfin', 'connect-error': 'M03 Jellyfin Sign-in Error', connecting: 'M03 Connecting', 'server-error': 'M22 Connection Error', loading: 'M04 Loading Library', home: 'M05 First Home' }[s],
+      isHome: s === 'home', isSetup: s !== 'home', homeState: this.state.skipped ? 'not-connected' : 'ready',
+      s1: dot(!loggedIn, loggedIn), s2: dot(loggedIn && !done, done),
+      isLogin: s === 'login' || s === 'login-error', isConnect: s === 'connect' || s === 'connect-error', isConnecting: s === 'connecting', isServerError: s === 'server-error', isLoading: s === 'loading',
+      email: this.state.email, onEmail: e => this.setState({ email: e.target.value, loginFailed: false }),
+      password: this.state.password, onPassword: e => this.setState({ password: e.target.value, loginFailed: false }),
+      onLoginKey: e => { if (e.key === 'Enter') logIn(); },
+      loginFailed, loginRing: loginFailed ? 'inset 0 0 0 1.5px #e5484d' : 'inset 0 0 0 1px rgba(255,255,255,.14)', logIn,
+      jfUser: this.state.jfUser, onJfUser: e => this.setState({ jfUser: e.target.value, jfFailed: false }),
+      jfPassword: this.state.jfPassword, onJfPassword: e => this.setState({ jfPassword: e.target.value, jfFailed: false }),
+      onJfKey: e => { if (e.key === 'Enter') connect(); },
+      jfFailed, jfRing: jfFailed ? 'inset 0 0 0 1.5px #e5484d' : 'inset 0 0 0 1px rgba(255,255,255,.14)', connect,
+      cancel: () => this.go('connect'), retry: () => this.go('connecting'),
+      skip: () => (this.props.onDone ? this.props.onDone('skipped') : this.go('home', { skipped: true })),
+      logOut: () => this.go('login', { password: '' }),
+      loadText: p < 0.5 ? `Movies · ${Math.round(p * 2 * 214)} of 214` : p < 1 ? `TV Shows · ${Math.round((p - 0.5) * 2 * 62)} of 62` : 'Done. Opening Home…',
+      loadPct: Math.round(p * 100),
+      loadPosters: POSTERS.map((id, i) => ({ img: `assets/posters/${id}.jpg`, opacity: p > i / 7 ? 1 : 0 })),
+    };
+  }
+}
+</script>
+</body>
+</html>

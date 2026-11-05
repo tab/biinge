@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<script src="biinge-theme.js"></script>
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+body{margin:0;background:#1a1a1f}
+a{color:#f4f4f2;text-decoration:none}a:hover{color:#fff;text-decoration:underline}
+</style>
+</helmet>
+<div style="padding:72px 80px 140px;background:#1a1a1f;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;gap:80px;min-width:3200px;">
+
+  <div style="display:flex;gap:96px;align-items:flex-start;">
+    <div style="display:flex;flex-direction:column;gap:12px;flex:none;max-width:620px;">
+      <div style="font-size:15px;font-weight:600;color:#91919a;">Biinge · light and dark</div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:56px;line-height:1;letter-spacing:-.035em;">Light theme on every platform</div>
+      <div style="font-size:17px;line-height:1.5;color:#c9c9c6;">The light values come from the dark tokens. Every frame below renders the same screen code as the dark prototypes with the light token set. The red accent stays removed.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;font-size:15px;line-height:1.45;color:#c9c9c6;">
+        <div style="display:flex;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.1;color:#91919a;">smartphone</span><span>iPhone: light and dark, switched by the existing Appearance setting in Profile (System, Light, Dark).</span></div>
+        <div style="display:flex;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.1;color:#91919a;">laptop_mac</span><span>macOS and Apple TV: follow the system appearance. No setting.</span></div>
+        <div style="display:flex;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.1;color:#91919a;">movie</span><span>Controls, scrims and badges that sit on artwork or video keep their dark values in both themes. Player panels and menus follow the theme.</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font-size:14px;font-weight:600;color:#91919a;">Tokens · dark → light</div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,300px));gap:10px 28px;">
+        <sc-for list="{{ tokens }}" as="t" hint-placeholder-count="12">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);">
+          <div style="display:flex;flex:none;border-radius:9px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><div style="width:30px;height:38px;background:{{ t.dark }};"></div><div style="width:30px;height:38px;background:{{ t.light }};"></div></div>
+          <div style="display:flex;flex-direction:column;gap:2px;min-width:0;"><div style="font-size:14px;font-weight:600;">{{ t.name }}</div><div style="font:500 11.5px ui-monospace,Menlo,monospace;color:#91919a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ t.darkLabel }} → {{ t.lightLabel }}</div></div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <section id="mac" style="display:flex;flex-direction:column;gap:28px;">
+    <div style="display:flex;align-items:baseline;gap:16px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">macOS · Light</div><div style="font-size:15px;color:#91919a;">Follows the system appearance.</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start;">
+      <div id="ML05" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">M05 Home · Light</div><div style="width:1440px;height:900px;"><dc-import name="Biinge Mac" theme="light" screen="home" hint-size="1440px,900px"></dc-import></div></div>
+      <div id="ML06" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">M06 Movies library · Light</div><div style="width:1440px;height:900px;"><dc-import name="Biinge Mac" theme="light" screen="movies" hint-size="1440px,900px"></dc-import></div></div>
+      <div id="ML07" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">M07 Movie details · Light</div><div style="width:1440px;height:900px;"><dc-import name="Biinge Mac" theme="light" screen="details" movie="la-la-land" hint-size="1440px,900px"></dc-import></div></div>
+      <div id="ML25" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">M25 My Lists · Want to Watch · Light</div><div style="width:1440px;height:900px;"><dc-import name="Biinge Mac" theme="light" screen="want" hint-size="1440px,900px"></dc-import></div></div>
+      <div id="ML19" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">M19 Player · Audio &amp; Subtitles · Light</div><div style="width:1440px;height:900px;"><dc-import name="Biinge Mac Player" theme="light" state="tracks" freeze="{{ true }}" hint-size="1440px,900px"></dc-import></div></div>
+      <div id="ML21" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">M21 Settings · Light</div><div style="width:640px;height:560px;"><dc-import name="Biinge Mac Settings" theme="light" hint-size="640px,560px"></dc-import></div></div>
+      <div id="ML04" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">M04 Connect Jellyfin · Light</div><div style="width:1440px;height:900px;"><dc-import name="Biinge Mac Setup" theme="light" step="connect" freeze="{{ true }}" hint-size="1440px,900px"></dc-import></div></div>
+    </div>
+  </section>
+
+  <section id="tv" style="display:flex;flex-direction:column;gap:28px;">
+    <div style="display:flex;align-items:baseline;gap:16px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">Apple TV · Light</div><div style="font-size:15px;color:#91919a;">Follows the system appearance. Focus stays a solid pill: dark on light.</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start;">
+      <div id="TL05" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">T05 Home · Light</div><div style="width:1920px;height:1080px;"><dc-import name="Biinge TV" theme="light" screen="home" hint-size="1920px,1080px"></dc-import></div></div>
+      <div id="TL07" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">T07 Movie details · Light</div><div style="width:1920px;height:1080px;"><dc-import name="Biinge TV" theme="light" screen="details" movie="la-la-land" hint-size="1920px,1080px"></dc-import></div></div>
+      <div id="TL24" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">My Lists · Light</div><div style="width:1920px;height:1080px;"><dc-import name="Biinge TV" theme="light" screen="lists" focus-row="{{ 0 }}" focus-col="{{ 1 }}" hint-size="1920px,1080px"></dc-import></div></div>
+      <div id="TL19" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">T19 Player · Audio &amp; Subtitles · Light</div><div style="width:1920px;height:1080px;"><dc-import name="Biinge TV Player" theme="light" state="tracks" freeze="{{ true }}" hint-size="1920px,1080px"></dc-import></div></div>
+      <div id="TL21" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">T21 Settings · Light</div><div style="width:1920px;height:1080px;"><dc-import name="Biinge TV Settings" theme="light" hint-size="1920px,1080px"></dc-import></div></div>
+      <div id="TL04" style="display:flex;flex-direction:column;gap:14px;"><div style="font-size:15px;font-weight:600;color:#91919a;">T04 Connect Jellyfin · Light</div><div style="width:1920px;height:1080px;"><dc-import name="Biinge TV Setup" theme="light" step="connect" freeze="{{ true }}" hint-size="1920px,1080px"></dc-import></div></div>
+    </div>
+  </section>
+
+  <section id="iphone" style="display:flex;flex-direction:column;gap:20px;">
+    <div style="display:flex;align-items:baseline;gap:16px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">iPhone · Light</div><div style="font-size:15px;color:#91919a;">On the iPhone board, next to their dark frames.</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;">
+      <sc-for list="{{ iphoneLinks }}" as="l" hint-placeholder-count="6">
+      <a href="{{ l.href }}" style="display:flex;align-items:center;gap:10px;height:48px;padding:0 18px 0 14px;border-radius:999px;background:rgba(255,255,255,.07);font-size:15px;font-weight:500;"><span style="font:600 12px ui-monospace,Menlo,monospace;color:#91919a;">{{ l.id }}</span>{{ l.label }}</a>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const T = (name, dark, light, darkLabel, lightLabel) => ({ name, dark, light, darkLabel: darkLabel || dark, lightLabel: lightLabel || light });
+    return {
+      tokens: [
+        T('Background', '#101014', '#f3f3f1'), T('Surface', '#17171d', '#eaeae7'), T('Raised sheet', '#1b1b20', '#ffffff'),
+        T('Poster placeholder', '#282828', '#deded9'), T('Text', '#f4f4f2', '#16161a'), T('Text secondary', '#91919a', '#62626a'),
+        T('Text tertiary', '#64646d', '#8c8c94'), T('Fill', 'rgba(255,255,255,.14)', 'rgba(0,0,0,.105)', 'white α', 'black 0.75α'), T('Glass', 'rgba(36,36,42,.5)', 'rgba(255,255,255,.65)'),
+        T('Primary pill', '#f4f4f2', '#16161a', '#f4f4f2 on bg', '#16161a on bg'), T('Watched', '#34c46f', '#1f9a52'), T('New · rating', '#eec01e', '#a77d00'),
+        T('Error', '#ff8a8d', '#c8383d'), T('Media scrim and badges', 'rgba(0,0,0,.6)', 'rgba(0,0,0,.6)', 'black α', 'unchanged'),
+      ],
+      iphoneLinks: [['I01L', 'Movies · Want list'], ['I22L', 'Movies · Library'], ['I04L', 'Movie details'], ['I19L', 'Player · Audio & Subtitles'], ['I12L', 'Profile · Appearance set to Light'], ['I31L', 'Connect Jellyfin sheet']].map(([id, label]) => ({ id, label, href: `Biinge iOS.dc.html#${id}` })),
+    };
+  }
+}
+</script>
+</body>
+</html>

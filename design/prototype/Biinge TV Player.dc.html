@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<script src="biinge-theme.js"></script>
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+@keyframes tspin{to{transform:rotate(360deg)}}
+body{margin:0;background:#1a1a1f}
+a{color:#f4f4f2;text-decoration:none}a:hover{color:#fff}
+</style>
+</helmet>
+<div data-screen-label="{{ label }}" data-media="" data-theme="{{ theme }}" style="width:1920px;height:1080px;position:relative;overflow:hidden;background:#000;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 50px 120px rgba(0,0,0,.55);">
+
+  <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+  <img src="assets/posters/mr-robot.jpg" alt="" style="position:absolute;inset:-100px;width:calc(100% + 200px);height:calc(100% + 200px);object-fit:cover;filter:blur(80px) brightness(.4) saturate(1.3);">
+  <div data-screen-label="T17 Player · starting" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;text-align:center;">
+    <div style="width:72px;height:72px;border-radius:50%;border:5px solid rgba(255,255,255,.2);border-top-color:#fff;animation:tspin .9s linear infinite;"></div>
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:56px;letter-spacing:-.03em;">Mr. Robot</div>
+    <div style="font-size:30px;color:rgba(244,244,242,.7);">S1 · E4 · Resumes at 21:14</div>
+    <div style="font-size:28px;color:rgba(244,244,242,.55);">Living Room is preparing the stream…</div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ showVideo }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;left:{{ vx }}px;top:{{ vy }}px;width:{{ vw }}px;height:{{ vh }}px;overflow:hidden;border-radius:{{ vr }}px;box-shadow:{{ vShadow }};transition:all .5s cubic-bezier(.2,.7,.2,1);">
+    <img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 28%;filter:saturate(.9) brightness(.92);">
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ cueOn }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;left:120px;right:120px;bottom:{{ cueB }}px;display:flex;justify-content:center;z-index:7;pointer-events:none;">
+    <span style="font-size:{{ cueSize }}px;font-weight:{{ cueWeight }};line-height:1.3;color:#fff;text-align:center;background:{{ cueBg }};padding:{{ cuePad }};border-radius:10px;text-shadow:{{ cueShadow }};">{{ cueText }}</span>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ controls }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.78) 100%);z-index:4;"></div>
+  <div style="position:absolute;left:96px;right:96px;bottom:80px;display:flex;flex-direction:column;gap:22px;z-index:5;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;">
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font-size:26px;font-weight:600;color:rgba(244,244,242,.7);">Mr. Robot · S1 · E4</div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:48px;letter-spacing:-.025em;">eps1.3_da3m0ns.mp4</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <sc-for list="{{ buttons }}" as="b" hint-placeholder-count="3">
+        <div onClick="{{ b.go }}" style="height:72px;padding:0 30px 0 24px;display:flex;align-items:center;gap:12px;border-radius:999px;font-size:26px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .2s;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;font-variation-settings:'FILL' 1;">{{ b.icon }}</span>{{ b.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position:relative;height:10px;border-radius:5px;background:rgba(255,255,255,.25);">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:58%;border-radius:5px;background:rgba(255,255,255,.3);"></div>
+      <div style="position:absolute;left:0;top:0;bottom:0;width:{{ played }}%;border-radius:5px;background:#f4f4f2;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:24px;font-weight:500;color:rgba(244,244,242,.75);font-variant-numeric:tabular-nums;"><span>{{ timeNow }}</span><span>{{ timeLeft }}</span></div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ reloading }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="T18 Stream reload indicator" style="position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:6;display:flex;align-items:center;gap:20px;padding:20px 34px 20px 26px;border-radius:999px;background:rgba(0,0,0,.6);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);">
+    <div style="width:40px;height:40px;border-radius:50%;border:4px solid rgba(255,255,255,.22);border-top-color:#fff;animation:tspin .9s linear infinite;"></div>
+    <span style="font-size:28px;font-weight:500;">Switching to Russian · LostFilm…</span>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.15) 70%);z-index:6;"></div>
+  <div data-screen-label="{{ panelLabel }}" data-theme="{{ theme }}" style="position:absolute;left:200px;right:200px;top:56px;height:{{ panelH }}px;border-radius:40px;background:rgba(30,30,36,.95);backdrop-filter:blur(50px) saturate(1.8);-webkit-backdrop-filter:blur(50px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 40px 100px rgba(0,0,0,.55);z-index:7;display:flex;flex-direction:column;overflow:hidden;">
+    <sc-if value="{{ isTracks }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;padding:40px 44px 0;flex:1;min-height:0;">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+        <div style="font-size:24px;font-weight:600;color:rgba(244,244,242,.5);padding:0 22px 8px;">Audio</div>
+        <sc-for list="{{ audio }}" as="a" hint-placeholder-count="4">
+        <div onClick="{{ a.go }}" style="min-height:84px;display:flex;align-items:center;gap:14px;padding:8px 22px;border-radius:20px;background:{{ a.bg }};color:{{ a.color }};transform:{{ a.tf }};box-shadow:{{ a.shadow }};transition:all .2s;cursor:default;">
+          <span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;width:30px;flex:none;opacity:{{ a.check }};font-variation-settings:'wght' 600;">check</span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><div style="display:flex;align-items:center;gap:10px;font-size:28px;font-weight:600;">{{ a.lang }}<sc-if value="{{ a.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:17px;font-weight:700;letter-spacing:.03em;padding:2px 9px;border-radius:6px;box-shadow:inset 0 0 0 1.5px currentColor;opacity:.7;">{{ a.tag }}</span></sc-if></div><div style="font-size:22px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ a.detail }}</div></div>
+        </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+        <div style="font-size:24px;font-weight:600;color:rgba(244,244,242,.5);padding:0 22px 8px;">Subtitles</div>
+        <sc-for list="{{ subs }}" as="s" hint-placeholder-count="6">
+        <sc-if value="{{ s.isHead }}" hint-placeholder-val="{{ false }}"><div style="font-size:21px;font-weight:600;color:rgba(244,244,242,.45);padding:8px 22px 0 66px;">{{ s.head }}</div></sc-if>
+        <sc-if value="{{ s.isRow }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ s.go }}" style="min-height:66px;display:flex;align-items:center;gap:14px;padding:6px 22px;border-radius:20px;background:{{ s.bg }};color:{{ s.color }};transform:{{ s.tf }};box-shadow:{{ s.shadow }};transition:all .2s;cursor:default;">
+          <span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;width:30px;flex:none;opacity:{{ s.check }};font-variation-settings:'wght' 600;">check</span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><div style="font-size:27px;font-weight:600;opacity:{{ s.dim }};">{{ s.label }}</div><sc-if value="{{ s.hasDetail }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:6px;font-size:21px;color:{{ s.detailColor }};"><sc-if value="{{ s.bad }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">error</span></sc-if>{{ s.detail }}</div></sc-if></div>
+        </div>
+        </sc-if>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:0;">
+        <div style="font-size:24px;font-weight:600;color:rgba(244,244,242,.5);padding:0 22px 8px;">Options</div>
+        <div onClick="{{ toggleRemember }}" style="min-height:96px;display:flex;align-items:center;gap:20px;padding:10px 22px;border-radius:20px;background:{{ remRow.bg }};color:{{ remRow.color }};transform:{{ remRow.tf }};box-shadow:{{ remRow.shadow }};transition:all .2s;cursor:default;">
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;"><div style="font-size:26px;font-weight:600;">Use for every episode</div><div style="font-size:21px;opacity:.65;">Keeps these tracks for Mr. Robot</div></div>
+          <div style="font-size:24px;font-weight:600;opacity:.8;">{{ remText }}</div>
+        </div>
+        <div onClick="{{ openStyle }}" style="min-height:96px;display:flex;align-items:center;gap:16px;padding:10px 22px;border-radius:20px;background:{{ styleRow.bg }};color:{{ styleRow.color }};transform:{{ styleRow.tf }};box-shadow:{{ styleRow.shadow }};transition:all .2s;cursor:default;">
+          <span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;">format_size</span>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;"><div style="font-size:26px;font-weight:600;">Subtitle Style</div><div style="font-size:21px;opacity:.65;">{{ styleSummary }}</div></div>
+          <span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;opacity:.6;">chevron_right</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:none;padding:18px 66px 26px;font-size:21px;color:rgba(244,244,242,.45);">Swipe to move · Click to choose · Menu to close</div>
+    </sc-if>
+
+    <sc-if value="{{ isStyle }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:36px 66px 12px;">
+      <div style="display:flex;align-items:center;gap:14px;font-size:24px;color:rgba(244,244,242,.55);"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;">arrow_back</span>Audio &amp; Subtitles</div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:36px;letter-spacing:-.02em;">Subtitle Style</div>
+      <div onClick="{{ resetStyle }}" style="height:60px;padding:0 26px;display:flex;align-items:center;border-radius:999px;font-size:24px;font-weight:600;background:{{ resetBtn.bg }};color:{{ resetBtn.color }};transform:{{ resetBtn.tf }};transition:all .2s;cursor:default;">Reset</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;padding:8px 44px 0;">
+      <sc-for list="{{ styleRows }}" as="r" hint-placeholder-count="5">
+      <div style="min-height:84px;display:flex;align-items:center;justify-content:space-between;gap:30px;padding:6px 22px;border-radius:22px;background:{{ r.rowBg }};">
+        <div style="font-size:28px;font-weight:600;">{{ r.label }}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <sc-for list="{{ r.options }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.go }}" style="height:60px;min-width:72px;padding:0 26px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:24px;font-weight:600;background:{{ o.bg }};color:{{ o.color }};transform:{{ o.tf }};box-shadow:{{ o.shadow }};transition:all .2s;cursor:default;">{{ o.label }}</div></sc-for>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="flex:none;padding:12px 66px 26px;font-size:21px;color:rgba(244,244,242,.45);">The style applies to every title. Swipe left or right to change a value.</div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ nextOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="T20 Next episode prompt" style="position:absolute;left:1020px;right:120px;top:300px;display:flex;flex-direction:column;gap:22px;z-index:6;">
+    <div style="font-size:24px;font-weight:700;letter-spacing:.08em;color:rgba(244,244,242,.6);">UP NEXT · IN {{ count }}</div>
+    <div style="width:520px;aspect-ratio:16/9;border-radius:22px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12);"><img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 62%;filter:hue-rotate(-12deg) saturate(1.2);"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-size:26px;color:rgba(244,244,242,.65);">S1 · E5 · 47 min</div><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.02em;">eps1.4_3xpl0its.wmv</div></div>
+    <div style="display:flex;gap:22px;margin-top:10px;">
+      <sc-for list="{{ nextButtons }}" as="b" hint-placeholder-count="2">
+      <div onClick="{{ b.go }}" style="height:80px;padding:0 36px 0 28px;display:flex;align-items:center;gap:12px;border-radius:999px;font-size:28px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .2s;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;font-variation-settings:'FILL' 1;">{{ b.icon }}</span>{{ b.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ errorOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="T24 Playback error" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;">
+    <span style="font-family:'Material Symbols Rounded';font-size:88px;line-height:1;color:#ff8a8d;">error</span>
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:64px;letter-spacing:-.03em;">Can’t play this episode</div>
+    <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.7);max-width:1100px;">Living Room can’t turn this file into a stream Apple TV plays. Try again, or play it on another device.</div>
+    <div style="display:flex;gap:24px;margin-top:20px;">
+      <sc-for list="{{ errButtons }}" as="b" hint-placeholder-count="2">
+      <div onClick="{{ b.go }}" style="height:80px;padding:0 36px 0 28px;display:flex;align-items:center;gap:12px;border-radius:999px;font-size:28px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .2s;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;">{{ b.icon }}</span>{{ b.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;controls&quot;,&quot;hidden&quot;,&quot;loading&quot;,&quot;reloading&quot;,&quot;tracks&quot;,&quot;style&quot;,&quot;next&quot;,&quot;error&quot;],&quot;default&quot;:&quot;controls&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;freeze&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;subStyle&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}">
+const AUDIO = [
+  { lang: 'English', tag: 'Original', detail: 'Dolby Digital 5.1' },
+  { lang: 'Russian', detail: 'LostFilm · DTS 5.1' },
+  { lang: 'Russian', detail: 'Кубик в Кубе · DTS 5.1' },
+  { lang: 'English', detail: 'Commentary · Stereo' },
+];
+const SUBS = [
+  { id: 'off', label: 'Off' },
+  { head: 'English' },
+  { id: 'en', label: 'Full', detail: 'Every line', text: 'Elliot? Are you there?' },
+  { id: 'en-sdh', label: 'Full with sound cues', detail: 'For the deaf and hard of hearing', text: '[phone buzzing] Elliot? Are you there?' },
+  { head: 'Russian' },
+  { id: 'ru-forced', label: 'Foreign lines only', detail: 'Signs and other languages', text: 'ВХОДЯЩИЙ ВЫЗОВ' },
+  { id: 'ru', label: 'Full', detail: 'Every line', text: 'Эллиот? Ты здесь?' },
+  { head: 'Spanish' },
+  { id: 'es', label: 'Full', detail: 'Couldn’t load from the server', bad: true },
+];
+const STYLE0 = { size: 1, weight: 0, bg: 1, pos: 0, delay: 0 };
+const DUR = 49 * 60;
+const fmt = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? `${h}:${String(m).padStart(2, '0')}` : `${m}`) + `:${String(x).padStart(2, '0')}`; };
+const FOCUS = { bg: '#f4f4f2', color: '#101014', tf: 'scale(1.05)', shadow: '0 18px 40px rgba(0,0,0,.45)' };
+const REST = { bg: 'rgba(255,255,255,.12)', color: '#f4f4f2', tf: 'scale(1)', shadow: 'none' };
+const PLAIN = { bg: 'transparent', color: '#f4f4f2', tf: 'scale(1)', shadow: 'none' };
+
+class Component extends DCLogic {
+  state = { ui: null, focus: null, audio: null, sub: 'en', remember: true, style: null, count: 8 };
+  ui() { return this.state.ui ?? this.props.state ?? 'controls'; }
+  defFocus(ui) { return { controls: 'btn:0', tracks: 'sub:2', style: 'style:2:1', next: 'next:0', error: 'err:0', reloading: 'btn:0' }[ui] || ''; }
+  focus() { return this.state.focus ?? this.defFocus(this.ui()); }
+  componentDidMount() {
+    this.tick = setInterval(() => { if (!this.props.freeze && this.ui() === 'next') this.setState(s => ({ count: s.count <= 1 ? 8 : s.count - 1 })); }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this.tick); }
+  set(ui, focus) { this.setState({ ui, focus: focus ?? null }); }
+  renderVals() {
+    const ui = this.ui(), f = this.focus();
+    const at = (key, base = REST) => key === f ? FOCUS : base;
+    const panelOpen = ui === 'tracks' || ui === 'style', isNext = ui === 'next', isErr = ui === 'error', loading = ui === 'loading', reloading = ui === 'reloading';
+    const controls = ui === 'controls' || reloading;
+    const st = { ...STYLE0, ...(this.state.style || this.props.subStyle || {}) };
+    const setStyle = (k, v) => this.setState({ style: { ...st, [k]: v } });
+    const sub = SUBS.find(x => x.id === this.state.sub) || SUBS[2];
+    const audioIdx = this.state.audio ?? (reloading ? 1 : 0);
+    const sizeL = ['Small', 'Medium', 'Large'], bgL = ['None', 'Shadow', 'Box'];
+    const cueText = sub.text || (ui === 'style' ? 'Elliot? Are you there?' : '');
+    const t = isNext ? DUR - 20 : ui === 'hidden' ? 1302 : 1274;
+    const opts = (row, k, labels) => labels.map((label, i) => { const key = `style:${row}:${i}`, sel = st[k] === i; const look = key === f ? FOCUS : sel ? { bg: 'rgba(255,255,255,.22)', color: '#fff', tf: 'scale(1)', shadow: 'none' } : PLAIN; return { label, ...look, go: () => { setStyle(k, i); this.setState({ focus: key }); } }; });
+    const row = (i, label, options) => ({ label, options, rowBg: f.startsWith(`style:${i}:`) ? 'rgba(255,255,255,.06)' : 'transparent' });
+    const posL = ['Lowest', 'Low', 'Middle', 'High', 'Highest'];
+    const label = { controls: 'T18 Playback controls', hidden: 'T17 Player · controls hidden', loading: 'T17 Player · starting', reloading: 'T18 Player · audio switch reloading', tracks: 'T19 Audio & Subtitles', style: 'T19 Subtitle Style', next: 'T20 Next episode prompt', error: 'T24 Playback error' }[ui] || 'T17 Player';
+    return {
+      label, theme: this.props.theme,
+      vx: isNext ? 120 : 0, vy: isNext ? 300 : 0, vw: isNext ? 820 : 1920, vh: isNext ? 461 : 1080, vr: isNext ? 28 : 0, vShadow: isNext ? '0 0 0 2px rgba(255,255,255,.14),0 40px 90px rgba(0,0,0,.6)' : 'none',
+      showVideo: !loading && !isErr, loading, controls, reloading, panelOpen, nextOpen: isNext, errorOpen: isErr,
+      isTracks: ui === 'tracks', isStyle: ui === 'style', panelLabel: ui === 'style' ? 'T19 Subtitle Style' : 'T19 Audio & Subtitles', panelH: ui === 'style' ? 640 : 800,
+      cueOn: !!cueText && !loading && !isErr && !isNext && !reloading && this.state.sub !== 'off',
+      cueText, cueB: (controls ? 300 : 90) + st.pos * 30, cueSize: [38, 46, 56][st.size], cueWeight: st.weight ? 600 : 400,
+      cueBg: st.bg === 2 ? 'rgba(0,0,0,.62)' : 'transparent', cuePad: st.bg === 2 ? '6px 20px 10px' : '0',
+      cueShadow: st.bg === 0 ? '0 2px 3px rgba(0,0,0,.6)' : st.bg === 1 ? '0 0 10px rgba(0,0,0,.9),0 3px 4px rgba(0,0,0,.9)' : 'none',
+      played: (t / DUR * 100).toFixed(1), timeNow: fmt(t), timeLeft: `-${fmt(DUR - t)}`,
+      buttons: [['subtitles', 'Audio & Subtitles', () => this.set('tracks')], ['skip_next', 'Next Episode', () => this.set('next')], ['info', 'Episode', () => {}]].map(([icon, l, go], i) => ({ icon, label: l, go, ...at(`btn:${i}`) })),
+      audio: AUDIO.map((a, i) => ({ ...a, hasTag: !!a.tag, tag: a.tag || '', check: audioIdx === i ? 1 : 0, ...at(`aud:${i}`, PLAIN), go: () => this.setState({ audio: i, ui: 'reloading', focus: null }) })),
+      subs: SUBS.map((s, i) => s.head ? { isHead: true, isRow: false, head: s.head } : { isHead: false, isRow: true, head: '', label: s.label, detail: s.detail || '', hasDetail: !!s.detail, bad: !!s.bad, dim: s.bad ? .5 : 1, detailColor: s.bad ? '#ff8a8d' : 'inherit', check: this.state.sub === s.id ? 1 : 0, ...at(`sub:${i}`, PLAIN), go: () => !s.bad && this.setState({ sub: s.id, focus: `sub:${i}` }) }),
+      remRow: at('opt:0', PLAIN), styleRow: at('opt:1', PLAIN), remText: this.state.remember ? 'On' : 'Off',
+      toggleRemember: () => this.setState(s => ({ remember: !s.remember, focus: 'opt:0' })), openStyle: () => this.set('style'),
+      styleSummary: `${sizeL[st.size]} · ${bgL[st.bg]}`,
+      resetBtn: at('reset', PLAIN), resetStyle: () => this.setState({ style: { ...STYLE0 }, focus: 'reset' }),
+      styleRows: [row(0, 'Size', opts(0, 'size', sizeL)), row(1, 'Weight', opts(1, 'weight', ['Regular', 'Bold'])), row(2, 'Background', opts(2, 'bg', bgL)),
+        row(3, 'Position', opts(3, 'pos', posL).filter((_, i) => i === st.pos).map(o => ({ ...o, label: `‹  ${o.label}  ›` }))),
+        row(4, 'Timing', [{ label: st.delay === 0 ? '‹  In sync  ›' : `‹  ${Math.abs(st.delay).toFixed(1)} s ${st.delay < 0 ? 'earlier' : 'later'}  ›`, ...(f === 'style:4:0' ? FOCUS : PLAIN), go: () => setStyle('delay', st.delay >= 5 ? -5 : +(st.delay + 0.5).toFixed(1)) }])],
+      count: this.state.count,
+      nextButtons: [['play_arrow', 'Play Next Episode', () => this.set('controls')], ['close', 'Cancel', () => this.set('controls')]].map(([icon, l, go], i) => ({ icon, label: l, go, ...at(`next:${i}`) })),
+      errButtons: [['refresh', 'Try Again', () => this.set('loading')], ['arrow_back', 'Back to Episode', () => {}]].map(([icon, l, go], i) => ({ icon, label: l, go, ...at(`err:${i}`) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block"><script src="biinge-theme.js"></script><style>@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}@keyframes bdrift{from{transform:scale(1) translate3d(0,0,0)}to{transform:scale(1.06) translate3d(-1.5%,-2%,0)}}@keyframes bpress{50%{transform:scale(.96)}}body{margin:0;background:#101014;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}a:hover{color:inherit}</style></helmet>
+<div ref="{{ rootRef }}" data-theme="{{ theme }}" style="position:relative;container-type:inline-size;min-height:100vh;background:#101014;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip;">
+
+<dc-import name="Site Header" page="home" theme="{{ theme }}" over="{{ true }}" narrow="{{ narrow }}" on-toggle-theme="{{ toggleTheme }}" style="position:absolute;top:0;left:0;right:0;z-index:50;" hint-size="100%,64px"></dc-import>
+
+<sc-if value="{{ heroA }}" hint-placeholder-val="{{ true }}">
+<section data-media="" data-screen-label="Hero · Cinematic" style="color:#f4f4f2;position:relative;isolation:isolate;overflow:hidden;min-height:clamp(700px,60cqw,900px);display:flex;align-items:flex-end;background:#0b0b0e;">
+  <sc-for list="{{ ha.slides }}" as="s" hint-placeholder-count="3"><img src="{{ s.img }}" alt="" style="position:absolute;left:-80px;top:-80px;width:calc(100% + 160px);height:calc(100% + 160px);object-fit:cover;filter:blur(56px) saturate(1.45) brightness(.62);opacity:{{ s.o }};transition:{{ s.btr }};z-index:-3;"></sc-for>
+  <div style="position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(16,16,20,.9) 0%,rgba(16,16,20,.62) 46%,rgba(16,16,20,.2) 100%),linear-gradient(0deg,#101014 0%,rgba(16,16,20,0) 34%);"></div>
+  <div style="position:relative;width:100%;max-width:1320px;margin:0 auto;padding:150px clamp(20px,5cqw,64px) clamp(64px,7cqw,96px);box-sizing:border-box;display:flex;align-items:flex-end;justify-content:space-between;gap:56px;">
+    <div style="display:flex;flex-direction:column;gap:26px;max-width:680px;min-width:0;">
+      <div style="font-size:15px;font-weight:500;color:rgba(255,255,255,.68);">For iPhone, Mac and Apple TV · Open source</div>
+      <h1 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:clamp(46px,6.2cqw,90px);line-height:1.02;letter-spacing:-.034em;text-wrap:balance;">Your watchlist, now with a play button.</h1>
+      <p style="margin:0;max-width:56ch;font-size:clamp(17px,1.5cqw,20px);line-height:1.55;color:rgba(255,255,255,.8);text-wrap:pretty;">Biinge keeps track of the movies, shows and games you want to see, have started and have finished. Now it plays your own library too, and picks up where you left off on any screen.</p>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:6px;">
+        <a href="https://github.com/tab/biinge" style="display:flex;align-items:center;gap:8px;height:50px;padding:0 28px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;">Get it on GitHub<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">north_east</span></a>
+        <a href="#features" style="display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600;color:#f4f4f2;">See what’s new<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">arrow_forward</span></a>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+        <a href="Site%20iPhone.dc.html" style="display:flex;align-items:center;gap:7px;height:36px;padding:0 14px 0 11px;border-radius:999px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);font-size:14px;font-weight:500;color:#f4f4f2;" style-hover="background:rgba(255,255,255,.18);"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">smartphone</span>iPhone</a>
+        <a href="Site%20Mac.dc.html" style="display:flex;align-items:center;gap:7px;height:36px;padding:0 14px 0 11px;border-radius:999px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);font-size:14px;font-weight:500;color:#f4f4f2;" style-hover="background:rgba(255,255,255,.18);"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">laptop_mac</span>Mac</a>
+        <a href="Site%20Apple%20TV.dc.html" style="display:flex;align-items:center;gap:7px;height:36px;padding:0 14px 0 11px;border-radius:999px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);font-size:14px;font-weight:500;color:#f4f4f2;" style-hover="background:rgba(255,255,255,.18);"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">tv</span>Apple TV</a>
+      </div>
+    </div>
+    <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:none;width:300px;display:flex;flex-direction:column;gap:18px;">
+      <div style="position:relative;width:300px;height:450px;border-radius:14px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 40px 80px rgba(0,0,0,.55);">
+        <sc-for list="{{ ha.slides }}" as="s" hint-placeholder-count="3"><img src="{{ s.img }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:{{ s.o }};transform:{{ s.tf }};transition:{{ s.tr }};"></sc-for>
+      </div>
+      <div style="position:relative;height:96px;">
+        <sc-for list="{{ ha.slides }}" as="s" hint-placeholder-count="3">
+        <div style="position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;gap:6px;opacity:{{ s.o }};transform:{{ s.ctf }};transition:{{ s.ctr }};">
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.66);">{{ s.eyebrow }}</div>
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:24px;line-height:1.05;letter-spacing:-.025em;">{{ s.title }}</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:13px;color:rgba(255,255,255,.72);"><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22);"><div style="width:{{ s.pct }}%;height:100%;border-radius:2px;background:#f4f4f2;"></div></div>{{ s.left }}</div>
+        </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:6px;"><sc-for list="{{ ha.slides }}" as="s" hint-placeholder-count="3"><div style="width:{{ s.dot }}px;height:6px;border-radius:3px;background:{{ s.dotBg }};transition:width 280ms cubic-bezier(.2,.7,.2,1),background 280ms;"></div></sc-for></div>
+    </div>
+    </sc-if>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ heroB }}" hint-placeholder-val="{{ false }}">
+<section data-media="" data-screen-label="Hero · Devices" style="color:#f4f4f2;position:relative;isolation:isolate;overflow:hidden;background:#0b0b0e;">
+  <div style="position:absolute;inset:-3%;z-index:-3;background-image:url(../../docs/public/screens/poster-wall.jpg);background-size:cover;background-position:center;animation:bdrift 72s ease-in-out infinite alternate;"></div>
+  <div style="position:absolute;inset:0;z-index:-2;background:linear-gradient(180deg,rgba(16,16,20,.88) 0%,rgba(16,16,20,.74) 40%,rgba(16,16,20,.9) 78%,#101014 100%);"></div>
+  <div style="max-width:1320px;margin:0 auto;padding:150px clamp(20px,5cqw,64px) 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px;">
+    <div style="font-size:15px;font-weight:500;color:rgba(255,255,255,.68);">For iPhone, Mac and Apple TV · Open source</div>
+    <h1 style="margin:0;max-width:16ch;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:clamp(46px,6.2cqw,90px);line-height:1.02;letter-spacing:-.034em;text-wrap:balance;">Your watchlist, now with a play button.</h1>
+    <p style="margin:0;max-width:58ch;font-size:clamp(17px,1.5cqw,20px);line-height:1.55;color:rgba(255,255,255,.8);text-wrap:pretty;">Biinge keeps track of the movies, shows and games you want to see, have started and have finished. Now it plays your own library too, and picks up where you left off on any screen.</p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px 28px;margin-top:4px;">
+      <a href="https://github.com/tab/biinge" style="display:flex;align-items:center;gap:8px;height:50px;padding:0 28px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;">Get it on GitHub<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">north_east</span></a>
+      <a href="#features" style="display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600;color:#f4f4f2;">See what’s new<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">arrow_forward</span></a>
+    </div>
+    <div style="position:relative;width:{{ dv.w }}px;height:{{ dv.h }}px;margin-top:40px;">
+      <div style="position:absolute;left:0;top:0;width:1200px;height:560px;transform:scale({{ dv.s }});transform-origin:0 0;text-align:left;">
+
+        <div style="position:absolute;left:0;top:76px;width:560px;height:326px;box-sizing:border-box;padding:9px;border-radius:12px;background:#0a0a0c;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 40px 80px rgba(0,0,0,.6);">
+          <div style="position:relative;width:542px;height:308px;border-radius:4px;overflow:hidden;background:#101014;">
+            <img src="assets/posters/dune-part-two.jpg" alt="" style="position:absolute;left:-30px;top:-30px;width:602px;height:368px;object-fit:cover;filter:blur(24px) saturate(1.3) brightness(.55);">
+            <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,16,20,.75) 0%,rgba(16,16,20,.1) 70%),linear-gradient(0deg,rgba(16,16,20,.95) 0%,rgba(16,16,20,0) 55%);"></div>
+            <div style="position:absolute;left:0;right:0;top:12px;display:flex;justify-content:center;gap:4px;font-size:8.5px;font-weight:600;">
+              <span style="padding:3px 8px;color:rgba(244,244,242,.6);font-family:'Material Symbols Rounded';font-size:10px;line-height:1.3;">search</span><span style="padding:3px 9px;border-radius:999px;background:#f4f4f2;color:#101014;">Home</span><span style="padding:3px 9px;color:rgba(244,244,242,.66);">Movies</span><span style="padding:3px 9px;color:rgba(244,244,242,.66);">TV Shows</span><span style="padding:3px 9px;color:rgba(244,244,242,.66);">Collections</span><span style="padding:3px 9px;color:rgba(244,244,242,.66);">My Lists</span>
+            </div>
+            <div style="position:absolute;left:26px;top:56px;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-size:8.5px;font-weight:600;color:rgba(244,244,242,.7);">Recently Added · Movie</div>
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:26px;line-height:1;letter-spacing:-.03em;">Dune: Part Two</div>
+              <div style="font-size:8.5px;color:rgba(244,244,242,.72);">2024 · 2h 46m · Science Fiction</div>
+              <div style="display:flex;gap:5px;margin-top:4px;"><span style="display:flex;align-items:center;gap:2px;height:20px;padding:0 10px 0 7px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:8.5px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:12px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>Play</span><span style="height:20px;padding:0 10px;display:flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.16);font-size:8.5px;font-weight:600;">Details</span></div>
+            </div>
+            <div style="position:absolute;left:26px;top:166px;font-size:9px;font-weight:600;">Continue Watching</div>
+            <div style="position:absolute;left:26px;top:186px;display:flex;gap:12px;">
+              <sc-for list="{{ dvTv }}" as="p" hint-placeholder-count="6"><div style="position:relative;width:62px;height:93px;border-radius:6px;overflow:hidden;background:#282828;transform:{{ p.tf }};box-shadow:{{ p.sh }};transition:transform 280ms cubic-bezier(.34,1.36,.64,1),box-shadow 280ms;"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;inset:0;opacity:{{ p.glare }};background:linear-gradient(125deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,0) 45%);transition:opacity 280ms;"></div></div></sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;left:236px;top:402px;width:88px;height:8px;border-radius:0 0 4px 4px;background:#1a1a1e;"></div>
+
+        <div style="position:absolute;left:330px;top:0;width:700px;height:440px;border-radius:12px;overflow:hidden;background:#101014;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 50px 100px rgba(0,0,0,.7);display:flex;">
+          <div style="flex:none;width:164px;padding:12px 10px;box-sizing:border-box;background:#17171d;box-shadow:inset -1px 0 0 rgba(255,255,255,.06);display:flex;flex-direction:column;gap:2px;font-size:11px;">
+            <div style="display:flex;gap:6px;padding:2px 4px 14px;"><span style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></span><span style="width:10px;height:10px;border-radius:50%;background:#febc2e;"></span><span style="width:10px;height:10px;border-radius:50%;background:#28c840;"></span></div>
+            <div style="padding:4px 8px;font-size:9.5px;font-weight:600;color:rgba(244,244,242,.45);">Library</div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:rgba(255,255,255,.1);font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;font-variation-settings:'FILL' 1;">home</span>Home</div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;">movie</span>Movies</div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;">tv</span>TV Shows</div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;">collections_bookmark</span>Collections</div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;">resume</span>Continue Watching</div>
+            <div style="padding:12px 8px 4px;font-size:9.5px;font-weight:600;color:rgba(244,244,242,.45);">My Lists</div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;">bookmark</span><span style="flex:1;">Want to Watch</span><span style="color:rgba(244,244,242,.4);">24</span></div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;">play_circle</span><span style="flex:1;">Watching</span><span style="color:rgba(244,244,242,.4);">6</span></div>
+            <div style="display:flex;align-items:center;gap:7px;padding:5px 8px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;">check_circle</span><span style="flex:1;">Watched</span><span style="color:rgba(244,244,242,.4);">148</span></div>
+          </div>
+          <div style="position:relative;flex:1;min-width:0;">
+            <img src="assets/posters/blade-runner-2049.jpg" alt="" style="position:absolute;left:-30px;top:-30px;width:596px;height:290px;object-fit:cover;filter:blur(26px) saturate(1.3) brightness(.5);">
+            <div style="position:absolute;left:0;right:0;top:0;height:240px;background:linear-gradient(0deg,#101014 0%,rgba(16,16,20,0) 60%);"></div>
+            <img src="assets/posters/blade-runner-2049.jpg" alt="" style="position:absolute;left:24px;top:32px;width:104px;height:156px;object-fit:cover;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 16px 30px rgba(0,0,0,.5);">
+            <div style="position:absolute;left:148px;top:64px;display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:9.5px;font-weight:600;color:rgba(244,244,242,.7);">Recently Added · Movie</div>
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:28px;line-height:1;letter-spacing:-.03em;">Blade Runner 2049</div>
+              <div style="font-size:10px;color:rgba(244,244,242,.72);">2017 · 2h 44m · Science Fiction</div>
+              <div style="display:flex;gap:6px;margin-top:6px;"><span style="display:flex;align-items:center;gap:3px;height:24px;padding:0 12px 0 8px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:10px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>Play</span><span style="display:flex;align-items:center;gap:3px;height:24px;padding:0 10px 0 8px;border-radius:999px;background:rgba(255,255,255,.16);font-size:10px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:13px;line-height:1;">add</span>Add to List</span></div>
+            </div>
+            <div style="position:absolute;left:24px;top:226px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:14px;letter-spacing:-.02em;">Continue Watching</div>
+            <div style="position:absolute;left:24px;top:254px;display:flex;gap:12px;">
+              <sc-for list="{{ dvMac }}" as="c" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:6px;width:152px;transform:{{ c.tf }};transition:transform 200ms cubic-bezier(.2,.7,.2,1);">
+                <div style="position:relative;width:152px;height:86px;border-radius:8px;overflow:hidden;background:#282828;box-shadow:{{ c.sh }};transition:box-shadow 200ms;"><img src="{{ c.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;"><div style="position:absolute;left:7px;right:7px;bottom:6px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);"><div style="width:{{ c.pct }}%;height:100%;border-radius:2px;background:#f4f4f2;"></div></div></div>
+                <div style="font-size:10.5px;font-weight:600;">{{ c.title }}</div>
+                <div style="font-size:9.5px;color:rgba(244,244,242,.55);margin-top:-3px;">{{ c.sub }}</div>
+              </div>
+              </sc-for>
+            </div>
+            <div style="position:absolute;left:24px;top:388px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:14px;letter-spacing:-.02em;">Next Up</div>
+          </div>
+        </div>
+
+        <div style="position:absolute;left:958px;top:116px;width:212px;height:436px;box-sizing:border-box;padding:7px;border-radius:40px;background:#0a0a0c;box-shadow:0 0 0 1.5px rgba(214,214,220,.35),0 40px 80px rgba(0,0,0,.7);">
+          <div style="position:relative;width:198px;height:422px;border-radius:33px;overflow:hidden;background:#101014;">
+            <div style="position:absolute;left:24px;top:13px;font-size:10px;font-weight:600;">9:41</div>
+            <div style="position:absolute;left:67px;top:9px;width:64px;height:19px;border-radius:10px;background:#000;"></div>
+            <div style="position:absolute;left:14px;top:42px;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:24px;letter-spacing:-.03em;">Movies</div>
+            <div style="position:absolute;left:12px;top:80px;width:174px;height:26px;border-radius:999px;background:rgba(255,255,255,.06);">
+              <div style="position:absolute;top:2px;left:{{ dvPh.pill }}px;width:{{ dvPh.pillW }}px;height:22px;border-radius:999px;background:rgba(255,255,255,.16);transition:left 280ms cubic-bezier(.2,.7,.2,1),width 280ms cubic-bezier(.2,.7,.2,1);"></div>
+              <div style="position:absolute;inset:0;display:flex;font-size:9.5px;font-weight:600;">
+                <div style="flex:none;width:50px;display:flex;align-items:center;justify-content:center;color:{{ dvPh.c0 }};transition:color 200ms;">Want</div><div style="flex:none;width:60px;display:flex;align-items:center;justify-content:center;color:rgba(244,244,242,.55);">Watched</div><div style="flex:1;display:flex;align-items:center;justify-content:center;color:{{ dvPh.c1 }};transition:color 200ms;">Library</div>
+              </div>
+            </div>
+            <div style="position:absolute;left:12px;top:118px;display:grid;grid-template-columns:repeat(3,54px);gap:6px 6px;opacity:{{ dvPh.aO }};transform:{{ dvPh.aTf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+              <sc-for list="{{ dvPhList }}" as="p" hint-placeholder-count="9"><div data-media="" style="position:relative;width:54px;height:81px;border-radius:6px;overflow:hidden;background:#282828;"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><sc-if value="{{ p.pin }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:9px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;color:#fff;">push_pin</span></div></sc-if></div></sc-for>
+            </div>
+            <div style="position:absolute;left:12px;top:118px;width:174px;display:flex;flex-direction:column;gap:7px;opacity:{{ dvPh.bO }};transform:{{ dvPh.bTf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+              <div style="font-size:10.5px;font-weight:600;">Continue Watching</div>
+              <div style="position:relative;width:174px;height:98px;border-radius:9px;overflow:hidden;"><img src="assets/posters/the-bear.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;"><div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,0) 60%);"></div><div style="position:absolute;left:8px;bottom:14px;font-size:9.5px;font-weight:600;color:#fff;">The Bear · S3 · E2</div><div style="position:absolute;left:8px;right:8px;bottom:7px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);"><div style="width:62%;height:100%;border-radius:2px;background:#fff;"></div></div></div>
+              <div style="font-size:10.5px;font-weight:600;margin-top:4px;">Recently Added</div>
+              <div style="display:flex;gap:6px;"><img src="assets/posters/conclave.jpg" alt="" style="width:54px;height:81px;object-fit:cover;border-radius:6px;"><img src="assets/posters/poor-things.jpg" alt="" style="width:54px;height:81px;object-fit:cover;border-radius:6px;"><img src="assets/posters/perfect-days.jpg" alt="" style="width:54px;height:81px;object-fit:cover;border-radius:6px;"></div>
+            </div>
+            <div style="position:absolute;left:12px;right:12px;bottom:12px;height:44px;border-radius:999px;background:rgba(36,36,42,.82);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-around;padding:0 6px;">
+              <span style="display:flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:999px;background:rgba(255,255,255,.12);font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'FILL' 1;">movie</span>
+              <span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:rgba(244,244,242,.6);">tv</span>
+              <span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:rgba(244,244,242,.6);">sports_esports</span>
+              <span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:rgba(244,244,242,.6);">search</span>
+              <span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;color:rgba(244,244,242,.6);">account_circle</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(0deg,#101014 0%,rgba(16,16,20,0) 100%);pointer-events:none;"></div>
+</section>
+</sc-if>
+
+<section data-screen-label="Platforms" style="padding:clamp(80px,9cqw,128px) 0 clamp(72px,8cqw,112px);background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;gap:48px;">
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:760px;">
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(34px,3.9cqw,52px);line-height:1.05;letter-spacing:-.028em;">One library. An app for every screen.</h2>
+      <p style="margin:0;font-size:18px;line-height:1.6;color:rgba(244,244,242,.66);text-wrap:pretty;">Each app is shaped by its screen and its input. They share your lists, your progress and the library on your server, so anything you do on one is there on the others.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px;">
+      <a href="Site%20iPhone.dc.html" style="display:flex;flex-direction:column;gap:14px;padding:30px 30px 28px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);color:#f4f4f2;" style-hover="background:#1b1b20;">
+        <span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;font-variation-settings:'wght' 300;">smartphone</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:18px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:28px;letter-spacing:-.025em;">iPhone</div><div style="font-size:17px;font-weight:600;">Track, discover and play.</div></div>
+        <div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);text-wrap:pretty;">The tracker you know, with your library one tap away. Lists, episode progress, games and statistics stay right where they were.</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:10px;font-size:15px;font-weight:600;">Biinge for iPhone<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">arrow_forward</span></div>
+      </a>
+      <a href="Site%20Mac.dc.html" style="display:flex;flex-direction:column;gap:14px;padding:30px 30px 28px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);color:#f4f4f2;" style-hover="background:#1b1b20;">
+        <span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;font-variation-settings:'wght' 300;">laptop_mac</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:18px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:28px;letter-spacing:-.025em;">Mac</div><div style="font-size:17px;font-weight:600;">Browse and watch.</div></div>
+        <div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);text-wrap:pretty;">A media center with a sidebar, keyboard shortcuts and a player that fits a window or fills the screen.</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:10px;font-size:15px;font-weight:600;">Biinge for Mac<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">arrow_forward</span></div>
+      </a>
+      <a href="Site%20Apple%20TV.dc.html" style="display:flex;flex-direction:column;gap:14px;padding:30px 30px 28px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);color:#f4f4f2;" style-hover="background:#1b1b20;">
+        <span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;font-variation-settings:'wght' 300;">tv</span>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:18px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:28px;letter-spacing:-.025em;">Apple TV</div><div style="font-size:17px;font-weight:600;">Relax and watch.</div></div>
+        <div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);text-wrap:pretty;">Large artwork and clear focus, built for the Siri Remote. Find something and start it in a few clicks.</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:10px;font-size:15px;font-weight:600;">Biinge for Apple TV<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">arrow_forward</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="features" data-screen-label="Continue Watching" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,6cqw,96px);">
+    <div style="flex:1 1 340px;min-width:0;max-width:620px;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:9px;font-size:15px;font-weight:500;color:rgba(244,244,242,.6);margin-bottom:16px;"><span style="width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 2.5px #eec01e;"></span>Continue Watching</div>
+      <h2 style="margin:0 0 20px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(32px,3.6cqw,48px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Pick up where you stopped, on any screen.</h2>
+      <p style="margin:0 0 40px;font-size:18px;line-height:1.6;color:rgba(244,244,242,.66);text-wrap:pretty;">Pause an episode on the Mac and it waits on the Apple TV at the same second. Playback positions live on your Jellyfin server, so every app resumes from the same place.</p>
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Continue Watching comes first</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Home opens on what you’ve started, with the time left on every card.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Next Up</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">The next episode of every show you’re watching, ready to play.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Resume or start over</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Choose from the card, the details page or the player.</div></div>
+      </div>
+    </div>
+    <div style="position:relative;flex:none;width:{{ dm.w }}px;height:{{ dm.h }}px;border-radius:24px;overflow:hidden;background:#101014;">
+      <div style="position:absolute;left:0;top:0;width:560px;height:420px;transform:scale({{ dm.s }});transform-origin:0 0;">
+        <div style="position:absolute;left:32px;top:36px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:21px;letter-spacing:-.02em;opacity:{{ d1.uiO }};transition:{{ d1.uiTr }};">Continue Watching</div>
+        <sc-for list="{{ d1.cards }}" as="c" hint-placeholder-count="2">
+          <div data-media="" style="position:absolute;left:{{ c.l }}px;top:{{ c.t }}px;width:{{ c.w }}px;height:{{ c.h }}px;border-radius:{{ c.r }}px;overflow:hidden;background:#282828;opacity:{{ c.o }};transform:{{ c.tf }};box-shadow:{{ c.sh }};transition:{{ c.tr }};z-index:{{ c.z }};"><img src="{{ c.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;"><div style="position:absolute;left:10px;right:10px;bottom:9px;height:4px;border-radius:2px;background:rgba(255,255,255,.3);opacity:{{ c.barO }};transition:opacity 150ms;"><div style="width:{{ c.pct }}%;height:100%;border-radius:2px;background:#fff;"></div></div></div>
+          <div style="position:absolute;left:{{ c.cl }}px;top:230px;display:flex;flex-direction:column;gap:3px;opacity:{{ d1.uiO }};transition:{{ d1.uiTr }};"><div style="font-size:14.5px;font-weight:600;">{{ c.title }}</div><div style="font-size:13px;color:rgba(244,244,242,.55);">{{ c.sub }}</div></div>
+        </sc-for>
+        <div style="position:absolute;left:32px;top:300px;display:flex;flex-direction:column;gap:12px;opacity:{{ d1.uiO }};transition:{{ d1.uiTr }};">
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:17px;letter-spacing:-.02em;">Next Up</div>
+          <div style="display:flex;gap:16px;">
+            <div style="display:flex;gap:12px;align-items:center;width:232px;"><img src="assets/posters/mr-robot.jpg" alt="" style="width:96px;height:54px;object-fit:cover;object-position:center 30%;border-radius:7px;"><div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:13px;font-weight:600;">Mr. Robot</div><div style="font-size:12px;color:rgba(244,244,242,.55);">S1 · E5 · 49 min</div></div></div>
+            <div style="display:flex;gap:12px;align-items:center;width:232px;"><img src="assets/posters/severance.jpg" alt="" style="width:96px;height:54px;object-fit:cover;object-position:center 30%;border-radius:7px;"><div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:13px;font-weight:600;">Severance</div><div style="font-size:12px;color:rgba(244,244,242,.55);">S2 · E4 · 46 min</div></div></div>
+          </div>
+        </div>
+        <div data-media="" style="position:absolute;inset:0;z-index:5;pointer-events:none;">
+          <div style="position:absolute;left:24px;top:22px;display:flex;align-items:center;gap:10px;opacity:{{ d1.ctrlO }};transition:{{ d1.ctrlTr }};color:#fff;"><span style="width:30px;height:30px;border-radius:50%;background:rgba(30,30,36,.55);display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">chevron_left</span><span style="font-size:15px;font-weight:600;text-shadow:0 1px 8px rgba(0,0,0,.6);">La La Land</span></div>
+          <div style="position:absolute;left:20px;right:20px;bottom:18px;display:flex;align-items:center;gap:12px;height:50px;padding:0 16px;border-radius:18px;background:rgba(30,30,36,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);color:#fff;opacity:{{ d1.ctrlO }};transform:{{ d1.ctrlTf }};transition:{{ d1.ctrlTr }};">
+            <span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1;">pause</span>
+            <span style="font-size:12px;font-variant-numeric:tabular-nums;">56:20</span>
+            <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22);"><div style="width:44%;height:100%;border-radius:2px;background:#fff;"></div></div>
+            <span style="font-size:12px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.7);">-1:11:40</span>
+            <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">subtitles</span>
+            <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">fullscreen</span>
+          </div>
+        </div>
+        <span style="position:absolute;left:{{ d1.cur.l }}px;top:{{ d1.cur.t }}px;z-index:6;font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6);opacity:{{ d1.cur.o }};transition:{{ d1.cur.tr }};" data-media="">arrow_selector_tool</span>
+      </div>
+      <div style="position:absolute;inset:0;border-radius:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none;"></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Lists and library" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,6cqw,96px);">
+    <div style="position:relative;flex:none;order:{{ flipOrder }};width:{{ dm.w }}px;height:{{ dm.h }}px;border-radius:24px;overflow:hidden;background:#17171d;">
+      <div style="position:absolute;left:0;top:0;width:560px;height:420px;transform:scale({{ dm.s }});transform-origin:0 0;">
+        <div style="position:absolute;left:110px;top:30px;width:340px;height:40px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+          <div style="position:absolute;top:3px;left:{{ d2.pill }}px;width:{{ d2.pillW }}px;height:34px;border-radius:999px;background:rgba(255,255,255,.14);transition:left 280ms cubic-bezier(.2,.7,.2,1),width 280ms cubic-bezier(.2,.7,.2,1);"></div>
+          <div style="position:absolute;inset:0;display:flex;font-size:14.5px;font-weight:600;">
+            <div style="flex:none;width:92px;display:flex;align-items:center;justify-content:center;color:{{ d2.c0 }};transition:color 200ms;">Want</div>
+            <div style="flex:none;width:112px;display:flex;align-items:center;justify-content:center;color:{{ d2.c1 }};transition:color 200ms;">Watched</div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;color:{{ d2.c2 }};transition:color 200ms;">Library</div>
+          </div>
+        </div>
+        <div style="position:absolute;left:42px;top:96px;display:grid;grid-template-columns:repeat(5,84px);gap:14px;opacity:{{ d2.g0.o }};transform:{{ d2.g0.tf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+          <sc-for list="{{ d2.want }}" as="p" hint-placeholder-count="10"><div data-media="" style="position:relative;width:84px;height:126px;border-radius:9px;overflow:hidden;background:#282828;"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><sc-if value="{{ p.pin }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:13px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;color:#fff;">push_pin</span></div></sc-if><sc-if value="{{ p.bar }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:6px;right:6px;bottom:6px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);"><div style="width:{{ p.pct }}%;height:100%;border-radius:2px;background:#fff;"></div></div></sc-if></div></sc-for>
+        </div>
+        <div style="position:absolute;left:42px;top:96px;display:grid;grid-template-columns:repeat(5,84px);gap:14px;opacity:{{ d2.g1.o }};transform:{{ d2.g1.tf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+          <sc-for list="{{ d2.watched }}" as="p" hint-placeholder-count="10"><div data-media="" style="position:relative;width:84px;height:126px;border-radius:9px;overflow:hidden;background:#282828;"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:6px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;font-variation-settings:'wght' 700;color:#fff;">check</span></div></div></sc-for>
+        </div>
+        <div style="position:absolute;left:42px;top:96px;width:476px;display:flex;flex-direction:column;gap:12px;opacity:{{ d2.g2.o }};transform:{{ d2.g2.tf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+          <div style="font-size:14.5px;font-weight:600;">Continue Watching</div>
+          <div style="display:flex;gap:14px;">
+            <div data-media="" style="position:relative;width:231px;height:130px;border-radius:11px;overflow:hidden;"><img src="assets/posters/the-bear.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;"><div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,0) 55%);"></div><div data-media="" style="position:absolute;left:12px;bottom:18px;font-size:13px;font-weight:600;color:#fff;">The Bear · S3 · E2</div><div style="position:absolute;left:12px;right:12px;bottom:10px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);"><div style="width:62%;height:100%;border-radius:2px;background:#fff;"></div></div></div>
+            <div data-media="" style="position:relative;width:231px;height:130px;border-radius:11px;overflow:hidden;"><img src="assets/posters/la-la-land.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;"><div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,0) 55%);"></div><div data-media="" style="position:absolute;left:12px;bottom:18px;font-size:13px;font-weight:600;color:#fff;">La La Land · 1h 12m left</div><div style="position:absolute;left:12px;right:12px;bottom:10px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);"><div style="width:44%;height:100%;border-radius:2px;background:#fff;"></div></div></div>
+          </div>
+          <div style="font-size:14.5px;font-weight:600;margin-top:6px;">Recently Added</div>
+          <div style="display:flex;gap:14px;"><sc-for list="{{ d2.recent }}" as="p" hint-placeholder-count="6"><img src="{{ p.img }}" alt="" style="width:68px;height:102px;object-fit:cover;border-radius:8px;display:block;"></sc-for></div>
+        </div>
+      </div>
+      <div style="position:absolute;inset:0;border-radius:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none;"></div>
+    </div>
+    <div style="flex:1 1 340px;min-width:0;max-width:620px;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:9px;font-size:15px;font-weight:500;color:rgba(244,244,242,.6);margin-bottom:16px;"><span style="width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 2.5px #aab0bd;"></span>Lists and library</div>
+      <h2 style="margin:0 0 20px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(32px,3.6cqw,48px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Your lists and your library, side by side.</h2>
+      <p style="margin:0 0 40px;font-size:18px;line-height:1.6;color:rgba(244,244,242,.66);text-wrap:pretty;">Lists hold everything you mean to see. The library holds everything you can play tonight. One switch at the top of Movies and TV moves between them.</p>
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Want, Watching and Watched</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Add any movie or show from the catalog, whether you own it yet or not. Pin the ones that matter to the top.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Library</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Continue Watching, Recently Added and every movie and show on your Jellyfin server.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Play from anywhere</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">A title on your server shows Play in its details, whether you found it in a list, in search or on a cast member’s page.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="TV progress" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,6cqw,96px);">
+    <div style="flex:1 1 340px;min-width:0;max-width:620px;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:9px;font-size:15px;font-weight:500;color:rgba(244,244,242,.6);margin-bottom:16px;"><span style="width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 2.5px #eec01e;"></span>TV progress</div>
+      <h2 style="margin:0 0 20px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(32px,3.6cqw,48px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Tick an episode. The show keeps up.</h2>
+      <p style="margin:0 0 40px;font-size:18px;line-height:1.6;color:rgba(244,244,242,.66);text-wrap:pretty;">Mark one episode, a season or the whole show, and Biinge moves the show between Want, Watching and Watched. Finish an episode in the player and it’s ticked for you.</p>
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Watched means watched everywhere</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">A mark made in any app is written to Jellyfin too, so the two always agree.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Correct it anytime</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Untick an episode and the show’s progress and state are worked out again.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Ready for new seasons</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">A returning series stays in Watching when you’re caught up, with the next season waiting.</div></div>
+      </div>
+    </div>
+    <div style="position:relative;flex:none;width:{{ dm.w }}px;height:{{ dm.h }}px;border-radius:24px;overflow:hidden;background:#101014;">
+      <div style="position:absolute;left:0;top:0;width:560px;height:420px;transform:scale({{ dm.s }});transform-origin:0 0;">
+        <div style="position:absolute;left:0;top:0;width:560px;height:260px;overflow:hidden;"><img src="assets/posters/mr-robot.jpg" alt="" style="position:absolute;left:-60px;top:-60px;width:680px;height:400px;object-fit:cover;filter:blur(30px) saturate(1.3) brightness(.45);opacity:.9;"></div>
+        <div style="position:absolute;left:0;right:0;top:0;height:262px;background:linear-gradient(0deg,#101014 0%,rgba(16,16,20,0) 100%);"></div>
+        <img src="assets/posters/mr-robot.jpg" alt="" style="position:absolute;left:32px;top:30px;width:72px;height:108px;object-fit:cover;border-radius:9px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 12px 24px rgba(0,0,0,.4);">
+        <div style="position:absolute;left:124px;top:34px;right:32px;display:flex;flex-direction:column;gap:6px;">
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:26px;line-height:1;letter-spacing:-.03em;">Mr. Robot</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.66);">2015 · 4 Seasons · Drama, Crime</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+            <div style="display:flex;align-items:center;gap:7px;height:32px;padding:0 10px 0 11px;border-radius:999px;background:rgba(255,255,255,.14);font-size:13.5px;font-weight:600;"><span style="position:relative;width:18px;height:18px;flex:none;"><span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;opacity:{{ d3.want }};transition:opacity 200ms;">bookmark</span><span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;opacity:{{ d3.watching }};transform:scale({{ d3.ringS }});transition:opacity 280ms cubic-bezier(.34,1.36,.64,1),transform 280ms cubic-bezier(.34,1.36,.64,1);">clock_loader_40</span></span><span style="display:grid;"><span style="grid-area:1/1;opacity:{{ d3.want }};transition:opacity 200ms;">Want to Watch</span><span style="grid-area:1/1;opacity:{{ d3.watching }};transition:opacity 280ms;">Watching</span></span><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;opacity:.6;margin-left:-3px;">expand_more</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div style="font-size:12px;color:rgba(244,244,242,.6);">{{ d3.count }}</div><div style="height:4px;border-radius:2px;background:rgba(255,255,255,.1);"><div style="width:{{ d3.pct }}%;height:100%;border-radius:2px;background:#f4f4f2;transition:width 450ms cubic-bezier(.2,.7,.2,1);"></div></div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:32px;top:160px;display:flex;gap:6px;font-size:13px;font-weight:600;">
+          <span style="padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.14);">Season 1</span><span style="padding:6px 14px;border-radius:999px;color:rgba(244,244,242,.6);">Season 2</span><span style="padding:6px 14px;border-radius:999px;color:rgba(244,244,242,.6);">Season 3</span><span style="padding:6px 14px;border-radius:999px;color:rgba(244,244,242,.6);">Season 4</span>
+        </div>
+        <sc-for list="{{ d3.eps }}" as="e" hint-placeholder-count="4">
+        <div style="position:absolute;left:32px;right:32px;top:{{ e.top }}px;height:44px;display:flex;align-items:center;gap:14px;">
+          <div style="position:relative;flex:none;width:78px;height:44px;border-radius:7px;overflow:hidden;"><img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ e.pos }};display:block;"></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;"><div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.title }}</div><div style="font-size:12.5px;color:rgba(244,244,242,.55);">{{ e.meta }}</div></div>
+          <span style="position:relative;flex:none;width:28px;height:28px;">
+            <span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:28px;line-height:1;color:rgba(244,244,242,.35);opacity:{{ e.o0 }};transition:opacity 200ms;">check_circle</span>
+            <span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:28px;line-height:1;color:#f4f4f2;font-variation-settings:'FILL' 1;opacity:{{ e.o1 }};transform:scale({{ e.s1 }});transition:opacity 280ms cubic-bezier(.34,1.36,.64,1),transform 280ms cubic-bezier(.34,1.36,.64,1);">check_circle</span>
+          </span>
+        </div>
+        </sc-for>
+      </div>
+      <div style="position:absolute;inset:0;border-radius:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none;"></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Playback" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,6cqw,96px);">
+    <div data-media="" style="position:relative;flex:none;order:{{ flipOrder }};width:{{ dm.w }}px;height:{{ dm.h }}px;border-radius:24px;overflow:hidden;background:#000;color:#f4f4f2;">
+      <div style="position:absolute;left:0;top:0;width:560px;height:420px;transform:scale({{ dm.s }});transform-origin:0 0;">
+        <div style="position:absolute;left:0;top:0;width:560px;height:420px;overflow:hidden;transform-origin:0 0;transform:{{ d4.vidTf }};border-radius:{{ d4.vidR }}px;box-shadow:{{ d4.vidSh }};transition:{{ d4.vidTr }};"><img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:brightness(.78);display:block;"></div>
+        <div style="position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,0) 100%);opacity:{{ d4.ctrlO }};transition:{{ d4.ctrlTr }};"></div>
+        <div style="position:absolute;left:24px;top:22px;display:flex;flex-direction:column;gap:3px;opacity:{{ d4.ctrlO }};transition:{{ d4.ctrlTr }};"><div style="font-size:16px;font-weight:600;">Mr. Robot</div><div style="font-size:12.5px;color:rgba(255,255,255,.7);">S1 · E4 · eps1.3_da3m0ns.mp4</div></div>
+        <div style="position:absolute;left:20px;right:20px;bottom:18px;display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;border-radius:18px;background:rgba(30,30,36,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);opacity:{{ d4.ctrlO }};transform:{{ d4.ctrlTf }};transition:{{ d4.ctrlTr }};">
+          <span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1;">pause</span>
+          <span style="font-size:12px;font-variant-numeric:tabular-nums;">38:12</span>
+          <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22);"><div style="width:78%;height:100%;border-radius:2px;background:#fff;"></div></div>
+          <span style="font-size:12px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.7);">-10:41</span>
+          <span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:{{ d4.subBg }};transition:background 200ms;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">subtitles</span>
+          <span style="font-size:13px;font-weight:600;">1×</span>
+          <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;">fullscreen</span>
+        </div>
+        <div style="position:absolute;right:20px;bottom:82px;width:320px;height:{{ d4.panelH }}px;border-radius:18px;overflow:hidden;background:rgba(34,34,40,.72);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 18px 50px rgba(0,0,0,.5);transform-origin:85% 100%;opacity:{{ d4.panelO }};transform:{{ d4.panelTf }};transition:{{ d4.panelTr }};">
+          <div style="position:absolute;left:0;top:0;width:320px;box-sizing:border-box;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;opacity:{{ d4.pa.o }};transform:{{ d4.pa.tf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+            <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.55);padding:2px 8px;">Audio</div><div style="padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.08);font-size:13px;">English<div style="font-size:11px;color:rgba(255,255,255,.5);">Original · Dolby Digital 5.1</div></div><div style="padding:6px 8px;font-size:13px;">German<div style="font-size:11px;color:rgba(255,255,255,.5);">AAC Stereo</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.55);padding:2px 8px;">Subtitles</div><div style="padding:6px 8px;font-size:13px;">Off</div><div style="padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.08);font-size:13px;">English<div style="font-size:11px;color:rgba(255,255,255,.5);">Every line</div></div></div>
+            <div style="grid-column:1 / -1;display:flex;justify-content:space-between;padding:8px 8px 0;font-size:12.5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);"><span style="color:rgba(255,255,255,.6);">Subtitle Style</span><span style="font-weight:600;">Medium · Shadow ›</span></div>
+          </div>
+          <div style="position:absolute;left:0;top:0;width:320px;box-sizing:border-box;padding:12px 16px;display:flex;flex-direction:column;gap:10px;opacity:{{ d4.pb.o }};transform:{{ d4.pb.tf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+            <div style="font-size:13px;font-weight:600;">‹ Subtitle Style</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;">Size<span style="display:flex;gap:2px;padding:2px;border-radius:7px;background:rgba(255,255,255,.06);"><span style="padding:2px 8px;">S</span><span style="padding:2px 8px;border-radius:5px;background:rgba(255,255,255,.2);">M</span><span style="padding:2px 8px;">L</span></span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;">Background<span style="display:flex;gap:2px;padding:2px;border-radius:7px;background:rgba(255,255,255,.06);"><span style="padding:2px 8px;">None</span><span style="padding:2px 8px;border-radius:5px;background:rgba(255,255,255,.2);">Shadow</span><span style="padding:2px 8px;">Box</span></span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;">Timing<span style="color:rgba(255,255,255,.7);">In sync</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:28px;top:318px;font-size:11.5px;font-weight:500;color:rgba(255,255,255,.6);opacity:{{ d4.nextO }};transition:{{ d4.nextTr }};">S1 · E4 · Credits</div>
+        <div style="position:absolute;left:304px;top:118px;width:228px;display:flex;flex-direction:column;gap:9px;opacity:{{ d4.nextO }};transform:{{ d4.nextTf }};transition:{{ d4.nextTr }};">
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);">Next Episode</div>
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:22px;letter-spacing:-.02em;">S1 · E5</div>
+          <div style="font-size:13px;line-height:1.45;color:rgba(255,255,255,.72);">fsociety needs Elliot inside a secured data facility.</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+            <svg width="34" height="34" viewBox="0 0 34 34" style="flex:none;transform:rotate(-90deg);"><circle cx="17" cy="17" r="14" stroke="rgba(255,255,255,.2)" stroke-width="3" fill="none"></circle><circle cx="17" cy="17" r="14" stroke="#ffffff" stroke-width="3" fill="none" stroke-dasharray="88" stroke-dashoffset="{{ d4.ringOff }}" style="transition:{{ d4.ringTr }};"></circle></svg>
+            <div style="height:36px;padding:0 18px;display:flex;align-items:center;border-radius:999px;background:#f4f4f2;color:#101014;font-size:14px;font-weight:600;">Play Now</div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute;inset:0;border-radius:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);pointer-events:none;"></div>
+    </div>
+    <div style="flex:1 1 340px;min-width:0;max-width:620px;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:9px;font-size:15px;font-weight:500;color:rgba(244,244,242,.6);margin-bottom:16px;"><span style="width:13px;height:13px;border-radius:50%;background:#34c46f;"></span>Playback</div>
+      <h2 style="margin:0 0 20px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(32px,3.6cqw,48px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">A native player that gets out of the way.</h2>
+      <p style="margin:0 0 40px;font-size:18px;line-height:1.6;color:rgba(244,244,242,.66);text-wrap:pretty;">Every app plays with Apple’s own video engine, streamed from your server. Controls fade after three seconds, and when the credits roll the next episode is already counting down.</p>
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Audio and subtitles in one panel</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Every track with its language and format. Subtitle size, background and timing sit one step in.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Next episode</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">At the credits the video moves aside and keeps playing while the next episode counts down.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Your languages by default</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Audio and subtitles start in the languages you set on your server, and a series can keep the tracks you pick.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Games" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,6cqw,96px);">
+    <div style="flex:1 1 340px;min-width:0;max-width:620px;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:9px;font-size:15px;font-weight:500;color:rgba(244,244,242,.6);margin-bottom:16px;"><span style="width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 2.5px #aab0bd;"></span>Games · on iPhone</div>
+      <h2 style="margin:0 0 20px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(32px,3.6cqw,48px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Plan what to play next.</h2>
+      <p style="margin:0 0 40px;font-size:18px;line-height:1.6;color:rgba(244,244,242,.66);text-wrap:pretty;">Games keep their own lists: Want, Playing and Played. Check how long one takes to beat before you start, and pin a release you’re waiting for.</p>
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Three lists, your call</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Move a game between Want, Playing and Played whenever you like.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Time to beat</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">IGDB’s estimate for the main story, with the 100% run beside it.</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:16.5px;font-weight:600;">Release day in Up Next</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.62);">Pin an upcoming game and it shows up in Up Next the day it’s out.</div></div>
+      </div>
+    </div>
+    <div style="position:relative;flex:none;width:{{ dm.w }}px;height:{{ dm.h }}px;border-radius:24px;overflow:hidden;background:#101014;">
+      <div style="position:absolute;left:0;top:0;width:560px;height:420px;transform:scale({{ dm.s }});transform-origin:0 0;">
+        <div style="position:absolute;left:32px;top:30px;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:30px;letter-spacing:-.03em;">Games</div>
+        <div style="position:absolute;left:32px;top:80px;width:268px;height:38px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+          <div style="position:absolute;top:3px;left:{{ d5.pill }}px;width:{{ d5.pillW }}px;height:32px;border-radius:999px;background:rgba(255,255,255,.14);transition:left 280ms cubic-bezier(.2,.7,.2,1),width 280ms cubic-bezier(.2,.7,.2,1);"></div>
+          <div style="position:absolute;inset:0;display:flex;font-size:14px;font-weight:600;"><div style="flex:none;width:80px;display:flex;align-items:center;justify-content:center;color:{{ d5.c0 }};transition:color 200ms;">Want</div><div style="flex:none;width:96px;display:flex;align-items:center;justify-content:center;color:{{ d5.c1 }};transition:color 200ms;">Playing</div><div style="flex:none;width:92px;display:flex;align-items:center;justify-content:center;color:{{ d5.c2 }};transition:color 200ms;">Played</div></div>
+        </div>
+        <sc-for list="{{ d5.lists }}" as="g" hint-placeholder-count="3">
+        <div style="position:absolute;left:32px;right:32px;top:140px;display:flex;flex-direction:column;gap:12px;opacity:{{ g.o }};transform:{{ g.tf }};transition:opacity 280ms cubic-bezier(.2,.7,.2,1),transform 280ms cubic-bezier(.2,.7,.2,1);">
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:16px;height:80px;">
+            <div style="flex:none;width:60px;height:80px;border-radius:8px;background:repeating-linear-gradient(135deg,#202027 0 8px,#1a1a20 8px 16px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);display:flex;align-items:flex-end;padding:5px;box-sizing:border-box;font:500 8.5px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.35);">cover</div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:15.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ it.title }}</div>
+              <div style="font-size:13px;color:rgba(244,244,242,.55);">{{ it.meta }}</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:12.5px;color:rgba(244,244,242,.72);"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;">timer</span>{{ it.ttb }}</div>
+            </div>
+            <sc-if value="{{ it.pin }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;color:rgba(244,244,242,.8);">push_pin</span></sc-if>
+          </div>
+          </sc-for>
+        </div>
+        </sc-for>
+      </div>
+      <div style="position:absolute;inset:0;border-radius:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none;"></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="More" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;gap:44px;">
+    <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.2cqw,42px);line-height:1.08;letter-spacing:-.026em;">Also in Biinge</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:40px 48px;">
+      <div style="display:flex;flex-direction:column;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">search</span><div style="font-size:17px;font-weight:600;margin-top:6px;">Search the whole catalog</div><div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);">Movies, shows and people, whether or not your server has them.</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">event_upcoming</span><div style="font-size:17px;font-weight:600;margin-top:6px;">Up Next</div><div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);">New episodes and release days for everything you follow, in one place.</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">collections_bookmark</span><div style="font-size:17px;font-weight:600;margin-top:6px;">Collections</div><div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);">Browse the collections you keep on your server, on Mac and Apple TV.</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">bar_chart</span><div style="font-size:17px;font-weight:600;margin-top:6px;">Statistics</div><div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);">Watch time adds up as you mark titles. Review it by week, month or year on iPhone.</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;"><span style="align-self:flex-start;font-family:'Material Symbols Rounded';font-size:28px;line-height:1;transform:rotate(25deg);">push_pin</span><div style="font-size:17px;font-weight:600;margin-top:6px;">Pins</div><div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);">Keep the titles that matter at the top of any list.</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">contrast</span><div style="font-size:17px;font-weight:600;margin-top:6px;">Light and dark</div><div style="font-size:15.5px;line-height:1.6;color:rgba(244,244,242,.62);">Every app follows your system appearance. Artwork and the player stay dark.</div></div>
+    </div>
+  </div>
+</section>
+
+<section data-media="" data-screen-label="Open source" style="position:relative;isolation:isolate;overflow:hidden;padding:clamp(88px,9cqw,136px) 0;background:#0b0b0e;color:#f4f4f2;">
+  <div style="position:absolute;inset:0;z-index:-2;background-image:url(../../docs/public/screens/poster-wall.jpg);background-size:cover;background-position:center 18%;transform:scale(1.04);"></div>
+  <div style="position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,rgba(16,16,20,.95) 0%,rgba(16,16,20,.86) 52%,rgba(16,16,20,.6) 100%);"></div>
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;gap:22px;">
+    <div style="font-size:15px;font-weight:500;color:rgba(255,255,255,.6);">Open source</div>
+    <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:clamp(36px,5cqw,62px);line-height:1.03;letter-spacing:-.032em;">Run it on your own server.</h2>
+    <p style="margin:0;max-width:60ch;font-size:18px;line-height:1.62;color:rgba(255,255,255,.66);text-wrap:pretty;">The Go API and the apps for iPhone, Mac and Apple TV live in one repository. Run it next to your Jellyfin server, follow the setup guide, and make it your own.</p>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:12px;">
+      <a href="https://github.com/tab/biinge" style="display:flex;align-items:center;gap:8px;height:50px;padding:0 28px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;">Get it on GitHub<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">north_east</span></a>
+      <a href="#" style="display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600;color:#f4f4f2;">Read the setup guide<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">arrow_forward</span></a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;font-size:13px;color:rgba(255,255,255,.6);">
+      <span style="padding:6px 15px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);">Go</span><span style="padding:6px 15px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);">PostgreSQL</span><span style="padding:6px 15px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);">Redis</span><span style="padding:6px 15px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);">SwiftUI</span><span style="padding:6px 15px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);">Jellyfin</span><span style="padding:6px 15px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);">MIT</span>
+    </div>
+  </div>
+</section>
+
+<dc-import name="Site Footer" hint-size="100%,110px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;hero&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cinematic&quot;,&quot;devices&quot;],&quot;default&quot;:&quot;cinematic&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const C = { std: 'cubic-bezier(.2,.7,.2,1)', exit: 'cubic-bezier(.4,0,1,1)', focus: 'cubic-bezier(.34,1.36,.64,1)', lin: 'linear' };
+const P = id => `assets/posters/${id}.jpg`;
+const BEAT = 1400;
+const tr = (props, ms, c = 'std', d = 0) => props.split(',').map(p => `${p} ${ms}ms ${C[c]} ${d}ms`).join(', ');
+
+class Component extends DCLogic {
+  state = { n: 0, w: 1440, theme: null };
+  rootRef = React.createRef();
+  componentDidMount() {
+    this.t = setInterval(() => this.setState(s => ({ n: s.n + 1 })), BEAT);
+    const el = this.rootRef.current;
+    if (el && window.ResizeObserver) {
+      this.ro = new ResizeObserver(e => { const w = Math.round(e[0].contentRect.width); if (w && w !== this.state.w) this.setState({ w }); });
+      this.ro.observe(el);
+    }
+  }
+  componentWillUnmount() { clearInterval(this.t); this.ro && this.ro.disconnect(); }
+  componentDidUpdate(pp) { if (pp.theme !== this.props.theme && this.state.theme) this.setState({ theme: null }); }
+
+  renderVals() {
+    const n = this.state.n, w = this.state.w;
+    const theme = this.state.theme ?? this.props.theme ?? 'dark';
+    const hero = this.props.hero ?? 'cinematic';
+    const pad = Math.max(20, Math.min(64, w * 0.05));
+    const narrow = w < 760, contentW = Math.min(w, 1320) - 2 * pad, stacked = contentW < 1000;
+    const dmW = stacked ? Math.min(560, contentW) : 560, dmS = dmW / 560;
+    const dvS = Math.min(1, contentW / 1200);
+
+    // Hero A
+    const hi = Math.floor(n / 4) % 3;
+    const HS = [['dune-part-two', 'Recently Added · Movie', 'Dune: Part Two', 0, '2h 46m'], ['the-bear', 'Next Up · S3 · E2', 'The Bear', 62, '12 min left'], ['la-la-land', 'Continue Watching · Movie', 'La La Land', 44, '1h 12m left']];
+    const ha = { slides: HS.map(([id, eyebrow, title, pct, left], i) => { const a = i === hi; return {
+      img: P(id), eyebrow, title, pct, left, o: a ? 1 : 0,
+      btr: `opacity 800ms ${C.std}`,
+      tf: a ? 'scale(1.06)' : 'scale(1)', tr: a ? `opacity 800ms ${C.std}, transform ${BEAT * 4 + 800}ms linear` : `opacity 800ms ${C.std}, transform 0ms linear 800ms`,
+      ctf: a ? 'none' : 'translateY(8px)', ctr: a ? tr('opacity,transform', 450, 'std', 300) : tr('opacity,transform', 200, 'exit'),
+      dot: a ? 22 : 6, dotBg: a ? '#f4f4f2' : 'rgba(244,244,242,.35)' }; }) };
+
+    // Hero B devices
+    const tvIds = ['la-la-land', 'severance', 'the-bear', 'shogun', 'slow-horses', 'arrival'];
+    const tf = n % 6;
+    const dvTv = tvIds.map((id, i) => ({ img: P(id), tf: i === tf ? 'scale(1.14) translateY(-3px)' : 'none', sh: i === tf ? '0 14px 26px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.2)' : '0 3px 8px rgba(0,0,0,.3)', glare: i === tf ? 1 : 0 }));
+    const mh = n % 3;
+    const dvMac = [['la-la-land', 'La La Land', '1h 12m left', 44], ['the-bear', 'The Bear', 'S3 · E2 · 12 min left', 62], ['severance', 'Severance', 'S2 · E3 · 31 min left', 30]].map(([id, title, sub, pct], i) => ({ img: P(id), title, sub, pct,
+      tf: i === mh ? 'translateY(-4px)' : 'none', sh: i === mh ? '0 0 0 1px rgba(255,255,255,.3),0 12px 22px rgba(0,0,0,.5)' : '0 0 0 1px rgba(255,255,255,.07)' }));
+    const plib = Math.floor(n / 3) % 2 === 1;
+    const dvPh = { pill: plib ? 111 : 2, pillW: plib ? 61 : 48, c0: plib ? 'rgba(244,244,242,.55)' : '#f4f4f2', c1: plib ? '#f4f4f2' : 'rgba(244,244,242,.55)',
+      aO: plib ? 0 : 1, aTf: plib ? 'translateX(-16px)' : 'none', bO: plib ? 1 : 0, bTf: plib ? 'none' : 'translateX(16px)' };
+    const dvPhList = ['la-la-land', 'dune-part-two', 'aftersun', 'blade-runner-2049', 'arrival', 'drive', 'zodiac', 'prisoners', 'sicario'].map((id, i) => ({ img: P(id), pin: i === 0 }));
+
+    // D1 continue watching -> player
+    const k1 = n % 6, open = k1 >= 2 && k1 <= 4, ctrl = k1 === 2 || k1 === 3, hov = k1 === 1;
+    const geo = tr('left,top,width,height,border-radius', 550);
+    const d1 = {
+      uiO: open ? 0 : 1, uiTr: open ? tr('opacity', 150, 'exit') : tr('opacity', 280, 'std', 300),
+      cards: [['la-la-land', 'La La Land', '1h 12m left', 44], ['the-bear', 'The Bear', 'S3 · E2 · 12 min left', 62]].map(([id, title, sub, pct], i) => {
+        const g = { l: 32 + i * 264, t: 80, w: 232, h: 130, r: 12 };
+        const d = i === 0 && open ? { l: 0, t: 0, w: 560, h: 420, r: 0 } : g;
+        return Object.assign({ img: P(id), title, sub, pct, cl: g.l, z: i === 0 ? 2 : 1,
+          o: i === 1 && open ? 0 : 1, barO: i === 0 && open ? 0 : 1,
+          tf: i === 0 && hov ? 'translateY(-4px)' : 'none',
+          sh: i === 0 && hov ? '0 0 0 1px rgba(255,255,255,.3),0 14px 28px rgba(0,0,0,.5)' : '0 0 0 1px rgba(255,255,255,.07)',
+          tr: [geo, i === 1 && open ? tr('opacity', 150, 'exit') : tr('opacity', 280, 'std', 250), tr('transform,box-shadow', 200)].join(', ') }, d);
+      }),
+      ctrlO: ctrl ? 1 : 0, ctrlTf: ctrl ? 'none' : 'translateY(10px)', ctrlTr: ctrl ? tr('opacity,transform', 280, 'std', k1 === 2 ? 350 : 0) : tr('opacity,transform', 300),
+      cur: { l: hov ? 150 : open ? 300 : 470, t: hov ? 150 : open ? 300 : 340, o: hov ? 1 : 0, tr: tr('left,top', 450) + ', ' + tr('opacity', 200) },
+    };
+
+    // D2 lists / library
+    const seg = Math.floor(n / 2) % 3;
+    const grp = i => ({ o: seg === i ? 1 : 0, tf: seg === i ? 'none' : i < seg ? 'translateX(-24px)' : 'translateX(24px)' });
+    const pills = [[3, 86], [95, 106], [207, 130]];
+    const d2 = { pill: pills[seg][0], pillW: pills[seg][1], c0: seg === 0 ? '#f4f4f2' : 'rgba(244,244,242,.55)', c1: seg === 1 ? '#f4f4f2' : 'rgba(244,244,242,.55)', c2: seg === 2 ? '#f4f4f2' : 'rgba(244,244,242,.55)',
+      g0: grp(0), g1: grp(1), g2: grp(2),
+      want: ['la-la-land', 'arrival', 'conclave', 'poor-things', 'perfect-days', 'the-favourite', 'midnight-in-paris', 'darjeeling', 'inside-llewyn-davis', 'the-curse'].map((id, i) => ({ img: P(id), pin: i === 0, bar: i === 0 || i === 3, pct: i === 0 ? 44 : 18 })),
+      watched: ['dune-part-two', 'aftersun', 'blade-runner-2049', 'drive', 'zodiac', 'prisoners', 'sicario', 'nightcrawler', 'terminator-2', 'lotr-fellowship'].map(id => ({ img: P(id) })),
+      recent: ['conclave', 'poor-things', 'shogun', 'silo', 'slow-horses', 'mi-fallout'].map(id => ({ img: P(id) })) };
+
+    // D3 episodes
+    const k3 = n % 7, ticks = k3 <= 4 ? k3 : k3 === 5 ? 4 : 0;
+    const EPS = [['1 · eps1.0_hellofriend.mov', '65 min'], ['2 · eps1.1_ones-and-zer0es.mpeg', '49 min'], ['3 · eps1.2_d3bug.mkv', '49 min'], ['4 · eps1.3_da3m0ns.mp4', '48 min']];
+    const d3 = { want: ticks ? 0 : 1, watching: ticks ? 1 : 0, ringS: ticks ? 1 : 0.5, count: `${ticks} of 10 episodes`, pct: ticks * 10,
+      eps: EPS.map(([title, meta], i) => { const on = i < ticks; return { title, meta, top: 206 + i * 52, pos: `50% ${10 + i * 25}%`, o0: on ? 0 : 1, o1: on ? 1 : 0, s1: on ? 1 : 0.5 }; }) };
+
+    // D4 player
+    const k4 = n % 8, panel = k4 === 1 || k4 === 2, style = k4 === 2, credits = k4 === 5 || k4 === 6, ctrl4 = k4 <= 3 || k4 === 7;
+    const d4 = {
+      ctrlO: ctrl4 ? 1 : 0, ctrlTf: ctrl4 ? 'none' : 'translateY(10px)', ctrlTr: ctrl4 ? tr('opacity,transform', 280, 'std', k4 === 7 ? 300 : 0) : tr('opacity,transform', 200, 'exit'),
+      subBg: panel ? 'rgba(255,255,255,.2)' : 'transparent',
+      panelO: panel ? 1 : 0, panelTf: panel ? 'none' : 'scale(.94) translateY(6px)', panelTr: panel ? tr('opacity,transform,height', 280) : tr('opacity,transform', 150, 'exit'),
+      panelH: style ? 140 : 168,
+      pa: { o: style ? 0 : 1, tf: style ? 'translateX(-24px)' : 'none' }, pb: { o: style ? 1 : 0, tf: style ? 'none' : 'translateX(24px)' },
+      vidTf: credits ? 'translate(28px,118px) scale(.44)' : 'none', vidR: credits ? 28 : 0, vidSh: credits ? '0 0 0 2px rgba(255,255,255,.14),0 20px 50px rgba(0,0,0,.6)' : 'none', vidTr: tr('transform,border-radius,box-shadow', 550),
+      nextO: credits ? 1 : 0, nextTf: credits ? 'none' : 'translateX(20px)', nextTr: credits ? tr('opacity,transform', 450, 'std', 250) : tr('opacity,transform', 200, 'exit'),
+      ringOff: credits ? 0 : 88, ringTr: credits ? `stroke-dashoffset ${BEAT * 2}ms linear` : 'none',
+    };
+
+    // D5 games
+    const g5 = Math.floor(n / 2) % 3;
+    const gp = [[3, 74], [83, 90], [179, 86]];
+    const GL = [
+      [['Clair Obscur: Expedition 33', 'Sandfall Interactive · 2025', 'Main 30 h · 100% 60 h'], ['Hollow Knight: Silksong', 'Team Cherry · 2025', 'Main 28 h · 100% 50 h'], ['Death Stranding 2', 'Kojima Productions · 2025', 'Main 40 h · 100% 90 h']],
+      [['Hades II', 'Supergiant Games · 2025', 'Main 30 h · 100% 95 h', true], ['Blue Prince', 'Dogubomb · 2025', 'Main 25 h · 100% 70 h']],
+      [['Split Fiction', 'Hazelight · 2025', 'Main 14 h · 100% 20 h'], ['Astro Bot', 'Team Asobi · 2024', 'Main 12 h · 100% 22 h'], ['Balatro', 'LocalThunk · 2024', 'Main 11 h · 100% 80 h']],
+    ];
+    const d5 = { pill: gp[g5][0], pillW: gp[g5][1], c0: g5 === 0 ? '#f4f4f2' : 'rgba(244,244,242,.55)', c1: g5 === 1 ? '#f4f4f2' : 'rgba(244,244,242,.55)', c2: g5 === 2 ? '#f4f4f2' : 'rgba(244,244,242,.55)',
+      lists: GL.map((items, i) => ({ o: g5 === i ? 1 : 0, tf: g5 === i ? 'none' : i < g5 ? 'translateX(-24px)' : 'translateX(24px)', items: items.map(([title, meta, ttb, pin]) => ({ title, meta, ttb, pin: !!pin })) })) };
+
+    return {
+      rootRef: this.rootRef, theme, narrow, wide: !narrow,
+      toggleTheme: () => this.setState({ theme: theme === 'light' ? 'dark' : 'light' }),
+      heroA: hero !== 'devices', heroB: hero === 'devices',
+      ha, dvTv, dvMac, dvPh, dvPhList,
+      dv: { w: Math.round(1200 * dvS), h: Math.round(560 * dvS), s: dvS },
+      dm: { w: Math.round(dmW), h: Math.round(420 * dmS), s: dmS },
+      flipOrder: stacked ? 0 : -1,
+      d1, d2, d3, d4, d5,
+    };
+  }
+}
+</script>
+</body>
+</html>

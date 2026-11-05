@@ -29,6 +29,18 @@ type ReleaseDate struct {
 	Platform uint64 `json:"platform"`
 }
 
+type Company struct {
+	Id   uint64 `json:"id"`
+	Name string `json:"name"`
+}
+
+// InvolvedCompany is one company's role on a game
+type InvolvedCompany struct {
+	Id        uint64  `json:"id"`
+	Company   Company `json:"company"`
+	Developer bool    `json:"developer"`
+}
+
 // SimilarGame is one nested similar_games row; its Platforms are raw ids because a nested expansion
 // carries no platform names
 type SimilarGame struct {
@@ -42,18 +54,19 @@ type SimilarGame struct {
 }
 
 type Game struct {
-	Id               uint64        `json:"id"`
-	Name             string        `json:"name"`
-	Summary          string        `json:"summary"`
-	FirstReleaseDate int64         `json:"first_release_date"`
-	TotalRating      float64       `json:"total_rating"`
-	TotalRatingCount int           `json:"total_rating_count"`
-	Cover            Cover         `json:"cover"`
-	GameStatus       GameStatus    `json:"game_status"`
-	Genres           []Genre       `json:"genres"`
-	Platforms        []Platform    `json:"platforms"`
-	ReleaseDates     []ReleaseDate `json:"release_dates"`
-	SimilarGames     []SimilarGame `json:"similar_games"`
+	Id                uint64            `json:"id"`
+	Name              string            `json:"name"`
+	Summary           string            `json:"summary"`
+	FirstReleaseDate  int64             `json:"first_release_date"`
+	TotalRating       float64           `json:"total_rating"`
+	TotalRatingCount  int               `json:"total_rating_count"`
+	Cover             Cover             `json:"cover"`
+	GameStatus        GameStatus        `json:"game_status"`
+	Genres            []Genre           `json:"genres"`
+	Platforms         []Platform        `json:"platforms"`
+	ReleaseDates      []ReleaseDate     `json:"release_dates"`
+	InvolvedCompanies []InvolvedCompany `json:"involved_companies"`
+	SimilarGames      []SimilarGame     `json:"similar_games"`
 }
 
 // TimeToBeat holds crowd-sourced completion times in seconds, with the submission count behind them
@@ -100,6 +113,7 @@ type GameResponse struct {
 	RuntimeCompleted uint64
 	Genres           []string
 	Platforms        []string
+	Developers       []string
 	Recommendations  []GameRecommendation
 }
 

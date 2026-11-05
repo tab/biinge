@@ -119,24 +119,6 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 		genres = append(genres, genre.Name)
 	}
 
-	// every director counts here, photo or not (the credits row keeps only those with a photo)
-	directorCrew := make([]PersonCrew, 0)
-
-	for _, crew := range movie.Credits.Crew {
-		if crew.Job == TMDBJobDirector {
-			directorCrew = append(directorCrew, crew)
-		}
-	}
-
-	uniqueDirectors := UniqById(directorCrew, func(c PersonCrew) int {
-		return c.Id
-	})
-
-	directors := make([]string, 0, len(uniqueDirectors))
-	for _, director := range uniqueDirectors {
-		directors = append(directors, director.Name)
-	}
-
 	return &MovieResponse{
 		Id:              movie.Id,
 		Title:           movie.Title,
@@ -148,7 +130,7 @@ func TransformMovieDetails(movie *MovieDetails) *MovieResponse {
 		Runtime:         movie.Runtime,
 		Rating:          movie.VoteAverage,
 		Genres:          genres,
-		Directors:       directors,
+		Directors:       directorNames(movie.Credits),
 		Credits:         uniqueCredits,
 		Recommendations: recommendations,
 		Videos:          videos,
@@ -468,9 +450,32 @@ func TransformEpisodeDetails(episode *EpisodeDetails) *EpisodeResponse {
 		Overview:   episode.Overview,
 		Rating:     episode.VoteAverage,
 		AirDate:    episode.AirDate,
+		Directors:  directorNames(episode.Credits),
 		Credits:    buildCastCredits(episode.Credits),
 		Videos:     buildTrailers(episode.Videos),
 	}
+}
+
+// directorNames lists every director in TMDB order, each person once, photo or not (the credits row keeps only those with a photo)
+func directorNames(credits Credits) []string {
+	directorCrew := make([]PersonCrew, 0)
+
+	for _, crew := range credits.Crew {
+		if crew.Job == TMDBJobDirector {
+			directorCrew = append(directorCrew, crew)
+		}
+	}
+
+	uniqueDirectors := UniqById(directorCrew, func(c PersonCrew) int {
+		return c.Id
+	})
+
+	directors := make([]string, 0, len(uniqueDirectors))
+	for _, director := range uniqueDirectors {
+		directors = append(directors, director.Name)
+	}
+
+	return directors
 }
 
 // buildCastCredits selects directors and billed cast with a profile image, deduplicated by person id

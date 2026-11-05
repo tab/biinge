@@ -36,6 +36,20 @@ func TransformGameDetails(details *GameDetails) *GameResponse {
 		platforms = append(platforms, name)
 	}
 
+	developers := make([]string, 0, len(game.InvolvedCompanies))
+	seenDevelopers := make(map[string]bool, len(game.InvolvedCompanies))
+
+	// the same company can arrive twice, so developers are unique by name
+	for _, involved := range game.InvolvedCompanies {
+		name := involved.Company.Name
+		if !involved.Developer || seenDevelopers[name] {
+			continue
+		}
+
+		seenDevelopers[name] = true
+		developers = append(developers, name)
+	}
+
 	release := playstationRelease(&game)
 
 	return &GameResponse{
@@ -50,6 +64,7 @@ func TransformGameDetails(details *GameDetails) *GameResponse {
 		RuntimeCompleted: minutes(details.TimeToBeat.Completely, details.TimeToBeat.Count),
 		Genres:           genres,
 		Platforms:        platforms,
+		Developers:       developers,
 		Recommendations:  recommendations(game.SimilarGames),
 	}
 }

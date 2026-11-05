@@ -34,6 +34,7 @@ type GameDetailsSerializer struct {
 	Rating           float64                    `json:"rating,omitempty"`
 	Genres           []string                   `json:"genres"`
 	Platforms        []string                   `json:"platforms"`
+	Developers       []string                   `json:"developers,omitempty"`
 	Recommendations  []RecommendationSerializer `json:"recommendations"`
 }
 

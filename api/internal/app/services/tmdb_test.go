@@ -141,6 +141,7 @@ func sampleEpisodeDetails() *tmdb.EpisodeDetails {
 			},
 			Crew: []tmdb.PersonCrew{
 				{Person: tmdb.Person{Id: 6, Name: "Vince Gilligan", ProfilePath: "/vg.jpg"}, Job: tmdb.TMDBJobDirector},
+				{Person: tmdb.Person{Id: 7, Name: "Michelle MacLaren"}, Job: tmdb.TMDBJobDirector},
 			},
 		},
 		Videos: tmdb.Videos{
@@ -1167,6 +1168,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				AirDate:    "2008-01-20",
 				Watched:    true,
 				JellyfinId: "jf-e1",
+				Directors:  []string{"Vince Gilligan", "Michelle MacLaren"},
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -1195,6 +1197,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				Rating:     8.0,
 				AirDate:    "2008-01-20",
 				Watched:    false,
+				Directors:  []string{"Vince Gilligan", "Michelle MacLaren"},
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -1226,6 +1229,7 @@ func Test_Tmdb_FetchTvEpisodeDetails(t *testing.T) {
 				Overview:   "The pilot.",
 				Rating:     8.0,
 				AirDate:    "2008-01-20",
+				Directors:  []string{"Vince Gilligan", "Michelle MacLaren"},
 				Credits: []serializers.PersonSerializer{
 					{Id: 6, Name: "Vince Gilligan", Description: "Director", ProfilePath: "/vg.jpg"},
 					{Id: 5, Name: "Bryan Cranston", Description: "Walter White", ProfilePath: "/bc.jpg"},
@@ -1382,6 +1386,7 @@ func Test_Tmdb_FetchTvEpisodeDetails_PerUser(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result.JellyfinId)
+			assert.Equal(t, []string{"Vince Gilligan", "Michelle MacLaren"}, result.Directors)
 			assert.Contains(t, store.store, "tmdb:v1:tv:300:season:1:episode:1")
 			assert.NotContains(t, string(store.store["tmdb:v1:tv:300:season:1:episode:1"]), "jf-")
 		})

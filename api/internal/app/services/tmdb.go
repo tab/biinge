@@ -655,6 +655,7 @@ func (p *tmdbProvider) FetchTvEpisodeDetails(ctx context.Context, seriesId, seas
 		Rating:     details.Rating,
 		AirDate:    details.AirDate,
 		Watched:    watched,
+		Directors:  details.Directors,
 		JellyfinId: p.library.Episodes(ctx, userId, seriesId, seasonNumber)[episodeNumber],
 		Credits:    credits,
 		Videos:     videos,

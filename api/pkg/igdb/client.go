@@ -64,6 +64,7 @@ const tokenRefreshMargin = 5 * time.Minute
 // the fields playstationFilter would test, since Apicalypse can't filter through a nested expansion)
 const detailFields = "fields name,summary,first_release_date,total_rating,total_rating_count," +
 	"cover.image_id,game_status.status,genres.name,platforms.name,release_dates.date,release_dates.platform," +
+	"involved_companies.company.name,involved_companies.developer," +
 	"similar_games.name,similar_games.game_type,similar_games.version_parent," +
 	"similar_games.total_rating_count,similar_games.cover.image_id,similar_games.platforms;"
 

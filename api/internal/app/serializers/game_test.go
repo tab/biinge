@@ -1,6 +1,7 @@
 package serializers
 
 import (
+	"encoding/json"
 	"io"
 	"strings"
 	"testing"
@@ -160,6 +161,42 @@ func Test_UpdateGameRequest_Validate(t *testing.T) {
 			default:
 				require.NoError(t, err)
 			}
+		})
+	}
+}
+
+func Test_GameDetailsSerializer_Marshal(t *testing.T) {
+	tests := []struct {
+		name       string
+		developers []string
+		expected   string
+	}{
+		{
+			name:       "With developers",
+			developers: []string{"CD Projekt RED"},
+			expected:   `"developers":["CD Projekt RED"]`,
+		},
+		{
+			name: "Nil developers are omitted",
+		},
+		{
+			name:       "Empty developers are omitted",
+			developers: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data, err := json.Marshal(GameDetailsSerializer{Id: 1, Developers: tt.developers})
+
+			require.NoError(t, err)
+
+			if tt.expected == "" {
+				assert.NotContains(t, string(data), "developers")
+				return
+			}
+
+			assert.Contains(t, string(data), tt.expected)
 		})
 	}
 }

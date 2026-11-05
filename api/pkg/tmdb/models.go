@@ -336,6 +336,7 @@ type EpisodeResponse struct {
 	Overview   string       `json:"overview"`
 	Rating     float64      `json:"rating,omitempty"`
 	AirDate    string       `json:"airDate,omitempty"`
+	Directors  []string     `json:"directors"`
 	Credits    []CreditItem `json:"credits"`
 	Videos     []VideoItem  `json:"videos"`
 }

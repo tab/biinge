@@ -440,13 +440,14 @@ func Test_TransformEpisodeDetails(t *testing.T) {
 				},
 			},
 			expected: &EpisodeResponse{
-				Id:       100,
-				Title:    "Winter Is Coming",
-				Number:   1,
-				Runtime:  0,
-				Overview: "Ep1",
-				Rating:   8.1,
-				AirDate:  "2011-04-17",
+				Id:        100,
+				Title:     "Winter Is Coming",
+				Number:    1,
+				Runtime:   0,
+				Overview:  "Ep1",
+				Rating:    8.1,
+				AirDate:   "2011-04-17",
+				Directors: []string{"Director A"},
 				Credits: []CreditItem{
 					{Id: 3, ProfilePath: "/d.jpg", Name: "Director A", Description: "Director"},
 					{Id: 1, ProfilePath: "/a.jpg", Name: "Actor A", Description: "Jon Snow"},
@@ -457,6 +458,31 @@ func Test_TransformEpisodeDetails(t *testing.T) {
 			},
 		},
 		{
+			name: "Lists a director without a photo and a repeated director once",
+			episode: &EpisodeDetails{
+				ID:   300,
+				Name: "Two Directors",
+				Credits: Credits{
+					Crew: []PersonCrew{
+						{Person: Person{Id: 9, Name: "With Photo", ProfilePath: "/p.jpg"}, Job: TMDBJobDirector},
+						{Person: Person{Id: 8, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 8, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 11, Name: "No Photo", ProfilePath: ""}, Job: TMDBJobDirector},
+						{Person: Person{Id: 10, Name: "Editor", ProfilePath: "/e.jpg"}, Job: "Editor"},
+					},
+				},
+			},
+			expected: &EpisodeResponse{
+				Id:        300,
+				Title:     "Two Directors",
+				Directors: []string{"With Photo", "No Photo", "No Photo"},
+				Credits: []CreditItem{
+					{Id: 9, ProfilePath: "/p.jpg", Name: "With Photo", Description: "Director"},
+				},
+				Videos: []VideoItem{},
+			},
+		},
+		{
 			name: "Empty credits and videos produce empty slices",
 			episode: &EpisodeDetails{
 				ID:      200,
@@ -464,11 +490,12 @@ func Test_TransformEpisodeDetails(t *testing.T) {
 				Runtime: 55,
 			},
 			expected: &EpisodeResponse{
-				Id:      200,
-				Title:   "The Kingsroad",
-				Runtime: 55,
-				Credits: []CreditItem{},
-				Videos:  []VideoItem{},
+				Id:        200,
+				Title:     "The Kingsroad",
+				Runtime:   55,
+				Directors: []string{},
+				Credits:   []CreditItem{},
+				Videos:    []VideoItem{},
 			},
 		},
 	}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><style>@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}body{margin:0;background:#0a0a0c;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased}a{color:#f4f4f2;text-decoration:none}a:hover{color:#eec01e}</style></helmet>
+<div style="padding:80px;display:flex;flex-direction:column;gap:120px;background:#0a0a0c;min-width:max-content;">
+
+  <div style="display:flex;flex-direction:column;gap:14px;max-width:1100px;">
+    <div style="font-size:16px;font-weight:600;color:rgba(244,244,242,.5);">example.com redesign</div>
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:72px;letter-spacing:-.035em;line-height:1;">Website</div>
+    <div style="font-size:20px;line-height:1.55;color:rgba(244,244,242,.7);max-width:960px;">Home leads with the features and sends each platform to its own page. Every page is shown at 1440 and 390. Use Tweaks to switch all boards to the light theme; the sun button in each header switches one page.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:16px;">
+      <a href="#1a" style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);">1a Home · Cinematic</a>
+      <a href="#1b" style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);">1b Home · Devices</a>
+      <a href="#2a" style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);">2a iPhone</a>
+      <a href="#2b" style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);">2b Mac</a>
+      <a href="#2c" style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);">2c Apple TV</a>
+      <a href="#2d" style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);">2d About</a>
+    </div>
+  </div>
+
+  <section data-screen-label="Home" style="display:flex;flex-direction:column;gap:40px;">
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:44px;letter-spacing:-.03em;">Home · two hero directions</div>
+    <div style="display:flex;gap:160px;align-items:flex-start;">
+      <div id="1a" style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;align-items:center;gap:14px;"><span style="font:600 18px ui-monospace,Menlo,monospace;padding:5px 12px;border-radius:7px;background:#f4f4f2;color:#101014;">1a</span><span style="font-size:24px;font-weight:600;">Cinematic</span><span style="font-size:18px;color:rgba(244,244,242,.55);">Blurred backdrop and poster rotate through featured titles, as on Apple TV.</span></div>
+        <div style="display:flex;gap:64px;align-items:flex-start;">
+          <dc-import name="Site Home" hero="cinematic" theme="{{ theme }}" style="width:1440px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="1440px,7200px"></dc-import>
+          <dc-import name="Site Home" hero="cinematic" theme="{{ theme }}" style="width:390px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="390px,9000px"></dc-import>
+        </div>
+      </div>
+      <div id="1b" style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;align-items:center;gap:14px;"><span style="font:600 18px ui-monospace,Menlo,monospace;padding:5px 12px;border-radius:7px;background:#f4f4f2;color:#101014;">1b</span><span style="font-size:24px;font-weight:600;">Devices</span><span style="font-size:18px;color:rgba(244,244,242,.55);">Apple TV, Mac and iPhone together over the poster wall, each screen live.</span></div>
+        <div style="display:flex;gap:64px;align-items:flex-start;">
+          <dc-import name="Site Home" hero="devices" theme="{{ theme }}" style="width:1440px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="1440px,7600px"></dc-import>
+          <dc-import name="Site Home" hero="devices" theme="{{ theme }}" style="width:390px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="390px,9000px"></dc-import>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Platform pages" style="display:flex;flex-direction:column;gap:40px;">
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:44px;letter-spacing:-.03em;">Platform pages and About</div>
+    <div style="font-size:20px;color:rgba(244,244,242,.6);margin-top:-24px;">Screenshot slots: drop real app exports onto any of them. They stay filled after reload.</div>
+    <div style="display:flex;gap:160px;align-items:flex-start;">
+      <div id="2a" style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;align-items:center;gap:14px;"><span style="font:600 18px ui-monospace,Menlo,monospace;padding:5px 12px;border-radius:7px;background:#f4f4f2;color:#101014;">2a</span><span style="font-size:24px;font-weight:600;">iPhone</span></div>
+        <div style="display:flex;gap:64px;align-items:flex-start;">
+          <dc-import name="Site iPhone" theme="{{ theme }}" style="width:1440px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="1440px,6400px"></dc-import>
+          <dc-import name="Site iPhone" theme="{{ theme }}" style="width:390px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="390px,8000px"></dc-import>
+        </div>
+      </div>
+      <div id="2b" style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;align-items:center;gap:14px;"><span style="font:600 18px ui-monospace,Menlo,monospace;padding:5px 12px;border-radius:7px;background:#f4f4f2;color:#101014;">2b</span><span style="font-size:24px;font-weight:600;">Mac</span></div>
+        <div style="display:flex;gap:64px;align-items:flex-start;">
+          <dc-import name="Site Mac" theme="{{ theme }}" style="width:1440px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="1440px,6000px"></dc-import>
+          <dc-import name="Site Mac" theme="{{ theme }}" style="width:390px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="390px,7000px"></dc-import>
+        </div>
+      </div>
+      <div id="2c" style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;align-items:center;gap:14px;"><span style="font:600 18px ui-monospace,Menlo,monospace;padding:5px 12px;border-radius:7px;background:#f4f4f2;color:#101014;">2c</span><span style="font-size:24px;font-weight:600;">Apple TV</span></div>
+        <div style="display:flex;gap:64px;align-items:flex-start;">
+          <dc-import name="Site Apple TV" theme="{{ theme }}" style="width:1440px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="1440px,6000px"></dc-import>
+          <dc-import name="Site Apple TV" theme="{{ theme }}" style="width:390px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="390px,7000px"></dc-import>
+        </div>
+      </div>
+      <div id="2d" style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;align-items:center;gap:14px;"><span style="font:600 18px ui-monospace,Menlo,monospace;padding:5px 12px;border-radius:7px;background:#f4f4f2;color:#101014;">2d</span><span style="font-size:24px;font-weight:600;">About</span></div>
+        <div style="display:flex;gap:64px;align-items:flex-start;">
+          <dc-import name="Site About" theme="{{ theme }}" style="width:1440px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="1440px,3600px"></dc-import>
+          <dc-import name="Site About" theme="{{ theme }}" style="width:390px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1);" hint-size="390px,5200px"></dc-import>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() { return { theme: this.props.theme ?? 'dark' }; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}
+@keyframes bshimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@keyframes bspin{to{transform:rotate(360deg)}}
+@keyframes bpress{50%{transform:scale(.96)}}
+@keyframes bshake{0%,100%{transform:translateX(0)}18%{transform:translateX(-8px)}38%{transform:translateX(7px)}58%{transform:translateX(-5px)}78%{transform:translateX(3px)}}
+body{margin:0;background:#0c0c0f;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#f4f4f2;text-decoration:none}a:hover{color:#eec01e}
+</style>
+</helmet>
+<div data-screen-label="Motion" style="padding:56px 56px 96px;display:flex;flex-direction:column;gap:56px;max-width:1480px;">
+
+  <div style="display:flex;flex-direction:column;gap:14px;max-width:900px;">
+    <div style="font-size:14px;font-weight:600;color:rgba(244,244,242,.5);">Biinge for iPhone, macOS and Apple TV</div>
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:56px;line-height:1;letter-spacing:-.035em;">Motion</div>
+    <div style="font-size:17px;line-height:1.55;color:rgba(244,244,242,.7);text-wrap:pretty;">The animations and morphs Biinge should use. Every demo loops with the timing and curve it lists. Use Tweaks to slow everything down, preview Reduce Motion, or filter by platform.</div>
+  </div>
+
+  <section data-screen-label="Foundations" style="display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:30px;letter-spacing:-.02em;">Foundations</div><div style="font-size:15px;color:rgba(244,244,242,.6);">Four curves and six durations cover every animation below.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:20px;">
+      <div style="display:flex;flex-direction:column;padding:8px 22px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="display:flex;align-items:center;gap:18px;min-height:84px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.07);">
+          <svg width="60" height="44" viewBox="-4 -18 68 62" style="flex:none;overflow:visible;"><path d="M0 40 L60 0" stroke="rgba(255,255,255,.12)" fill="none"></path><path d="M0 40 C12 12 12 0 60 0" stroke="#f4f4f2" stroke-width="2" fill="none"></path></svg>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;"><div style="font-size:15.5px;font-weight:600;">Standard</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.5);">cubic-bezier(.2, .7, .2, 1)</div><div style="font-size:13px;color:rgba(244,244,242,.6);">The default for anything moving into place.</div></div>
+          <div style="position:relative;flex:none;width:160px;height:14px;border-radius:7px;background:rgba(255,255,255,.06);"><div style="position:absolute;top:0;left:{{ a.left }}px;width:14px;height:14px;border-radius:50%;background:#f4f4f2;transition:{{ a.std }};"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:18px;min-height:84px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.07);">
+          <svg width="60" height="44" viewBox="-4 -18 68 62" style="flex:none;overflow:visible;"><path d="M0 40 L60 0" stroke="rgba(255,255,255,.12)" fill="none"></path><path d="M0 40 C24 40 60 0 60 0" stroke="#f4f4f2" stroke-width="2" fill="none"></path></svg>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;"><div style="font-size:15.5px;font-weight:600;">Exit</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.5);">cubic-bezier(.4, 0, 1, 1)</div><div style="font-size:13px;color:rgba(244,244,242,.6);">Things leaving: menus, toasts, removed items.</div></div>
+          <div style="position:relative;flex:none;width:160px;height:14px;border-radius:7px;background:rgba(255,255,255,.06);"><div style="position:absolute;top:0;left:{{ a.left }}px;width:14px;height:14px;border-radius:50%;background:#f4f4f2;transition:{{ a.exit }};"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:18px;min-height:84px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.07);">
+          <svg width="60" height="44" viewBox="-4 -18 68 62" style="flex:none;overflow:visible;"><path d="M0 40 L60 0" stroke="rgba(255,255,255,.12)" fill="none"></path><path d="M0 40 C20 -14 38 0 60 0" stroke="#eec01e" stroke-width="2" fill="none"></path></svg>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;"><div style="font-size:15.5px;font-weight:600;">Focus</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.5);">cubic-bezier(.34, 1.36, .64, 1)</div><div style="font-size:13px;color:rgba(244,244,242,.6);">A small overshoot. Only for TV focus and icon pops.</div></div>
+          <div style="position:relative;flex:none;width:160px;height:14px;border-radius:7px;background:rgba(255,255,255,.06);"><div style="position:absolute;top:0;left:{{ a.left }}px;width:14px;height:14px;border-radius:50%;background:#eec01e;transition:{{ a.focus }};"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:18px;min-height:84px;">
+          <svg width="60" height="44" viewBox="-4 -18 68 62" style="flex:none;overflow:visible;"><path d="M0 40 L60 0" stroke="#f4f4f2" stroke-width="2" fill="none"></path></svg>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;"><div style="font-size:15.5px;font-weight:600;">Linear</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.5);">linear</div><div style="font-size:13px;color:rgba(244,244,242,.6);">Timers and progress only.</div></div>
+          <div style="position:relative;flex:none;width:160px;height:14px;border-radius:7px;background:rgba(255,255,255,.06);"><div style="position:absolute;top:0;left:{{ a.left }}px;width:14px;height:14px;border-radius:50%;background:#f4f4f2;transition:{{ a.lin }};"></div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;padding:8px 22px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <sc-for list="{{ durations }}" as="d" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:96px 70px minmax(0,1fr);align-items:center;gap:16px;min-height:56px;box-shadow:{{ d.line }};">
+          <div style="font-size:15px;font-weight:600;">{{ d.name }}</div>
+          <div style="font:500 13px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.7);">{{ d.ms }}</div>
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;"><div style="width:{{ d.pct }}%;height:100%;border-radius:3px;background:rgba(244,244,242,.75);"></div></div>
+            <div style="font-size:13px;color:rgba(244,244,242,.6);">{{ d.use }}</div>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Feedback" style="display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:30px;letter-spacing:-.02em;">Feedback</div><div style="font-size:15px;color:rgba(244,244,242,.6);">Small, fast responses to pointer, focus and taps.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,428px),1fr));gap:20px;">
+
+      <div id="b1" data-screen-label="Poster hover" style="display:{{ vis.b1 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:32px;top:62px;display:flex;gap:16px;">
+              <sc-for list="{{ b1 }}" as="p" hint-placeholder-count="4"><div style="width:72px;height:108px;border-radius:8px;overflow:hidden;background:#282828;transform:{{ p.tf }};box-shadow:{{ p.sh }};transition:{{ p.tr }};"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div></sc-for>
+            </div>
+            <span style="position:absolute;top:150px;left:{{ b1c.left }}px;font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1;text-shadow:0 2px 6px rgba(0,0,0,.6);transition:{{ b1c.tr }};">arrow_selector_tool</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Poster hover</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">200 ms · Standard · lift 4 px, shadow</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Posters in grids and rows lift under the pointer. No scaling, so titles and neighbours stay put.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: shadow and ring only.</div>
+        </div>
+      </div>
+
+      <div id="b2" data-screen-label="TV focus" style="display:{{ vis.b2 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:33px;top:58px;display:flex;gap:26px;">
+              <sc-for list="{{ b2 }}" as="p" hint-placeholder-count="4">
+              <div style="width:64px;display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <div style="position:relative;width:64px;height:96px;border-radius:9px;overflow:hidden;background:#282828;transform:{{ p.tf }};box-shadow:{{ p.sh }};transition:{{ p.tr }};"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><div style="position:absolute;inset:0;opacity:{{ p.glare }};background:linear-gradient(125deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,0) 45%);transition:{{ p.tr }};"></div></div>
+                <div style="width:96px;text-align:center;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ p.color }};transform:translateY({{ p.ty }}px);transition:{{ p.ttr }};">{{ p.title }}</div>
+              </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Focus</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">280 ms · Focus · scale 1.14, shadow, glare</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">The focused poster lifts with a small overshoot and its title drops clear of it. A new swipe retargets the animation mid-flight.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: no scale; a 3 px light ring marks focus.</div>
+        </div>
+      </div>
+
+      <div id="b3" data-screen-label="Want toggle" style="display:{{ vis.b3 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:0;right:0;top:80px;display:flex;justify-content:center;">
+              <div style="display:flex;align-items:center;gap:{{ b3.gap }}px;transition:{{ b3.ptr }};">
+                <div style="display:flex;overflow:hidden;max-width:{{ b3.pMax }}px;opacity:{{ b3.pO }};transform:scale({{ b3.pS }});transition:{{ b3.ptr }};">
+                  <div style="flex:none;display:flex;align-items:center;gap:6px;height:44px;padding:0 18px 0 14px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:15px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'wght' 500;">bookmark_add</span>Add to Want to Watch</div>
+                </div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px;height:44px;padding:0 10px 0 14px;border-radius:999px;background:rgba(255,255,255,.16);font-size:15px;font-weight:600;white-space:nowrap;">
+                  <span style="position:relative;width:21px;height:21px;flex:none;">
+                    <span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:21px;line-height:1;font-variation-settings:'wght' 500;opacity:{{ b3.o0 }};transform:scale({{ b3.s0 }});transition:{{ b3.itr }};">add</span>
+                    <span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:21px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;opacity:{{ b3.o1 }};transform:scale({{ b3.s1 }});transition:{{ b3.itr }};">bookmark</span>
+                  </span>
+                  <span style="display:grid;"><span style="grid-area:1/1;opacity:{{ b3.o0 }};transition:{{ b3.itr }};">Add to List</span><span style="grid-area:1/1;opacity:{{ b3.o1 }};transition:{{ b3.itr }};">Want to Watch</span></span>
+                  <span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span>
+                </div>
+              </div>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:24px;display:flex;justify-content:center;">
+              <div style="display:flex;align-items:center;gap:8px;height:38px;padding:0 6px 0 12px;border-radius:999px;background:rgba(40,40,46,.85);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 10px 30px rgba(0,0,0,.5);font-size:13.5px;font-weight:500;opacity:{{ b3.toastO }};transform:{{ b3.toastTf }};transition:{{ b3.toastTr }};"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#34c46f;font-variation-settings:'FILL' 1;">bookmark_added</span>Added to Want to Watch<span style="padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:650;">Undo</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Add to Want to Watch</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">White button out 240 ms · list icon and label 280 ms · Focus · toast 280 ms in, 200 ms out</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">The white button only offered the add, so it folds away. The list button keeps its width: the plus becomes a filled bookmark and the label changes to the list name. The toast confirms with Undo.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: icons and toast crossfade.</div>
+        </div>
+      </div>
+
+      <div id="b4" data-screen-label="Watched" style="display:{{ vis.b4 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:90px;top:40px;width:112px;height:168px;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.08);">
+              <img src="assets/posters/aftersun.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+              <div style="position:absolute;top:8px;left:8px;width:26px;height:26px;border-radius:7px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:{{ b4.badgeO }};transform:scale({{ b4.badgeS }});transition:{{ b4.btr }};"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#fff;font-variation-settings:'wght' 700;">check</span></div>
+            </div>
+            <div style="position:absolute;left:236px;top:96px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;">
+              <span style="position:relative;width:28px;height:28px;">
+                <span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'wght' 500;opacity:{{ b4.o0 }};transform:scale({{ b4.s0 }});transition:{{ b4.itr }};">check</span>
+                <span style="position:absolute;inset:0;font-family:'Material Symbols Rounded';font-size:28px;line-height:1;color:#34c46f;font-variation-settings:'FILL' 1,'wght' 500;opacity:{{ b4.o1 }};transform:scale({{ b4.s1 }});transition:{{ b4.itr }};">check_circle</span>
+              </span>
+            </div>
+            <div style="position:absolute;left:200px;top:166px;width:130px;text-align:center;font-size:12px;line-height:1.35;color:rgba(244,244,242,.7);opacity:{{ b4.capO }};transition:{{ b4.capTr }};">Watched in Biinge and Jellyfin</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Watched</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Icon 280 ms · Focus · badge follows 80 ms later</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">The button turns green first, then the badge appears on the poster, so the eye moves from the action to its result.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: icon and badge crossfade.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section data-screen-label="Morphs" style="display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:30px;letter-spacing:-.02em;">Morphs</div><div style="font-size:15px;color:rgba(244,244,242,.6);">One element changes shape or place, so the user sees where they went and how to get back.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,428px),1fr));gap:20px;">
+
+      <div id="c1" data-screen-label="Poster to details" style="display:{{ vis.c1 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <img src="assets/posters/la-la-land.jpg" alt="" style="position:absolute;left:-40px;top:-40px;width:480px;height:330px;object-fit:cover;filter:blur(30px) brightness(.5) saturate(1.3);opacity:{{ c1.backO }};transition:{{ c1.backTr }};">
+            <div style="position:absolute;left:70px;top:62px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:22px;letter-spacing:-.02em;opacity:{{ c1.headO }};transition:{{ c1.headTr }};">Want to Watch</div>
+            <sc-for list="{{ c1.posters }}" as="p" hint-placeholder-count="3"><div style="position:absolute;left:{{ p.l }}px;top:{{ p.t }}px;width:{{ p.w }}px;height:{{ p.h }}px;border-radius:{{ p.r }}px;overflow:hidden;background:#282828;opacity:{{ p.o }};transform:{{ p.tf }};box-shadow:0 0 0 1px rgba(255,255,255,.08),0 12px 30px rgba(0,0,0,.4);transition:{{ p.tr }};"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div></sc-for>
+            <div style="position:absolute;left:172px;top:58px;display:flex;flex-direction:column;gap:8px;">
+              <div style="font-size:11px;font-weight:600;color:rgba(244,244,242,.7);opacity:{{ c1.l0.o }};transform:{{ c1.l0.tf }};transition:{{ c1.l0.tr }};">Movie</div>
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:30px;line-height:1;letter-spacing:-.03em;opacity:{{ c1.l0.o }};transform:{{ c1.l0.tf }};transition:{{ c1.l0.tr }};">La La Land</div>
+              <div style="font-size:11.5px;color:rgba(244,244,242,.72);opacity:{{ c1.l1.o }};transform:{{ c1.l1.tf }};transition:{{ c1.l1.tr }};">2016 · 2h 8m · Musical, Drama</div>
+              <div style="display:flex;gap:8px;margin-top:6px;opacity:{{ c1.l2.o }};transform:{{ c1.l2.tf }};transition:{{ c1.l2.tr }};"><div style="display:flex;align-items:center;gap:4px;height:32px;padding:0 16px 0 12px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:13px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>Resume</div><div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1;">bookmark</span></div><div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">check</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Poster to details</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">550 ms · Standard · shared poster; text 280 ms, 60 ms apart</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">The clicked poster becomes the details poster. Its neighbours fade, the backdrop fades in, then the title, facts and actions rise in order. Back reverses it into the same slot.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: cut to details; content crossfades in 200 ms.</div>
+        </div>
+      </div>
+
+      <div id="c2" data-screen-label="Details to player" style="display:{{ vis.c2 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <img src="assets/posters/blade-runner-2049.jpg" alt="" style="position:absolute;left:-40px;top:-40px;width:480px;height:330px;object-fit:cover;filter:blur(30px) brightness(.5) saturate(1.3);opacity:{{ c2.backO }};transition:{{ c2.backTr }};">
+            <div style="position:absolute;left:172px;top:58px;display:flex;flex-direction:column;gap:8px;opacity:{{ c2.textO }};transform:{{ c2.textTf }};transition:{{ c2.textTr }};">
+              <div style="font-size:11px;font-weight:600;color:rgba(244,244,242,.7);">Movie</div>
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:26px;line-height:1.05;letter-spacing:-.03em;max-width:200px;">Blade Runner 2049</div>
+              <div style="font-size:11.5px;color:rgba(244,244,242,.72);">2017 · 2h 44m · Science Fiction</div>
+              <div style="display:flex;gap:8px;margin-top:6px;"><div style="display:flex;align-items:center;gap:4px;height:32px;padding:0 16px 0 12px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:13px;font-weight:600;animation:{{ c2.press }};"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>Play</div></div>
+            </div>
+            <div style="position:absolute;left:{{ c2.img.l }}px;top:{{ c2.img.t }}px;width:{{ c2.img.w }}px;height:{{ c2.img.h }}px;border-radius:{{ c2.img.r }}px;overflow:hidden;background:#282828;opacity:{{ c2.img.o }};transition:{{ c2.img.tr }};"><img src="assets/posters/blade-runner-2049.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+            <div style="position:absolute;left:18px;right:18px;bottom:14px;display:flex;align-items:center;gap:10px;height:42px;padding:0 14px;border-radius:16px;background:rgba(30,30,36,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);opacity:{{ c2.barO }};transform:{{ c2.barTf }};transition:{{ c2.barTr }};">
+              <span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1;">pause</span>
+              <span style="font-size:11px;font-variant-numeric:tabular-nums;">0:04</span>
+              <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22);"><div style="width:2%;height:100%;border-radius:2px;background:#f4f4f2;"></div></div>
+              <span style="font-size:11px;font-variant-numeric:tabular-nums;color:rgba(244,244,242,.7);">-2:43:56</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Details to player</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Press 120 ms · artwork 550 ms · controls 280 ms after</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Play presses in, then the artwork grows to fill the window while details fade out. Controls arrive last and hide after 3 s without input.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: crossfade to the player.</div>
+        </div>
+      </div>
+
+      <div id="c3" data-screen-label="Next episode" style="display:{{ vis.c3 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#000;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:0;top:0;width:400px;height:250px;overflow:hidden;transform-origin:0 0;transform:{{ c3.vidTf }};border-radius:{{ c3.vidR }}px;box-shadow:{{ c3.vidSh }};transition:{{ c3.vidTr }};"><img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;filter:brightness(.8);"></div>
+            <div style="position:absolute;left:20px;top:176px;font-size:10.5px;font-weight:500;color:rgba(244,244,242,.6);opacity:{{ c3.labelO }};transition:{{ c3.nextTr }};">S1 · E4 · Credits</div>
+            <div style="position:absolute;left:220px;top:58px;width:160px;display:flex;flex-direction:column;gap:8px;opacity:{{ c3.nextO }};transform:{{ c3.nextTf }};transition:{{ c3.nextTr }};">
+              <div style="font-size:10.5px;font-weight:600;color:rgba(244,244,242,.6);">Next Episode</div>
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:17px;letter-spacing:-.02em;">S1 · E5</div>
+              <div style="font-size:11px;line-height:1.4;color:rgba(244,244,242,.7);">fsociety needs Elliot inside a secured data facility.</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                <svg width="28" height="28" viewBox="0 0 28 28" style="flex:none;transform:rotate(-90deg);"><circle cx="14" cy="14" r="11" stroke="rgba(255,255,255,.2)" stroke-width="2.5" fill="none"></circle><circle cx="14" cy="14" r="11" stroke="#f4f4f2" stroke-width="2.5" fill="none" stroke-dasharray="69.1" stroke-dashoffset="{{ c3.ringOff }}" style="transition:{{ c3.ringTr }};"></circle></svg>
+                <div style="height:30px;padding:0 14px;display:flex;align-items:center;border-radius:999px;background:#f4f4f2;color:#101014;font-size:12px;font-weight:600;">Play Now</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Next episode</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">550 ms · Standard · video to 42 %; countdown Linear 10 s</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">At the credits the video shrinks to the left and keeps playing. The next episode slides in from the right with its countdown.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: video stays full size; the card fades in over it.</div>
+        </div>
+      </div>
+
+      <div id="c4" data-screen-label="Remove from list" style="display:{{ vis.c4 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <sc-for list="{{ c4.items }}" as="p" hint-placeholder-count="6"><div style="position:absolute;left:{{ p.l }}px;top:{{ p.t }}px;width:56px;height:84px;border-radius:7px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.08);opacity:{{ p.o }};transform:{{ p.tf }};transition:{{ p.tr }};"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div></sc-for>
+            <div style="position:absolute;left:0;right:0;bottom:16px;display:flex;justify-content:center;">
+              <div style="display:flex;align-items:center;gap:12px;height:36px;padding:0 6px 0 14px;border-radius:999px;background:rgba(40,40,46,.85);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 10px 30px rgba(0,0,0,.5);font-size:12.5px;opacity:{{ c4.toastO }};transform:{{ c4.toastTf }};transition:{{ c4.toastTr }};">Removed from Want to Watch<span style="height:26px;padding:0 12px;display:flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.12);font-weight:600;">Undo</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Remove from a list</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Out 200 ms · Exit · reflow 450 ms · Standard</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">The removed poster shrinks and fades, then the rest slide into the gap. Undo plays it backwards. The same reflow applies when a title moves to another list.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: fade out, then the grid cuts to its new order.</div>
+        </div>
+      </div>
+
+      <div id="c5" data-screen-label="Want, Watched and Library control" style="display:{{ vis.c5 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:77px;top:22px;width:246px;height:36px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+              <div style="position:absolute;top:3px;left:{{ c5.pill }}px;width:{{ c5.pillW }}px;height:30px;border-radius:999px;background:rgba(255,255,255,.14);transition:{{ c5.pillTr }};"></div>
+              <div style="position:absolute;inset:0;display:flex;">
+                <div style="flex:none;width:70px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:{{ c5.c0 }};transition:{{ c5.cTr }};">Want</div><div style="flex:none;width:80px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:rgba(244,244,242,.55);">Watched</div><div style="flex:none;width:1px;height:16px;align-self:center;background:rgba(255,255,255,.14);"></div>
+                <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:600;color:{{ c5.c1 }};transition:{{ c5.cTr }};"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;">video_library</span>Library</div>
+              </div>
+            </div>
+            <div style="position:absolute;left:44px;top:84px;display:flex;gap:12px;opacity:{{ c5.aO }};transform:{{ c5.aTf }};transition:{{ c5.tr }};">
+              <sc-for list="{{ c5.lists }}" as="p" hint-placeholder-count="4"><div style="position:relative;width:68px;height:102px;border-radius:8px;overflow:hidden;background:#282828;"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"><sc-if value="{{ p.pin }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:12px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div></sc-if></div></sc-for>
+            </div>
+            <div style="position:absolute;left:44px;top:84px;display:flex;flex-direction:column;gap:8px;opacity:{{ c5.bO }};transform:{{ c5.bTf }};transition:{{ c5.tr }};">
+              <div style="font-size:12px;font-weight:600;">Continue Watching</div>
+              <div style="display:flex;gap:10px;">
+                <div style="position:relative;width:150px;height:84px;border-radius:9px;overflow:hidden;"><img src="assets/posters/the-bear.jpg" alt="" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;left:8px;right:8px;bottom:7px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);"><div style="width:55%;height:100%;background:#f4f4f2;border-radius:2px;"></div></div></div>
+                <div style="position:relative;width:150px;height:84px;border-radius:9px;overflow:hidden;"><img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;left:8px;right:8px;bottom:7px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);"><div style="width:30%;height:100%;background:#f4f4f2;border-radius:2px;"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Want, Watched and Library control</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">280 ms · Standard · pill slides; content shifts 20 px</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">One control at the top of Movies and TV. The pill slides to the picked segment and the content moves the same way, so neighbouring views read as neighbours. Library sits after a divider because it comes from Jellyfin. Mac uses the same motion for the Movies and TV Shows pills on lists.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: pill and content crossfade.</div>
+        </div>
+      </div>
+
+      <div id="c6" data-screen-label="Panel pages" style="display:{{ vis.c6 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#000;">
+          <img src="assets/posters/mr-robot.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.45);">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:60px;bottom:20px;width:280px;height:{{ c6.h }}px;border-radius:18px;overflow:hidden;background:rgba(34,34,40,.7);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 18px 50px rgba(0,0,0,.5);transition:{{ c6.hTr }};">
+              <div style="position:absolute;left:0;top:0;width:280px;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;opacity:{{ c6.aO }};transform:{{ c6.aTf }};transition:{{ c6.tr }};">
+                <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:10px;font-weight:600;color:rgba(244,244,242,.55);padding:2px 6px;">Audio</div><div style="padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.06);font-size:11.5px;">English<div style="font-size:9.5px;color:rgba(244,244,242,.5);">Dolby Digital 5.1</div></div><div style="padding:4px 6px;font-size:11.5px;">Russian<div style="font-size:9.5px;color:rgba(244,244,242,.5);">LostFilm · DTS 5.1</div></div></div>
+                <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:10px;font-weight:600;color:rgba(244,244,242,.55);padding:2px 6px;">Subtitles</div><div style="padding:4px 6px;font-size:11.5px;">Off</div><div style="padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.06);font-size:11.5px;">Full<div style="font-size:9.5px;color:rgba(244,244,242,.5);">English</div></div></div>
+                <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;padding:6px 4px 0;font-size:11px;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);">Subtitle Style ›</div>
+              </div>
+              <div style="position:absolute;left:0;top:0;width:280px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;opacity:{{ c6.bO }};transform:{{ c6.bTf }};transition:{{ c6.tr }};">
+                <div style="font-size:11.5px;font-weight:600;">‹ Subtitle Style</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;">Size<span style="display:flex;gap:2px;padding:2px;border-radius:6px;background:rgba(255,255,255,.06);"><span style="padding:2px 6px;">S</span><span style="padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.2);">M</span><span style="padding:2px 6px;">L</span></span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;">Background<span style="display:flex;gap:2px;padding:2px;border-radius:6px;background:rgba(255,255,255,.06);"><span style="padding:2px 6px;">None</span><span style="padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.2);">Shadow</span><span style="padding:2px 6px;">Box</span></span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;">Timing<span style="color:rgba(244,244,242,.7);">In sync</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Pages inside a panel</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">280 ms · Standard · height morph, 24 px slide</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Audio &amp; Subtitles opens Subtitle Style inside the same glass panel. The panel resizes to fit and the pages slide, so nothing behind it jumps.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: height snaps; pages crossfade.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section data-screen-label="Surfaces" style="display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:30px;letter-spacing:-.02em;">Surfaces</div><div style="font-size:15px;color:rgba(244,244,242,.6);">How menus, sheets and featured content arrive.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,428px),1fr));gap:20px;">
+
+      <div id="d1" data-screen-label="Popover" style="display:{{ vis.d1 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;right:40px;bottom:72px;width:200px;padding:6px;border-radius:14px;background:rgba(34,34,40,.75);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 18px 50px rgba(0,0,0,.5);transform-origin:100% 100%;opacity:{{ d1.o }};transform:{{ d1.tf }};transition:{{ d1.tr }};">
+              <div style="padding:5px 8px;font-size:11px;font-weight:600;color:rgba(244,244,242,.55);">Sort by</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.08);font-size:12.5px;"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;">check</span>Date Added</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:12.5px;"><span style="width:15px;"></span>Title</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:12.5px;"><span style="width:15px;"></span>Release Year</div>
+            </div>
+            <div style="position:absolute;right:40px;bottom:24px;display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:{{ d1.btn }};box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);font-size:12.5px;font-weight:500;transition:{{ d1.btnTr }};"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1;">swap_vert</span>Date Added</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Menus and popovers</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">In 200 ms · Standard · out 150 ms · Exit · from 94 %</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Sort, context menus, the speed list and the tracks panel grow out of the control that opened them, and leave faster than they arrive.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: fade only.</div>
+        </div>
+      </div>
+
+      <div id="d2" data-screen-label="Sheet" style="display:{{ vis.d2 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#000;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;inset:0;padding:22px 26px;background:#101014;border-radius:{{ d2.underR }}px;transform:{{ d2.underTf }};transition:{{ d2.underTr }};display:flex;flex-direction:column;gap:12px;">
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:22px;letter-spacing:-.03em;">Up Next</div>
+              <div style="display:flex;gap:10px;"><img src="assets/posters/the-bear.jpg" alt="" style="width:150px;height:84px;object-fit:cover;border-radius:9px;"><img src="assets/posters/mr-robot.jpg" alt="" style="width:150px;height:84px;object-fit:cover;border-radius:9px;"></div>
+            </div>
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:{{ d2.dimO }};transition:{{ d2.dimTr }};"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:150px;padding:8px 18px 0;border-radius:22px 22px 0 0;background:#1d1d23;box-shadow:inset 0 1px 0 rgba(255,255,255,.1);display:flex;flex-direction:column;gap:6px;opacity:{{ d2.sheetO }};transform:{{ d2.sheetTf }};transition:{{ d2.sheetTr }};">
+              <div style="align-self:center;width:32px;height:4px;border-radius:2px;background:rgba(255,255,255,.3);"></div>
+              <div style="font-size:13px;font-weight:600;padding:6px 0 2px;">The Bear · S3 · E2</div>
+              <div style="display:flex;align-items:center;gap:10px;height:36px;padding:0 12px;border-radius:10px;background:rgba(255,255,255,.08);font-size:13px;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>Resume · 12 min left</div>
+              <div style="display:flex;align-items:center;gap:10px;height:36px;padding:0 12px;font-size:13px;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">replay</span>Play from Beginning</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Sheets</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">In 450 ms · Standard · out 280 ms · Exit</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Sheets rise from the bottom edge while the page behind dims and steps back to 96 %. On Apple TV the page does not step back; it only dims.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: sheet and dim fade; the page stays still.</div>
+        </div>
+      </div>
+
+      <div id="e2" data-screen-label="Hero rotation" style="display:{{ vis.e2 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#000;">
+          <sc-for list="{{ e2.slides }}" as="sl" hint-placeholder-count="3"><img src="{{ sl.img }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.7);opacity:{{ sl.o }};transform:{{ sl.tf }};transition:{{ sl.tr }};"></sc-for>
+          <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.8) 0%,rgba(0,0,0,0) 60%);"></div>
+          <div style="position:absolute;left:24px;bottom:24px;right:24px;height:60px;">
+            <sc-for list="{{ e2.slides }}" as="sl" hint-placeholder-count="3"><div style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;gap:4px;opacity:{{ sl.o }};transition:{{ sl.ttr }};"><div style="font-size:11px;font-weight:600;color:rgba(244,244,242,.75);">{{ sl.eyebrow }}</div><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:28px;line-height:1;letter-spacing:-.03em;">{{ sl.title }}</div></div></sc-for>
+          </div>
+          <div style="position:absolute;right:24px;bottom:30px;display:flex;gap:6px;"><sc-for list="{{ e2.slides }}" as="sl" hint-placeholder-count="3"><div style="width:{{ sl.dot }}px;height:7px;border-radius:4px;background:{{ sl.dotBg }};transition:{{ sl.dotTr }};"></div></sc-for></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Hero rotation</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Crossfade 800 ms · Standard · push-in to 108 % · Linear</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Featured titles change every 9 s (shortened here) with a crossfade and a slow push-in. Rotation pauses while anything below the hero has focus or the pointer is over it.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: crossfade only, no push-in.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section data-screen-label="Loading" style="display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:30px;letter-spacing:-.02em;">Loading</div><div style="font-size:15px;color:rgba(244,244,242,.6);">What waiting looks like on buttons, pages, lists and playback.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,428px),1fr));gap:20px;">
+
+      <div id="f1" data-screen-label="Button loading" style="display:{{ vis.f1 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:80px;top:44px;width:240px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;height:36px;padding:0 12px;border-radius:10px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);font-size:13px;opacity:{{ f1.fieldO }};transition:{{ f1.fieldTr }};">tom@example.com</div>
+            <div style="display:flex;align-items:center;height:36px;padding:0 12px;border-radius:10px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);font-size:13px;opacity:{{ f1.fieldO }};transition:{{ f1.fieldTr }};">••••••••••</div>
+            <div style="height:10px;"></div>
+            <div style="position:relative;height:40px;border-radius:999px;background:#f4f4f2;color:#101014;animation:{{ f1.press }};">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;opacity:{{ f1.labelO }};transition:{{ f1.labelTr }};">Log In</div>
+              <div style="position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:{{ f1.spinO }};transition:{{ f1.spinTr }};"><div style="width:18px;height:18px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(16,16,20,.2);border-top-color:#101014;animation:{{ spin }};"></div></div>
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:{{ f1.okO }};transform:scale({{ f1.okS }});transition:{{ f1.okTr }};"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'wght' 600;">check</span></div>
+            </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Button loading</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Press 120 ms · label out 150 ms · spinner in 200 ms · check 280 ms · Focus</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Log In, Connect, Retry and any button that waits on the network keeps its size. The label gives way to a spinner and the fields dim and lock until the request returns. On success a check pops in before the next step slides in.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: no press scale; label, spinner and check crossfade.</div>
+        </div>
+      </div>
+
+      <div id="f2" data-screen-label="Button error" style="display:{{ vis.f2 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:80px;top:34px;width:240px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;flex-direction:column;gap:10px;animation:{{ f2.shake }};">
+            <div style="display:flex;align-items:center;height:36px;padding:0 12px;border-radius:10px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);font-size:13px;opacity:{{ f2.fieldO }};transition:{{ f2.fieldTr }};">tom@example.com</div>
+            <div style="display:flex;align-items:center;height:36px;padding:0 12px;border-radius:10px;background:rgba(255,255,255,.07);box-shadow:{{ f2.ring }};font-size:13px;opacity:{{ f2.fieldO }};transition:{{ f2.fieldTr }}, {{ f2.ringTr }};">••••••</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;height:18px;font-size:12.5px;color:#ff8a8d;opacity:{{ f2.errO }};transform:{{ f2.errTf }};transition:{{ f2.errTr }};"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1;font-variation-settings:'FILL' 1;">error</span>Wrong email or password.</div>
+            <div style="position:relative;height:40px;border-radius:999px;background:#f4f4f2;color:#101014;animation:{{ f2.press }};">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;opacity:{{ f2.labelO }};transition:{{ f2.labelTr }};">Log In</div>
+              <div style="position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:{{ f2.spinO }};transition:{{ f2.spinTr }};"><div style="width:18px;height:18px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(16,16,20,.2);border-top-color:#101014;animation:{{ spin }};"></div></div>
+            </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Button error</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Ring 200 ms · message 200 ms, +80 ms · shake 400 ms on Mac</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">When the request fails the button gets its label back at once, ready for a retry. The field at fault takes a red ring and the message appears under it; both clear as soon as the user types. On Mac the fields shake once, as macOS does for a wrong password. iPhone plays the error haptic instead.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: no shake; ring and message fade in.</div>
+        </div>
+      </div>
+
+      <div id="e1" data-screen-label="Loading to content" style="display:{{ vis.e1 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:30px;top:30px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:18px;letter-spacing:-.02em;">Recently Added</div>
+            <div style="position:absolute;left:30px;top:70px;display:flex;gap:12px;opacity:{{ e1.skelO }};transition:{{ e1.skelTr }};">
+              <sc-for list="{{ e1.items }}" as="p" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;gap:8px;"><div style="width:58px;height:87px;border-radius:7px;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ e1.anim }};"></div><div style="width:44px;height:8px;border-radius:4px;background:rgba(255,255,255,.07);"></div><div style="width:28px;height:7px;border-radius:4px;background:rgba(255,255,255,.04);"></div></div></sc-for>
+            </div>
+            <div style="position:absolute;left:30px;top:70px;display:flex;gap:12px;">
+              <sc-for list="{{ e1.items }}" as="p" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;gap:6px;opacity:{{ p.o }};transform:{{ p.tf }};transition:{{ p.tr }};"><img src="{{ p.img }}" alt="" style="width:58px;height:87px;object-fit:cover;border-radius:7px;display:block;"><div style="width:58px;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.title }}</div><div style="font-size:9.5px;color:rgba(244,244,242,.5);">{{ p.year }}</div></div></sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Loading to content</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Shimmer 1.4 s loop · posters 280 ms, 40 ms apart</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Skeletons match the final layout exactly. Posters fade in left to right as they arrive and the skeleton fades out underneath. Skeletons show only after 300 ms, so fast loads never flash.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: no shimmer, no stagger.</div>
+        </div>
+      </div>
+
+      <div id="f3" data-screen-label="Details skeleton" style="display:{{ vis.f3 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <img src="assets/posters/la-la-land.jpg" alt="" style="position:absolute;left:-40px;top:-40px;width:480px;height:330px;object-fit:cover;filter:blur(30px) brightness(.5) saturate(1.3);opacity:{{ f3.backO }};transition:{{ f3.backTr }};">
+            <div style="position:absolute;inset:0;opacity:{{ f3.skelO }};transition:{{ f3.skelTr }};">
+              <div style="position:absolute;left:28px;top:34px;"><div style="width:122px;height:183px;border-radius:12px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div></div>
+              <div style="position:absolute;left:172px;top:58px;display:flex;flex-direction:column;gap:10px;"><div style="width:40px;height:9px;border-radius:4px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div><div style="width:150px;height:26px;border-radius:6px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div><div style="width:130px;height:10px;border-radius:5px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div><div style="display:flex;gap:8px;margin-top:4px;"><div style="width:84px;height:32px;border-radius:16px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div><div style="width:32px;height:32px;border-radius:16px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div><div style="width:32px;height:32px;border-radius:16px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div></div></div>
+            </div>
+            <div style="position:absolute;left:28px;top:34px;width:122px;height:183px;border-radius:12px;overflow:hidden;opacity:{{ f3.o }};transition:{{ f3.tr }};"><img src="assets/posters/la-la-land.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+            <div style="position:absolute;left:172px;top:58px;display:flex;flex-direction:column;gap:8px;opacity:{{ f3.o }};transition:{{ f3.tr }};">
+              <div style="font-size:11px;font-weight:600;color:rgba(244,244,242,.7);">Movie</div>
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:30px;line-height:1;letter-spacing:-.03em;">La La Land</div>
+              <div style="font-size:11.5px;color:rgba(244,244,242,.72);">2016 · 2h 8m · Musical, Drama</div>
+              <div style="display:flex;gap:8px;margin-top:6px;"><div style="display:flex;align-items:center;gap:4px;height:32px;padding:0 16px 0 12px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:13px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>Play</div><div style="display:flex;align-items:center;gap:3px;height:32px;padding:0 8px 0 10px;border-radius:999px;background:rgba(255,255,255,.16);font-size:13px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1;">add</span>Add to List<span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;opacity:.6;">expand_more</span></div><div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">more_horiz</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Details skeleton</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Skeleton out 200 ms · content 280 ms · backdrop 450 ms, +150 ms</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Details opened from a link or search start as a skeleton of their own layout, with poster, title, facts and actions exactly where they will land. Content replaces it in one fade, so nothing shifts. The backdrop follows because it is the largest image. Opened from a poster, the poster and title are already known and never skeleton.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: no shimmer; skeleton and content crossfade.</div>
+        </div>
+      </div>
+
+      <div id="f4" data-screen-label="List skeleton" style="display:{{ vis.f4 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#101014;">
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:30px;top:22px;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:17px;letter-spacing:-.02em;">Season 1</div>
+            <sc-for list="{{ f4.rows }}" as="r" hint-placeholder-count="3"><div style="position:absolute;left:30px;top:{{ r.top }}px;display:flex;gap:14px;opacity:{{ f4.skelO }};transition:{{ f4.skelTr }};"><div style="width:96px;height:54px;border-radius:7px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div><div style="display:flex;flex-direction:column;gap:9px;padding-top:9px;"><div style="width:170px;height:10px;border-radius:5px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div><div style="width:70px;height:8px;border-radius:4px;flex:none;background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:{{ shimmer }};"></div></div></div></sc-for>
+            <sc-for list="{{ f4.rows }}" as="r" hint-placeholder-count="3"><div style="position:absolute;left:30px;top:{{ r.top }}px;display:flex;gap:14px;">
+              <div style="position:relative;width:96px;height:54px;border-radius:7px;overflow:hidden;background:#282828;opacity:{{ r.o }};transition:{{ r.tr }};"><img src="assets/posters/mr-robot.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ r.pos }};display:block;opacity:{{ r.thumbO }};transition:{{ r.thumbTr }};"><div style="position:absolute;left:6px;right:6px;bottom:5px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);opacity:{{ r.progO }};"><div style="width:62%;height:100%;border-radius:2px;background:#f4f4f2;"></div></div></div>
+              <div style="display:flex;flex-direction:column;gap:5px;padding-top:7px;opacity:{{ r.o }};transition:{{ r.tr }};"><div style="font-size:13px;font-weight:600;">{{ r.title }}</div><div style="font-size:11.5px;color:{{ r.metaC }};">{{ r.meta }}</div></div>
+            </div></sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">List skeleton</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Rows 280 ms, 40 ms apart · thumbnails 200 ms as each decodes</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">Episode lists, search results and Continue Watching show as many skeleton rows as the last visit returned, up to one screen. Section titles never skeleton. Text arrives with the response; thumbnails fade in one by one as they decode, and cached images appear without a fade.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: no shimmer, no stagger.</div>
+        </div>
+      </div>
+
+      <div id="f5" data-screen-label="Buffering" style="display:{{ vis.f5 }};flex-direction:column;gap:14px;padding:14px 14px 18px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="position:relative;height:250px;border-radius:14px;overflow:hidden;background:#000;">
+          <img src="assets/posters/mr-robot.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.75);">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:{{ f5.o }};transition:{{ f5.tr }};"></div>
+          <div style="position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-40px 0 0 -20px;opacity:{{ f5.o }};transition:{{ f5.tr }};"><div style="width:40px;height:40px;box-sizing:border-box;border-radius:50%;border:3.5px solid rgba(255,255,255,.25);border-top-color:#ffffff;animation:{{ spin }};"></div></div>
+          <div style="position:absolute;left:50%;top:0;width:400px;height:250px;margin-left:-200px;">
+            <div style="position:absolute;left:18px;right:18px;bottom:14px;display:flex;align-items:center;gap:10px;height:42px;padding:0 14px;border-radius:16px;background:rgba(30,30,36,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);">
+              <span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1;">pause</span>
+              <span style="font-size:11px;font-variant-numeric:tabular-nums;">12:04</span>
+              <div style="position:relative;flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ f5.bufW }}%;background:rgba(255,255,255,.42);transition:{{ f5.bufTr }};"></div><div style="position:absolute;left:0;top:0;bottom:0;width:30%;border-radius:2px;background:#f4f4f2;"></div></div>
+              <span style="font-size:11px;font-variant-numeric:tabular-nums;color:rgba(244,244,242,.7);">-34:51</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:17px;font-weight:600;">Buffering</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Mac</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span></div>
+          <div style="font:500 12.5px ui-monospace,Menlo,monospace;color:#eec01e;">Spinner after a 500 ms stall · in 200 ms · out 150 ms · Exit</div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(244,244,242,.72);">If playback stalls for more than 500 ms the picture dims a little and a spinner appears over it. The buffered range keeps filling in the scrubber and the controls stay usable, so the user can seek or leave.</div>
+          <div style="font-size:13px;color:rgba(244,244,242,.5);">Reduce Motion: unchanged. The spinner keeps turning because it is the only sign of progress.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section data-screen-label="Rules" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px;">
+    <div style="display:flex;flex-direction:column;gap:14px;padding:24px 26px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:24px;letter-spacing:-.02em;">Rules</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14.5px;line-height:1.5;color:rgba(244,244,242,.78);">
+        <div>Things grow out of what was clicked, tapped or focused, and go back to it.</div>
+        <div>Standard does most of the work. Focus is only for TV focus and icon pops.</div>
+        <div>Exits run at about 70 % of the entrance time.</div>
+        <div>A new input always interrupts and retargets the running animation. Nothing blocks clicks or the remote.</div>
+        <div>Only the TV hero, skeleton shimmer and spinners move on their own.</div>
+        <div>A pressed button shows its spinner at once. Page skeletons wait 300 ms and playback spinners 500 ms. Once shown, either stays at least 500 ms so it never flickers.</div>
+        <div>Want to Watch and Watched update instantly and sync in the background. If the sync fails, the change reverts and a toast explains why. These buttons never show a spinner.</div>
+        <div>During playback, only the controls, subtitles and the next-episode morph move over the video.</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;padding:24px 26px;border-radius:22px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:24px;letter-spacing:-.02em;">Avoid</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14.5px;line-height:1.5;color:rgba(244,244,242,.78);">
+        <div>Bounce or springy overshoot on Mac windows, menus and sheets.</div>
+        <div>Parallax on scroll and tilt effects on Mac and iPhone posters.</div>
+        <div>Animating lists and grids on first load beyond the poster fade-in.</div>
+        <div>Page-turn, flip or zoom-through transitions between sidebar sections. Sidebar sections switch instantly.</div>
+        <div>Motion that carries meaning on its own. Every state change also shows in the final frame.</div>
+        <div>Full-screen spinners where a skeleton can show the layout, and buttons that change width while they load.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;slowMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;reduceMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;All&quot;,&quot;Mac&quot;,&quot;Apple TV&quot;,&quot;iPhone&quot;],&quot;default&quot;:&quot;All&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const CURVES = { std: 'cubic-bezier(.2,.7,.2,1)', exit: 'cubic-bezier(.4,0,1,1)', focus: 'cubic-bezier(.34,1.36,.64,1)', lin: 'linear' };
+const BEAT = 1100;
+const P = id => `assets/posters/${id}.jpg`;
+const DUR = [
+  ['Press', 120, 'Button press: scale to 97 %.'],
+  ['Quick', 200, 'Hover, toggles, colour changes and exits.'],
+  ['Standard', 280, 'TV focus, menus, page slides, toasts.'],
+  ['Emphasis', 450, 'Sheets and grid reflow.'],
+  ['Morph', 550, 'Shared-element morphs between screens.'],
+  ['Ambient', 800, 'Hero crossfades. Never on a user action.'],
+];
+
+class Component extends DCLogic {
+  state = { n: 0 };
+  componentDidMount() {
+    const loop = () => { this.t = setTimeout(() => { this.setState(s => ({ n: s.n + 1 })); loop(); }, BEAT * (this.props.slowMotion ? 3 : 1)); };
+    loop();
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+
+  renderVals() {
+    const n = this.state.n, S = this.props.slowMotion ? 3 : 1, rm = !!this.props.reduceMotion, plat = this.props.platform ?? 'All';
+    const beat = BEAT * S;
+    const tr = (props, ms, c = 'std', d = 0) => props.split(',').map(p => `${p} ${Math.round(ms * S)}ms ${CURVES[c]} ${Math.round(d * S)}ms`).join(', ');
+    const on = (...ps) => (plat === 'All' || ps.includes(plat) ? 'flex' : 'none');
+
+    // Foundations
+    const a = { left: n % 2 ? 146 : 0, std: tr('left', 600), exit: tr('left', 600, 'exit'), focus: tr('left', 600, 'focus'), lin: tr('left', 600, 'lin') };
+    const durations = DUR.map(([name, ms, use], i) => ({ name, ms: `${ms} ms`, use, pct: Math.round(ms / 800 * 100), line: i < DUR.length - 1 ? 'inset 0 -1px 0 rgba(255,255,255,.07)' : 'none' }));
+
+    // B1 hover
+    const h = n % 4, b1ids = ['la-la-land', 'blade-runner-2049', 'dune-part-two', 'aftersun'];
+    const b1 = b1ids.map((id, i) => ({ img: P(id), tf: !rm && i === h ? 'translateY(-4px)' : 'none',
+      sh: i === h ? '0 0 0 1px rgba(255,255,255,.28),0 14px 28px rgba(0,0,0,.5)' : '0 0 0 1px rgba(255,255,255,.07)', tr: tr('transform,box-shadow', 200) }));
+    const b1c = { left: 32 + h * 88 + 34, tr: tr('left', 280) };
+
+    // B2 focus
+    const f = n % 4, b2titles = ['La La Land', 'Blade Runner 2049', 'Dune: Part Two', 'Aftersun'];
+    const b2 = b1ids.map((id, i) => { const F = i === f; return { img: P(id), title: b2titles[i],
+      tf: rm ? 'none' : F ? 'scale(1.14) translateY(-4px)' : 'scale(1)',
+      sh: F ? (rm ? '0 0 0 3px #f4f4f2' : '0 18px 36px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.2)') : '0 4px 10px rgba(0,0,0,.3)',
+      glare: F && !rm ? 1 : 0, color: F ? '#ffffff' : 'rgba(244,244,242,.55)', ty: F && !rm ? 10 : 0,
+      tr: tr('transform,box-shadow,opacity', 280, 'focus'), ttr: tr('transform,color', 280, 'focus') }; });
+
+    // B3 want
+    const k3 = n % 4, w = k3 === 1 || k3 === 2, toast = k3 === 1;
+    const b3 = { pMax: w ? 0 : 240, pO: w ? 0 : 1, pS: rm ? 1 : w ? 0.9 : 1, gap: w ? 0 : 10, ptr: w ? tr('max-width,opacity,transform,gap', 240, 'exit') : tr('max-width,opacity,transform,gap', 280, 'focus'),
+      o0: w ? 0 : 1, s0: rm ? 1 : w ? 0.5 : 1, o1: w ? 1 : 0, s1: rm ? 1 : w ? 1 : 0.5, itr: w ? tr('opacity,transform', 280, 'focus') : tr('opacity,transform', 200),
+      toastO: toast ? 1 : 0, toastTf: rm ? 'none' : toast ? 'translateY(0)' : 'translateY(16px)', toastTr: toast ? tr('opacity,transform', 280) : tr('opacity,transform', 200, 'exit') };
+
+    // B4 watched
+    const wd = n % 3 >= 1;
+    const b4 = { badgeO: wd ? 1 : 0, badgeS: rm ? 1 : wd ? 1 : 0.4, btr: wd ? tr('opacity,transform', 280, 'focus', 80) : tr('opacity,transform', 150, 'exit'),
+      o0: wd ? 0 : 1, s0: rm ? 1 : wd ? 0.5 : 1, o1: wd ? 1 : 0, s1: rm ? 1 : wd ? 1 : 0.5, itr: wd ? tr('opacity,transform', 280, 'focus') : tr('opacity,transform', 200),
+      capO: wd ? 1 : 0, capTr: wd ? tr('opacity', 200, 'std', 160) : tr('opacity', 150, 'exit') };
+
+    // C1 poster -> details
+    const k1 = n % 4, open = k1 === 1 || k1 === 2;
+    const geo = rm ? '' : tr('left,top,width,height,border-radius', 550);
+    const c1 = {
+      backO: open ? 1 : 0, backTr: tr('opacity', 450, 'std', open ? 100 : 0), headO: open ? 0 : 1, headTr: open ? tr('opacity', 150, 'exit') : tr('opacity', 280, 'std', 250),
+      posters: ['aftersun', 'la-la-land', 'dune-part-two'].map((id, i) => {
+        const sel = i === 1, g = { l: 70 + i * 96, t: 104, w: 68, h: 102, r: 8 };
+        const d = sel && open ? { l: 28, t: 34, w: 122, h: 183, r: 12 } : g;
+        const op = !sel && open ? tr('opacity,transform', 150, 'exit') : tr('opacity,transform', 280, 'std', open ? 0 : 250);
+        return { img: P(id), ...d, o: !sel && open ? 0 : 1, tf: !sel && open && !rm ? 'translateY(8px)' : 'none', tr: [geo, op].filter(Boolean).join(', ') };
+      }),
+    };
+    [0, 1, 2].forEach(i => { c1['l' + i] = { o: open ? 1 : 0, tf: rm || open ? 'none' : 'translateY(10px)', tr: open ? tr('opacity,transform', 280, 'std', (rm ? 0 : 250) + i * (rm ? 0 : 60)) : tr('opacity,transform', 150, 'exit') }; });
+
+    // C2 details -> player
+    const k2 = n % 4, player = k2 === 1 || k2 === 2, ctrl = k2 === 1;
+    const c2 = {
+      backO: player ? 0 : 1, backTr: tr('opacity', 280),
+      textO: player ? 0 : 1, textTf: rm || !player ? 'none' : 'translateY(-6px)', textTr: player ? tr('opacity,transform', 150, 'exit') : tr('opacity,transform', 280, 'std', 300),
+      press: k2 === 0 && !rm ? `bpress ${240 * S}ms ${CURVES.std} ${beat - 320}ms` : 'none',
+      img: Object.assign(player ? { l: 0, t: 0, w: 400, h: 250, r: 0 } : { l: 28, t: 34, w: 122, h: 183, r: 12 },
+        { o: rm ? (player ? 1 : 1) : 1, tr: rm ? 'none' : tr('left,top,width,height,border-radius', 550) }),
+      barO: ctrl ? 1 : 0, barTf: rm || ctrl ? 'none' : 'translateY(10px)', barTr: ctrl ? tr('opacity,transform', 280, 'std', 350) : tr('opacity,transform', 300),
+    };
+
+    // C3 next episode
+    const k3b = n % 4, credits = k3b === 1 || k3b === 2;
+    const c3 = {
+      vidTf: credits && !rm ? 'translate(20px,62px) scale(.42)' : 'none', vidR: credits && !rm ? 30 : 0,
+      vidSh: credits && !rm ? '0 0 0 2px rgba(255,255,255,.14),0 20px 50px rgba(0,0,0,.6)' : 'none', vidTr: tr('transform,border-radius,box-shadow', 550),
+      labelO: credits && !rm ? 1 : 0,
+      nextO: credits ? 1 : 0, nextTf: rm || credits ? 'none' : 'translateX(20px)', nextTr: credits ? tr('opacity,transform', 450, 'std', 250) : tr('opacity,transform', 200, 'exit'),
+      ringOff: credits ? 0 : 69.1, ringTr: credits ? `stroke-dashoffset ${beat * 2}ms linear` : 'none',
+    };
+
+    // C4 remove + reflow
+    const k4 = n % 4, ids4 = ['la-la-land', 'blade-runner-2049', 'dune-part-two', 'aftersun', 'mr-robot', 'the-bear'];
+    const c4 = {
+      items: ids4.map((id, i) => {
+        const removed = i === 1 && (k4 === 1 || k4 === 2), slot = k4 === 2 && i > 1 ? i - 1 : i;
+        const op = removed ? tr('opacity,transform', 200, 'exit') : i === 1 && k4 === 3 ? tr('opacity,transform', 280, 'std', rm ? 0 : 250) : tr('opacity,transform', 200);
+        return { img: P(id), l: 58 + (slot % 4) * 76, t: 26 + Math.floor(slot / 4) * 100, o: removed ? 0 : 1, tf: removed && !rm ? 'scale(.85)' : 'none',
+          tr: [rm ? '' : tr('left,top', 450), op].filter(Boolean).join(', ') };
+      }),
+      toastO: k4 === 1 || k4 === 2 ? 1 : 0, toastTf: rm || k4 === 1 || k4 === 2 ? 'none' : 'translateY(14px)',
+      toastTr: k4 === 1 || k4 === 2 ? tr('opacity,transform', 280, 'std', 150) : tr('opacity,transform', 200, 'exit'),
+    };
+
+    // C5 switch
+    const lib = Math.floor(n / 2) % 2 === 1;
+    const c5 = { pill: lib ? 155 : 3, pillW: lib ? 88 : 70, pillTr: rm ? tr('left,width', 0) : tr('left,width', 280), c0: lib ? 'rgba(244,244,242,.55)' : '#f4f4f2', c1: lib ? '#f4f4f2' : 'rgba(244,244,242,.55)', cTr: tr('color', 200),
+      aO: lib ? 0 : 1, aTf: rm || !lib ? 'none' : 'translateX(-20px)', bO: lib ? 1 : 0, bTf: rm || lib ? 'none' : 'translateX(20px)', tr: tr('opacity,transform', 280),
+      lists: ['la-la-land', 'dune-part-two', 'aftersun', 'blade-runner-2049'].map((id, i) => ({ img: P(id), pin: i === 0 })) };
+
+    // C6 panel pages
+    const sty = Math.floor(n / 2) % 2 === 1;
+    const c6 = { h: sty ? 120 : 150, hTr: rm ? 'none' : tr('height', 280), aO: sty ? 0 : 1, aTf: rm || !sty ? 'none' : 'translateX(-24px)', bO: sty ? 1 : 0, bTf: rm || sty ? 'none' : 'translateX(24px)', tr: tr('opacity,transform', 280) };
+
+    // D1 popover
+    const pop = n % 3 >= 1;
+    const d1 = { o: pop ? 1 : 0, tf: rm || pop ? 'none' : 'scale(.94) translateY(6px)', tr: pop ? tr('opacity,transform', 200) : tr('opacity,transform', 150, 'exit'),
+      btn: pop ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.06)', btnTr: tr('background', 200) };
+
+    // D2 sheet
+    const sh = n % 3 >= 1;
+    const d2 = { sheetO: rm ? (sh ? 1 : 0) : 1, sheetTf: rm || sh ? 'translateY(0)' : 'translateY(100%)', sheetTr: sh ? tr('transform,opacity', 450) : tr('transform,opacity', 280, 'exit'),
+      dimO: sh ? 1 : 0, dimTr: tr('opacity', sh ? 450 : 280),
+      underTf: sh && !rm ? 'scale(.96)' : 'none', underR: sh && !rm ? 18 : 0, underTr: sh ? tr('transform,border-radius', 450) : tr('transform,border-radius', 280, 'exit') };
+
+    // E1 loading
+    const loaded = n % 4 >= 2;
+    const e1titles = [['La La Land', 2016], ['Blade Runner 2049', 2017], ['Dune: Part Two', 2024], ['Aftersun', 2022], ['Mr. Robot', 2015]];
+    const e1 = { anim: rm ? 'none' : 'bshimmer 1.4s linear infinite', skelO: loaded ? 0 : 1, skelTr: loaded ? tr('opacity', 200, 'std', 200) : tr('opacity', 0),
+      items: ['la-la-land', 'blade-runner-2049', 'dune-part-two', 'aftersun', 'mr-robot'].map((id, i) => ({ img: P(id), title: e1titles[i][0], year: e1titles[i][1],
+        o: loaded ? 1 : 0, tf: loaded || rm ? 'none' : 'scale(.97)', tr: loaded ? tr('opacity,transform', 280, 'std', rm ? 0 : i * 40) : tr('opacity,transform', 150, 'exit') })) };
+
+    // E2 hero
+    const idx = Math.floor(n / 3) % 3, slideMs = beat * 3;
+    const e2 = { slides: [['dune-part-two', 'Recently Added · Movie', 'Dune: Part Two'], ['the-bear', 'Next Up · TV Show', 'The Bear'], ['la-la-land', 'Continue Watching · Movie', 'La La Land']].map(([id, eyebrow, title], i) => {
+      const act = i === idx;
+      return { img: P(id), eyebrow, title, o: act ? 1 : 0, tf: rm ? 'none' : act ? 'scale(1.08)' : 'scale(1)',
+        tr: act ? `opacity ${800 * S}ms ${CURVES.std}, transform ${slideMs + 800 * S}ms linear` : `opacity ${800 * S}ms ${CURVES.std}, transform 0ms linear ${800 * S}ms`,
+        ttr: tr('opacity', act ? 450 : 200, act ? 'std' : 'exit', act ? 300 : 0),
+        dot: act ? 22 : 7, dotBg: act ? '#f4f4f2' : 'rgba(244,244,242,.35)', dotTr: tr('width,background', 280) };
+    }) };
+
+    // F loading
+    const spin = `bspin ${800 * S}ms linear infinite`, shimmer = rm ? 'none' : `bshimmer ${1400 * S}ms linear infinite`;
+    const btn = (loading, done, pressNow) => ({ press: pressNow && !rm ? `bpress ${240 * S}ms ${CURVES.std}` : 'none',
+      labelO: loading || done ? 0 : 1, labelTr: loading || done ? tr('opacity', 150, 'exit') : tr('opacity', 200),
+      spinO: loading ? 1 : 0, spinTr: loading ? tr('opacity', 200, 'std', 80) : tr('opacity', 150, 'exit'),
+      okO: done ? 1 : 0, okS: rm || done ? 1 : 0.5, okTr: done ? tr('opacity,transform', 280, 'focus') : tr('opacity,transform', 150, 'exit'),
+      fieldO: loading || done ? 0.5 : 1, fieldTr: tr('opacity', 200) });
+    const k5 = n % 4;
+    const f1 = btn(k5 === 1 || k5 === 2, k5 === 3, k5 === 1);
+    const k6 = n % 4, err = k6 >= 2;
+    const f2 = Object.assign(btn(k6 === 1, false, k6 === 1), { ring: err ? 'inset 0 0 0 1.5px #ff8a8d' : 'inset 0 0 0 1px rgba(255,255,255,.1)', ringTr: tr('box-shadow', 200),
+      shake: k6 === 2 && !rm ? `bshake ${400 * S}ms ${CURVES.std}` : 'none',
+      errO: err ? 1 : 0, errTf: err || rm ? 'none' : 'translateY(-4px)', errTr: err ? tr('opacity,transform', 200, 'std', 80) : tr('opacity,transform', 150, 'exit') });
+    const in7 = n % 4 >= 2;
+    const f3 = { skelO: in7 ? 0 : 1, skelTr: in7 ? tr('opacity', 200, 'std', 80) : tr('opacity', 0), o: in7 ? 1 : 0, tr: in7 ? tr('opacity', 280) : tr('opacity', 150, 'exit'),
+      backO: in7 ? 1 : 0, backTr: in7 ? tr('opacity', 450, 'std', 150) : tr('opacity', 150, 'exit') };
+    const in8 = n % 4 >= 2;
+    const eps = [['1 · eps1.0_hellofriend.mov', 'Watched', '#34c46f'], ['2 · eps1.1_ones-and-zer0es.mpeg', '18 min left', 'rgba(244,244,242,.55)'], ['3 · eps1.2_d3bug.mkv', '49 min', 'rgba(244,244,242,.55)']];
+    const f4 = { skelO: in8 ? 0 : 1, skelTr: in8 ? tr('opacity', 200, 'std', 80) : tr('opacity', 0),
+      rows: eps.map(([title, meta, metaC], i) => ({ title, meta, metaC, top: 58 + i * 64, pos: `50% ${15 + i * 35}%`, progO: i === 1 ? 1 : 0,
+        o: in8 ? 1 : 0, tr: in8 ? tr('opacity', 280, 'std', rm ? 0 : i * 40) : tr('opacity', 150, 'exit'),
+        thumbO: in8 ? 1 : 0, thumbTr: in8 ? tr('opacity', 200, 'std', rm ? 0 : 220 + [2, 0, 1][i] * 120) : tr('opacity', 150, 'exit') })) };
+    const k9 = n % 4, buf = k9 === 1 || k9 === 2;
+    const f5 = { o: buf ? 1 : 0, tr: buf ? tr('opacity', 200, 'std', 500) : tr('opacity', 150, 'exit'), bufW: k9 === 0 ? 31 : 40, bufTr: buf ? `width ${beat * 2}ms linear` : 'none' };
+
+    const vis = { b1: on('Mac'), b2: on('Apple TV'), b3: on('Mac', 'Apple TV', 'iPhone'), b4: on('Mac', 'Apple TV', 'iPhone'),
+      c1: on('Mac', 'iPhone'), c2: on('Mac', 'Apple TV', 'iPhone'), c3: on('Mac', 'Apple TV'), c4: on('Mac', 'iPhone'), c5: on('iPhone', 'Mac'), c6: on('Mac'),
+      d1: on('Mac'), d2: on('iPhone', 'Apple TV'), e1: on('Mac', 'Apple TV', 'iPhone'), e2: on('Apple TV', 'Mac'),
+      f1: on('Mac', 'Apple TV', 'iPhone'), f2: on('Mac', 'Apple TV', 'iPhone'), f3: on('Mac', 'Apple TV', 'iPhone'), f4: on('Mac', 'Apple TV', 'iPhone'), f5: on('Mac', 'Apple TV', 'iPhone') };
+
+    return { a, durations, b1, b1c, b2, b3, b4, c1, c2, c3, c4, c5, c6, d1, d2, e1, e2, f1, f2, f3, f4, f5, spin, shimmer, vis };
+  }
+}
+</script>
+</body>
+</html>

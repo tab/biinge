@@ -33,11 +33,15 @@ jobs:
         run: make lint SWIFTLINT_ARGS=--reporter=github-actions-logging
 
   tests:
-    name: Tests
+    name: Tests (${{ matrix.platform }})
     permissions:
       contents: read
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ios, macos, tvos]
     steps:
       - uses: actions/checkout@v7
       - name: Test
-        run: make test
+        run: make test:${{ matrix.platform }}

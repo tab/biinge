@@ -10,8 +10,8 @@ struct SeriesDetailsCountsTests {
         SeriesDetails(
             id: 1, title: "Show", posterPath: "/p.jpg", pinned: false, state: .none,
             overview: "", status: "Ended", releaseDate: nil,
-            seasonsCount: seasonsCount, episodesCount: episodesCount, rating: nil,
-            credits: [], recommendations: [], videos: [], seasons: seasons
+            seasonsCount: seasonsCount, episodesCount: episodesCount, rating: nil, genres: [],
+            credits: [], recommendations: [], videos: [], seasons: seasons, jellyfinID: nil
         )
     }
 

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}
+@keyframes bspin{to{transform:rotate(360deg)}}
+@keyframes bcaret{50%{opacity:0}}
+</style>
+<script src="biinge-theme.js"></script>
+</helmet>
+<div onMouseEnter="{{ onEnter }}" onMouseLeave="{{ onLeave }}" data-screen-label="{{ label }}" data-theme="{{ theme }}" style="width:1920px;height:1080px;position:relative;overflow:hidden;background:#000;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 50px 120px rgba(0,0,0,.55);">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+  <dc-import name="Biinge TV" screen="home" data-state="{{ homeState }}" hint-size="1920px,1080px"></dc-import>
+</sc-if>
+
+<sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+  <img src="../../docs/public/screens/poster-wall.jpg" alt="" data-light-filter="brightness(1.02) saturate(.7) blur(5px)" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.65) saturate(.95);transform:scale(1.05);">
+  <div data-light-background="radial-gradient(ellipse at 50% 50%,rgba(243,243,241,.9) 0%,rgba(243,243,241,.74) 50%,rgba(243,243,241,.45) 100%)" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.75) 0%,rgba(0,0,0,.55) 45%,rgba(0,0,0,.3) 100%);"></div>
+  <div data-light-background="linear-gradient(180deg,rgba(243,243,241,0) 0%,rgba(243,243,241,0) 70%,rgba(243,243,241,.6) 100%)" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 70%,rgba(0,0,0,.6) 100%);"></div>
+
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;text-align:center;">
+
+    <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="T01 Biinge Login" style="display:flex;flex-direction:column;align-items:center;gap:22px;">
+      <img src="../../docs/public/icon.png" alt="Biinge" style="width:140px;height:140px;border-radius:32px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 30px 70px rgba(0,0,0,.6);">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:80px;line-height:1;letter-spacing:-.035em;">Log in to Biinge</div>
+      <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.65);max-width:1000px;">Use the Biinge account you have on iPhone. Your lists and watched history come with it.</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isConnect }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="T02 Connect Jellyfin" style="display:flex;flex-direction:column;align-items:center;gap:20px;">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:72px;letter-spacing:-.03em;">Connect Jellyfin</div>
+      <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.65);max-width:1100px;">Sign in with your Jellyfin account once. It links Living Room to your Biinge account and this Apple TV.</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="{{ errorLabel }}" style="display:flex;align-items:center;gap:14px;font-size:28px;color:#ff8a8d;margin-top:-14px;"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;">error</span>{{ errorText }}</div>
+    </sc-if>
+
+    <sc-if value="{{ isKeyboard }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="{{ kbLabel }}" style="display:flex;flex-direction:column;align-items:center;gap:20px;">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:60px;letter-spacing:-.03em;">{{ kbTitle }}</div>
+      <div style="display:flex;align-items:center;width:1000px;height:96px;padding:0 34px;border-radius:24px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);font-size:40px;text-align:left;">
+        <span>{{ kbValue }}</span><span style="width:3px;height:48px;margin-left:3px;background:#f4f4f2;animation:bcaret 1s step-end infinite;"></span>
+        <span style="color:rgba(244,244,242,.35);">{{ kbPlaceholder }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:24px;color:rgba(244,244,242,.5);"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">phone_iphone</span>You can also type on your iPhone when the keyboard notification appears.</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isConnecting }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="T03 Connecting" style="display:flex;flex-direction:column;align-items:center;gap:28px;">
+      <div style="width:84px;height:84px;border-radius:50%;border:6px solid rgba(255,255,255,.15);border-top-color:#f4f4f2;animation:bspin .9s linear infinite;"></div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:60px;letter-spacing:-.03em;">Connecting to Living Room</div>
+      <div style="font-size:28px;color:rgba(244,244,242,.55);">Signing in as {{ jfUser }}</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="T22 Server Connection Error" style="display:flex;flex-direction:column;align-items:center;gap:24px;">
+      <div style="width:110px;height:110px;border-radius:50%;background:rgba(229,72,77,.16);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:60px;line-height:1;color:#e5484d;">cloud_off</span></div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:64px;letter-spacing:-.03em;">Can’t reach Living Room</div>
+      <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.7);max-width:1000px;">Biinge couldn’t get through to jellyfin.home.arpa. The server may be off, or out of reach from this network.</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="T04 Loading Library" style="display:flex;flex-direction:column;align-items:center;gap:30px;">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:64px;letter-spacing:-.03em;">Loading your library</div>
+      <div style="font-size:30px;color:rgba(244,244,242,.65);">{{ loadText }}</div>
+      <div style="display:flex;gap:24px;margin-top:10px;">
+        <sc-for list="{{ loadPosters }}" as="p" hint-placeholder-count="6"><div style="width:200px;height:300px;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.07);"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;opacity:{{ p.opacity }};transition:opacity .5s;"></div></sc-for>
+      </div>
+      <div style="width:700px;height:10px;border-radius:5px;background:rgba(255,255,255,.14);overflow:hidden;"><div style="width:{{ loadPct }}%;height:100%;background:#f4f4f2;transition:width .4s;"></div></div>
+    </div>
+    </sc-if>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:{{ rowGap }}px;">
+      <sc-for list="{{ grid }}" as="row" hint-placeholder-count="1">
+      <div style="display:flex;justify-content:center;gap:{{ row.gap }}px;">
+        <sc-for list="{{ row.items }}" as="it" hint-placeholder-count="1">
+        <div onClick="{{ it.click }}" style="display:flex;flex-direction:{{ it.dir }};align-items:center;justify-content:{{ it.justify }};gap:{{ it.innerGap }}px;width:{{ it.w }};flex:none;white-space:nowrap;height:{{ it.h }}px;padding:{{ it.pad }};border-radius:{{ it.r }}px;font-size:{{ it.fs }}px;font-weight:600;background:{{ it.bg }};color:{{ it.color }};transform:{{ it.tf }};box-shadow:{{ it.shadow }};transition:all .2s cubic-bezier(.2,.7,.2,1);cursor:default;text-align:left;">
+          <sc-if value="{{ it.hasAvatar }}" hint-placeholder-val="{{ false }}"><div style="width:180px;height:180px;border-radius:50%;background:{{ it.avatar }};display:flex;align-items:center;justify-content:center;font-size:72px;font-weight:600;color:#101014;">{{ it.initial }}</div></sc-if>
+          <sc-if value="{{ it.hasIcon }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:{{ it.iconSize }}px;line-height:1;">{{ it.icon }}</span></sc-if>
+          <div style="display:flex;flex-direction:column;gap:4px;flex:{{ it.grow }};">
+            <span>{{ it.label }}</span>
+            <sc-if value="{{ it.hasDetail }}" hint-placeholder-val="{{ false }}"><span style="font-size:24px;font-weight:400;opacity:.65;">{{ it.detail }}</span></sc-if>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="position:absolute;right:56px;top:56px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:18px;color:rgba(244,244,242,.4);pointer-events:none;">
+    <span>Arrow keys · Siri Remote swipe</span><span>Return · Select</span><span>Esc · Back</span>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;},&quot;step&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;login-error&quot;,&quot;keyboard&quot;,&quot;connect&quot;,&quot;connect-error&quot;,&quot;connecting&quot;,&quot;error&quot;,&quot;loading&quot;,&quot;home&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;freeze&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const KEYS = ['abcdefghijklm', 'nopqrstuvwxyz', '1234567890.@_'];
+const POSTERS = ['blade-runner-2049', 'la-la-land', 'mr-robot', 'dune-part-two', 'the-bear', 'aftersun'];
+const FIELDS = { email: ['Email', 'email', false, 'login'], password: ['Password', 'password', true, 'login'], jfUser: ['Jellyfin username', 'person', false, 'connect'], jfPassword: ['Jellyfin password', 'key', true, 'connect'] };
+
+class Component extends DCLogic {
+  state = { step: null, f: { r: 0, c: 0 }, text: { email: 'tom@example.com', password: 'secret12', jfUser: 'tom', jfPassword: 'secret12' }, field: 'email', failed: null, progress: 0, skipped: false };
+  hovered = false;
+
+  step() { return this.state.step ?? this.props.step ?? 'login'; }
+  frozen() { return this.props.freeze && this.state.step == null; }
+  componentDidMount() {
+    this.onKey = e => {
+      if (!this.hovered || this.step() === 'home') return;
+      const m = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+      if (m) { e.preventDefault(); this.move(...m); }
+      else if (e.key === 'Enter') { e.preventDefault(); this.activate(); }
+      else if (e.key === 'Escape') { e.preventDefault(); this.back(); }
+    };
+    window.addEventListener('keydown', this.onKey);
+    this.maybeStart();
+  }
+  componentDidUpdate() { this.maybeStart(); }
+  componentWillUnmount() { window.removeEventListener('keydown', this.onKey); clearTimeout(this.t); clearInterval(this.li); }
+  maybeStart() {
+    const s = this.step();
+    if (this.frozen() || s === this.started) return;
+    this.started = s;
+    clearTimeout(this.t); clearInterval(this.li);
+    if (s === 'connecting') this.t = setTimeout(() => this.go('loading'), 1800);
+    if (s === 'loading') this.li = setInterval(() => {
+      const p = this.state.progress + 0.08;
+      if (p >= 1) { clearInterval(this.li); this.setState({ progress: 1 }); this.t = setTimeout(() => this.go('home'), 500); } else this.setState({ progress: p });
+    }, 220);
+  }
+  go = (step, extra = {}) => this.setState({ step, f: { r: 0, c: 0 }, progress: 0, ...extra });
+  back = () => {
+    const s = this.step();
+    if (s === 'keyboard') return this.go(FIELDS[this.state.field][3], { f: { r: this.state.field === 'password' || this.state.field === 'jfPassword' ? 1 : 0, c: 0 } });
+    const prev = { connect: 'login', 'connect-error': 'login', error: 'connect' }[s];
+    if (prev) this.go(prev);
+  };
+  move(dr, dc) {
+    const g = this.gridModel;
+    if (!g || !g.length) return;
+    let { r, c } = this.state.f;
+    if (dr) { r = Math.max(0, Math.min(g.length - 1, r + dr)); c = Math.min(c, g[r].length - 1); }
+    else c = Math.max(0, Math.min(g[r].length - 1, c + dc));
+    this.setState({ f: { r, c } });
+  }
+  activate() { const g = this.gridModel, { r, c } = this.state.f; g && g[r] && g[r][c] && g[r][c].action(); }
+  type(ch) { const k = this.state.field; this.setState(s => ({ text: { ...s.text, [k]: s.text[k] + ch } })); }
+  del() { const k = this.state.field; this.setState(s => ({ text: { ...s.text, [k]: s.text[k].slice(0, -1) } })); }
+
+  renderVals() {
+    const s = this.step(), f = this.state.f, T = this.state.text;
+    const B = (label, action, o = {}) => ({ label, action, ...o });
+    const fieldRow = k => { const [name, icon, secret] = FIELDS[k]; const v = T[k]; return B(name, () => this.go('keyboard', { field: k }), { kind: 'row', icon, detail: v ? (secret ? '•'.repeat(v.length) : v) : 'Not entered' }); };
+    const failed = this.state.failed ?? (s === 'login-error' || s === 'connect-error');
+    let grid = [], rowGap = 24;
+    if (s === 'login' || s === 'login-error') grid = [[fieldRow('email')], [fieldRow('password')], [B('Log In', () => this.go('connect', { failed: false }), { kind: 'pill' })]];
+    if (s === 'connect' || s === 'connect-error') grid = [
+      [B('Living Room', () => {}, { kind: 'row', icon: 'dns', detail: 'jellyfin.home.arpa · set on your Biinge server', inert: true })],
+      [fieldRow('jfUser')], [fieldRow('jfPassword')],
+      [B('Connect', () => this.go('connecting', { failed: false }), { kind: 'pill' }), B('Not Now', () => this.go('home', { skipped: true }), { kind: 'pill' })]];
+    if (s === 'keyboard') {
+      grid = KEYS.map(row => row.split('').map(ch => B(ch, () => this.type(ch), { kind: 'key' })));
+      grid.push([B('space', () => this.type(' '), { kind: 'wide', icon: 'space_bar', w: 220 }), B('delete', () => this.del(), { kind: 'wide', icon: 'backspace', w: 220 }), B('Done', () => this.back(), { kind: 'wide', w: 340, primary: true })]);
+      rowGap = 14;
+    }
+    if (s === 'connecting') grid = [[B('Cancel', () => this.go('connect'), { kind: 'pill' })]];
+    if (s === 'error') grid = [[B('Try Again', () => this.go('connecting'), { kind: 'pill' }), B('Not Now', () => this.go('home', { skipped: true }), { kind: 'pill' })]];
+    this.gridModel = grid;
+
+    const sizes = {
+      pill: { w: 'auto', h: 84, pad: '0 48px', r: 999, fs: 32 }, row: { w: 960, h: 116, pad: '0 36px', r: 28, fs: 26 },
+      key: { w: 86, h: 80, pad: '0', r: 16, fs: 36 }, wide: { w: 220, h: 80, pad: '0 24px', r: 16, fs: 28 },
+    };
+    const vGrid = grid.map((row, r) => ({ gap: row[0]?.kind === 'key' ? 12 : 20, items: row.map((it, c) => {
+      const on = f.r === r && f.c === c;
+      const sz = sizes[it.kind];
+      const light = this.props.theme === 'light';
+      const base = it.inert ? 'rgba(255,255,255,.05)' : light ? (it.primary ? '#2a2a30' : '#1b1b20') : it.primary ? 'rgba(244,244,242,.28)' : 'rgba(255,255,255,.12)';
+      return { label: it.label, click: () => { if (on) it.action(); else this.setState({ f: { r, c } }); },
+        w: it.w ? it.w + 'px' : sz.w === 'auto' ? 'auto' : sz.w + 'px', h: sz.h, pad: sz.pad, r: sz.r, fs: sz.fs,
+        dir: 'row', justify: it.kind === 'row' ? 'flex-start' : 'center', innerGap: 22, grow: it.kind === 'row' ? '1 1 0%' : 'none',
+        bg: on ? '#f4f4f2' : base, color: on ? '#101014' : '#f4f4f2', tf: on ? 'scale(1.05)' : 'scale(1)', shadow: on ? '0 24px 50px rgba(0,0,0,.5)' : light && !it.inert ? '0 4px 16px rgba(0,0,0,.3)' : 'none',
+        hasIcon: !!it.icon, icon: it.icon || '', iconSize: it.kind === 'row' ? 40 : 34,
+        hasDetail: !!it.detail, detail: it.detail || '', hasAvatar: false, avatar: '', initial: '' };
+    }).map(x => (x.label === 'space' || x.label === 'delete') ? { ...x, label: '' } : x) }));
+
+    const k = this.state.field, val = T[k], secret = FIELDS[k][2];
+    const p = this.frozen() && s === 'loading' ? 0.6 : this.state.progress;
+    const isLoginStep = s === 'login' || s === 'login-error';
+    return {
+      onEnter: () => { this.hovered = true; }, onLeave: () => { this.hovered = false; },
+      label: { login: 'T01 Biinge Login', 'login-error': 'T01 Biinge Login Error', keyboard: 'Keyboard', connect: 'T02 Connect Jellyfin', 'connect-error': 'T04 Jellyfin Sign-in Error', connecting: 'T03 Connecting', error: 'T22 Server Error', loading: 'T04 Loading', home: 'T05 First Home' }[s],
+      isHome: s === 'home', isSetup: s !== 'home', homeState: this.state.skipped ? 'not-connected' : 'ready',
+      isLogin: isLoginStep, isConnect: s === 'connect' || s === 'connect-error', isKeyboard: s === 'keyboard', isConnecting: s === 'connecting', isError: s === 'error', isLoading: s === 'loading',
+      hasError: failed && (isLoginStep || s === 'connect-error'), errorLabel: isLoginStep ? 'T01 Biinge Login Error' : 'T04 Jellyfin Sign-in Error',
+      errorText: isLoginStep ? 'That email and password don’t match a Biinge account.' : 'Living Room didn’t accept that username and password.',
+      grid: vGrid, rowGap, jfUser: T.jfUser,
+      kbLabel: `Keyboard · ${FIELDS[k][0]}`, kbTitle: FIELDS[k][0], kbValue: secret ? '•'.repeat(val.length) : val, kbPlaceholder: val ? '' : FIELDS[k][0],
+      loadText: p < 1 ? `Loading Movies and TV Shows · ${Math.round(p * 100)}%` : 'Opening Home…', loadPct: Math.round(p * 100),
+      loadPosters: POSTERS.map((id, i) => ({ img: `assets/posters/${id}.jpg`, opacity: p > i / 7 ? 1 : 0 })),
+    };
+  }
+}
+</script>
+</body>
+</html>

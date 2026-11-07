@@ -52,7 +52,7 @@ attribution, so `docs(claude):` is fine.
 A change is breaking when it:
 
 - removes or renames a route, a query parameter or a request field
-- changes a response shape, a field name or a field type. The iOS `Models/`
+- changes a response shape, a field name or a field type. The iOS `Core/Models/`
   mirror the serializers, so a rename ships a client crash
 - changes a status code a client branches on
 - adds a migration that drops or renames a column, or that the running API

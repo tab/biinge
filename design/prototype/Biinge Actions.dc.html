@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block"><style>@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}body{margin:0;background:#141418;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;-webkit-font-smoothing:antialiased}a{color:#f4f4f2;text-decoration:none}a:hover{color:#eec01e}</style></helmet>
+<div style="padding:56px 64px 8px;display:flex;flex-direction:column;gap:14px;max-width:1100px;">
+  <div style="font-size:14px;font-weight:600;color:rgba(244,244,242,.5);">Biinge for iPhone, macOS and Apple TV</div>
+  <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:56px;letter-spacing:-.035em;line-height:1;">Actions</div>
+  <div style="font-size:17px;line-height:1.55;color:rgba(244,244,242,.7);max-width:900px;text-wrap:pretty;">Every action button on Movie, TV show and Game details, in every state. One pattern for all three: a white button for the next step, a labelled list button that shows where the title is, and ••• for everything else. Each state lists what every tap does.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:13.5px;">
+    <a href="#today" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">1 · Today</a>
+    <a href="#pattern" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">2 · The pattern</a>
+    <a href="#try" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">3 · Try it</a>
+    <a href="#movies" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">4 · Movies</a>
+    <a href="#tv" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">5 · TV shows</a>
+    <a href="#games" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">6 · Games</a>
+    <a href="#menus" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">7 · Menus</a>
+    <a href="#feedback" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">8 · Feedback</a>
+    <a href="#platforms" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);">9 · Platforms</a>
+  </div>
+</div>
+
+<section id="today" style="padding:48px 64px;border-bottom:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">01</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">Today</span></div>
+  <div style="font-size:16px;color:rgba(244,244,242,.62);max-width:900px;line-height:1.5;margin-bottom:28px;text-wrap:pretty;">The current rows, as built. The white button changes meaning between titles, icon buttons hide whether they show a state or change it, and games follow a different pattern.</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(540px,1fr));gap:20px;max-width:1760px;">
+    <sc-for list="{{ audit }}" as="c" hint-placeholder-count="6">
+    <div style="display:flex;flex-direction:column;gap:18px;padding:22px;border-radius:18px;background:#1a1a20;box-shadow:0 0 0 1px rgba(255,255,255,.07);min-width:0;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 7px;border-radius:5px;background:rgba(229,72,77,.18);color:#ff8a8d;">{{ c.code }}</span><span style="font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.1);">{{ c.platform }}</span><span style="font-size:15px;font-weight:600;">{{ c.state }}</span></div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <sc-for list="{{ c.btns }}" as="b" hint-placeholder-count="3">
+        <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;cursor:default;"><sc-if value="{{ b.hasIcon }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span></sc-if>{{ b.label }}</div></sc-if>
+        <sc-if value="{{ b.isS }}" hint-placeholder-val="{{ false }}"><div style="flex:none;display:flex;align-items:center;gap:7px;height:48px;padding:0 22px 0 18px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+        <sc-if value="{{ b.isI }}" hint-placeholder-val="{{ false }}"><div style="flex:none;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;color:{{ b.color }};transform:rotate({{ b.rot }}deg);">{{ b.icon }}</span></div></sc-if>
+        <sc-if value="{{ b.isA }}" hint-placeholder-val="{{ false }}"><div style="flex:none;display:flex;align-items:center;justify-content:center;width:320px;height:48px;border-radius:999px;background:#eec01e;color:#101014;font-size:17px;font-weight:600;">{{ b.label }}</div></sc-if>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ c.issues }}" as="i" hint-placeholder-count="2">
+        <div style="display:flex;gap:10px;font-size:14.5px;line-height:1.45;color:rgba(244,244,242,.78);text-wrap:pretty;"><span style="flex:none;width:20px;height:20px;margin-top:1px;border-radius:50%;background:rgba(229,72,77,.2);color:#ff8a8d;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ i.n }}</span><span>{{ i.text }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="pattern" style="padding:48px 64px;border-bottom:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">02</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">The pattern</span></div>
+  <div style="font-size:16px;color:rgba(244,244,242,.62);max-width:900px;line-height:1.5;margin-bottom:32px;text-wrap:pretty;">Three slots, always in this order. The row stays compact, but anything that changes your data has words on it.</div>
+  <div style="display:flex;gap:56px;flex-wrap:wrap;align-items:flex-start;max-width:1760px;">
+    <div style="flex:none;display:flex;flex-direction:column;gap:22px;padding:32px;border-radius:20px;background:#1a1a20;box-shadow:0 0 0 1px rgba(255,255,255,.07);">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Resume S1 · E4</div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:4px;border-left:2px solid #f4f4f2;padding:2px 0 2px 10px;"><span style="font-size:14px;font-weight:700;">1 · Next step</span><span style="font-size:13.5px;color:rgba(244,244,242,.6);max-width:190px;line-height:1.4;">A verb. Acts on tap.</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;margin-left:2px;">push_pin</span><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid rgba(255,255,255,.4);padding:2px 0 2px 10px;"><span style="font-size:14px;font-weight:700;">2 · List</span><span style="font-size:13.5px;color:rgba(244,244,242,.6);max-width:190px;line-height:1.4;">A noun: where it is now. The chevron opens a menu.</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">more_horiz</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid rgba(255,255,255,.2);padding:2px 0 2px 10px;"><span style="font-size:14px;font-weight:700;">3 · More</span><span style="font-size:13.5px;color:rgba(244,244,242,.6);max-width:120px;line-height:1.4;">Everything else.</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:520px;display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px 36px;">
+      <sc-for list="{{ rules }}" as="r" hint-placeholder-count="6">
+      <div style="display:flex;gap:14px;">
+        <span style="flex:none;font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:28px;line-height:1;color:rgba(244,244,242,.3);width:22px;">{{ r.n }}</span>
+        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:16.5px;font-weight:650;line-height:1.3;">{{ r.title }}</span><span style="font-size:14.5px;line-height:1.5;color:rgba(244,244,242,.65);text-wrap:pretty;">{{ r.text }}</span></div>
+      </div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="margin-top:44px;display:flex;flex-direction:column;gap:16px;max-width:1760px;">
+    <div style="font-size:15px;font-weight:650;">What decides the buttons</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px;">
+      <sc-for list="{{ inputs }}" as="g" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+        <div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:15px;font-weight:650;">{{ g.title }}</span><span style="font-size:13.5px;color:rgba(244,244,242,.55);">{{ g.sub }}</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4"><span style="font-size:13px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);color:rgba(244,244,242,.85);">{{ it }}</span></sc-for>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="try" style="padding:48px 64px;border-bottom:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">03</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">Try it</span></div>
+  <div style="font-size:16px;color:rgba(244,244,242,.62);max-width:900px;line-height:1.5;margin-bottom:28px;text-wrap:pretty;">The same live row on macOS, iPhone and Apple TV. Pick a platform, title type and server state on the left, then use the buttons. On macOS, hover a button to see what it will do. On Apple TV, click the screen, then use the arrow keys, Return and Esc.</div>
+  <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">
+    <div style="flex:none;width:300px;display:flex;flex-direction:column;gap:22px;">
+      <sc-for list="{{ pg.controls }}" as="g" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <span style="font-size:13px;font-weight:600;color:rgba(244,244,242,.55);">{{ g.label }}</span>
+        <div style="display:flex;gap:2px;padding:3px;border-radius:11px;background:rgba(255,255,255,.06);">
+          <sc-for list="{{ g.items }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.go }}" style="flex:1;text-align:center;padding:8px 6px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:default;background:{{ o.bg }};color:{{ o.color }};">{{ o.label }}</div></sc-for>
+        </div>
+      </div>
+      </sc-for>
+      <div onClick="{{ pg.reset }}" style="align-self:flex-start;font-size:13.5px;font-weight:600;color:rgba(244,244,242,.6);cursor:default;" style-hover="color:#f4f4f2">Reset</div>
+    </div>
+    <div style="flex:1;min-width:640px;max-width:980px;display:flex;flex-direction:column;gap:20px;">
+      <sc-if value="{{ pg.isMac }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ pg.closeMenu }}" style="position:relative;border-radius:20px;background:#101014;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 20px 50px rgba(0,0,0,.4);min-height:470px;">
+        <div style="position:absolute;inset:0;border-radius:20px;overflow:hidden;">
+          <sc-if value="{{ pg.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pg.img }}" alt="" style="position:absolute;left:-80px;top:-80px;width:calc(100% + 160px);height:calc(100% + 160px);object-fit:cover;filter:blur(60px) saturate(1.4) brightness(.42);"></sc-if>
+        </div>
+        <div style="position:relative;padding:40px;display:flex;gap:34px;align-items:flex-start;">
+          <sc-if value="{{ pg.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pg.img }}" alt="" style="flex:none;width:170px;height:255px;object-fit:cover;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 16px 40px rgba(0,0,0,.5);"></sc-if>
+          <sc-if value="{{ pg.noImg }}" hint-placeholder-val="{{ false }}"><div style="flex:none;width:170px;height:255px;border-radius:12px;background:repeating-linear-gradient(135deg,#202027 0 8px,#1a1a20 8px 16px);box-shadow:0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font:500 11px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.45);">game cover</div></sc-if>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <span style="font-size:13px;font-weight:700;letter-spacing:.06em;color:rgba(244,244,242,.6);">{{ pg.eyebrow }}</span>
+              <span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;line-height:1.02;">{{ pg.title }}</span>
+              <span style="font-size:15.5px;color:rgba(244,244,242,.72);">{{ pg.meta }}</span>
+            </div>
+            <sc-if value="{{ pg.hasProg }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:14px;"><div style="width:200px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:44%;height:100%;background:#f4f4f2;"></div></div><span style="font-size:14px;color:rgba(244,244,242,.75);">{{ pg.progText }}</span></div>
+            </sc-if>
+            <div style="position:relative;">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <sc-for list="{{ pg.btns }}" as="b" hint-placeholder-count="3">
+                <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;" style-hover="background:#ffffff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+                <sc-if value="{{ b.isS }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:{{ b.bg }};font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;" style-hover="background:rgba(255,255,255,.22)" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}<sc-if value="{{ b.pin }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;margin-left:2px;">push_pin</span></sc-if><sc-if value="{{ b.chev }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></sc-if></div></sc-if>
+                <sc-if value="{{ b.isI }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;width:48px;height:48px;border-radius:50%;background:{{ b.bg }};display:flex;align-items:center;justify-content:center;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.22)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">{{ b.icon }}</span></div></sc-if>
+                <sc-if value="{{ b.isD }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:rgba(255,255,255,.07);color:rgba(244,244,242,.38);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+                </sc-for>
+              </div>
+              <sc-if value="{{ pg.menuOpen }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ pg.stop }}" style="position:absolute;top:58px;left:{{ pg.mx }}px;z-index:10;width:350px;padding:6px;border-radius:14px;background:#232329;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 24px 60px rgba(0,0,0,.55);display:flex;flex-direction:column;">
+                <div style="padding:8px 12px 6px;font-size:12.5px;font-weight:650;color:rgba(244,244,242,.5);">{{ pg.menu.title }}</div>
+                <sc-for list="{{ pg.menu.rows }}" as="r" hint-placeholder-count="4">
+                <sc-if value="{{ r.isSep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;margin:5px 10px;background:rgba(255,255,255,.08);"></div></sc-if>
+                <sc-if value="{{ r.isRow }}" hint-placeholder-val="{{ true }}"><div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px;cursor:default;" style-hover="background:rgba(255,255,255,.08)"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:{{ r.color }};font-variation-settings:'FILL' {{ r.fill }};transform:rotate({{ r.rot }}deg);">{{ r.icon }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;font-weight:550;color:{{ r.color }};">{{ r.label }}</span><sc-if value="{{ r.hasDesc }}" hint-placeholder-val="{{ true }}"><span style="font-size:12.5px;line-height:1.35;color:rgba(244,244,242,.5);">{{ r.desc }}</span></sc-if></div><sc-if value="{{ r.check }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#f4f4f2;font-variation-settings:'wght' 600;">check</span></sc-if><sc-if value="{{ r.toggle }}" hint-placeholder-val="{{ false }}"><span style="flex:none;position:relative;width:36px;height:22px;border-radius:11px;background:{{ r.swBg }};transition:background .15s;"><span style="position:absolute;top:2px;left:{{ r.swX }}px;width:18px;height:18px;border-radius:50%;background:{{ r.swKnob }};transition:left .15s;"></span></span></sc-if></div></sc-if>
+                </sc-for>
+              </div>
+              </sc-if>
+            </div>
+            <sc-if value="{{ pg.hasNote }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:8px;font-size:15px;color:rgba(244,244,242,.75);flex-wrap:wrap;"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;color:{{ pg.noteColor }};">{{ pg.noteIcon }}</span>{{ pg.noteText }}<sc-if value="{{ pg.hasCta }}" hint-placeholder-val="{{ false }}"><span onClick="{{ pg.noteGo }}" style="color:#f4f4f2;font-weight:650;cursor:default;" style-hover="text-decoration:underline">{{ pg.noteCta }}</span></sc-if></div>
+            </sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ pg.hasToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;pointer-events:none;">
+          <div style="pointer-events:auto;display:flex;align-items:center;gap:10px;height:44px;padding:0 8px 0 14px;border-radius:999px;background:rgba(44,44,50,.96);box-shadow:0 0 0 1px rgba(255,255,255,.1),0 12px 30px rgba(0,0,0,.45);font-size:15px;font-weight:550;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:{{ pg.toast.color }};font-variation-settings:'FILL' 1;">{{ pg.toast.icon }}</span>{{ pg.toast.text }}<sc-if value="{{ pg.toast.hasSub }}" hint-placeholder-val="{{ false }}"><span style="color:rgba(244,244,242,.55);font-weight:400;">{{ pg.toast.sub }}</span></sc-if><sc-if value="{{ pg.toast.hasUndo }}" hint-placeholder-val="{{ false }}"><span onClick="{{ pg.undo }}" style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:650;cursor:default;" style-hover="background:rgba(255,255,255,.2)">Undo</span></sc-if><sc-if value="{{ pg.toast.noUndo }}" hint-placeholder-val="{{ true }}"><span style="width:6px;"></span></sc-if></div>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ pg.isIos }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;position:relative;width:393px;height:852px;border-radius:54px;overflow:hidden;background:#101014;box-shadow:0 0 0 9px #2a2a30,0 0 0 10px #3a3a42,0 40px 90px rgba(0,0,0,.5);margin:10px;">
+        <sc-if value="{{ pg.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pg.img }}" alt="" style="position:absolute;left:-100px;top:-100px;width:calc(100% + 200px);height:640px;object-fit:cover;filter:blur(60px) saturate(1.4) brightness(.5);"></sc-if>
+        <div style="position:absolute;left:0;right:0;top:300px;height:300px;background:linear-gradient(180deg,rgba(16,16,20,0),#101014);"></div>
+        <div style="position:absolute;top:11px;left:50%;margin-left:-62px;width:124px;height:36px;border-radius:20px;background:#000;z-index:31;"></div>
+        <div style="position:absolute;left:0;right:0;top:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 48px;z-index:30;font-size:16.5px;font-weight:600;"><span>9:41</span><span style="display:flex;gap:5px;font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1;"><span>signal_cellular_alt</span><span>wifi</span><span>battery_full</span></span></div>
+        <div style="position:absolute;top:60px;left:16px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:5;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">close</span></div>
+        <div onClick="{{ pg.iosMore }}" style="position:absolute;top:60px;right:16px;width:36px;height:36px;border-radius:50%;background:{{ pg.iosMoreBg }};display:flex;align-items:center;justify-content:center;z-index:5;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">more_horiz</span></div>
+        <div style="position:absolute;left:16px;right:16px;top:84px;display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;justify-content:center;">
+            <sc-if value="{{ pg.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pg.img }}" alt="" style="width:186px;height:279px;object-fit:cover;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.55);"></sc-if>
+            <sc-if value="{{ pg.noImg }}" hint-placeholder-val="{{ false }}"><div style="width:186px;height:279px;border-radius:12px;background:repeating-linear-gradient(135deg,#202027 0 8px,#1a1a20 8px 16px);box-shadow:0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font:500 11px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.45);">game cover</div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <span style="font-size:12px;font-weight:700;letter-spacing:.06em;color:rgba(244,244,242,.6);">{{ pg.eyebrow }}</span>
+            <span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:30px;letter-spacing:-.025em;line-height:1.05;">{{ pg.title }}</span>
+            <span style="font-size:14px;color:rgba(244,244,242,.7);">{{ pg.meta }}</span>
+          </div>
+          <sc-if value="{{ pg.hasProg }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:12px;"><div style="width:120px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:44%;height:100%;background:#f4f4f2;"></div></div><span style="font-size:13px;color:rgba(244,244,242,.75);">{{ pg.progText }}</span></div>
+          </sc-if>
+          <div style="display:flex;gap:10px;">
+            <sc-for list="{{ pg.iosRow }}" as="b" hint-placeholder-count="2">
+            <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ true }}"><div onClick="{{ b.go }}" style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;height:50px;padding:0 14px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s;" style-active="transform:scale(.97)"><sc-if value="{{ b.iosIcon }}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:23px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span></sc-if><span style="overflow:hidden;text-overflow:ellipsis;">{{ b.label }}</span></div></sc-if>
+            <sc-if value="{{ b.isD }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;height:50px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.07);color:rgba(244,244,242,.38);font-size:16px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+            <sc-if value="{{ b.isS }}" hint-placeholder-val="{{ true }}"><div onClick="{{ b.go }}" style="flex:{{ b.iosFlex }};min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;height:50px;padding:0 10px 0 14px;border-radius:999px;background:{{ b.bg }};font-size:16px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s;" style-active="transform:scale(.97)"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:21px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}<sc-if value="{{ b.pin }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:16px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></sc-if><span style="flex:none;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div></sc-if>
+            </sc-for>
+          </div>
+          <sc-if value="{{ pg.hasNote }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:13.5px;line-height:1.4;color:rgba(244,244,242,.75);"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:17px;line-height:1.1;color:{{ pg.noteColor }};">{{ pg.noteIcon }}</span><span>{{ pg.noteText }}<sc-if value="{{ pg.hasCta }}" hint-placeholder-val="{{ false }}"> <span onClick="{{ pg.noteGo }}" style="color:#f4f4f2;font-weight:650;cursor:default;">{{ pg.noteCta }}</span></sc-if></span></div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ pg.menuOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ pg.closeMenu }}" style="position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:24;"></div>
+        <div style="position:absolute;left:8px;right:8px;bottom:8px;z-index:25;padding:8px 8px 26px;border-radius:40px;background:#1f1f25;box-shadow:0 0 0 1px rgba(255,255,255,.08);display:flex;flex-direction:column;">
+          <div style="align-self:center;width:36px;height:5px;border-radius:3px;background:rgba(255,255,255,.25);margin:2px 0 10px;"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 14px 10px;"><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:20px;letter-spacing:-.01em;">{{ pg.menu.title }}</span><span style="font-size:13px;color:rgba(244,244,242,.5);">{{ pg.title }}</span></div><span onClick="{{ pg.closeMenu }}" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:18px;cursor:default;">close</span></div>
+          <sc-for list="{{ pg.menu.rows }}" as="r" hint-placeholder-count="4">
+          <sc-if value="{{ r.isSep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;margin:4px 14px;background:rgba(255,255,255,.08);"></div></sc-if>
+          <sc-if value="{{ r.isRow }}" hint-placeholder-val="{{ true }}"><div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:14px;min-height:56px;padding:8px 14px;border-radius:16px;cursor:default;" style-active="background:rgba(255,255,255,.08)"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:24px;line-height:1;color:{{ r.color }};font-variation-settings:'FILL' {{ r.fill }};transform:rotate({{ r.rot }}deg);">{{ r.icon }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><span style="font-size:16.5px;font-weight:550;color:{{ r.color }};">{{ r.label }}</span><sc-if value="{{ r.hasDesc }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;line-height:1.35;color:rgba(244,244,242,.5);">{{ r.desc }}</span></sc-if></div><sc-if value="{{ r.check }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'wght' 600;">check</span></sc-if><sc-if value="{{ r.toggle }}" hint-placeholder-val="{{ false }}"><span style="flex:none;position:relative;width:51px;height:31px;border-radius:16px;background:{{ r.swBg }};"><span style="position:absolute;top:2px;left:{{ r.swXi }}px;width:27px;height:27px;border-radius:50%;background:{{ r.swKnob }};"></span></span></sc-if></div></sc-if>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ pg.hasToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:16px;right:16px;top:58px;z-index:28;display:flex;align-items:center;gap:12px;padding:12px 10px 12px 16px;border-radius:24px;background:rgba(44,44,50,.97);box-shadow:0 0 0 1px rgba(255,255,255,.1),0 12px 30px rgba(0,0,0,.45);"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:24px;line-height:1;color:{{ pg.toast.color }};font-variation-settings:'FILL' 1;">{{ pg.toast.icon }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;"><span style="font-size:15px;font-weight:600;">{{ pg.toast.text }}</span><sc-if value="{{ pg.toast.hasSub }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:rgba(244,244,242,.55);">{{ pg.toast.sub }}</span></sc-if></div><sc-if value="{{ pg.toast.hasUndo }}" hint-placeholder-val="{{ false }}"><span onClick="{{ pg.undo }}" style="flex:none;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.12);font-size:15px;font-weight:650;cursor:default;">Undo</span></sc-if></div>
+        </sc-if>
+        <div style="position:absolute;bottom:8px;left:50%;margin-left:-70px;width:140px;height:5px;border-radius:3px;background:#f4f4f2;z-index:30;"></div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ pg.isTv }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div ref="{{ pg.tvRef }}" tabIndex="0" onKeyDown="{{ pg.tvKey }}" onClick="{{ pg.tvClick }}" style="position:relative;width:960px;height:540px;border-radius:12px;overflow:hidden;background:#0c0c10;box-shadow:0 0 0 8px #17171b,0 0 0 9px #2a2a30,0 30px 70px rgba(0,0,0,.5);outline:none;">
+          <div style="position:absolute;left:0;top:0;width:1920px;height:1080px;transform:scale(.5);transform-origin:0 0;">
+            <sc-if value="{{ pg.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pg.img }}" alt="" style="position:absolute;right:0;top:0;width:1200px;height:1080px;object-fit:cover;"></sc-if>
+            <sc-if value="{{ pg.noImg }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;right:0;top:0;width:1200px;height:1080px;background:repeating-linear-gradient(135deg,#1c1c22 0 14px,#16161b 14px 28px);display:flex;align-items:center;justify-content:center;font:500 22px ui-monospace,Menlo,monospace;color:rgba(244,244,242,.35);">game key art</div></sc-if>
+            <div style="position:absolute;inset:0;background:linear-gradient(90deg,#0c0c10 0%,#0c0c10 36%,rgba(12,12,16,.7) 58%,rgba(12,12,16,.05) 100%);"></div>
+            <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,12,16,.9) 0%,rgba(12,12,16,0) 45%);"></div>
+            <div style="position:absolute;left:120px;bottom:120px;width:1400px;display:flex;flex-direction:column;gap:26px;">
+              <span style="font-size:22px;font-weight:700;letter-spacing:.08em;color:rgba(244,244,242,.6);">{{ pg.eyebrow }}</span>
+              <span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:92px;letter-spacing:-.03em;line-height:1;">{{ pg.title }}</span>
+              <span style="font-size:28px;color:rgba(244,244,242,.72);">{{ pg.meta }}</span>
+              <sc-if value="{{ pg.hasProg }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:22px;"><div style="width:360px;height:6px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:44%;height:100%;background:#f4f4f2;"></div></div><span style="font-size:26px;color:rgba(244,244,242,.75);">{{ pg.progText }}</span></div>
+              </sc-if>
+              <div style="display:flex;align-items:center;gap:24px;margin-top:12px;">
+                <sc-for list="{{ pg.tvBtns }}" as="b" hint-placeholder-count="3">
+                <sc-if value="{{ b.isPill }}" hint-placeholder-val="{{ true }}"><div onClick="{{ b.go }}" style="flex:none;display:flex;align-items:center;gap:12px;height:84px;padding:0 {{ b.tpadR }}px 0 32px;border-radius:999px;background:{{ b.tbg }};color:{{ b.tcol }};font-size:32px;font-weight:600;white-space:nowrap;transform:scale({{ b.sc }});box-shadow:{{ b.tsh }};transition:transform .18s,background .18s,box-shadow .18s,color .18s;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:42px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}<sc-if value="{{ b.pin }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></sc-if><sc-if value="{{ b.chev }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:38px;line-height:1;opacity:.6;margin-left:-4px;">expand_more</span></sc-if></div></sc-if>
+                <sc-if value="{{ b.isRound }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" style="flex:none;width:84px;height:84px;border-radius:50%;background:{{ b.tbg }};color:{{ b.tcol }};display:flex;align-items:center;justify-content:center;transform:scale({{ b.sc }});box-shadow:{{ b.tsh }};transition:transform .18s,background .18s,box-shadow .18s,color .18s;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:44px;line-height:1;">more_horiz</span></div></sc-if>
+                </sc-for>
+              </div>
+              <sc-if value="{{ pg.hasNote }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:14px;font-size:26px;color:rgba(244,244,242,.75);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;color:{{ pg.noteColor }};">{{ pg.noteIcon }}</span>{{ pg.noteText }}</div>
+              </sc-if>
+            </div>
+            <sc-if value="{{ pg.menuOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;background:rgba(8,8,12,.9);z-index:5;">
+              <sc-if value="{{ pg.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pg.img }}" alt="" style="position:absolute;left:220px;top:200px;width:440px;height:660px;object-fit:cover;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6);"></sc-if>
+              <sc-if value="{{ pg.noImg }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:220px;top:200px;width:440px;height:660px;border-radius:22px;background:repeating-linear-gradient(135deg,#202027 0 14px,#1a1a20 14px 28px);"></div></sc-if>
+              <div style="position:absolute;left:780px;top:200px;width:880px;display:flex;flex-direction:column;gap:10px;">
+                <span style="font-size:28px;color:rgba(244,244,242,.55);padding-left:34px;">{{ pg.title }}</span>
+                <span style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:60px;letter-spacing:-.02em;padding-left:34px;margin-bottom:18px;">{{ pg.menu.title }}</span>
+                <sc-for list="{{ pg.tvRows }}" as="r" hint-placeholder-count="4">
+                <sc-if value="{{ r.isSep }}" hint-placeholder-val="{{ false }}"><div style="height:2px;margin:6px 34px;background:rgba(255,255,255,.08);"></div></sc-if>
+                <sc-if value="{{ r.isRow }}" hint-placeholder-val="{{ true }}"><div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:26px;padding:20px 34px;border-radius:20px;background:{{ r.tbg }};transform:scale({{ r.sc }});box-shadow:{{ r.tsh }};transition:transform .18s,background .18s,box-shadow .18s;cursor:default;"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:40px;line-height:1;color:{{ r.lcol }};font-variation-settings:'FILL' {{ r.fill }};transform:rotate({{ r.rot }}deg);">{{ r.icon }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;"><span style="font-size:32px;font-weight:550;color:{{ r.lcol }};">{{ r.label }}</span><sc-if value="{{ r.hasDesc }}" hint-placeholder-val="{{ true }}"><span style="font-size:22px;line-height:1.35;color:{{ r.dcol }};">{{ r.desc }}</span></sc-if></div><sc-if value="{{ r.check }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:40px;line-height:1;color:{{ r.lcol }};font-variation-settings:'wght' 600;">check</span></sc-if><sc-if value="{{ r.toggle }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:26px;font-weight:650;color:{{ r.dcol }};">{{ r.onText }}</span></sc-if></div></sc-if>
+                </sc-for>
+              </div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ pg.hasToast }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:0;right:0;top:60px;z-index:6;display:flex;justify-content:center;">
+              <div style="display:flex;align-items:center;gap:16px;height:80px;padding:0 38px 0 30px;border-radius:999px;background:rgba(44,44,50,.96);box-shadow:0 0 0 2px rgba(255,255,255,.1),0 20px 50px rgba(0,0,0,.5);font-size:28px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:38px;line-height:1;color:{{ pg.toast.color }};font-variation-settings:'FILL' 1;">{{ pg.toast.icon }}</span>{{ pg.toast.text }}<sc-if value="{{ pg.toast.hasSub }}" hint-placeholder-val="{{ false }}"><span style="color:rgba(244,244,242,.55);font-weight:400;">{{ pg.toast.sub }}</span></sc-if></div>
+            </div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:rgba(244,244,242,.6);"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">keyboard</span>Click the screen, then ← → move focus, ↑ ↓ move through a menu, Return selects, Esc is the remote’s Back button. Undo isn’t offered on TV; open the list again to change it back.</div>
+      </div>
+      </sc-if>
+
+      <div style="display:flex;flex-direction:column;gap:9px;padding:4px 4px 0;">
+        <span style="font-size:13px;font-weight:600;color:rgba(244,244,242,.5);">{{ pg.tapsHead }}</span>
+        <sc-for list="{{ pg.taps }}" as="t" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;font-size:14.5px;line-height:1.45;"><span style="font-weight:650;">{{ t.btn }}</span><span style="color:rgba(244,244,242,.68);text-wrap:pretty;">{{ t.res }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<sc-for list="{{ matrices }}" as="mx" hint-placeholder-count="3">
+<section id="{{ mx.id }}" style="padding:48px 64px;border-bottom:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">{{ mx.num }}</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">{{ mx.title }}</span><span style="font-size:14px;color:rgba(244,244,242,.5);">{{ mx.count }}</span></div>
+  <div style="font-size:16px;color:rgba(244,244,242,.62);max-width:900px;line-height:1.5;margin-bottom:28px;text-wrap:pretty;">{{ mx.desc }}</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(580px,1fr));gap:20px;max-width:1800px;">
+    <sc-for list="{{ mx.cards }}" as="c" hint-placeholder-count="6">
+    <div style="display:flex;flex-direction:column;border-radius:18px;background:#1a1a20;box-shadow:0 0 0 1px rgba(255,255,255,.07);overflow:hidden;min-width:0;">
+      <div style="position:relative;padding:20px 22px 22px;display:flex;flex-direction:column;gap:16px;overflow:hidden;">
+        <sc-if value="{{ c.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ c.img }}" alt="" style="position:absolute;left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(50px) saturate(1.3) brightness(.4);opacity:.75;"></sc-if>
+        <div style="position:relative;display:flex;align-items:center;gap:10px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 7px;border-radius:5px;background:rgba(255,255,255,.14);">{{ c.code }}</span><span style="font-size:14.5px;font-weight:650;">{{ c.state }}</span></div>
+        <div style="position:relative;display:flex;align-items:center;gap:14px;">
+          <sc-if value="{{ c.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ c.img }}" alt="" style="flex:none;width:{{ c.tw }}px;height:{{ c.th }}px;object-fit:cover;border-radius:7px;box-shadow:0 0 0 1px rgba(255,255,255,.1);"></sc-if>
+          <sc-if value="{{ c.noImg }}" hint-placeholder-val="{{ false }}"><div style="flex:none;width:44px;height:66px;border-radius:7px;background:repeating-linear-gradient(135deg,#26262d 0 5px,#1f1f25 5px 10px);box-shadow:0 0 0 1px rgba(255,255,255,.1);"></div></sc-if>
+          <div style="display:flex;flex-direction:column;gap:3px;min-width:0;"><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:20px;letter-spacing:-.015em;">{{ c.title }}</span><span style="font-size:13.5px;color:rgba(244,244,242,.6);">{{ c.meta }}</span></div>
+        </div>
+        <div style="position:relative;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <sc-for list="{{ c.btns }}" as="b" hint-placeholder-count="3">
+          <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+          <sc-if value="{{ b.isS }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:7px;height:48px;padding:0 {{ b.padR }}px 0 16px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}<sc-if value="{{ b.pin }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;margin-left:2px;">push_pin</span></sc-if><sc-if value="{{ b.chev }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></sc-if></div></sc-if>
+          <sc-if value="{{ b.isI }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">{{ b.icon }}</span></div></sc-if>
+          <sc-if value="{{ b.isD }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:rgba(255,255,255,.07);color:rgba(244,244,242,.38);font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+          </sc-for>
+        </div>
+        <sc-if value="{{ c.hasNote }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;display:flex;align-items:center;gap:8px;font-size:14.5px;color:rgba(244,244,242,.75);flex-wrap:wrap;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:{{ c.noteColor }};">{{ c.noteIcon }}</span>{{ c.noteText }}<sc-if value="{{ c.hasCta }}" hint-placeholder-val="{{ false }}"><span style="color:#f4f4f2;font-weight:650;">{{ c.noteCta }}</span></sc-if></div>
+        </sc-if>
+      </div>
+      <div style="flex:1;padding:16px 22px 20px;display:flex;flex-direction:column;gap:8px;border-top:1px solid rgba(255,255,255,.06);">
+        <span style="font-size:12.5px;font-weight:600;color:rgba(244,244,242,.45);">Each tap</span>
+        <sc-for list="{{ c.taps }}" as="t" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:12px;font-size:14px;line-height:1.45;"><span style="font-weight:650;">{{ t.btn }}</span><span style="color:rgba(244,244,242,.65);text-wrap:pretty;">{{ t.res }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+</section>
+</sc-for>
+
+<section id="menus" style="padding:48px 64px;border-bottom:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">07</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">Menus</span></div>
+  <div style="font-size:16px;color:rgba(244,244,242,.62);max-width:900px;line-height:1.5;margin-bottom:28px;text-wrap:pretty;">The list menu holds every list, Pin and Remove, so the row never needs a separate icon for each. Every row says what it does; rows with side effects say so underneath. The menu closes on pick and the toast confirms.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
+    <sc-for list="{{ menus }}" as="m" hint-placeholder-count="4">
+    <div style="flex:none;width:350px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:15px;font-weight:650;">{{ m.caption }}</span><span style="font-size:13.5px;color:rgba(244,244,242,.55);">{{ m.from }}</span></div>
+      <div style="padding:6px;border-radius:14px;background:#232329;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 24px 60px rgba(0,0,0,.45);display:flex;flex-direction:column;">
+        <div style="padding:8px 12px 6px;font-size:12.5px;font-weight:650;color:rgba(244,244,242,.5);">{{ m.title }}</div>
+        <sc-for list="{{ m.rows }}" as="r" hint-placeholder-count="4">
+        <sc-if value="{{ r.isSep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;margin:5px 10px;background:rgba(255,255,255,.08);"></div></sc-if>
+        <sc-if value="{{ r.isRow }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px;cursor:default;" style-hover="background:rgba(255,255,255,.08)"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:{{ r.color }};font-variation-settings:'FILL' {{ r.fill }};transform:rotate({{ r.rot }}deg);">{{ r.icon }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;font-weight:550;color:{{ r.color }};">{{ r.label }}</span><sc-if value="{{ r.hasDesc }}" hint-placeholder-val="{{ true }}"><span style="font-size:12.5px;line-height:1.35;color:rgba(244,244,242,.5);">{{ r.desc }}</span></sc-if></div><sc-if value="{{ r.check }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;font-variation-settings:'wght' 600;">check</span></sc-if><sc-if value="{{ r.toggle }}" hint-placeholder-val="{{ false }}"><span style="flex:none;position:relative;width:36px;height:22px;border-radius:11px;background:{{ r.swBg }};"><span style="position:absolute;top:2px;left:{{ r.swX }}px;width:18px;height:18px;border-radius:50%;background:{{ r.swKnob }};"></span></span></sc-if></div></sc-if>
+        </sc-for>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="feedback" style="padding:48px 64px;border-bottom:1px solid rgba(255,255,255,.07);">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">08</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">Feedback</span></div>
+  <div style="font-size:16px;color:rgba(244,244,242,.62);max-width:900px;line-height:1.5;margin-bottom:28px;text-wrap:pretty;">Every change is confirmed in words, at the bottom of the window, for 4 seconds. Anything that changes a list gets Undo. The button that changed updates in place, so the result is visible twice.</div>
+  <div style="display:flex;flex-direction:column;gap:14px;max-width:1100px;">
+    <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:280px 32px minmax(0,1fr);align-items:center;gap:12px;">
+      <span style="font-size:14.5px;font-weight:600;color:rgba(244,244,242,.8);">{{ t.from }}</span>
+      <span style="font-family:'Material Symbols Rounded';font-size:20px;color:rgba(244,244,242,.35);">arrow_forward</span>
+      <div style="justify-self:start;display:flex;align-items:center;gap:10px;height:44px;padding:0 8px 0 14px;border-radius:999px;background:rgba(44,44,50,.96);box-shadow:0 0 0 1px rgba(255,255,255,.1),0 12px 30px rgba(0,0,0,.35);font-size:15px;font-weight:550;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:{{ t.color }};font-variation-settings:'FILL' 1;">{{ t.icon }}</span>{{ t.text }}<sc-if value="{{ t.hasSub }}" hint-placeholder-val="{{ false }}"><span style="color:rgba(244,244,242,.55);font-weight:400;">{{ t.sub }}</span></sc-if><sc-if value="{{ t.hasUndo }}" hint-placeholder-val="{{ true }}"><span style="padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:650;">Undo</span></sc-if><sc-if value="{{ t.noUndo }}" hint-placeholder-val="{{ false }}"><span style="width:6px;"></span></sc-if></div>
+    </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="platforms" style="padding:48px 64px 80px;">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;"><span style="font:600 11px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px;background:#f4f4f2;color:#101014;">09</span><span style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:32px;letter-spacing:-.02em;">Platforms</span><span style="font-size:14px;color:rgba(244,244,242,.5);">State T3 on each device</span></div>
+  <div style="font-size:16px;color:rgba(244,244,242,.62);max-width:900px;line-height:1.5;margin-bottom:28px;text-wrap:pretty;">Same slots and labels everywhere. Only the sizing and how the menu opens change.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
+    <div style="flex:none;width:560px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.1);">macOS</span><span style="font-size:13.5px;color:rgba(244,244,242,.55);">48 pt, pointer</span></div>
+      <div style="position:relative;height:200px;padding:28px;border-radius:18px;background:#1a1a20;box-shadow:0 0 0 1px rgba(255,255,255,.07);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Resume S1 · E4</div>
+          <div style="display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:rgba(255,255,255,.22);font-size:17px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;margin-left:2px;">push_pin</span><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">more_horiz</span></div>
+        </div>
+        <div style="position:absolute;left:206px;top:84px;padding:6px 10px;border-radius:7px;background:#2c2c32;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 20px rgba(0,0,0,.4);font-size:13px;white-space:nowrap;">Change list or unpin</div>
+        <div style="position:absolute;left:28px;right:28px;bottom:22px;font-size:13.5px;line-height:1.45;color:rgba(244,244,242,.6);">Hover shows a tooltip naming the result. The list menu also lists its shortcuts: ⇧⌘U Watched, ⌘P Pin.</div>
+      </div>
+    </div>
+    <div style="flex:none;width:620px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.1);">Apple TV</span><span style="font-size:13.5px;color:rgba(244,244,242,.55);">Focus, remote</span></div>
+      <div style="height:200px;padding:28px;border-radius:18px;background:#1a1a20;box-shadow:0 0 0 1px rgba(255,255,255,.07);display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="display:flex;align-items:center;gap:8px;height:58px;padding:0 28px 0 22px;border-radius:999px;background:#ffffff;color:#101014;font-size:20px;font-weight:650;white-space:nowrap;transform:scale(1.06);box-shadow:0 14px 30px rgba(0,0,0,.5);"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Resume S1 · E4</div>
+          <div style="display:flex;align-items:center;gap:8px;height:58px;padding:0 18px 0 20px;border-radius:999px;background:rgba(255,255,255,.16);font-size:20px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;opacity:.6;">expand_more</span></div>
+          <div style="width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;">more_horiz</span></div>
+        </div>
+        <div style="font-size:13.5px;line-height:1.45;color:rgba(244,244,242,.6);">The white button takes focus first. Select on Watching opens the list menu full screen over the poster, as the iPhone game menu does today; Menu closes it.</div>
+      </div>
+    </div>
+    <div style="flex:none;width:420px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.1);">iPhone</span><span style="font-size:13.5px;color:rgba(244,244,242,.55);">393 pt wide, touch</span></div>
+      <div style="padding:22px 16px;border-radius:18px;background:#1a1a20;box-shadow:0 0 0 1px rgba(255,255,255,.07);display:flex;flex-direction:column;gap:16px;">
+        <div style="width:361px;display:flex;gap:10px;">
+          <div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;height:50px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Resume S1 · E4</div>
+          <div style="flex:none;display:flex;align-items:center;gap:6px;height:50px;padding:0 10px 0 14px;border-radius:999px;background:rgba(255,255,255,.14);font-size:16px;font-weight:600;white-space:nowrap;"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">clock_loader_40</span>Watching<span style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div>
+        </div>
+        <div style="font-size:13.5px;line-height:1.45;color:rgba(244,244,242,.6);">Two buttons side by side. ••• moves to the top bar, next to Close. Time left sits on the progress line, so Resume stays short. The list menu opens as a sheet.</div>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { plat: 'mac', pk: 'movie', avail: 'server', list: 'want', pin: false, prog: true, menu: null, mx: 0, toast: null, tvF: 0, tvM: 0 };
+  tvRef = React.createRef();
+  focusTv() { setTimeout(() => this.tvRef.current && this.tvRef.current.focus({ preventScroll: true }), 0); }
+  tvKey = e => {
+    const k = e.key, st = this.state, ps = this.pgState();
+    if (st.menu) {
+      const rows = (st.menu === 'menu' ? this.listMenu(ps) : this.moreMenu(ps)).rows.filter(x => x.isRow);
+      const m = Math.min(st.tvM, rows.length - 1);
+      if (k === 'ArrowDown') this.setState({ tvM: Math.min(m + 1, rows.length - 1) });
+      else if (k === 'ArrowUp') this.setState({ tvM: Math.max(m - 1, 0) });
+      else if (k === 'Enter' || k === ' ') { const row = rows[m]; row && this.act(row.act, e); }
+      else if (k === 'Escape' || k === 'Backspace') this.setState({ menu: null });
+      else return;
+    } else {
+      const fs = this.row(ps).btns.filter(b => !b.isD);
+      const f = Math.min(st.tvF, fs.length - 1);
+      if (k === 'ArrowRight') this.setState({ tvF: Math.min(f + 1, fs.length - 1) });
+      else if (k === 'ArrowLeft') this.setState({ tvF: Math.max(f - 1, 0) });
+      else if ((k === 'Enter' || k === ' ') && fs[f]) this.act(fs[f].act, e);
+      else return;
+    }
+    e.preventDefault();
+  };
+
+  lists(kind) {
+    if (kind === 'game') return [
+      { id: 'want', name: 'Want to Play', icon: 'bookmark', pinnable: true, desc: 'Saved for later.' },
+      { id: 'playing', name: 'Playing', icon: 'sports_esports', pinnable: true, desc: 'What you’re playing now.' },
+      { id: 'played', name: 'Played', icon: 'check_circle', pinnable: false, desc: 'Finished, or done with it. Unpins it.' }];
+    if (kind === 'show') return [
+      { id: 'want', name: 'Want to Watch', icon: 'bookmark', pinnable: true, desc: 'Saved for later.' },
+      { id: 'watching', name: 'Watching', icon: 'clock_loader_40', pinnable: true, desc: 'Biinge follows your next episode.' },
+      { id: 'watched', name: 'Watched', icon: 'check_circle', pinnable: false, desc: 'Marks every episode watched, here and on Living Room.' }];
+    return [
+      { id: 'want', name: 'Want to Watch', icon: 'bookmark', pinnable: true, desc: 'Saved for later.' },
+      { id: 'watched', name: 'Watched', icon: 'check_circle', pinnable: false, desc: 'Also marks it played on Living Room.' }];
+  }
+
+  nb(o) {
+    return Object.assign({ isP: false, isS: false, isI: false, isD: false, isA: false, icon: '', label: '', chev: false, pin: false, fill: 0, color: '#f4f4f2', rot: 0, tip: '', act: '', bg: 'rgba(255,255,255,.14)', padR: 14, go: () => {} }, o, { hasIcon: !!o.icon });
+  }
+
+  moreItems(s) {
+    if (s.kind === 'game') return [{ icon: 'open_in_new', label: 'Open on IGDB' }, { icon: 'ios_share', label: 'Share…' }];
+    const onServer = s.avail === 'server';
+    if (s.kind === 'show') return [
+      s.prog && onServer ? { icon: 'replay', label: `Start ${s.ep} Over`, desc: 'From 0:00' } : null,
+      onServer ? { icon: 'done_all', label: 'Mark Season 1 Watched', desc: 'Marks 10 episodes watched, here and on Living Room.' } : null,
+      { icon: 'library_add', label: 'Add to Collection…' },
+      onServer ? { icon: 'open_in_new', label: 'Open in Jellyfin' } : null].filter(Boolean);
+    return [
+      s.prog && onServer ? { icon: 'replay', label: 'Start Over', desc: 'From 0:00' } : null,
+      { icon: 'library_add', label: 'Add to Collection…' },
+      onServer ? { icon: 'open_in_new', label: 'Open in Jellyfin' } : null,
+      { icon: 'ios_share', label: 'Share…' }].filter(Boolean);
+  }
+
+  noteFor(s) {
+    const N = {
+      off: { icon: 'dns', color: '#91919a', text: 'Not on Living Room. Add it to Jellyfin to play here.' },
+      dupes: { icon: 'content_copy', color: '#eec01e', text: 'Living Room has 2 copies, so Biinge can’t pick one to play.' },
+      unreach: { icon: 'cloud_off', color: '#ff8a8d', text: 'Can’t reach Living Room.', cta: 'Retry', act: 'retry' },
+      notconn: { icon: 'link_off', color: '#91919a', text: 'Jellyfin isn’t connected.', cta: 'Connect…', act: 'connect' },
+      missing: { icon: 'dns', color: '#91919a', text: 'You’re up to S3 · E1. Season 3 isn’t on Living Room.' },
+      airing: { icon: 'calendar_today', color: '#91919a', text: 'You’re caught up. S5 · E4 airs Friday, 13 Nov.' },
+      unreleased: { icon: 'event', color: '#91919a', text: 'Not out yet. No release date.' } };
+    if (s.playedJF) return { icon: 'check', color: '#91919a', text: 'Played on Living Room, not in your Watched list.', cta: 'Add to Watched', act: 'list:watched' };
+    return N[s.avail] || null;
+  }
+
+  row(s) {
+    const kind = s.kind, L = this.lists(kind), cur = L.find(l => l.id === s.list), want = L[0].name;
+    const btns = [], taps = [];
+    const add = (b, res) => { btns.push(this.nb(Object.assign({ tip: res }, b))); taps.push({ btn: b.tap || b.label, res }); };
+    const addWant = () => add({ isP: true, icon: 'bookmark_add', label: `Add to ${want}`, act: 'want', fill: 0 }, `Saves it to ${want}. The list button changes to “${want}”.`);
+    if (kind !== 'game') {
+      if (s.avail === 'server' || s.avail === 'unreach') {
+        let label, icon = 'play_arrow', res;
+        if (s.prog) { label = kind === 'movie' ? `Resume · ${s.left}` : `Resume ${s.ep}`; res = `Opens the player at ${s.at}.`; }
+        else if (s.list === 'watched' || s.playedJF) { label = kind === 'movie' ? 'Play Again' : 'Play Again · S1 · E1'; icon = 'replay'; res = kind === 'movie' ? 'Plays from the beginning. Stays in Watched.' : 'Plays the first episode. Watched episodes stay watched.'; }
+        else { label = kind === 'movie' ? 'Play' : `Play ${s.ep}`; res = kind === 'movie' ? 'Plays from the beginning.' : `Plays ${s.ep} from the beginning.`; }
+        if (s.avail === 'unreach') add({ isD: true, icon, label }, 'Does nothing until Living Room is back. Retry checks again.');
+        else add({ isP: true, icon, label, act: 'play', fill: 1 }, res);
+      } else if (!s.list) addWant();
+    } else {
+      if (!s.list) addWant();
+      else if (s.list === 'want' && s.avail !== 'unreleased') add({ isP: true, icon: 'sports_esports', label: 'Mark as Playing', act: 'playing', fill: 1 }, 'Moves it from Want to Play to Playing. A pin stays.');
+      else if (s.list === 'playing') add({ isP: true, icon: 'check', label: 'Mark as Played', act: 'played', fill: 0 }, 'Moves it to Played and unpins it.');
+    }
+    if (cur) {
+      const others = L.filter(l => l.id !== cur.id).map(l => l.name);
+      const pinTxt = cur.pinnable ? (s.pin ? 'unpin, ' : 'pin to Up Next, ') : '';
+      add({ isS: true, icon: cur.icon, label: cur.name, chev: true, pin: !!s.pin, act: 'menu', fill: 1, tap: `${cur.name} ▾` }, `Opens Lists to move it to ${others.join(' or ')}, ${pinTxt}or remove it. Nothing changes until you pick.`);
+    } else add({ isS: true, icon: 'add', label: 'Add to List', chev: true, act: 'menu', fill: 0, tap: 'Add to List ▾' }, `Opens Lists: ${L.map(l => l.name).join(', ')}. Nothing changes until you pick.`);
+    add({ isI: true, icon: 'more_horiz', act: 'more', tap: '•••' }, `Opens a menu: ${this.moreItems(s).map(m => m.label.replace(/…$/, '')).join(', ')}`);
+    return { btns, taps, note: this.noteFor(s) };
+  }
+
+  card(code, state, s) {
+    const r = this.row(s), n = r.note;
+    const ep = !!s.episode;
+    return { code, state, title: s.title, meta: s.meta, img: s.img || '', hasImg: !!s.img, noImg: !s.img, tw: 44, th: 66,
+      btns: r.btns, taps: r.taps, hasNote: !!n, noteIcon: n ? n.icon : '', noteColor: n ? n.color : '', noteText: n ? n.text : '', hasCta: !!(n && n.cta), noteCta: n && n.cta ? n.cta : '' };
+  }
+
+  mrow(o) {
+    return Object.assign({ isRow: true, isSep: false, icon: '', label: '', desc: '', check: false, toggle: false, on: false, color: '#f4f4f2', fill: 0, rot: 0, act: '', go: () => {} }, o,
+      { hasDesc: !!o.desc, swBg: o.on ? '#f4f4f2' : 'rgba(255,255,255,.2)', swKnob: o.on ? '#101014' : '#f4f4f2', swX: o.on ? 16 : 2, swXi: o.on ? 22 : 2 });
+  }
+  sep() { return this.mrow({ isRow: false, isSep: true }); }
+
+  listMenu(s) {
+    const L = this.lists(s.kind), cur = L.find(l => l.id === s.list);
+    const rows = L.map(l => this.mrow({ icon: l.icon, fill: cur && cur.id === l.id ? 1 : 0, label: l.name, desc: l.desc, check: !!(cur && cur.id === l.id), act: 'list:' + l.id }));
+    if (cur && cur.pinnable) rows.push(this.sep(), this.mrow({ icon: 'push_pin', rot: 25, fill: s.pin ? 1 : 0, label: 'Pin to Up Next', desc: 'Keeps it at the top of Up Next and the list.', toggle: true, on: !!s.pin, act: 'pin' }));
+    if (cur) rows.push(this.sep(), this.mrow({ icon: 'do_not_disturb_on', label: `Remove from ${cur.name}`, color: '#ff8a8d', act: 'remove' }));
+    return { title: cur ? 'Lists' : 'Add to List', rows };
+  }
+  moreMenu(s) {
+    return { title: 'More', rows: this.moreItems(s).map(m => this.mrow({ icon: m.icon, label: m.label, desc: m.desc || '', act: 'more:' + m.label })) };
+  }
+
+  toast(t) {
+    clearTimeout(this.tt);
+    this.setState({ toast: t });
+    this.tt = setTimeout(() => this.setState({ toast: null }), 4500);
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+
+  act(a, e) {
+    const s = this.state, kind = s.pk, L = this.lists(kind);
+    const snap = { list: s.list, pin: s.pin, prog: s.prog };
+    const name = id => (L.find(l => l.id === id) || {}).name;
+    if (a === 'play') { this.setState({ menu: null }); return this.toast({ icon: 'play_circle', color: '#f4f4f2', text: 'Opening the player…' }); }
+    if (a === 'menu' || a === 'more') { const x = e && e.currentTarget ? e.currentTarget.offsetLeft : 0; return this.setState(st => ({ menu: st.menu === a ? null : a, mx: x, tvM: 0 })); }
+    if (a === 'want' || a === 'playing' || a === 'played' || a.indexOf('list:') === 0) {
+      const id = a.indexOf('list:') === 0 ? a.slice(5) : a;
+      if (id === s.list) return this.setState({ menu: null });
+      const def = L.find(l => l.id === id);
+      if (!def) return;
+      const patch = { list: id, pin: def.pinnable ? s.pin : false, menu: null };
+      if (id === 'watched' || id === 'played') patch.prog = false;
+      this.setState(patch);
+      return this.toast({ icon: def.icon, color: '#34c46f', text: `${s.list ? 'Moved' : 'Added'} to ${def.name}`, sub: id === 'watched' ? 'Also marked played on Living Room' : '', undo: snap });
+    }
+    if (a === 'pin') { this.setState({ pin: !s.pin, menu: null }); return this.toast({ icon: 'push_pin', color: '#34c46f', text: s.pin ? 'Unpinned from Up Next' : 'Pinned to Up Next', undo: snap }); }
+    if (a === 'remove') { const n = name(s.list); this.setState({ list: null, pin: false, menu: null }); return this.toast({ icon: 'do_not_disturb_on', color: '#34c46f', text: `Removed from ${n}`, undo: snap }); }
+    if (a === 'retry') return this.toast({ icon: 'cloud_off', color: '#ff8a8d', text: 'Still can’t reach Living Room' });
+    if (a === 'connect') return this.toast({ icon: 'link', color: '#f4f4f2', text: 'Opens Connect Jellyfin' });
+    if (a.indexOf('more:Start') === 0) { this.setState({ menu: null, prog: false }); return this.toast({ icon: 'play_circle', color: '#f4f4f2', text: 'Playing from the beginning…' }); }
+    if (a.indexOf('more:Mark Season') === 0) { this.setState({ menu: null }); return this.toast({ icon: 'done_all', color: '#34c46f', text: 'Season 1 marked watched', undo: snap }); }
+    this.setState({ menu: null });
+  }
+
+  pgState() {
+    const s = this.state, k = s.pk;
+    const T = {
+      movie: { title: 'La La Land', eyebrow: 'MOVIE', img: 'assets/posters/la-la-land.jpg', meta: '2016  ·  2h 8m  ·  Romance, Music, Drama', at: '56:20', left: '1h 12m left', ep: '', progText: 'Stopped at 56 min  ·  1h 12m left' },
+      show: { title: 'Mr. Robot', eyebrow: 'TV SHOW', img: 'assets/posters/mr-robot.jpg', meta: '2015  ·  4 Seasons  ·  Drama, Crime, Thriller', at: '23:40', left: '', ep: 'S1 · E4', progText: 'S1 · E4  ·  23 min left' },
+      game: { title: 'Hades II', eyebrow: 'GAME', img: '', meta: 'Supergiant Games  ·  2025  ·  Action Roguelike', at: '', left: '', ep: '', progText: '' } }[k];
+    const avail = k === 'game' ? 'server' : s.avail;
+    return Object.assign({}, T, { kind: k, avail, list: s.list, pin: s.pin, prog: k !== 'game' && s.prog && (avail === 'server' || avail === 'unreach') });
+  }
+
+  setKind(k) {
+    const d = { movie: { list: 'want', pin: false, prog: true }, show: { list: 'watching', pin: true, prog: true }, game: { list: 'playing', pin: true, prog: false } }[k];
+    this.setState(Object.assign({ pk: k, avail: 'server', menu: null, toast: null }, d));
+  }
+
+  renderVals() {
+    const st = this.state, I = this.nb.bind(this);
+    const P = 'assets/posters/';
+
+    const audit = [
+      { code: 'C1', platform: 'macOS', state: 'Movie on server · in Want · started', btns: [I({ isP: true, icon: 'play_arrow', label: 'Resume', fill: 1 }), I({ isS: true, icon: 'replay', label: 'Start Over' }), I({ isI: true, icon: 'bookmark', fill: 1 }), I({ isI: true, icon: 'check' }), I({ isI: true, icon: 'push_pin', rot: 25 }), I({ isI: true, icon: 'more_horiz' })],
+        issues: ['Six buttons, four of them icons only. You have to hover to learn which one marks it watched.', 'The filled bookmark could mean “it’s in Want to Watch” or “add to Want to Watch”. A click removes it.', 'The check doesn’t say it also marks the movie played on Living Room.', 'Pin shows only in Want to Watch and Watching, so the row changes length from title to title.'] },
+      { code: 'C2', platform: 'macOS', state: 'Movie not on server · not in a list', btns: [I({ isP: true, icon: 'bookmark_add', label: 'Want to Watch', fill: 0 }), I({ isI: true, icon: 'check' }), I({ isI: true, icon: 'more_horiz' })],
+        issues: ['The white button adds to a list here, but plays on other titles.', 'Its label is a list name, so it reads as a state, not an action.'] },
+      { code: 'C3', platform: 'macOS', state: 'Movie not on server · in Want', btns: [I({ isS: true, icon: 'bookmark', label: 'In Want to Watch', fill: 1 }), I({ isI: true, icon: 'check' }), I({ isI: true, icon: 'push_pin', rot: 25 }), I({ isI: true, icon: 'more_horiz' })],
+        issues: ['“In Want to Watch” states a fact, but a click removes it.', 'The same slot was the white button a moment ago, so the row shifts after one click.'] },
+      { code: 'C4', platform: 'iPhone', state: 'Movie with two copies on server', btns: [I({ isP: true, icon: 'check_circle', label: 'Watched', fill: 1 }), I({ isI: true, icon: 'bookmark_add' }), I({ isI: true, icon: 'more_horiz' })],
+        issues: ['The biggest button shows a state. It’s unclear if tapping it unmarks the movie.', 'Want and Watched look like two separate switches, but a title is only ever in one list.'] },
+      { code: 'C5', platform: 'iPhone app', state: 'Game not in a list', btns: [I({ isP: true, label: 'Want' }), I({ isP: true, label: 'Playing' })],
+        issues: ['Two white buttons of equal weight with one-word labels.', 'Played can’t be picked until the game is in another list.'] },
+      { code: 'C6', platform: 'iPhone app', state: 'Game in Playing', btns: [I({ isA: true, label: 'Playing' })],
+        issues: ['A state label opens a full-screen menu. Nothing hints at that.', 'Games use a different pattern from movies and shows.'] },
+    ].map(c => Object.assign(c, { issues: c.issues.map((t, i) => ({ n: i + 1, text: t })) }));
+
+    const rules = [
+      { title: 'If it can play, the white button plays.', text: 'Its label says exactly what: Play, Resume · 1h 12m left, Play S2 · E3, Play Again.' },
+      { title: 'If it can’t play, the white button is the next useful step.', text: 'Add to Want to Watch, Mark as Playing. If there is none, there is no white button and a line underneath says why.' },
+      { title: 'The list button shows where the title is.', text: 'Its label is always a list name, or Add to List. The chevron means it opens a menu and changes nothing on its own.' },
+      { title: 'No chevron means it acts right away.', text: 'Those labels are verbs that name the result: Add to Want to Watch, Mark Watched, Mark Unwatched.' },
+      { title: 'Only ••• is icon-only.', text: 'Every button that changes your data has words. Pin shows as a small pin on the list button and is changed in its menu.' },
+      { title: 'Slots never move. Every change says so.', text: 'Next step, list, more. A toast confirms each change in words and offers Undo.' },
+    ].map((r, i) => Object.assign(r, { n: i + 1 }));
+
+    const inputs = [
+      { title: 'Can it play here?', sub: 'Movies and TV shows only', items: ['On Living Room', 'Not on server', '2 copies on server', 'Server unreachable', 'Jellyfin not connected', 'Next season missing', 'Next episode not out'] },
+      { title: 'Which list is it in?', sub: 'One list at a time, plus Pin', items: ['None', 'Want to Watch / Play', 'Watching (TV)', 'Playing (games)', 'Watched / Played', 'Pinned'] },
+      { title: 'How far along?', sub: 'From Jellyfin playback', items: ['Not started', 'Stopped part-way', 'Played on Living Room, not in Watched', 'Caught up'] },
+    ];
+
+    const mv = (code, state, o) => this.card(code, state, Object.assign({ kind: 'movie', avail: 'server', list: null, pin: false, prog: false, at: '56:20', left: '1h 12m left' }, o, { img: P + o.id + '.jpg' }));
+    const movies = [
+      mv('M1', 'On server · not in a list', { id: 'dune-part-two', title: 'Dune: Part Two', meta: '2024 · 2h 46m' }),
+      mv('M2', 'On server · Want to Watch', { id: 'blade-runner-2049', title: 'Blade Runner 2049', meta: '2017 · 2h 44m', list: 'want' }),
+      mv('M3', 'On server · Want to Watch · pinned · started', { id: 'la-la-land', title: 'La La Land', meta: '2016 · 2h 8m · stopped at 56 min', list: 'want', pin: true, prog: true }),
+      mv('M4', 'On server · Watched', { id: 'aftersun', title: 'Aftersun', meta: '2022 · 1h 42m', list: 'watched' }),
+      mv('M5', 'On server · played in Jellyfin, not in Watched', { id: 'nightcrawler', title: 'Nightcrawler', meta: '2014 · 1h 57m', playedJF: true }),
+      mv('M6', 'Not on server · not in a list', { id: 'midnight-in-paris', title: 'Midnight in Paris', meta: '2011 · 1h 34m', avail: 'off' }),
+      mv('M7', 'Not on server · Want to Watch · pinned', { id: 'arrival', title: 'Arrival', meta: '2016 · 1h 56m', avail: 'off', list: 'want', pin: true }),
+      mv('M8', 'Not on server · Watched', { id: 'terminator-2', title: 'Terminator 2: Judgment Day', meta: '1991 · 2h 17m', avail: 'off', list: 'watched' }),
+      mv('M9', '2 copies on server · Want to Watch', { id: 'lotr-fellowship', title: 'The Fellowship of the Ring', meta: '2001 · 2h 59m', avail: 'dupes', list: 'want' }),
+      mv('M10', 'Server unreachable · Want to Watch · started', { id: 'conclave', title: 'Conclave', meta: '2024 · 2h · stopped at 56 min', avail: 'unreach', list: 'want', prog: true }),
+      mv('M11', 'Jellyfin not connected · not in a list', { id: 'poor-things', title: 'Poor Things', meta: '2023 · 2h 21m', avail: 'notconn' }),
+    ];
+
+    const tv = (code, state, o) => this.card(code, state, Object.assign({ kind: 'show', avail: 'server', list: null, pin: false, prog: false, ep: 'S1 · E1', at: '23:40' }, o, { img: P + o.id + '.jpg' }));
+    const shows = [
+      tv('T1', 'On server · not in a list', { id: 'silo', title: 'Silo', meta: '2023 · 2 Seasons' }),
+      tv('T2', 'On server · Want to Watch', { id: 'the-bear', title: 'The Bear', meta: '2022 · 4 Seasons', list: 'want' }),
+      tv('T3', 'Watching · pinned · stopped mid-episode', { id: 'mr-robot', title: 'Mr. Robot', meta: '2015 · 4 Seasons · S1 · E4, 23 min left', list: 'watching', pin: true, prog: true, ep: 'S1 · E4' }),
+      tv('T4', 'Watching · next episode ready', { id: 'breaking-bad', title: 'Breaking Bad', meta: '2008 · 5 Seasons', list: 'watching', ep: 'S2 · E3' }),
+      tv('T5', 'Watching · next season not on server', { id: 'severance', title: 'Severance', meta: '2022 · 2 Seasons', list: 'watching', avail: 'missing' }),
+      tv('T6', 'Watching · pinned · caught up, next episode not out', { id: 'slow-horses', title: 'Slow Horses', meta: '2022 · 5 Seasons', list: 'watching', pin: true, avail: 'airing' }),
+      tv('T7', 'On server · Watched', { id: 'chernobyl', title: 'Chernobyl', meta: '2019 · Limited Series', list: 'watched' }),
+      tv('T8', 'Not on server · not in a list', { id: 'shogun', title: 'Shōgun', meta: '2024 · 1 Season', avail: 'off' }),
+      tv('T9', 'Server unreachable · Watching · mid-episode', { id: 'the-curse', title: 'The Curse', meta: '2023 · Limited Series', list: 'watching', avail: 'unreach', prog: true, ep: 'S1 · E4' }),
+    ];
+    const epCard = (code, state, btns, taps, meta) => ({ code, state, title: 'E4 · eps1.3_da3m0ns.mp4', meta, img: P + 'mr-robot.jpg', hasImg: true, noImg: false, tw: 96, th: 54,
+      btns: btns.map(b => I(Object.assign({ tip: '' }, b))), taps, hasNote: false, noteIcon: '', noteColor: '', noteText: '', hasCta: false, noteCta: '' });
+    const episodes = [
+      epCard('E1', 'Episode sheet · not started', [{ isP: true, icon: 'play_arrow', label: 'Play', fill: 1 }, { isS: true, icon: 'check', label: 'Mark Watched', padR: 22 }],
+        [{ btn: 'Play', res: 'Plays this episode from the beginning.' }, { btn: 'Mark Watched', res: 'Marks it watched here and on Living Room. Button becomes Mark Unwatched.' }], 'Mr. Robot · Season 1 · 49 min'),
+      epCard('E2', 'Episode sheet · stopped part-way', [{ isP: true, icon: 'play_arrow', label: 'Resume · 23 min left', fill: 1 }, { isS: true, icon: 'check', label: 'Mark Watched', padR: 22 }],
+        [{ btn: 'Resume · 23 min left', res: 'Opens the player at 23:40.' }, { btn: 'Mark Watched', res: 'Marks it watched and clears the progress bar.' }], 'Mr. Robot · Season 1 · 49 min'),
+      epCard('E3', 'Episode sheet · watched', [{ isP: true, icon: 'replay', label: 'Play Again', fill: 1 }, { isS: true, icon: 'remove_done', label: 'Mark Unwatched', padR: 22 }],
+        [{ btn: 'Play Again', res: 'Plays from the beginning. Stays watched.' }, { btn: 'Mark Unwatched', res: 'Marks it unwatched here and on Living Room.' }], 'Mr. Robot · Season 1 · 49 min'),
+    ];
+
+    const gm = (code, state, o) => this.card(code, state, Object.assign({ kind: 'game', avail: 'server', list: null, pin: false, prog: false }, o));
+    const games = [
+      gm('G1', 'Not in a list', { title: 'Split Fiction', meta: 'Hazelight · 2025' }),
+      gm('G2', 'Want to Play', { title: 'Blue Prince', meta: 'Dogubomb · 2025', list: 'want' }),
+      gm('G3', 'Playing · pinned', { title: 'Hades II', meta: 'Supergiant Games · 2025', list: 'playing', pin: true }),
+      gm('G4', 'Played', { title: 'Clair Obscur: Expedition 33', meta: 'Sandfall Interactive · 2025', list: 'played' }),
+      gm('G5', 'Want to Play · pinned · not released', { title: 'The Witcher IV', meta: 'CD Projekt Red · TBA', list: 'want', pin: true, avail: 'unreleased' }),
+      gm('G6', 'Not in a list · not released', { title: 'The Witcher IV', meta: 'CD Projekt Red · TBA', avail: 'unreleased' }),
+    ];
+
+    const matrices = [
+      { id: 'movies', num: '04', title: 'Movies', count: `${movies.length} states`, desc: 'Lists: Want to Watch and Watched. Only Want to Watch can be pinned. Watched also marks the movie played on Living Room.', cards: movies },
+      { id: 'tv', num: '05', title: 'TV shows', count: `${shows.length} states + 3 episode states`, desc: 'Lists: Want to Watch, Watching and Watched. The white button always names the episode. Episode sheets use the same rules with an immediate Mark Watched button, since one episode has only two states.', cards: shows.concat(episodes) },
+      { id: 'games', num: '06', title: 'Games', count: `${games.length} states`, desc: 'Lists: Want to Play, Playing and Played. Games can’t play in Biinge, so the white button moves the game one step forward: Add to Want to Play, Mark as Playing, Mark as Played.', cards: games },
+    ];
+
+    const menus = [
+      Object.assign(this.listMenu({ kind: 'movie', list: 'want', pin: true }), { caption: 'Movie · Lists', from: 'From “Want to Watch ▾” on La La Land' }),
+      Object.assign(this.listMenu({ kind: 'show', list: 'watching', pin: false }), { caption: 'TV show · Lists', from: 'From “Watching ▾” on Breaking Bad' }),
+      Object.assign(this.listMenu({ kind: 'game', list: null }), { caption: 'Game · Add to List', from: 'From “Add to List ▾” on Split Fiction' }),
+      Object.assign(this.moreMenu({ kind: 'movie', avail: 'server', prog: true }), { caption: 'Movie · More', from: 'From ••• on La La Land' }),
+    ];
+
+    const toasts = [
+      { from: 'Add to Want to Watch', icon: 'bookmark', color: '#34c46f', text: 'Added to Want to Watch', undo: true },
+      { from: 'Lists › Watched (movie)', icon: 'check_circle', color: '#34c46f', text: 'Moved to Watched', sub: 'Also marked played on Living Room', undo: true },
+      { from: 'Lists › Pin to Up Next', icon: 'push_pin', color: '#34c46f', text: 'Pinned to Up Next', undo: true },
+      { from: 'Mark as Playing', icon: 'sports_esports', color: '#34c46f', text: 'Moved to Playing', undo: true },
+      { from: 'Lists › Remove from Watching', icon: 'do_not_disturb_on', color: '#34c46f', text: 'Removed from Watching', undo: true },
+      { from: 'Mark Watched (episode)', icon: 'check_circle', color: '#34c46f', text: 'S1 · E4 marked watched', undo: true },
+      { from: 'Retry, still offline', icon: 'cloud_off', color: '#ff8a8d', text: 'Still can’t reach Living Room', undo: false },
+    ].map(t => Object.assign(t, { sub: t.sub || '', hasSub: !!t.sub, hasUndo: !!t.undo, noUndo: !t.undo }));
+
+    // playground
+    const ps = this.pgState();
+    const r = this.row(ps);
+    const btns = r.btns.map(b => Object.assign(b, { bg: (st.menu === 'menu' && b.act === 'menu') || (st.menu === 'more' && b.act === 'more') ? 'rgba(255,255,255,.26)' : 'rgba(255,255,255,.14)', go: e => { e.stopPropagation(); this.act(b.act, e); } }));
+    let menu = { title: '', rows: [] };
+    if (st.menu === 'menu') menu = this.listMenu(ps);
+    if (st.menu === 'more') menu = this.moreMenu(ps);
+    menu.rows.forEach(row => { row.go = e => { e.stopPropagation(); this.act(row.act, e); }; });
+    const seg = (label, items, cur, set) => ({ label, items: items.map(([v, l]) => ({ label: l, bg: v === cur ? 'rgba(255,255,255,.16)' : 'transparent', color: v === cur ? '#f4f4f2' : 'rgba(244,244,242,.6)', go: () => set(v) })) });
+    const plat = st.plat;
+    let k = -1;
+    const fCount = btns.filter(b => !b.isD).length;
+    const f = Math.min(st.tvF, Math.max(fCount - 1, 0));
+    const tvBtns = btns.map(b => {
+      const idx = b.isD ? -1 : ++k, foc = !st.menu && idx === f, prim = b.isP;
+      return Object.assign({}, b, { isPill: !b.isI, isRound: !!b.isI,
+        tbg: b.isD ? 'rgba(255,255,255,.07)' : foc ? '#ffffff' : prim ? 'rgba(244,244,242,.88)' : 'rgba(255,255,255,.16)',
+        tcol: b.isD ? 'rgba(244,244,242,.38)' : (foc || prim) ? '#101014' : '#f4f4f2',
+        sc: foc ? 1.1 : 1, tsh: foc ? '0 26px 50px rgba(0,0,0,.6)' : 'none', tpadR: b.chev ? 24 : 40,
+        go: e => { e.stopPropagation(); this.focusTv(); if (b.isD) return; this.setState({ tvF: idx }); this.act(b.act, e); } });
+    });
+    let mi = -1;
+    const rowCount = menu.rows.filter(x => x.isRow).length;
+    const mf = Math.min(st.tvM, Math.max(rowCount - 1, 0));
+    const tvRows = menu.rows.map(row => {
+      if (!row.isRow) return row;
+      const idx = ++mi, foc = idx === mf, red = row.color === '#ff8a8d';
+      return Object.assign({}, row, { tbg: foc ? '#ffffff' : 'transparent', lcol: foc ? (red ? '#c4262b' : '#101014') : row.color,
+        dcol: foc ? 'rgba(16,16,20,.6)' : 'rgba(244,244,242,.55)', sc: foc ? 1.04 : 1, tsh: foc ? '0 20px 40px rgba(0,0,0,.5)' : 'none', onText: row.on ? 'On' : 'Off',
+        go: e => { e.stopPropagation(); this.focusTv(); this.setState({ tvM: idx }); this.act(row.act, e); } });
+    });
+    const controls = [seg('Platform', [['mac', 'macOS'], ['ios', 'iPhone'], ['tv', 'Apple TV']], plat, v => { this.setState({ plat: v, menu: null, tvF: 0, tvM: 0 }); if (v === 'tv') this.focusTv(); }), seg('Title type', [['movie', 'Movie'], ['show', 'TV show'], ['game', 'Game']], st.pk, v => this.setKind(v))];
+    if (st.pk !== 'game') {
+      controls.push(seg('Server', [['server', 'On server'], ['off', 'Not on it'], ['unreach', 'Offline']], st.avail, v => this.setState({ avail: v, menu: null })));
+      controls.push(seg('Progress', [[true, 'Stopped part-way'], [false, 'Not started']], st.prog, v => this.setState({ prog: v, menu: null })));
+    }
+    const n = r.note, t = st.toast;
+    const pg = {
+      isMac: plat === 'mac', isIos: plat === 'ios', isTv: plat === 'tv',
+      tapsHead: plat === 'ios' ? 'Each tap, in this state' : plat === 'tv' ? 'Each select, in this state' : 'Each click, in this state',
+      iosRow: btns.filter(b => !b.isI).map(b => Object.assign({}, b, { label: b.label.replace(/ · [^·]* left$/, ''), iosIcon: b.act !== 'want', iosFlex: btns.some(x => x.isP || x.isD) ? 'none' : '1' })),
+      iosMore: e => { e.stopPropagation(); this.act('more', e); }, iosMoreBg: st.menu === 'more' ? 'rgba(255,255,255,.3)' : 'rgba(0,0,0,.35)',
+      taps: plat === 'ios' ? r.taps.map(t => t.btn === '•••' ? Object.assign({}, t, { btn: '••• in the top bar' }) : Object.assign({}, t, { btn: t.btn.replace(/ · [^·]* left$/, '') })) : r.taps,
+      tvBtns, tvRows, tvRef: this.tvRef, tvKey: this.tvKey, tvClick: () => this.focusTv(),
+      controls, reset: () => this.setKind(st.pk), closeMenu: () => st.menu && this.setState({ menu: null }), stop: e => e.stopPropagation(),
+      title: ps.title, eyebrow: ps.eyebrow, meta: ps.meta, img: ps.img, hasImg: !!ps.img, noImg: !ps.img,
+      hasProg: !!ps.prog, progText: ps.progText,
+      btns, menuOpen: !!st.menu, menu, mx: st.mx,
+      hasNote: !!n, noteIcon: n ? n.icon : '', noteColor: n ? n.color : '', noteText: n ? n.text : '', hasCta: !!(n && n.cta), noteCta: n && n.cta ? n.cta : '',
+      noteGo: e => { e.stopPropagation(); n && n.act && this.act(n.act, e); },
+      hasToast: !!t, toast: t ? { icon: t.icon, color: t.color, text: t.text, sub: t.sub || '', hasSub: !!t.sub, hasUndo: !!t.undo, noUndo: !t.undo } : { icon: '', color: '', text: '', sub: '', hasSub: false, hasUndo: false, noUndo: true },
+      undo: () => { if (t && t.undo) { clearTimeout(this.tt); this.setState(Object.assign({}, t.undo, { toast: null, menu: null })); } },
+    };
+
+    return { audit, rules, inputs, matrices, menus, toasts, pg };
+  }
+}
+</script>
+</body>
+</html>

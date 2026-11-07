@@ -1,0 +1,202 @@
+// Shared sample library for the Biinge macOS + Apple TV mockups (Jellyfin is the source of truth)
+(function () {
+  const movies = {
+    'la-la-land': { title: 'La La Land', year: 2016, runtime: 128, genres: 'Romance, Music, Drama', rating: 7.9, director: 'Damien Chazelle', released: '9 Dec 2016', quality: ['4K', 'HDR', 'ATMOS'], audio: 'English · Dolby Atmos', subs: 'English, Spanish +2', biinge: 'Want', progress: 0.44, pos: 'center 72%', added: 40,
+      overview: 'A jazz pianist and an aspiring actress fall in love in Los Angeles while chasing the careers that brought them there, and learn what each dream will cost.',
+      cast: [['Ryan Gosling', 'Sebastian'], ['Emma Stone', 'Mia'], ['John Legend', 'Keith'], ['Rosemarie DeWitt', 'Laura'], ['J.K. Simmons', 'Bill'], ['Damien Chazelle', 'Director'], ['Justin Hurwitz', 'Music'], ['Linus Sandgren', 'Cinematography']] },
+    'blade-runner-2049': { title: 'Blade Runner 2049', year: 2017, runtime: 164, genres: 'Science Fiction, Drama', rating: 7.6, director: 'Denis Villeneuve', released: '6 Oct 2017', quality: ['4K', 'HDR'], audio: 'English · Dolby Atmos', subs: 'English, German +4', biinge: 'Not tracked', progress: 0, pos: 'center 40%', added: 1,
+      overview: 'Thirty years on, a new blade runner digs up a buried secret that sends him looking for Rick Deckard, a former blade runner missing for decades.',
+      cast: [['Ryan Gosling', 'K'], ['Harrison Ford', 'Rick Deckard'], ['Ana de Armas', 'Joi'], ['Sylvia Hoeks', 'Luv'], ['Jared Leto', 'Niander Wallace'], ['Denis Villeneuve', 'Director']] },
+    'dune-part-two': { title: 'Dune: Part Two', year: 2024, runtime: 166, genres: 'Science Fiction, Adventure', rating: 8.1, director: 'Denis Villeneuve', released: '1 Mar 2024', quality: ['4K', 'HDR', 'ATMOS'], audio: 'English · Dolby Atmos', subs: 'English, French +3', biinge: 'Watched', progress: 0, watched: true, pos: 'center 80%', added: 9,
+      overview: 'Paul Atreides joins the Fremen in the fight against House Harkonnen, torn between the woman he loves and a future he has seen in visions.',
+      cast: [['Timothée Chalamet', 'Paul Atreides'], ['Zendaya', 'Chani'], ['Rebecca Ferguson', 'Jessica'], ['Austin Butler', 'Feyd-Rautha'], ['Denis Villeneuve', 'Director']] },
+    'aftersun': { title: 'Aftersun', year: 2022, runtime: 102, genres: 'Drama', rating: 7.7, director: 'Charlotte Wells', released: '21 Oct 2022', quality: ['1080p'], audio: 'English · 5.1', subs: 'English', biinge: 'Watched', progress: 0, watched: true, pos: 'center 80%', added: 3,
+      overview: 'Sophie looks back on a holiday in Turkey she took with her father when she was eleven, piecing together memories and home video of a man she only partly knew.',
+      cast: [['Paul Mescal', 'Calum'], ['Frankie Corio', 'Sophie'], ['Celia Rowlson-Hall', 'Adult Sophie'], ['Charlotte Wells', 'Director']] },
+    'zodiac': { title: 'Zodiac', year: 2007, runtime: 157, genres: 'Crime, Mystery, Thriller', rating: 7.5, director: 'David Fincher', released: '2 Mar 2007', quality: ['1080p'], audio: 'English · 5.1', subs: 'English, French', biinge: 'Want', progress: 0.76, pos: 'center 15%', added: 60,
+      overview: 'A cartoonist, a reporter and two detectives spend years chasing the identity of the killer who taunted San Francisco with letters and ciphers.',
+      cast: [['Jake Gyllenhaal', 'Robert Graysmith'], ['Mark Ruffalo', 'Dave Toschi'], ['Robert Downey Jr.', 'Paul Avery'], ['Anthony Edwards', 'Bill Armstrong'], ['David Fincher', 'Director']] },
+    'nightcrawler': { watched: true, title: 'Nightcrawler', year: 2014, runtime: 117, genres: 'Thriller, Crime', rating: 7.7, director: 'Dan Gilroy', released: '31 Oct 2014', quality: ['1080p'], audio: 'English · 5.1', subs: 'English', biinge: 'Not tracked', progress: 0, pos: 'center 60%', added: 4,
+      overview: 'A driven loner finds his calling filming crime scenes for Los Angeles morning news, and starts shaping the stories he is paid to capture.',
+      cast: [['Jake Gyllenhaal', 'Lou Bloom'], ['Rene Russo', 'Nina Romina'], ['Riz Ahmed', 'Rick'], ['Bill Paxton', 'Joe Loder'], ['Dan Gilroy', 'Director']] },
+    'poor-things': { title: 'Poor Things', year: 2023, runtime: 141, genres: 'Science Fiction, Comedy', rating: 7.7, director: 'Yorgos Lanthimos', released: '8 Dec 2023', quality: ['4K', 'HDR'], audio: 'English · 5.1', subs: 'English, Spanish', biinge: 'Want', progress: 0, pos: 'center 40%', added: 2,
+      overview: 'Brought back to life by an unorthodox scientist, Bella Baxter runs off on a voyage across continents, hungry for the experience she never had.',
+      cast: [['Emma Stone', 'Bella Baxter'], ['Mark Ruffalo', 'Duncan Wedderburn'], ['Willem Dafoe', 'Godwin Baxter'], ['Ramy Youssef', 'Max McCandles'], ['Yorgos Lanthimos', 'Director']] },
+    'darjeeling': { title: 'The Darjeeling Limited', year: 2007, runtime: 91, genres: 'Comedy, Drama', rating: 7.2, director: 'Wes Anderson', released: '26 Oct 2007', quality: ['1080p'], audio: 'English · 5.1', subs: 'English', biinge: 'Watched', progress: 0, watched: true, pos: 'center 85%', added: 6,
+      overview: 'A year after their father\u2019s funeral, three estranged brothers board a train across India on a trip one of them has planned to the minute.',
+      cast: [['Owen Wilson', 'Francis'], ['Adrien Brody', 'Peter'], ['Jason Schwartzman', 'Jack'], ['Anjelica Huston', 'Patricia'], ['Wes Anderson', 'Director']] },
+    'mi-fallout': { title: 'Mission: Impossible \u2013 Fallout', year: 2018, runtime: 147, genres: 'Action, Thriller', rating: 7.4, director: 'Christopher McQuarrie', released: '27 Jul 2018', quality: ['4K', 'HDR'], audio: 'English · Dolby Atmos', subs: 'English, French +2', biinge: 'Not tracked', progress: 0, pos: 'center 30%', added: 21,
+      overview: 'When a mission goes wrong, Ethan Hunt and his team race to recover stolen plutonium before it can be turned against three cities.',
+      cast: [['Tom Cruise', 'Ethan Hunt'], ['Henry Cavill', 'August Walker'], ['Rebecca Ferguson', 'Ilsa Faust'], ['Simon Pegg', 'Benji Dunn'], ['Christopher McQuarrie', 'Director']] },
+    'inside-llewyn-davis': { title: 'Inside Llewyn Davis', year: 2013, runtime: 104, genres: 'Drama, Music', rating: 7.0, director: 'Joel & Ethan Coen', released: '6 Dec 2013', quality: ['1080p'], audio: 'English · 5.1', subs: 'English', biinge: 'Want', progress: 0, pos: 'center 35%', added: 33,
+      overview: 'A week in the life of a folk singer in 1961 Greenwich Village, carrying his guitar and a borrowed cat from one couch to the next.',
+      cast: [['Oscar Isaac', 'Llewyn Davis'], ['Carey Mulligan', 'Jean'], ['John Goodman', 'Roland Turner'], ['Justin Timberlake', 'Jim'], ['Joel Coen', 'Director']] },
+    'terminator-2': { title: 'Terminator 2: Judgment Day', year: 1991, runtime: 137, genres: 'Action, Science Fiction', rating: 8.1, director: 'James Cameron', released: '3 Jul 1991', quality: ['4K', 'HDR'], audio: 'English · 5.1', subs: 'English, Spanish', biinge: 'Watched', progress: 0, watched: true, pos: 'center 40%', added: 120,
+      overview: 'A reprogrammed Terminator is sent back to protect a young John Connor from a more advanced machine sent to kill him.',
+      cast: [['Arnold Schwarzenegger', 'The Terminator'], ['Linda Hamilton', 'Sarah Connor'], ['Edward Furlong', 'John Connor'], ['Robert Patrick', 'T-1000'], ['James Cameron', 'Director']] },
+    'lotr-fellowship': { title: 'The Lord of the Rings: The Fellowship of the Ring', year: 2001, runtime: 179, genres: 'Adventure, Fantasy', rating: 8.4, director: 'Peter Jackson', released: '19 Dec 2001', quality: ['4K', 'HDR', 'ATMOS'], audio: 'English · Dolby Atmos', subs: 'English, Elvish +3', biinge: 'Watched', progress: 0, watched: true, pos: 'center 55%', added: 150, dup: 2,
+      overview: 'A hobbit inherits a ring of terrible power and sets out with eight companions to destroy it before its maker can reclaim it.',
+      cast: [['Elijah Wood', 'Frodo'], ['Ian McKellen', 'Gandalf'], ['Viggo Mortensen', 'Aragorn'], ['Sean Astin', 'Sam'], ['Peter Jackson', 'Director']] },
+    'midnight-in-paris': { title: 'Midnight in Paris', year: 2011, runtime: 94, genres: 'Comedy, Romance, Fantasy', rating: 7.5, director: 'Woody Allen', released: '20 May 2011', quality: ['1080p'], audio: 'English · 5.1', subs: 'English, French', biinge: 'Not tracked', progress: 0, pos: 'center 60%', added: 75,
+      overview: 'On holiday in Paris, a screenwriter finds that at midnight the city carries him back to the 1920s.',
+      cast: [['Owen Wilson', 'Gil'], ['Rachel McAdams', 'Inez'], ['Marion Cotillard', 'Adriana'], ['Kathy Bates', 'Gertrude Stein']] },
+    'perfect-days': { title: 'Perfect Days', year: 2023, runtime: 124, genres: 'Drama', rating: 7.8, director: 'Wim Wenders', released: '21 Dec 2023', quality: ['1080p'], audio: 'Japanese · 5.1', subs: 'English', biinge: 'Want', progress: 0, noArt: true, added: 5,
+      overview: 'A Tokyo toilet cleaner keeps to a quiet routine of work, cassette tapes, paperbacks and photographs of trees.',
+      cast: [['Koji Yakusho', 'Hirayama'], ['Tokio Emoto', 'Takashi'], ['Arisa Nakano', 'Niko'], ['Wim Wenders', 'Director']] },
+    'anatomy-of-a-fall': { title: 'Anatomy of a Fall', year: 2023, runtime: 152, genres: 'Drama, Thriller', rating: 7.6, director: 'Justine Triet', released: '23 Aug 2023', quality: ['1080p'], audio: 'French · 5.1', subs: 'English', biinge: 'Not tracked', progress: 0, noArt: true, added: 12,
+      overview: 'When a man is found dead outside his chalet, his wife, a novelist, becomes the main suspect.',
+      cast: [['Sandra Hüller', 'Sandra'], ['Swann Arlaud', 'Vincent'], ['Milo Machado-Graner', 'Daniel'], ['Justine Triet', 'Director']] },
+    'conclave': { title: 'Conclave', year: 2024, runtime: 120, genres: 'Drama, Thriller', rating: 7.2, director: 'Edward Berger', released: '25 Oct 2024', quality: ['4K', 'HDR'], audio: 'English · 5.1', subs: 'English, Italian', biinge: 'Want', progress: 0, noArt: true, added: 8,
+      overview: 'A cardinal oversees the secret election of a new pope and uncovers secrets that could shake the Church.',
+      cast: [['Ralph Fiennes', 'Cardinal Lawrence'], ['Stanley Tucci', 'Cardinal Bellini'], ['John Lithgow', 'Cardinal Tremblay'], ['Isabella Rossellini', 'Sister Agnes']] },
+  };
+
+  const ep = (n, title, min, desc, extra) => Object.assign({ n, title, min, desc }, extra || {});
+  const shows = {
+    'mr-robot': { title: 'Mr. Robot', year: 2015, seasonsTotal: 4, genres: 'Drama, Crime, Thriller', rating: 8.5, creator: 'Sam Esmail', added: 14, quality: ['1080p'],
+      overview: 'Elliot, a cybersecurity engineer by day and vigilante hacker by night, is recruited by an anarchist who wants to bring down the corporation he is paid to protect.',
+      cast: [['Rami Malek', 'Elliot Alderson'], ['Christian Slater', 'Mr. Robot'], ['Carly Chaikin', 'Darlene'], ['Portia Doubleday', 'Angela Moss'], ['Martin Wallström', 'Tyrell Wellick'], ['Sam Esmail', 'Creator']],
+      seasons: {
+        1: [
+          ep(1, 'eps1.0_hellofriend.mov', 65, 'Elliot spots a breach at E Corp and is approached by a group of hackers who want his help.', { watched: true }),
+          ep(2, 'eps1.1_ones-and-zer0es.mpeg', 50, 'Elliot weighs the offer from fsociety while Tyrell Wellick angles for a promotion.', { watched: true }),
+          ep(3, 'eps1.2_d3bug.mkv', 48, 'Elliot tries to live a normal life, but the bug he planted won\u2019t stay quiet.', { watched: true }),
+          ep(4, 'eps1.3_da3m0ns.mp4', 49, 'Withdrawal sends Elliot into a fever dream as fsociety\u2019s plan moves ahead.', { progress: 0.57 }),
+          ep(5, 'eps1.4_3xpl0its.wmv', 47, 'fsociety needs Elliot to get inside a heavily secured data facility.'),
+          ep(6, 'eps1.5_br4ve-trave1er.asf', 47, 'Elliot is pushed into a dangerous hack to protect someone close to him.'),
+          ep(7, 'eps1.6_v1ew-s0urce.flv', 47, 'The plan nears its deadline and old loyalties start to give.'),
+          ep(8, 'eps1.7_wh1ter0se.m4v', 46, 'fsociety looks for outside help to finish the final stage.'),
+          ep(9, 'eps1.8_m1rr0r1ng.qt', 59, 'Elliot is forced to face what he has been avoiding.'),
+          ep(10, 'eps1.9_zer0-day.avi', 49, 'The aftermath of the hack ripples outward.'),
+        ],
+        2: [
+          ep(1, 'eps2.0_unm4sk-pt1.tc', 48, 'Elliot keeps to a strict routine to stay in control.'),
+          ep(2, 'eps2.0_unm4sk-pt2.tc', 47, 'fsociety\u2019s next move draws unwanted attention.'),
+          ep(3, 'eps2.1_k3rnel-pan1c.ksd', 47, 'An FBI agent joins the investigation.'),
+          ep(4, 'eps2.2_init_1.asec', 46, 'Darlene takes charge as the pressure grows.'),
+          ep(5, 'eps2.3_logic-b0mb.hc', 49, 'Elliot helps an unlikely ally with a dangerous job.'),
+          ep(6, 'eps2.4_m4ster-s1ave.aes', 52, 'A risky operation goes off-script.'),
+          ep(7, 'eps2.5_h4ndshake.sme', 48, 'Elliot finally learns what he has been missing.'),
+          ep(8, 'eps2.6_succ3ss0r.p12', 52, 'fsociety\u2019s members are scattered and on edge.'),
+          ep(9, 'eps2.7_init_5.fve', 55, 'Angela makes a choice about her future.'),
+          ep(10, 'eps2.8_h1dden-pr0cess.axx', 47, 'Old alliances are tested.'),
+          ep(11, 'eps2.9_pyth0n-pt1.p7z', 50, 'Elliot races to understand a plan already in motion.'),
+          ep(12, 'eps2.9_pyth0n-pt2.p7z', 48, 'The season closes with a reckoning.'),
+        ],
+      } },
+    'chernobyl': { title: 'Chernobyl', year: 2019, limited: true, seasonsTotal: 1, genres: 'Drama, History', rating: 8.7, creator: 'Craig Mazin', added: 30, quality: ['4K', 'HDR'],
+      overview: 'The 1986 nuclear disaster and the people who fought to contain it, while officials worked to keep the truth quiet.',
+      cast: [['Jared Harris', 'Valery Legasov'], ['Stellan Skarsgård', 'Boris Shcherbina'], ['Emily Watson', 'Ulana Khomyuk'], ['Craig Mazin', 'Creator']],
+      seasons: { 1: [
+        ep(1, '1:23:45', 60, 'An explosion at the plant, and a night of denial in the control room and the town.', { watched: true }),
+        ep(2, 'Please Remain Calm', 65, 'A physicist warns Moscow that the danger is far worse than reported.', { watched: true }),
+        ep(3, 'Open Wide, O Earth', 65, 'Miners are brought in as the fight to contain the reactor moves underground.', { progress: 0.37 }),
+        ep(4, 'The Happiness of All Mankind', 66, 'Liquidators begin the long clean-up of the exclusion zone.'),
+        ep(5, 'Vichnaya Pamyat', 72, 'A trial asks who is responsible.'),
+      ] } },
+    'band-of-brothers': { title: 'Band of Brothers', year: 2001, limited: true, seasonsTotal: 1, genres: 'War, Drama', rating: 8.6, creator: 'Tom Hanks, Steven Spielberg', added: 7, quality: ['1080p'],
+      overview: 'Easy Company, 506th Parachute Infantry, from training in Georgia to the end of the war in Europe.',
+      cast: [['Damian Lewis', 'Richard Winters'], ['Ron Livingston', 'Lewis Nixon'], ['Donnie Wahlberg', 'Carwood Lipton'], ['Scott Grimes', 'Donald Malarkey']],
+      seasons: { 1: [
+        ep(1, 'Currahee', 73, 'Training under a commander the men can\u2019t stand.', { watched: true }), ep(2, 'Day of Days', 52, 'D-Day, scattered across Normandy.', { watched: true }),
+        ep(3, 'Carentan', 65, 'The fight for a French town.', { watched: true }), ep(4, 'Replacements', 59, 'New men arrive for Operation Market Garden.', { watched: true }),
+        ep(5, 'Crossroads', 55, 'A new role for Winters.', { watched: true }), ep(6, 'Bastogne', 64, 'Winter in the Ardennes, through a medic\u2019s eyes.'),
+        ep(7, 'The Breaking Point', 63, 'The assault on Foy.'), ep(8, 'The Last Patrol', 59, 'A night raid across the river.'),
+        ep(9, 'Why We Fight', 59, 'Germany, and what the company finds there.'), ep(10, 'Points', 71, 'The war ends; the men wait to go home.'),
+      ] } },
+    'breaking-bad': { title: 'Breaking Bad', year: 2008, seasonsTotal: 5, genres: 'Drama, Crime', rating: 8.9, creator: 'Vince Gilligan', added: 90, quality: ['1080p'],
+      overview: 'A high school chemistry teacher with a terminal diagnosis turns to making methamphetamine to secure his family\u2019s future.',
+      cast: [['Bryan Cranston', 'Walter White'], ['Aaron Paul', 'Jesse Pinkman'], ['Anna Gunn', 'Skyler White'], ['Dean Norris', 'Hank Schrader']],
+      seasons: {
+        1: [ep(1, 'Pilot', 58, 'Walter makes a life-changing decision.', { watched: true }), ep(2, 'Cat\u2019s in the Bag...', 48, 'A mess needs cleaning up.', { watched: true }), ep(3, '...And the Bag\u2019s in the River', 48, 'Walter faces a hard choice.', { watched: true }), ep(4, 'Cancer Man', 48, 'Walter tells his family.', { watched: true }), ep(5, 'Gray Matter', 48, 'An old friend offers help.', { watched: true }), ep(6, 'Crazy Handful of Nothin\u2019', 48, 'Walter steps into a new role.', { watched: true }), ep(7, 'A No-Rough-Stuff-Type Deal', 48, 'A bigger deal, bigger risks.', { watched: true })],
+        2: [ep(1, 'Seven Thirty-Seven', 47, 'Walt and Jesse deal with the fallout of a dangerous meeting.'), ep(2, 'Grilled', 47, 'A tense standoff in the desert.'), ep(3, 'Bit by a Dead Bee', 47, 'Two stories that need to match.'), ep(4, 'Down', 47, 'Jesse hits bottom.'), ep(5, 'Breakage', 47, 'Expanding the business.'), ep(6, 'Peekaboo', 47, 'Jesse collects a debt.')],
+      } },
+    'the-bear': { title: 'The Bear', year: 2022, seasonsTotal: 4, genres: 'Comedy, Drama', rating: 8.1, creator: 'Christopher Storer', added: 18, quality: ['4K'], overview: 'A fine-dining chef comes home to Chicago to run his late brother\u2019s sandwich shop.', cast: [['Jeremy Allen White', 'Carmy'], ['Ebon Moss-Bachrach', 'Richie'], ['Ayo Edebiri', 'Sydney']] },
+    'silo': { title: 'Silo', year: 2023, seasonsTotal: 2, genres: 'Science Fiction, Drama', rating: 8.1, creator: 'Graham Yost', added: 2, quality: ['4K', 'HDR'], overview: 'Ten thousand people live in a vast underground silo under rules they are told keep them safe. When the sheriff breaks one, she starts asking what is outside.', cast: [['Rebecca Ferguson', 'Juliette'], ['Common', 'Robert Sims'], ['Tim Robbins', 'Bernard']] },
+    'disclaimer': { title: 'Disclaimer', year: 2024, limited: true, seasonsTotal: 1, genres: 'Drama, Thriller', rating: 7.4, creator: 'Alfonso Cuarón', added: 1, quality: ['4K', 'HDR'], overview: 'A celebrated journalist realises the new novel on her bedside table is about her.', cast: [['Cate Blanchett', 'Catherine'], ['Kevin Kline', 'Stephen'], ['Kodi Smit-McPhee', 'Nicholas']] },
+    'severance': { title: 'Severance', year: 2022, seasonsTotal: 2, genres: 'Science Fiction, Drama', rating: 8.4, creator: 'Dan Erickson', added: 45, noArt: true, quality: ['4K', 'HDR'], overview: 'Office workers have their memories split between work and home.', cast: [['Adam Scott', 'Mark'], ['Britt Lower', 'Helly']] },
+    'shogun': { title: 'Sh\u014Dgun', year: 2024, seasonsTotal: 1, genres: 'Drama, History', rating: 8.6, creator: 'Rachel Kondo, Justin Marks', added: 55, noArt: true, quality: ['4K', 'HDR'], overview: 'An English pilot shipwrecked in feudal Japan is drawn into a lord\u2019s struggle for power.', cast: [['Hiroyuki Sanada', 'Toranaga'], ['Cosmo Jarvis', 'Blackthorne']] },
+  };
+
+  // Biinge catalog titles that are NOT in the Jellyfin library (TMDB metadata, no artwork in these mockups)
+  const cm = (title, year, runtime, genres, rating, director, released, overview, cast) => ({ kind: 'movie', title, year, runtime, genres, rating, director, released, overview, cast, noArt: true });
+  const cs = (title, year, seasonsTotal, genres, rating, creator, overview, cast, limited) => ({ kind: 'show', title, year, seasonsTotal, genres, rating, creator, overview, cast, limited: !!limited, noArt: true });
+  const tmdbArt = ["arrival","sicario","prisoners","drive","the-favourite","slow-horses","the-curse"];
+  const catalog = {
+    'drive': cm('Drive', 2011, 100, 'Crime, Drama', 7.6, 'Nicolas Winding Refn', '16 Sep 2011', 'A Hollywood stunt driver who moonlights as a getaway driver finds himself in trouble when he helps his neighbour.', [['Ryan Gosling', 'Driver'], ['Carey Mulligan', 'Irene'], ['Bryan Cranston', 'Shannon'], ['Albert Brooks', 'Bernie Rose'], ['Nicolas Winding Refn', 'Director']]),
+    'the-nice-guys': cm('The Nice Guys', 2016, 116, 'Comedy, Crime', 7.1, 'Shane Black', '20 May 2016', 'In 1970s Los Angeles, a hired enforcer and a hapless private eye team up to find a missing girl.', [['Ryan Gosling', 'Holland March'], ['Russell Crowe', 'Jackson Healy'], ['Angourie Rice', 'Holly March'], ['Shane Black', 'Director']]),
+    'first-man': cm('First Man', 2018, 141, 'Drama, History', 6.9, 'Damien Chazelle', '12 Oct 2018', 'Neil Armstrong and the years of NASA missions that led to the first walk on the Moon.', [['Ryan Gosling', 'Neil Armstrong'], ['Claire Foy', 'Janet Armstrong'], ['Jason Clarke', 'Ed White'], ['Damien Chazelle', 'Director']]),
+    'the-fall-guy': cm('The Fall Guy', 2024, 126, 'Action, Comedy', 7.0, 'David Leitch', '3 May 2024', 'A stuntman back on set is sent to find the missing star of his ex’s first film.', [['Ryan Gosling', 'Colt Seavers'], ['Emily Blunt', 'Jody Moreno'], ['Aaron Taylor-Johnson', 'Tom Ryder'], ['David Leitch', 'Director']]),
+    'birdman': cm('Birdman', 2014, 119, 'Comedy, Drama', 7.5, 'Alejandro G. Iñárritu', '17 Oct 2014', 'A washed-up actor famous for a superhero role tries to mount a Broadway play.', [['Michael Keaton', 'Riggan'], ['Emma Stone', 'Sam'], ['Edward Norton', 'Mike'], ['Naomi Watts', 'Lesley']]),
+    'the-favourite': cm('The Favourite', 2018, 120, 'Drama, History, Comedy', 7.1, 'Yorgos Lanthimos', '23 Nov 2018', 'Two cousins compete for the favour of Queen Anne in early 18th-century England.', [['Olivia Colman', 'Queen Anne'], ['Emma Stone', 'Abigail'], ['Rachel Weisz', 'Sarah Churchill'], ['Yorgos Lanthimos', 'Director']]),
+    'kinds-of-kindness': cm('Kinds of Kindness', 2024, 165, 'Comedy, Drama', 6.6, 'Yorgos Lanthimos', '21 Jun 2024', 'Three stories about control, devotion and a man trying to take back his life.', [['Emma Stone', 'Rita / Liz / Emily'], ['Jesse Plemons', 'Robert / Daniel / Andrew'], ['Willem Dafoe', 'Raymond / George / Omi']]),
+    'doctor-sleep': cm('Doctor Sleep', 2019, 152, 'Horror, Fantasy', 7.1, 'Mike Flanagan', '8 Nov 2019', 'Decades after the Overlook, Dan Torrance protects a girl with the same gift from a cult that feeds on it.', [['Ewan McGregor', 'Dan Torrance'], ['Rebecca Ferguson', 'Rose the Hat'], ['Kyliegh Curran', 'Abra Stone'], ['Mike Flanagan', 'Director']]),
+    'dune-2021': cm('Dune', 2021, 155, 'Science Fiction, Adventure', 7.8, 'Denis Villeneuve', '22 Oct 2021', 'Paul Atreides travels with his family to Arrakis, the most dangerous planet in the universe.', [['Timothée Chalamet', 'Paul Atreides'], ['Rebecca Ferguson', 'Jessica'], ['Oscar Isaac', 'Leto Atreides'], ['Denis Villeneuve', 'Director']]),
+    'arrival': cm('Arrival', 2016, 116, 'Science Fiction, Drama', 7.6, 'Denis Villeneuve', '11 Nov 2016', 'A linguist is recruited to talk with the visitors inside twelve ships that land across the world.', [['Amy Adams', 'Louise Banks'], ['Jeremy Renner', 'Ian Donnelly'], ['Forest Whitaker', 'Colonel Weber'], ['Denis Villeneuve', 'Director']]),
+    'sicario': cm('Sicario', 2015, 121, 'Crime, Thriller', 7.4, 'Denis Villeneuve', '2 Oct 2015', 'An FBI agent joins a government task force on the US–Mexico border.', [['Emily Blunt', 'Kate Macer'], ['Benicio del Toro', 'Alejandro'], ['Josh Brolin', 'Matt Graver'], ['Denis Villeneuve', 'Director']]),
+    'prisoners': cm('Prisoners', 2013, 153, 'Crime, Thriller, Drama', 8.1, 'Denis Villeneuve', '20 Sep 2013', 'When his daughter goes missing, a father takes matters into his own hands while a detective follows the case.', [['Hugh Jackman', 'Keller Dover'], ['Jake Gyllenhaal', 'Detective Loki'], ['Viola Davis', 'Nancy Birch'], ['Denis Villeneuve', 'Director']]),
+    'enemy': cm('Enemy', 2013, 91, 'Mystery, Thriller', 6.9, 'Denis Villeneuve', '14 Mar 2014', 'A history teacher spots his exact double in a film and sets out to find him.', [['Jake Gyllenhaal', 'Adam / Anthony'], ['Mélanie Laurent', 'Mary'], ['Sarah Gadon', 'Helen'], ['Denis Villeneuve', 'Director']]),
+    'donnie-darko': cm('Donnie Darko', 2001, 113, 'Drama, Mystery, Science Fiction', 7.8, 'Richard Kelly', '26 Oct 2001', 'A troubled teenager survives a freak accident and is visited by a figure who says the world will end.', [['Jake Gyllenhaal', 'Donnie Darko'], ['Jena Malone', 'Gretchen Ross'], ['Maggie Gyllenhaal', 'Elizabeth Darko'], ['Richard Kelly', 'Director']]),
+    'mi-rogue-nation': cm('Mission: Impossible – Rogue Nation', 2015, 131, 'Action, Thriller', 7.2, 'Christopher McQuarrie', '31 Jul 2015', 'With the IMF disbanded, Ethan Hunt hunts a network of rogue agents on his own.', [['Tom Cruise', 'Ethan Hunt'], ['Rebecca Ferguson', 'Ilsa Faust'], ['Simon Pegg', 'Benji Dunn'], ['Christopher McQuarrie', 'Director']]),
+    'slow-horses': cs('Slow Horses', 2022, 5, 'Drama, Thriller', 8.0, 'Will Smith', 'Disgraced MI5 agents are sent to Slough House, where careers go to die, and keep stumbling into real cases.', [['Gary Oldman', 'Jackson Lamb'], ['Jack Lowden', 'River Cartwright'], ['Kristin Scott Thomas', 'Diana Taverner']]),
+    'the-curse': cs('The Curse', 2023, 1, 'Comedy, Drama', 6.5, 'Nathan Fielder, Benny Safdie', 'A newly married couple film a home-renovation show while a curse may be working against them.', [['Emma Stone', 'Whitney Siegel'], ['Nathan Fielder', 'Asher Siegel'], ['Benny Safdie', 'Dougie Schecter']], true),
+    'maniac': cs('Maniac', 2018, 1, 'Drama, Comedy, Science Fiction', 7.6, 'Patrick Somerville', 'Two strangers sign up for a pharmaceutical trial that promises to fix them for good.', [['Emma Stone', 'Annie Landsberg'], ['Jonah Hill', 'Owen Milgrim'], ['Justin Theroux', 'Dr. James Mantleray']], true),
+    'the-penguin': cs('The Penguin', 2024, 1, 'Crime, Drama', 8.5, 'Lauren LeFranc', 'After the flood, Oz Cobb makes his move for Gotham’s underworld.', [['Colin Farrell', 'Oz Cobb'], ['Cristin Milioti', 'Sofia Falcone'], ['Rhenzy Feliz', 'Victor Aguilar']], true),
+    'the-white-queen': cs('The White Queen', 2013, 1, 'Drama, History', 7.6, 'Emma Frost', 'Three women fight for the English throne during the Wars of the Roses.', [['Rebecca Ferguson', 'Elizabeth Woodville'], ['Max Irons', 'Edward IV'], ['Amanda Hale', 'Margaret Beaufort']], true),
+    'true-detective': cs('True Detective', 2014, 4, 'Crime, Drama, Mystery', 8.2, 'Nic Pizzolatto', 'Police investigations unearth the secrets of the people and places involved, one season at a time.', [['Matthew McConaughey', 'Rust Cohle'], ['Woody Harrelson', 'Marty Hart'], ['Mahershala Ali', 'Wayne Hays']]),
+  };
+
+  // People: bio + filmography (ids point at library movies/shows or catalog titles)
+  tmdbArt.forEach(id => { if (catalog[id]) catalog[id].noArt = false; });
+  const people = {
+    'Ryan Gosling': { dept: 'Acting', born: 'Born 12 Nov 1980 · London, Ontario', bio: 'Canadian actor who started on television as a child before leading films such as Half Nelson, Drive and La La Land.', credits: [['la-la-land', 'Sebastian'], ['blade-runner-2049', 'K'], ['the-fall-guy', 'Colt Seavers'], ['first-man', 'Neil Armstrong'], ['the-nice-guys', 'Holland March'], ['drive', 'Driver']] },
+    'Emma Stone': { dept: 'Acting', born: 'Born 6 Nov 1988 · Scottsdale, Arizona', bio: 'American actor known for comedies and dramas alike, with frequent work alongside Yorgos Lanthimos.', credits: [['poor-things', 'Bella Baxter'], ['la-la-land', 'Mia'], ['kinds-of-kindness', 'Rita / Liz / Emily'], ['the-curse', 'Whitney Siegel'], ['the-favourite', 'Abigail'], ['maniac', 'Annie Landsberg'], ['birdman', 'Sam']] },
+    'Rebecca Ferguson': { dept: 'Acting', born: 'Born 19 Oct 1983 · Stockholm, Sweden', bio: 'Swedish actor who broke through in The White Queen and went on to the Mission: Impossible and Dune films.', credits: [['dune-part-two', 'Jessica'], ['silo', 'Juliette'], ['dune-2021', 'Jessica'], ['doctor-sleep', 'Rose the Hat'], ['mi-fallout', 'Ilsa Faust'], ['mi-rogue-nation', 'Ilsa Faust'], ['the-white-queen', 'Elizabeth Woodville']] },
+    'Denis Villeneuve': { dept: 'Directing', born: 'Born 3 Oct 1967 · Bécancour, Quebec', bio: 'Québécois director of tense dramas and large-scale science fiction.', credits: [['dune-part-two', 'Director'], ['dune-2021', 'Director'], ['blade-runner-2049', 'Director'], ['arrival', 'Director'], ['sicario', 'Director'], ['prisoners', 'Director'], ['enemy', 'Director']] },
+    'Jake Gyllenhaal': { dept: 'Acting', born: 'Born 19 Dec 1980 · Los Angeles, California', bio: 'American actor whose work runs from Donnie Darko and Zodiac to Nightcrawler.', credits: [['nightcrawler', 'Lou Bloom'], ['prisoners', 'Detective Loki'], ['enemy', 'Adam / Anthony'], ['zodiac', 'Robert Graysmith'], ['donnie-darko', 'Donnie Darko']] },
+  };
+
+  // Biinge lists (newest first). pin = pinned, pie = episode progress for Watching shows
+  const lists = {
+    want: { movies: [['la-la-land', { pin: true }], ['arrival'], ['poor-things'], ['zodiac'], ['prisoners'], ['inside-llewyn-davis'], ['perfect-days'], ['the-favourite'], ['conclave']], shows: [['slow-horses', { pin: true }], ['severance'], ['the-curse'], ['shogun']] },
+    watching: { movies: [], shows: [['mr-robot', { pin: true, pie: 30 }], ['chernobyl', { pie: 40 }], ['band-of-brothers', { pin: true, pie: 50 }], ['the-penguin', { pie: 25 }], ['silo', { pie: 50 }], ['breaking-bad', { pie: 15 }], ['the-bear', { pie: 55 }]] },
+    watched: { movies: [['dune-part-two'], ['aftersun'], ['sicario'], ['darjeeling'], ['drive'], ['terminator-2'], ['birdman'], ['lotr-fellowship']], shows: [['true-detective'], ['maniac'], ['the-white-queen']] },
+  };
+
+  window.BIINGE = {
+    movies, shows, catalog, people, lists, server: 'Living Room',
+    // any title: library movie/show or catalog title
+    title: id => movies[id] ? Object.assign({ kind: 'movie', inLib: true }, movies[id]) : shows[id] ? Object.assign({ kind: 'show', inLib: true }, shows[id]) : catalog[id] ? Object.assign({ inLib: false }, catalog[id]) : null,
+    listOf: id => { for (const l of ['want', 'watching', 'watched']) for (const k of ['movies', 'shows']) { const e = lists[l][k].find(x => x[0] === id); if (e) return { list: l, pin: !!(e[1] && e[1].pin), pie: e[1] && e[1].pie }; } return null; },
+    featured: [
+      { movie: 'blade-runner-2049', eyebrow: 'Recently added' },
+      { show: 'silo', eyebrow: 'New episodes', cta: 'Play S2 · E3', meta: '2023  ·  2 Seasons  ·  Science Fiction, Drama' },
+      { movie: 'poor-things', eyebrow: 'Recently added' },
+    ],
+    continueWatching: [
+      { show: 'mr-robot', season: 1, ep: 4, sub: 'S1 · E4 · eps1.3_da3m0ns.mp4', left: 21, pct: 57, pos: 'center 32%' },
+      { movie: 'la-la-land', left: 72, pct: 44 },
+      { show: 'the-bear', sub: 'S3 · E2 · Next', left: 14, pct: 58, pos: 'center 30%' },
+      { movie: 'zodiac', left: 38, pct: 76 },
+      { show: 'chernobyl', season: 1, ep: 3, sub: 'E3 · Open Wide, O Earth', left: 41, pct: 37, pos: 'center 78%' },
+    ],
+    nextUp: [
+      { show: 'breaking-bad', code: 'S2 · E1', title: 'Seven Thirty-Seven', dur: '47 min', pos: 'center 30%' },
+      { show: 'silo', code: 'S2 · E3', title: 'Solo', dur: '52 min', pos: 'center 40%' },
+      { show: 'band-of-brothers', code: 'E6', title: 'Bastogne', dur: '1h 4m', pos: 'center 25%' },
+      { show: 'disclaimer', code: 'E4', title: 'IV', dur: '49 min', pos: 'center 30%' },
+    ],
+    collections: [
+      { id: 'neo-noir', name: 'Neo-Noir', desc: 'Night streets, bad decisions and men who should have stayed home.', items: ['nightcrawler', 'zodiac', 'blade-runner-2049', 'terminator-2'] },
+      { id: 'limited', name: 'Limited Series', desc: 'One season, beginning to end.', items: ['band-of-brothers', 'chernobyl', 'disclaimer'] },
+      { id: 'favorites', name: 'Personal Favorites', desc: '', items: ['aftersun', 'la-la-land', 'the-bear', 'inside-llewyn-davis', 'lotr-fellowship', 'darjeeling'] },
+      { id: 'villeneuve', name: 'Denis Villeneuve', desc: '', items: ['dune-part-two', 'blade-runner-2049'] },
+      { id: 'music', name: 'Music on Screen', desc: '', items: ['inside-llewyn-davis', 'la-la-land'] },
+      { id: 'awards', name: 'Award Winners', desc: '', items: ['poor-things', 'la-la-land', 'chernobyl', 'anatomy-of-a-fall'] },
+    ],
+    poster: id => `assets/posters/${id}.jpg`,
+    fmtRun: m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`,
+    fmtLeft: m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m left` : `${m} min left`,
+    initials: n => n.split(' ').filter(w => /^[A-Z\u00C0-\u017F]/.test(w)).map(w => w[0]).slice(0, 2).join(''),
+  };
+})();

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}
+</style>
+<script src="biinge-theme.js"></script>
+<style>@keyframes bspin{to{transform:rotate(360deg)}}</style>
+</helmet>
+<div data-media="" data-theme="{{ theme }}" data-screen-label="{{ label }}" onMouseMove="{{ onMove }}" onMouseEnter="{{ onEnter }}" onMouseLeave="{{ onLeave }}" style="width:{{ w }};height:{{ h }};border-radius:{{ radius }}px;position:relative;overflow:hidden;background:#000;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;cursor:{{ cursor }};box-shadow:{{ shadow }};">
+
+  <div onClick="{{ onVideoClick }}" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;transform-origin:0 0;transform:{{ videoTransform }};border-radius:{{ videoRadius }}px;transition:transform .5s cubic-bezier(.2,.7,.2,1),border-radius .5s;box-shadow:{{ videoShadow }};">
+    <sc-if value="{{ showVideo }}" hint-placeholder-val="{{ true }}">
+    <img src="{{ media.poster }}" alt="" style="position:absolute;left:-80px;top:-80px;width:calc(100% + 160px);height:calc(100% + 160px);object-fit:cover;filter:blur(36px) saturate(1.25) brightness(.62);">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 30%,rgba(0,0,0,.55) 100%);"></div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ cueVisible }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Subtitle" style="position:absolute;left:0;right:0;bottom:{{ cue.bottom }}px;display:flex;justify-content:center;pointer-events:none;transition:bottom .3s cubic-bezier(.2,.7,.2,1);z-index:2;">
+    <div style="max-width:70%;text-align:center;font-size:{{ cue.size }}px;line-height:1.25;font-weight:{{ cue.weight }};padding:{{ cue.pad }};border-radius:8px;background:{{ cue.bg }};text-shadow:{{ cue.shadow }};color:#fff;transition:font-size .2s,background .2s,padding .2s;">{{ cue.text }}</div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ chromeVisible }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;left:0;right:0;top:0;height:140px;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0));pointer-events:none;"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:260px;background:linear-gradient(0deg,rgba(0,0,0,.6),rgba(0,0,0,0));pointer-events:none;"></div>
+  </sc-if>
+
+  <sc-if value="{{ topVisible }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;top:18px;left:20px;right:20px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <sc-if value="{{ windowed }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:8px;padding-left:4px;"><div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div><div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div><div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div></div></sc-if>
+      <div onClick="{{ exit }}" title="Back (esc)" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.45);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),inset 0 1px 0 rgba(255,255,255,.18);cursor:default;" style-hover="background:rgba(60,60,68,.55)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;">chevron_left</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.45);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),inset 0 1px 0 rgba(255,255,255,.18);cursor:default;" style-hover="background:rgba(60,60,68,.55)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;">airplay</span></div>
+      <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.45);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),inset 0 1px 0 rgba(255,255,255,.18);cursor:default;" style-hover="background:rgba(60,60,68,.55)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;">picture_in_picture_alt</span></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ controlsVisible }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="M17 Controls" onClick="{{ stop }}" style="position:absolute;left:50%;bottom:28px;transform:translateX(-50%);width:{{ barW }}px;padding:18px 22px 14px;border-radius:30px;background:rgba(30,30,36,.42);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),inset 0 1px 0 rgba(255,255,255,.2),0 20px 60px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:0 4px;">
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+        <div style="font-size:14px;font-weight:600;color:rgba(244,244,242,.65);">{{ media.title }}</div>
+        <div style="font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ media.sub }}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex:none;">
+        <sc-for list="{{ badges }}" as="b" hint-placeholder-count="2"><span style="font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:5px;box-shadow:inset 0 0 0 1.5px rgba(244,244,242,.4);color:rgba(244,244,242,.8);">{{ b }}</span></sc-for>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;padding:0 4px;">
+      <span style="font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;width:56px;">{{ timeNow }}</span>
+      <div ref="{{ trackRef }}" onMouseMove="{{ onTrackMove }}" onMouseLeave="{{ onTrackLeave }}" onClick="{{ onSeek }}" style="position:relative;flex:1;height:22px;display:flex;align-items:center;cursor:default;">
+        <div style="position:relative;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,.2);">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:{{ buffered }}%;border-radius:3px;background:rgba(255,255,255,.3);"></div>
+          <div style="position:absolute;left:0;top:0;bottom:0;width:{{ played }}%;border-radius:3px;background:#f4f4f2;"></div>
+          <div style="position:absolute;top:50%;left:{{ played }}%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4);"></div>
+        </div>
+        <sc-if value="{{ hovering }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;bottom:34px;left:{{ hoverPct }}%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;">
+          <div style="width:192px;height:108px;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1.5px rgba(255,255,255,.6),0 10px 30px rgba(0,0,0,.5);"><img src="{{ media.poster }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% {{ hoverPct }}%;transform:scale(1.4);"></div>
+          <span style="font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,.6);">{{ hoverTime }}</span>
+        </div>
+        </sc-if>
+      </div>
+      <span style="font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;width:60px;text-align:right;color:rgba(244,244,242,.75);">{{ timeLeft }}</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div onClick="{{ prevEp }}" title="Previous episode" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:{{ prevColor }};cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1;">skip_previous</span></div>
+        <div onClick="{{ back10 }}" title="Back 10 seconds (←)" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:27px;line-height:1;">replay_10</span></div>
+        <div onClick="{{ togglePlay }}" title="Play/Pause (space)" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;font-variation-settings:'FILL' 1;">{{ playIcon }}</span></div>
+        <div onClick="{{ fwd10 }}" title="Forward 10 seconds (→)" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:27px;line-height:1;">forward_10</span></div>
+        <div onClick="{{ nextEp }}" title="Next episode (⇧N)" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:{{ nextColor }};cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1;">skip_next</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:0 10px 0 6px;">
+          <span onClick="{{ toggleMute }}" style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1;cursor:default;">{{ volIcon }}</span>
+          <div ref="{{ volRef }}" onClick="{{ onVol }}" style="width:96px;height:20px;display:flex;align-items:center;cursor:default;"><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:{{ vol }}%;height:100%;background:#f4f4f2;"></div></div></div>
+        </div>
+        <div onClick="{{ toggleTracks }}" title="Audio &amp; Subtitles" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ tracksBg }};cursor:default;" style-hover="background:rgba(255,255,255,.12)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ subsFill }};">subtitles</span></div>
+        <div onClick="{{ toggleSpeed }}" title="Playback speed" style="height:42px;min-width:48px;padding:0 8px;border-radius:21px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;background:{{ speedBg }};cursor:default;" style-hover="background:rgba(255,255,255,.12)">{{ speed }}×</div>
+        <div onClick="{{ toggleFull }}" title="Full Screen (F)" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;">{{ fullIcon }}</span></div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="{{ panelLabel }}" data-theme="{{ theme }}" onClick="{{ stop }}" style="position:absolute;right:{{ tracksRight }}px;bottom:222px;width:620px;height:{{ panelCssH }};display:flex;flex-direction:column;border-radius:22px;overflow:hidden;background:rgba(34,34,40,.62);backdrop-filter:blur(36px) saturate(1.8);-webkit-backdrop-filter:blur(36px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),inset 0 1px 0 rgba(255,255,255,.2),0 24px 70px rgba(0,0,0,.5);z-index:3;">
+
+    <sc-if value="{{ isTracks }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);">
+      <div style="display:flex;flex-direction:column;min-height:0;padding:10px 6px 8px 10px;">
+        <div style="display:flex;align-items:center;gap:7px;padding:6px 10px 8px;font-size:13px;font-weight:600;color:rgba(244,244,242,.55);"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;">graphic_eq</span>Audio</div>
+        <div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:1px;">
+          <sc-for list="{{ audioRows }}" as="r" hint-placeholder-count="4">
+          <div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:{{ r.bg }};cursor:default;" style-hover="background:rgba(255,255,255,.08)">
+            <span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;width:18px;flex:none;opacity:{{ r.check }};font-variation-settings:'wght' 600;">check</span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;">
+              <div style="display:flex;align-items:center;gap:7px;"><span style="font-size:15px;font-weight:500;">{{ r.label }}</span><sc-if value="{{ r.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.1);color:rgba(244,244,242,.75);">{{ r.tag }}</span></sc-if></div>
+              <span style="font-size:12.5px;color:rgba(244,244,242,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.detail }}</span>
+            </div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;min-height:0;padding:10px 10px 8px 6px;box-shadow:inset 1px 0 0 rgba(255,255,255,.08);">
+        <div style="display:flex;align-items:center;gap:7px;padding:6px 10px 8px;font-size:13px;font-weight:600;color:rgba(244,244,242,.55);"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;">subtitles</span>Subtitles</div>
+        <div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:1px;">
+          <sc-for list="{{ subRows }}" as="r" hint-placeholder-count="6">
+          <sc-if value="{{ r.isHead }}" hint-placeholder-val="{{ false }}"><div style="padding:9px 10px 3px 38px;font-size:12px;font-weight:600;color:rgba(244,244,242,.42);">{{ r.label }}</div></sc-if>
+          <sc-if value="{{ r.isRow }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:{{ r.bg }};opacity:{{ r.opacity }};cursor:default;" style-hover="background:rgba(255,255,255,.08)">
+            <span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;width:18px;flex:none;opacity:{{ r.check }};font-variation-settings:'wght' 600;">check</span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;">
+              <span style="font-size:15px;font-weight:500;">{{ r.label }}</span>
+              <sc-if value="{{ r.hasDetail }}" hint-placeholder-val="{{ true }}"><span style="font-size:12.5px;color:{{ r.detailColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.detail }}</span></sc-if>
+            </div>
+          </div>
+          </sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 12px 10px 20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);">
+      <sc-if value="{{ isEpisode }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ toggleRemember }}" style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:rgba(244,244,242,.75);cursor:default;">
+        <div style="position:relative;width:32px;height:19px;border-radius:999px;background:{{ rememberTrack }};transition:background .2s;"><div style="position:absolute;top:2px;left:{{ rememberKnob }}px;width:15px;height:15px;border-radius:50%;background:{{ rememberKnobBg }};box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .2s,background .2s;"></div></div>
+        Use for every episode of {{ media.title }}
+      </div>
+      </sc-if>
+      <sc-if value="{{ isMovie }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:rgba(244,244,242,.5);">Defaults follow your Jellyfin language settings.</div></sc-if>
+      <div onClick="{{ openStyle }}" style="flex:none;display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 14px;border-radius:10px;font-size:14px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.08)">Subtitle Style<span style="font-weight:400;color:rgba(244,244,242,.5);">{{ styleSummary }}</span><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:rgba(244,244,242,.6);">chevron_right</span></div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isStyle }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px 8px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.08);">
+      <div onClick="{{ closeStyle }}" style="display:flex;align-items:center;gap:2px;height:32px;padding:0 10px 0 4px;border-radius:9px;font-size:15px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.08)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">chevron_left</span>Subtitle Style</div>
+      <div onClick="{{ resetStyle }}" style="height:30px;padding:0 12px;display:flex;align-items:center;border-radius:8px;font-size:13.5px;font-weight:500;color:{{ resetColor }};cursor:default;" style-hover="background:rgba(255,255,255,.08)">Reset</div>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:4px 20px 6px;">
+      <sc-for list="{{ styleRows }}" as="row" hint-placeholder-count="3">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:52px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.07);">
+        <span style="font-size:14.5px;">{{ row.label }}</span>
+        <div style="display:flex;padding:2px;border-radius:9px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+            <sc-for list="{{ row.options }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.go }}" style="min-width:68px;height:28px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:13.5px;font-weight:500;background:{{ o.bg }};color:{{ o.color }};box-shadow:{{ o.shadow }};cursor:default;" style-hover="color:#fff">{{ o.label }}</div></sc-for>
+          </div>
+      </div>
+      </sc-for>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:52px;box-shadow:inset 0 -1px 0 rgba(255,255,255,.07);">
+        <span style="font-size:14.5px;">Position</span>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12.5px;color:rgba(244,244,242,.5);">
+          <span>Lower</span>
+          <div style="position:relative;width:200px;height:24px;display:flex;align-items:center;">
+            <div style="position:absolute;left:0;right:0;height:4px;border-radius:2px;background:rgba(255,255,255,.18);"></div>
+            <div style="position:absolute;left:0;width:{{ posPct }}%;height:4px;border-radius:2px;background:#f4f4f2;"></div>
+            <div style="position:absolute;left:{{ posPct }}%;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:left .15s;"></div>
+            <div style="position:absolute;inset:0;display:flex;"><sc-for list="{{ posSteps }}" as="p" hint-placeholder-count="5"><div onClick="{{ p.go }}" style="flex:1;cursor:default;"></div></sc-for></div>
+          </div>
+          <span>Higher</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:56px;">
+        <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:14.5px;">Timing</span><span style="font-size:12px;color:rgba(244,244,242,.45);">For subtitles that run early or late</span></div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div onClick="{{ delayLess }}" title="Show subtitles earlier" style="width:32px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);cursor:default;" style-hover="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">remove</span></div>
+          <div style="min-width:104px;text-align:center;font-size:13.5px;font-weight:500;font-variant-numeric:tabular-nums;">{{ delayText }}</div>
+          <div onClick="{{ delayMore }}" title="Show subtitles later" style="width:32px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);cursor:default;" style-hover="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">add</span></div>
+        </div>
+      </div>
+    </div>
+    <sc-if value="{{ styleOffNote }}" hint-placeholder-val="{{ false }}"><div style="flex:none;padding:0 20px 14px;font-size:12.5px;color:rgba(244,244,242,.5);">Subtitles are off. The sample line shows your style.</div></sc-if>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ speedOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="M19 Playback Speed" data-theme="{{ theme }}" onClick="{{ stop }}" style="position:absolute;right:{{ speedRight }}px;bottom:222px;width:190px;padding:6px;border-radius:18px;display:flex;flex-direction:column;gap:1px;background:rgba(34,34,40,.62);backdrop-filter:blur(36px) saturate(1.8);-webkit-backdrop-filter:blur(36px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),inset 0 1px 0 rgba(255,255,255,.2),0 24px 70px rgba(0,0,0,.5);z-index:3;">
+    <div style="padding:6px 10px 6px;font-size:13px;font-weight:600;color:rgba(244,244,242,.55);">Speed</div>
+    <sc-for list="{{ speedRows }}" as="r" hint-placeholder-count="6">
+    <div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;font-size:15px;font-variant-numeric:tabular-nums;cursor:default;" style-hover="background:rgba(255,255,255,.08)">
+      <span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;width:18px;opacity:{{ r.check }};font-variation-settings:'wght' 600;">check</span><span style="flex:1;">{{ r.label }}</span><span style="font-size:12.5px;color:rgba(244,244,242,.45);">{{ r.note }}</span>
+    </div>
+    </sc-for>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ skipIntro }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ doSkipIntro }}" style="position:absolute;right:48px;bottom:{{ skipBottom }}px;display:flex;align-items:center;gap:8px;height:48px;padding:0 22px 0 18px;border-radius:999px;background:rgba(36,36,42,.45);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.22),0 10px 30px rgba(0,0,0,.35);font-size:16px;font-weight:600;cursor:default;" style-hover="background:rgba(244,244,242,.92);color:#101014"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' 1;">fast_forward</span>Skip Intro</div>
+  </sc-if>
+
+  <sc-if value="{{ nextOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="M20 Next Episode" style="position:absolute;inset:0;">
+    <div style="position:absolute;left:56px;top:{{ miniBottom }}px;font-size:14px;font-weight:500;color:rgba(244,244,242,.6);">{{ media.sub }}  ·  Credits</div>
+    <div style="position:absolute;right:{{ nextRight }}px;top:50%;transform:translateY(-50%);width:{{ nextW }}px;display:flex;flex-direction:column;gap:16px;">
+      <div style="font-size:15px;font-weight:600;color:rgba(244,244,242,.7);">Up Next in {{ media.title }}</div>
+      <div onClick="{{ playNext }}" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 30px 70px rgba(0,0,0,.6);cursor:default;">
+        <img src="{{ next.poster }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 70%;transform:scale(1.35);">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;">
+          <div style="position:relative;width:84px;height:84px;display:flex;align-items:center;justify-content:center;">
+            <sc-if value="{{ counting }}" hint-placeholder-val="{{ true }}">
+            <svg width="84" height="84" viewBox="0 0 84 84" style="position:absolute;inset:0;transform:rotate(-90deg);"><circle cx="42" cy="42" r="38" fill="rgba(0,0,0,.35)" stroke="rgba(255,255,255,.25)" stroke-width="4"></circle><circle cx="42" cy="42" r="38" fill="none" stroke="#f4f4f2" stroke-width="4" stroke-linecap="round" stroke-dasharray="238.8" stroke-dashoffset="{{ ringOffset }}" style="transition:stroke-dashoffset 1s linear;"></circle></svg>
+            </sc-if>
+            <span style="position:relative;font-family:'Material Symbols Rounded';font-size:44px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font-size:14.5px;font-weight:600;color:rgba(244,244,242,.6);">{{ next.code }}  ·  {{ next.dur }}</div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:34px;line-height:1.08;letter-spacing:-.03em;">{{ next.title }}</div>
+        <div style="font-size:16.5px;line-height:1.5;color:rgba(244,244,242,.75);">{{ next.desc }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div onClick="{{ playNext }}" style="display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1;">play_arrow</span>{{ nextCta }}</div>
+        <sc-if value="{{ counting }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ cancelAuto }}" style="display:flex;align-items:center;height:48px;padding:0 24px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.2)">Cancel</div>
+        </sc-if>
+        <sc-if value="{{ notCounting }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ exit }}" style="display:flex;align-items:center;height:48px;padding:0 24px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.2)">Back to Episodes</div>
+        </sc-if>
+      </div>
+      <div style="font-size:13.5px;color:rgba(244,244,242,.5);">{{ autoNote }}</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ errorOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="M25 Playback Error" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 45%,#17171d 0%,#000 75%);">
+    <div style="max-width:560px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;">
+      <div style="width:68px;height:68px;border-radius:50%;background:rgba(229,72,77,.14);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;color:#e5484d;">error</span></div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:34px;line-height:1.1;letter-spacing:-.03em;">This episode can’t be played</div>
+      <div style="font-size:17px;line-height:1.55;color:rgba(244,244,242,.75);text-wrap:pretty;">The file uses a video format this Mac can’t play directly, and transcoding is turned off on your Jellyfin server. Ask the server owner to enable transcoding, or try another version of this episode.</div>
+      <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;color:rgba(244,244,242,.45);padding:6px 12px;border-radius:8px;background:rgba(255,255,255,.05);">HEVC Main 10 · 3840×2160 · DTS-HD MA · Direct Play unsupported</div>
+      <div style="display:flex;gap:12px;margin-top:10px;">
+        <div onClick="{{ retry }}" style="display:flex;align-items:center;gap:7px;height:48px;padding:0 24px 0 20px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">refresh</span>Try Again</div>
+        <div onClick="{{ exit }}" style="display:flex;align-items:center;height:48px;padding:0 24px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.2)">Back to Episode</div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ bufferingOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:none;">
+    <div style="width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.2);border-top-color:#f4f4f2;animation:bspin 0.9s linear infinite;"></div>
+    <span style="font-size:15px;color:rgba(244,244,242,.75);">{{ bufferText }}</span>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;windowed&quot;,&quot;fullscreen&quot;],&quot;default&quot;:&quot;windowed&quot;,&quot;tsType&quot;:&quot;'windowed'|'fullscreen'&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;controls&quot;,&quot;hidden&quot;,&quot;loading&quot;,&quot;reloading&quot;,&quot;tracks&quot;,&quot;next&quot;,&quot;error&quot;,&quot;style&quot;,&quot;speed&quot;],&quot;default&quot;:&quot;controls&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;freeze&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;autoHide&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;fill&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;media&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;onExit&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;subStyle&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{size?:number,weight?:number,bg?:number,pos?:number,delay?:number}&quot;}}">
+const DEFAULT_MEDIA = {
+  kind: 'episode', title: 'Mr. Robot', sub: 'S1 · E4  ·  eps1.3_da3m0ns.mp4', poster: 'assets/posters/mr-robot.jpg', runtime: 49, startPct: 0.5,
+  next: { code: 'S1 · E5', title: 'eps1.4_3xpl0its.wmv', desc: 'fsociety needs Elliot to get inside a heavily secured data facility.', dur: '47 min', poster: 'assets/posters/mr-robot.jpg', runtime: 47, sub: 'S1 · E5  ·  eps1.4_3xpl0its.wmv' },
+};
+const fmt = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? `${h}:${String(m).padStart(2, '0')}` : `${m}`) + `:${String(x).padStart(2, '0')}`; };
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const AUDIO = [
+  { lang: 'English', tag: 'Original', detail: 'Dolby Digital 5.1' },
+  { lang: 'Russian', detail: 'LostFilm · DTS 5.1' },
+  { lang: 'Russian', detail: 'Кубик в Кубе · DTS 5.1' },
+  { lang: 'English', detail: 'Commentary · Stereo' },
+];
+// subtitles: grouped by language; kind = what the track holds, in plain words
+const SUBS = [
+  { id: 'off', label: 'Off' },
+  { head: 'English' },
+  { id: 'en', label: 'Full', detail: 'Every line', text: 'Elliot? Are you there?' },
+  { id: 'en-sdh', label: 'Full with sound cues', detail: 'For the deaf and hard of hearing', text: '[phone buzzing] Elliot? Are you there?' },
+  { head: 'Russian' },
+  { id: 'ru-forced', label: 'Foreign lines only', detail: 'Signs and other languages', text: 'ВХОДЯЩИЙ ВЫЗОВ' },
+  { id: 'ru', label: 'Full', detail: 'Every line', text: 'Эллиот? Ты здесь?' },
+  { head: 'Spanish' },
+  { id: 'es', label: 'Full', detail: 'Couldn’t load from the server', bad: true },
+];
+const STYLE0 = { size: 1, weight: 0, bg: 1, pos: 0, delay: 0 };
+
+class Component extends DCLogic {
+  trackRef = React.createRef();
+  volRef = React.createRef();
+  state = { ui: null, t: null, playing: true, media: null, audio: 0, sub: 'en', remember: true, style: null, vol: 70, muted: false, speed: 2, hover: null, count: 10, auto: true, full: null, introSkipped: false };
+
+  media() { return this.state.media || this.props.media || DEFAULT_MEDIA; }
+  ui() { return this.state.ui ?? this.props.state ?? 'controls'; }
+  dur() { return this.media().runtime * 60; }
+  t() {
+    if (this.state.t != null) return this.state.t;
+    const u = this.ui();
+    if (u === 'hidden') return 48;
+    if (u === 'next') return this.dur() - 24;
+    if (u === 'error') return 0;
+    return Math.round(this.dur() * (this.media().startPct || 0)) + 11;
+  }
+  componentDidMount() {
+    this.tick = setInterval(() => {
+      if (this.props.freeze && this.state.ui == null && this.state.t == null) return;
+      const u = this.ui();
+      if (u === 'next') {
+        if (this.state.auto && this.media().next) {
+          const c = this.state.count - 1;
+          if (c <= 0) this.playNext(); else this.setState({ count: c });
+        }
+        return;
+      }
+      if (!this.state.playing || u === 'error' || u === 'loading' || u === 'reloading') return;
+      const t = this.t() + SPEEDS[this.state.speed];
+      if (this.media().next && t >= this.dur() - 25) this.setState({ t, ui: 'next', count: 10 });
+      else this.setState({ t: Math.min(t, this.dur()) });
+    }, 1000);
+    this.onKey = e => {
+      if (!this.hovered) return;
+      if (e.key === ' ') { e.preventDefault(); this.togglePlay(); }
+      else if (e.key === 'ArrowLeft') this.seekBy(-10);
+      else if (e.key === 'ArrowRight') this.seekBy(10);
+      else if (e.key === 'Escape') { const u = this.ui(); if (u === 'style') this.setState({ ui: 'tracks' }); else if (u === 'tracks' || u === 'speed') this.setState({ ui: 'controls' }); else this.exit(); }
+      else if (e.key === 'f' || e.key === 'F') this.setState(s => ({ full: !this.isFull() }));
+      this.poke();
+    };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { clearInterval(this.tick); clearTimeout(this.hideT); window.removeEventListener('keydown', this.onKey); }
+
+  isFull() { return this.state.full ?? (this.props.mode === 'fullscreen'); }
+  poke = () => {
+    if (!this.props.autoHide) return;
+    if (this.ui() === 'hidden') this.setState({ ui: 'controls' });
+    clearTimeout(this.hideT);
+    this.hideT = setTimeout(() => { if (this.ui() === 'controls' && this.state.playing) this.setState({ ui: 'hidden' }); }, 3000);
+  };
+  seekBy = d => this.setState({ t: Math.max(0, Math.min(this.dur() - 1, this.t() + d)) });
+  togglePlay = () => this.setState(s => ({ playing: !s.playing }));
+  exit = () => { if (this.props.onExit) this.props.onExit(); else this.setState({ ui: 'controls', t: null, media: null, count: 10, auto: true }); };
+  playNext = () => {
+    const n = this.media().next;
+    if (!n) return;
+    this.setState({ media: { kind: 'episode', title: this.media().title, sub: n.sub, poster: n.poster, runtime: n.runtime, startPct: 0, next: null }, t: 0, ui: 'controls', playing: true, count: 10, auto: true });
+  };
+  pctFromEvent(e, ref) { const r = ref.current.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); }
+
+  renderVals() {
+    const media = this.media(), ui = this.ui(), dur = this.dur(), t = this.t();
+    const fill = !!this.props.fill, full = this.isFull();
+    const W = fill ? null : (full ? 1512 : 1440), H = fill ? null : (full ? 982 : 900);
+    const barW = Math.min(1120, (W || 1440) - 120);
+    const isNext = ui === 'next', isErr = ui === 'error', hidden = ui === 'hidden';
+    const popup = ['tracks', 'style', 'speed'].includes(ui);
+    const controls = ui === 'controls' || popup || ui === 'reloading';
+    const st = { ...STYLE0, ...(this.state.style || {}), ...(this.state.style ? {} : (this.props.subStyle || {})) };
+    const setStyle = (k, v) => this.setState({ style: { ...st, [k]: v } });
+    const sub = SUBS.find(x => x.id === this.state.sub) || SUBS[0];
+    const panelH = ui === 'style' ? (this.state.sub === 'off' ? 360 : 328) : 470, panelTop = 222 + panelH, inPanel = ui === 'tracks' || ui === 'style';
+    const baseBottom = (ui === 'tracks' || ui === 'style') ? panelTop + 28 : controls ? 232 : 64;
+    const cueText = sub.text || (ui === 'style' ? 'Elliot? Are you there?' : '');
+    const sizes = [24, 30, 38], fsK = full ? 1.05 : 1;
+    const cue = { text: cueText, bottom: baseBottom + st.pos * (inPanel ? 10 : 22), size: Math.round(sizes[st.size] * fsK), weight: st.weight ? 600 : 400,
+      bg: st.bg === 2 ? 'rgba(0,0,0,.62)' : 'transparent', pad: st.bg === 2 ? '4px 14px 6px' : '0',
+      shadow: st.bg === 0 ? '0 1px 2px rgba(0,0,0,.6)' : st.bg === 1 ? '0 0 6px rgba(0,0,0,.9),0 2px 3px rgba(0,0,0,.9)' : 'none' };
+    const seg = (k, labels) => labels.map((label, i) => ({ label, go: () => setStyle(k, i), bg: st[k] === i ? 'rgba(255,255,255,.2)' : 'transparent', color: st[k] === i ? '#fff' : 'rgba(244,244,242,.7)', shadow: st[k] === i ? '0 1px 3px rgba(0,0,0,.25)' : 'none' }));
+    const sizeL = ['Small', 'Medium', 'Large'], weightL = ['Regular', 'Bold'], bgL = ['None', 'Shadow', 'Box'];
+    const isDefaultStyle = Object.keys(STYLE0).every(k => st[k] === STYLE0[k]);
+    const next = media.next || {};
+    const vw = W || 1440;
+    return {
+      label: (full ? 'M18 Player · Fullscreen' : 'M17 Player · Windowed') + ({ loading: ' · starting', reloading: ' · audio switch reloading', hidden: ' · controls hidden', tracks: ' · Audio & Subtitles', style: ' · Subtitle Style', speed: ' · Speed', next: ' · Next episode', error: ' · Playback error' }[ui] || ''),
+      w: W ? `${W}px` : '100%', h: H ? `${H}px` : '100%', radius: full ? 0 : 24,
+      shadow: fill || full ? 'none' : '0 0 0 1px rgba(255,255,255,.12),0 50px 120px rgba(0,0,0,.55)',
+      cursor: hidden ? 'none' : 'default', windowed: !full, media, next,
+      onEnter: () => { this.hovered = true; }, onLeave: () => { this.hovered = false; },
+      onMove: this.poke, stop: e => e.stopPropagation(),
+      onVideoClick: () => { if (popup) this.setState({ ui: 'controls' }); else if (!isNext && !isErr) this.togglePlay(); },
+      showVideo: !isErr && ui !== 'loading',
+      videoTransform: isNext ? `translate(56px, ${Math.round((H || 900) * 0.3)}px) scale(.4)` : 'none',
+      videoRadius: isNext ? 36 : 0, videoShadow: isNext ? '0 0 0 2px rgba(255,255,255,.14),0 30px 80px rgba(0,0,0,.6)' : 'none',
+      miniBottom: Math.round((H || 900) * 0.3 + (H || 900) * 0.4 + 18),
+      nextRight: Math.round(vw * 0.06), nextW: Math.min(560, Math.round(vw * 0.4)),
+      chromeVisible: controls, topVisible: controls || isNext || isErr, controlsVisible: controls,
+      tracksRight: Math.round((vw - barW) / 2) + 40, tracksBg: ui === 'tracks' || ui === 'style' ? 'rgba(255,255,255,.18)' : 'transparent', subsFill: this.state.sub !== 'off' ? 1 : 0,
+      panelOpen: ui === 'tracks' || ui === 'style', isTracks: ui === 'tracks', isStyle: ui === 'style', panelH, panelCssH: ui === 'style' ? 'auto' : `${panelH}px`,
+      panelLabel: ui === 'style' ? 'M19 Subtitle Style' : 'M19 Audio & Subtitles',
+      cueVisible: !!cueText && !isNext && !isErr, cue,
+      isEpisode: media.kind === 'episode', isMovie: media.kind !== 'episode',
+      toggleRemember: () => this.setState(s => ({ remember: !s.remember })), rememberTrack: this.state.remember ? '#f4f4f2' : 'rgba(255,255,255,.2)', rememberKnobBg: this.state.remember ? '#101014' : '#f4f4f2', rememberKnob: this.state.remember ? 15 : 2,
+      styleSummary: `${sizeL[st.size]} · ${bgL[st.bg]}`, openStyle: () => this.setState({ ui: 'style' }), closeStyle: () => this.setState({ ui: 'tracks' }),
+      resetStyle: () => this.setState({ style: { ...STYLE0 } }), resetColor: isDefaultStyle ? 'rgba(244,244,242,.35)' : '#f4f4f2',
+      styleRows: [{ label: 'Size', options: seg('size', sizeL) }, { label: 'Weight', options: seg('weight', weightL) }, { label: 'Background', options: seg('bg', bgL) }],
+      posPct: st.pos * 25, posSteps: [0, 1, 2, 3, 4].map(i => ({ go: () => setStyle('pos', i) })),
+      delayText: st.delay === 0 ? 'In sync' : `${Math.abs(st.delay).toFixed(1)} s ${st.delay < 0 ? 'earlier' : 'later'}`,
+      delayLess: () => setStyle('delay', Math.max(-5, +(st.delay - 0.5).toFixed(1))), delayMore: () => setStyle('delay', Math.min(5, +(st.delay + 0.5).toFixed(1))),
+      styleOffNote: ui === 'style' && this.state.sub === 'off',
+      speedOpen: ui === 'speed', speedRight: Math.round((vw - barW) / 2) + 22 + 48, speedBg: ui === 'speed' ? 'rgba(255,255,255,.18)' : 'transparent',
+      toggleSpeed: () => this.setState({ ui: ui === 'speed' ? 'controls' : 'speed' }),
+      speedRows: SPEEDS.map((v, i) => ({ label: `${v}×`, note: v === 1 ? 'Normal' : '', check: this.state.speed === i ? 1 : 0, go: () => this.setState({ speed: i, ui: 'controls' }) })),
+      nextOpen: isNext, errorOpen: isErr, bufferingOpen: ui === 'reloading' || ui === 'loading', bufferText: ui === 'loading' ? 'Living Room is preparing the stream…' : 'Switching to Russian · LostFilm…',
+      skipIntro: false, skipBottom: controls ? 236 : 48,
+      doSkipIntro: e => { e.stopPropagation(); this.setState({ t: 92, introSkipped: true }); },
+      badges: media.kind === 'movie' ? ['4K', 'HDR', 'ATMOS'] : ['1080p', '5.1'],
+      barW, timeNow: fmt(t), timeLeft: `-${fmt(dur - t)}`, played: (t / dur * 100).toFixed(2), buffered: Math.min(100, t / dur * 100 + 14).toFixed(2),
+      trackRef: this.trackRef, volRef: this.volRef,
+      hovering: this.state.hover != null, hoverPct: ((this.state.hover || 0) * 100).toFixed(2), hoverTime: fmt((this.state.hover || 0) * dur),
+      onTrackMove: e => this.setState({ hover: this.pctFromEvent(e, this.trackRef) }), onTrackLeave: () => this.setState({ hover: null }),
+      onSeek: e => this.setState({ t: this.pctFromEvent(e, this.trackRef) * dur }),
+      playIcon: this.state.playing ? 'pause' : 'play_arrow', togglePlay: this.togglePlay,
+      back10: () => this.seekBy(-10), fwd10: () => this.seekBy(10),
+      prevColor: media.kind === 'episode' ? '#f4f4f2' : 'rgba(244,244,242,.3)', nextColor: media.next ? '#f4f4f2' : 'rgba(244,244,242,.3)',
+      prevEp: () => this.setState({ t: 0 }), nextEp: () => media.next && this.playNext(),
+      vol: this.state.muted ? 0 : this.state.vol, volIcon: this.state.muted || !this.state.vol ? 'volume_off' : 'volume_up',
+      toggleMute: () => this.setState(s => ({ muted: !s.muted })), onVol: e => this.setState({ vol: Math.round(this.pctFromEvent(e, this.volRef) * 100), muted: false }),
+      toggleTracks: () => this.setState({ ui: ui === 'tracks' || ui === 'style' ? 'controls' : 'tracks' }), speed: SPEEDS[this.state.speed],
+      toggleFull: () => this.setState({ full: !full }), fullIcon: full ? 'fullscreen_exit' : 'fullscreen',
+      audioRows: AUDIO.map((a, i) => ({ label: a.lang, detail: a.detail, hasTag: !!a.tag, tag: a.tag || '', check: this.state.audio === i ? 1 : 0, bg: this.state.audio === i ? 'rgba(255,255,255,.06)' : 'transparent', go: () => this.setState({ audio: i }) })),
+      subRows: SUBS.map(x => x.head ? { isHead: true, isRow: false, label: x.head, detail: '', hasDetail: false, detailColor: '', opacity: 1, check: 0, bg: 'transparent', go: null }
+        : { isHead: false, isRow: true, label: x.label, detail: x.detail || '', hasDetail: !!x.detail, detailColor: x.bad ? '#ff8a8d' : 'rgba(244,244,242,.5)', opacity: x.bad ? 0.6 : 1,
+            check: this.state.sub === x.id ? 1 : 0, bg: this.state.sub === x.id ? 'rgba(255,255,255,.06)' : 'transparent', go: () => !x.bad && this.setState({ sub: x.id }) }),
+      counting: isNext && this.state.auto, notCounting: isNext && !this.state.auto,
+      ringOffset: (238.8 * (1 - this.state.count / 10)).toFixed(1),
+      nextCta: this.state.auto ? `Play Now` : 'Play Next Episode',
+      autoNote: this.state.auto ? `Playing automatically in ${this.state.count}s` : 'Autoplay canceled for this episode. Change the default in Settings › Playback.',
+      cancelAuto: () => this.setState({ auto: false }), playNext: this.playNext, exit: this.exit,
+      retry: () => this.setState({ ui: 'controls', t: 0 }),
+    };
+  }
+}
+</script>
+</body>
+</html>

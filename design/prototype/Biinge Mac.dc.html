@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<script src="biinge-data.js"></script>
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+a{color:#f4f4f2;text-decoration:none}a:hover{color:#fff}
+</style>
+<script src="biinge-theme.js"></script>
+</helmet>
+<div ref="{{ rootRef }}" onMouseEnter="{{ onEnter }}" onMouseLeave="{{ onLeave }}" onClick="{{ closeMenus }}" data-screen-label="macOS window" data-theme="{{ theme }}" style="width:1440px;height:900px;position:relative;overflow:hidden;border-radius:24px;background:#101014;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 50px 120px rgba(0,0,0,.55);">
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+
+<div ref="{{ scroller }}" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="M05 Home">
+  <div style="position:relative;height:620px;overflow:hidden;">
+    <img src="{{ hero.poster }}" alt="" style="position:absolute;left:-120px;top:-120px;width:calc(100% + 240px);height:calc(100% + 240px);object-fit:cover;filter:blur(70px) saturate(1.5) brightness(.6);">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,16,20,.72) 0%,rgba(16,16,20,.15) 65%,rgba(16,16,20,.35) 100%);"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,16,20,0) 45%,#101014 100%);"></div>
+    <div style="position:absolute;top:112px;right:56px;left:{{ pad }}px;display:flex;align-items:flex-end;justify-content:space-between;gap:56px;">
+      <div style="max-width:600px;display:flex;flex-direction:column;gap:20px;padding-bottom:8px;">
+        <div style="font-size:15px;font-weight:600;color:rgba(244,244,242,.75);">{{ hero.eyebrow }}</div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:80px;line-height:1;letter-spacing:-.035em;text-wrap:balance;">{{ hero.title }}</div>
+        <div style="display:flex;align-items:center;gap:16px;font-size:16px;color:rgba(244,244,242,.8);">
+          <span>{{ hero.meta }}</span>
+          <span style="display:flex;align-items:center;gap:5px;color:#f4f4f2;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1,'wght' 400;">star</span>{{ hero.rating }}</span>
+        </div>
+        <div style="font-size:18px;line-height:1.5;color:rgba(244,244,242,.82);text-wrap:pretty;">{{ hero.overview }}</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+          <div onClick="{{ hero.play }}" style="display:flex;align-items:center;gap:6px;height:48px;padding:0 26px 0 20px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;transition:transform .12s,background .15s;" style-hover="background:#ffffff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>{{ hero.cta }}</div>
+          <div onClick="{{ hero.open }}" style="display:flex;align-items:center;gap:7px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:rgba(255,255,255,.14);color:#f4f4f2;font-size:17px;font-weight:600;cursor:default;transition:transform .12s,background .15s;" style-hover="background:rgba(255,255,255,.2)" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">info</span>More Info</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;flex:none;">
+        <img onClick="{{ hero.open }}" src="{{ hero.poster }}" alt="" style="width:256px;height:384px;object-fit:cover;border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 30px 70px rgba(0,0,0,.55);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div onClick="{{ heroPrev }}" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(244,244,242,.7);cursor:default;" style-hover="background:rgba(255,255,255,.1);color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">chevron_left</span></div>
+          <div style="display:flex;gap:6px;">
+            <sc-for list="{{ heroDots }}" as="d" hint-placeholder-count="3"><div onClick="{{ d.go }}" style="width:{{ d.w }}px;height:6px;border-radius:3px;background:{{ d.bg }};transition:all .25s;cursor:default;"></div></sc-for>
+          </div>
+          <div onClick="{{ heroNext }}" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(244,244,242,.7);cursor:default;" style-hover="background:rgba(255,255,255,.1);color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">chevron_right</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:relative;margin-top:-28px;padding:0 0 80px {{ pad }}px;display:flex;flex-direction:column;gap:48px;">
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding-right:40px;">
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Continue Watching</div>
+        <div onClick="{{ goContinue }}" style="font-size:15px;font-weight:500;color:#91919a;cursor:default;" style-hover="color:#f4f4f2">See All</div>
+      </div>
+      <div style="display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;padding-right:40px;">
+        <sc-for list="{{ continueWatching }}" as="item" hint-placeholder-count="4">
+        <div onClick="{{ item.open }}" onDoubleClick="{{ item.play }}" style="flex:none;width:300px;display:flex;flex-direction:column;gap:12px;cursor:default;">
+          <div style="position:relative;width:300px;height:169px;border-radius:12px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);">
+            <img src="{{ item.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ item.pos }};">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.75) 100%);"></div>
+            <div style="position:absolute;left:14px;bottom:22px;font-size:14px;font-weight:600;color:#fff;">{{ item.left }}</div>
+            <div style="position:absolute;left:14px;right:14px;bottom:11px;height:4px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden;"><div style="width:{{ item.pct }}%;height:100%;border-radius:2px;background:#f4f4f2;"></div></div>
+            <div onClick="{{ item.play }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;background:rgba(0,0,0,.28);transition:opacity .18s;" style-hover="opacity:1"><div style="width:56px;height:56px;border-radius:50%;background:#f4f4f2;color:#101014;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.4);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div style="font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.title }}</div>
+            <div style="font-size:14px;color:#91919a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.sub }}</div>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;padding-right:40px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Next Up</div>
+        <div style="font-size:15px;font-weight:500;color:#91919a;cursor:default;" style-hover="color:#f4f4f2">See All</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 24px;margin:0 -10px;">
+        <sc-for list="{{ nextUp }}" as="ep" hint-placeholder-count="4">
+        <div onClick="{{ ep.open }}" style="display:flex;align-items:center;gap:18px;padding:10px;border-radius:14px;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.05)">
+          <div style="position:relative;flex:none;width:192px;height:108px;border-radius:10px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);">
+            <img src="{{ ep.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ ep.pos }};">
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:14px;font-weight:600;color:#91919a;">{{ ep.showTitle }}</div>
+            <div style="font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ep.title }}</div>
+            <div style="font-size:14px;color:#64646d;">{{ ep.code }} · {{ ep.dur }}</div>
+          </div>
+          <div onClick="{{ ep.play }}" style="flex:none;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;" style-hover="background:#f4f4f2;color:#101014"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span></div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding-right:40px;">
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Recently Added</div>
+        <div onClick="{{ goRecent }}" style="font-size:15px;font-weight:500;color:#91919a;cursor:default;" style-hover="color:#f4f4f2">See All</div>
+      </div>
+      <div style="display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;padding-right:40px;">
+        <sc-for list="{{ recent }}" as="p" hint-placeholder-count="7">
+        <div onClick="{{ p.open }}" onDoubleClick="{{ p.play }}" onContextMenu="{{ p.ctx }}" style="flex:none;width:164px;display:flex;flex-direction:column;gap:10px;cursor:default;">
+          <div style="position:relative;width:164px;height:246px;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);transition:transform .2s;" style-hover="transform:translateY(-3px)">
+            <sc-if value="{{ p.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></sc-if>
+            <sc-if value="{{ p.noArt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;text-align:center;font-size:15px;line-height:1.3;color:#6e6969;">{{ p.title }}</div></sc-if>
+            <sc-if value="{{ p.watched }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:7px;left:7px;width:24px;height:24px;border-radius:5px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'wght' 700;">check</span></div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.title }}</div>
+            <div style="font-size:13.5px;color:#91919a;">{{ p.sub }}</div>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;padding-right:40px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Collections</div>
+        <div onClick="{{ goCollections }}" style="font-size:15px;font-weight:500;color:#91919a;cursor:default;" style-hover="color:#f4f4f2">See All</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;">
+        <sc-for list="{{ homeCollections }}" as="c" hint-placeholder-count="3">
+        <div onClick="{{ c.open }}" style="position:relative;height:196px;border-radius:16px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);cursor:default;transition:box-shadow .2s;" style-hover="box-shadow:0 0 0 1px rgba(255,255,255,.2)">
+          <img src="{{ c.p2 }}" alt="" style="position:absolute;left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(40px) saturate(1.4) brightness(.5);">
+          <div style="position:absolute;right:26px;top:26px;width:184px;height:146px;">
+            <img src="{{ c.p1 }}" alt="" style="position:absolute;left:4px;top:14px;width:86px;height:129px;object-fit:cover;border-radius:8px;transform:rotate(-9deg);box-shadow:0 10px 24px rgba(0,0,0,.5);">
+            <img src="{{ c.p3 }}" alt="" style="position:absolute;left:94px;top:14px;width:86px;height:129px;object-fit:cover;border-radius:8px;transform:rotate(9deg);box-shadow:0 10px 24px rgba(0,0,0,.5);">
+            <img src="{{ c.p2 }}" alt="" style="position:absolute;left:47px;top:2px;width:90px;height:135px;object-fit:cover;border-radius:8px;box-shadow:0 14px 30px rgba(0,0,0,.6);">
+          </div>
+          <div style="position:absolute;left:24px;bottom:22px;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:24px;letter-spacing:-.02em;">{{ c.name }}</div>
+            <div style="font-size:14px;color:rgba(244,244,242,.72);">{{ c.count }}</div>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLibrary }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="{{ lib.label }}" style="padding:96px 40px 80px {{ pad }}px;display:flex;flex-direction:column;gap:26px;">
+  <sc-if value="{{ lib.isCollection }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:flex-end;gap:36px;padding-bottom:6px;">
+    <div style="position:relative;flex:none;width:228px;height:176px;">
+      <img src="{{ lib.c1 }}" alt="" style="position:absolute;left:0;top:20px;width:100px;height:150px;object-fit:cover;border-radius:9px;transform:rotate(-9deg);box-shadow:0 12px 28px rgba(0,0,0,.5);">
+      <img src="{{ lib.c3 }}" alt="" style="position:absolute;left:124px;top:20px;width:100px;height:150px;object-fit:cover;border-radius:9px;transform:rotate(9deg);box-shadow:0 12px 28px rgba(0,0,0,.5);">
+      <img src="{{ lib.c2 }}" alt="" style="position:absolute;left:60px;top:4px;width:106px;height:159px;object-fit:cover;border-radius:9px;box-shadow:0 16px 34px rgba(0,0,0,.6);">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+      <div style="font-size:15px;font-weight:600;color:rgba(244,244,242,.72);">Collection</div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:56px;line-height:1.02;letter-spacing:-.035em;">{{ lib.title }}</div>
+      <div style="font-size:17px;line-height:1.5;color:rgba(244,244,242,.78);max-width:640px;">{{ lib.desc }}</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+        <div onClick="{{ lib.playAll }}" style="display:flex;align-items:center;gap:6px;height:44px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>Play</div>
+        
+        <span style="font-size:15px;color:#91919a;margin-left:6px;">{{ lib.count }}</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ lib.plainHeader }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:baseline;gap:14px;">
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;">{{ lib.title }}</div>
+    <div style="font-size:16px;color:#91919a;">{{ lib.count }}</div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ lib.banner }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="{{ lib.bannerLabel }}" style="display:flex;align-items:center;gap:14px;padding:12px 12px 12px 16px;border-radius:14px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);">
+    <span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:{{ lib.bannerColor }};">{{ lib.bannerIcon }}</span>
+    <div style="flex:1;font-size:15px;line-height:1.45;color:rgba(244,244,242,.85);">{{ lib.bannerText }}</div>
+    <div onClick="{{ lib.bannerAction }}" style="height:34px;padding:0 16px;display:flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.12);font-size:14px;font-weight:600;cursor:default;white-space:nowrap;" style-hover="background:rgba(255,255,255,.18)">{{ lib.bannerCta }}</div>
+  </div>
+  </sc-if>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <sc-if value="{{ lib.showFilters }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+        <sc-for list="{{ lib.filters }}" as="f" hint-placeholder-count="4"><div onClick="{{ f.go }}" style="height:32px;padding:0 15px;display:flex;align-items:center;border-radius:999px;font-size:14px;font-weight:500;background:{{ f.bg }};color:{{ f.color }};cursor:default;" style-hover="color:#fff">{{ f.label }}</div></sc-for>
+      </div>
+      <sc-for list="{{ lib.menus }}" as="mn" hint-placeholder-count="3"><div style="height:38px;padding:0 12px 0 15px;display:flex;align-items:center;gap:4px;border-radius:999px;font-size:14px;font-weight:500;color:rgba(244,244,242,.85);background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);cursor:default;" style-hover="background:rgba(255,255,255,.1)">{{ mn }}<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#91919a;">expand_more</span></div></sc-for>
+      </sc-if>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="position:relative;">
+        <div onClick="{{ toggleSort }}" style="height:38px;padding:0 12px 0 13px;display:flex;align-items:center;gap:7px;border-radius:999px;font-size:14px;font-weight:500;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#91919a;">swap_vert</span>{{ lib.sortLabel }}<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#91919a;">expand_more</span></div>
+        <sc-if value="{{ sortOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;right:0;top:46px;z-index:20;width:230px;padding:6px;border-radius:14px;background:rgba(40,40,46,.72);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.5);">
+          <div style="font-size:12px;font-weight:600;color:rgba(244,244,242,.45);padding:6px 10px 4px;">Sort by</div>
+          <sc-for list="{{ lib.sorts }}" as="s" hint-placeholder-count="5"><div onClick="{{ s.go }}" style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:8px;font-size:14px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;width:18px;opacity:{{ s.check }};font-variation-settings:'wght' 600;">check</span>{{ s.label }}</div></sc-for>
+        </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ lib.showViewToggle }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+        <div onClick="{{ setGrid }}" style="width:38px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ lib.gridBg }};cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">grid_view</span></div>
+        <div onClick="{{ setList }}" style="width:38px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ lib.listBg }};cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">view_list</span></div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ lib.grid }}" hint-placeholder-val="{{ true }}">
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:30px 22px;">
+    <sc-for list="{{ lib.items }}" as="p" hint-placeholder-count="12">
+    <div onClick="{{ p.open }}" onDoubleClick="{{ p.play }}" onContextMenu="{{ p.ctx }}" style="display:flex;flex-direction:column;gap:10px;cursor:default;min-width:0;">
+      <div style="position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);transition:transform .2s,box-shadow .2s;" style-hover="transform:translateY(-3px);box-shadow:0 0 0 1px rgba(255,255,255,.2),0 16px 34px rgba(0,0,0,.45)">
+        <sc-if value="{{ p.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;filter:{{ p.imgFilter }};"></sc-if>
+        <sc-if value="{{ p.noArt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;text-align:center;font-size:15px;line-height:1.3;color:#6e6969;">{{ p.title }}</div></sc-if>
+        <sc-if value="{{ p.watched }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:7px;left:7px;width:24px;height:24px;border-radius:5px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'wght' 700;">check</span></div></sc-if>
+        <sc-if value="{{ p.hasPie }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:8px;left:8px;width:22px;height:22px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,.4);background:{{ p.pie }};"></div></sc-if>
+        <sc-if value="{{ p.pinned }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div></sc-if>
+        <sc-if value="{{ p.isNew }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:8px;right:8px;padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.6);font-size:11px;font-weight:700;letter-spacing:.04em;color:#eec01e;">NEW</div></sc-if>
+        <sc-if value="{{ p.offServer }}" hint-placeholder-val="{{ false }}"><div title="Not on Living Room" style="position:absolute;left:8px;bottom:8px;height:24px;padding:0 8px 0 6px;border-radius:999px;background:rgba(0,0,0,.62);display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.88);"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;">hide_source</span>Not on server</div></sc-if><sc-if value="{{ p.hasProgress }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:8px;right:8px;bottom:8px;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;"><div style="width:{{ p.pct }}%;height:100%;background:#f4f4f2;"></div></div></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+        <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.title }}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13.5px;color:#91919a;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.sub }}</span><span style="display:flex;align-items:center;gap:3px;flex:none;"><span style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>{{ p.rating }}</span></div>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ lib.list }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;">
+    <div style="display:grid;grid-template-columns:60px minmax(0,1fr) 90px 110px 80px 40px;gap:20px;align-items:center;padding:0 12px 10px;font-size:12.5px;font-weight:600;color:#64646d;box-shadow:inset 0 -1px 0 #26262d;">
+      <span></span><span>Title</span><span>Year</span><span>{{ lib.lenLabel }}</span><span>Rating</span><span></span>
+    </div>
+    <sc-for list="{{ lib.items }}" as="p" hint-placeholder-count="8">
+    <div onClick="{{ p.open }}" onDoubleClick="{{ p.play }}" onContextMenu="{{ p.ctx }}" style="display:grid;grid-template-columns:60px minmax(0,1fr) 90px 110px 80px 40px;gap:20px;align-items:center;padding:10px 12px;border-radius:10px;cursor:default;box-shadow:inset 0 -1px 0 rgba(38,38,45,.7);" style-hover="background:rgba(255,255,255,.05)">
+      <div style="position:relative;width:52px;height:78px;border-radius:6px;overflow:hidden;background:#282828;">
+        <sc-if value="{{ p.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+        <div style="font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.title }}</div>
+        <div style="font-size:14px;color:#91919a;">{{ p.genres }}</div>
+      </div>
+      <span style="font-size:14.5px;color:#c9c9c6;">{{ p.year }}</span>
+      <span style="font-size:14.5px;color:#c9c9c6;">{{ p.len }}</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:14.5px;color:#c9c9c6;"><span style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>{{ p.rating }}</span>
+      <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:{{ p.checkColor }};font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+    </sc-for>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ lib.empty }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="{{ lib.emptyLabel }}" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:80px 0;text-align:center;">
+    <span style="font-family:'Material Symbols Rounded';font-size:44px;line-height:1;color:#64646d;">{{ lib.emptyIcon }}</span>
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:24px;letter-spacing:-.02em;">{{ lib.emptyTitle }}</div>
+    <div style="font-size:16px;color:#91919a;max-width:420px;line-height:1.5;">{{ lib.emptyText }}</div>
+    <div onClick="{{ lib.emptyAction }}" style="margin-top:8px;height:40px;padding:0 20px;display:flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.14);font-size:15px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.2)">{{ lib.emptyCta }}</div>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCollections }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="M14 Collections" style="padding:96px 40px 80px {{ pad }}px;display:flex;flex-direction:column;gap:26px;">
+  <div style="display:flex;align-items:baseline;gap:14px;">
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;">Collections</div>
+    <div style="font-size:16px;color:#91919a;">{{ collectionsCount }}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:22px;">
+    <sc-for list="{{ allCollections }}" as="c" hint-placeholder-count="6">
+    <div onClick="{{ c.open }}" style="position:relative;height:210px;border-radius:16px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);cursor:default;transition:box-shadow .2s;" style-hover="box-shadow:0 0 0 1px rgba(255,255,255,.2)">
+      <img src="{{ c.p2 }}" alt="" style="position:absolute;left:-60px;top:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(40px) saturate(1.4) brightness(.5);">
+      <div style="position:absolute;right:26px;top:30px;width:184px;height:146px;">
+        <img src="{{ c.p1 }}" alt="" style="position:absolute;left:4px;top:14px;width:86px;height:129px;object-fit:cover;border-radius:8px;transform:rotate(-9deg);box-shadow:0 10px 24px rgba(0,0,0,.5);">
+        <img src="{{ c.p3 }}" alt="" style="position:absolute;left:94px;top:14px;width:86px;height:129px;object-fit:cover;border-radius:8px;transform:rotate(9deg);box-shadow:0 10px 24px rgba(0,0,0,.5);">
+        <img src="{{ c.p2 }}" alt="" style="position:absolute;left:47px;top:2px;width:90px;height:135px;object-fit:cover;border-radius:8px;box-shadow:0 14px 30px rgba(0,0,0,.6);">
+      </div>
+      <div style="position:absolute;left:24px;bottom:22px;display:flex;flex-direction:column;gap:4px;">
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:24px;letter-spacing:-.02em;">{{ c.name }}</div>
+        <div style="font-size:14px;color:rgba(244,244,242,.72);">{{ c.count }}</div>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isContinue }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="M16 Continue Watching" style="padding:96px 40px 80px {{ pad }}px;display:flex;flex-direction:column;gap:26px;">
+  <div style="display:flex;align-items:baseline;gap:14px;">
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:44px;letter-spacing:-.03em;">Continue Watching</div>
+    <div style="font-size:16px;color:#91919a;">Synced from Jellyfin across your devices</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:30px 22px;">
+    <sc-for list="{{ continueWatching }}" as="item" hint-placeholder-count="5">
+    <div onClick="{{ item.open }}" onDoubleClick="{{ item.play }}" style="display:flex;flex-direction:column;gap:12px;cursor:default;min-width:0;">
+      <div style="position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);">
+        <img src="{{ item.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ item.pos }};">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.75) 100%);"></div>
+        <div style="position:absolute;left:14px;bottom:22px;font-size:14px;font-weight:600;">{{ item.left }}</div>
+        <div style="position:absolute;left:14px;right:14px;bottom:11px;height:4px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden;"><div style="width:{{ item.pct }}%;height:100%;background:#f4f4f2;"></div></div>
+        <div onClick="{{ item.play }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;background:rgba(0,0,0,.28);transition:opacity .18s;" style-hover="opacity:1"><div style="width:56px;height:56px;border-radius:50%;background:#f4f4f2;color:#101014;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <div style="font-size:16px;font-weight:600;">{{ item.title }}</div>
+        <div style="font-size:14px;color:#91919a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.sub }}</div>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSeries }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="M09 Series Details" style="position:relative;min-height:900px;">
+  <div style="position:absolute;left:0;right:0;top:0;height:760px;overflow:hidden;">
+    <img src="{{ s.poster }}" alt="" style="position:absolute;left:-120px;top:-120px;width:calc(100% + 240px);height:calc(100% + 240px);object-fit:cover;filter:blur(80px) saturate(1.4) brightness(.55);">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,16,20,0) 30%,#101014 100%);"></div>
+  </div>
+  <div style="position:relative;padding:100px 56px 80px {{ pad }}px;display:flex;flex-direction:column;gap:44px;">
+    <div style="display:grid;grid-template-columns:260px minmax(0,1fr);gap:48px;align-items:end;">
+      <img src="{{ s.poster }}" alt="" style="width:260px;height:390px;object-fit:cover;border-radius:16px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 34px 80px rgba(0,0,0,.55);">
+      <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+        <div style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:rgba(244,244,242,.75);"><span>TV Show</span><span style="color:rgba(244,244,242,.4);">·</span><span>{{ s.availability }}</span></div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:72px;line-height:1;letter-spacing:-.035em;">{{ s.title }}</div>
+        <div style="display:flex;align-items:center;gap:16px;font-size:16px;color:rgba(244,244,242,.8);">
+          <span>{{ s.meta }}</span>
+          <span style="display:flex;align-items:center;gap:5px;color:#f4f4f2;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1,'wght' 400;">star</span>{{ s.rating }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:240px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:{{ s.pct }}%;height:100%;background:#f4f4f2;"></div></div>
+          <span style="font-size:14.5px;color:rgba(244,244,242,.75);">{{ s.progressText }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <sc-for list="{{ s.btns }}" as="b" hint-placeholder-count="3">
+          <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;" style-hover="background:#ffffff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+          <sc-if value="{{ b.isS }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:{{ b.bg }};font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;" style-hover="background:rgba(255,255,255,.22)" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}<sc-if value="{{ b.pin }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;margin-left:2px;">push_pin</span></sc-if><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div></sc-if>
+          <sc-if value="{{ b.isI }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.22)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">more_horiz</span></div></sc-if>
+          <sc-if value="{{ b.isD }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:rgba(255,255,255,.07);color:rgba(244,244,242,.38);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+          </sc-for>
+        </div>
+        <div style="max-width:660px;font-size:18px;line-height:1.55;color:rgba(244,244,242,.82);text-wrap:pretty;">{{ s.overview }}</div>
+      </div>
+    </div>
+
+    <div data-screen-label="M10 Season" style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+          <sc-for list="{{ s.seasonTabs }}" as="t" hint-placeholder-count="2"><div onClick="{{ t.go }}" style="height:36px;padding:0 18px;display:flex;align-items:center;border-radius:999px;font-size:15px;font-weight:600;background:{{ t.bg }};color:{{ t.color }};cursor:default;" style-hover="color:#fff">{{ t.label }}</div></sc-for>
+          <sc-for list="{{ s.missingTabs }}" as="t" hint-placeholder-count="0"><div title="Not in your Jellyfin library" style="height:36px;padding:0 16px;display:flex;align-items:center;border-radius:999px;font-size:15px;font-weight:500;color:#64646d;">{{ t }}</div></sc-for>
+        </div>
+        <div style="font-size:14.5px;color:#91919a;">{{ s.seasonMeta }}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <sc-for list="{{ s.episodes }}" as="e" hint-placeholder-count="6">
+        <div onClick="{{ e.open }}" onDoubleClick="{{ e.play }}" style="display:grid;grid-template-columns:40px 224px minmax(0,1fr) auto;gap:22px;align-items:center;padding:14px 16px;border-radius:14px;background:{{ e.bg }};cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.06)">
+          <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:600;font-size:24px;color:#64646d;text-align:right;">{{ e.n }}</div>
+          <div style="position:relative;width:224px;height:126px;border-radius:10px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.07);">
+            <img src="{{ e.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ e.pos }};transform:scale({{ e.scale }});filter:{{ e.filter }};">
+            <sc-if value="{{ e.watched }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:7px;left:7px;width:24px;height:24px;border-radius:5px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;font-variation-settings:'wght' 700;">check</span></div></sc-if>
+            <sc-if value="{{ e.hasProgress }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:10px;right:10px;bottom:9px;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;"><div style="width:{{ e.pct }}%;height:100%;background:#f4f4f2;"></div></div></sc-if>
+            <div onClick="{{ e.playStop }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;background:rgba(0,0,0,.3);transition:opacity .18s;" style-hover="opacity:1"><div style="width:46px;height:46px;border-radius:50%;background:#f4f4f2;color:#101014;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+            <sc-if value="{{ e.upNext }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;font-weight:700;letter-spacing:.04em;color:#eec01e;">{{ e.upLabel }}</div></sc-if>
+            <div style="font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.title }}</div>
+            <div style="font-size:15px;line-height:1.45;color:#91919a;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ e.desc }}</div>
+          </div>
+          <div style="font-size:14.5px;color:#91919a;white-space:nowrap;">{{ e.dur }}</div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Cast &amp; Crew</div>
+      <div style="display:flex;gap:18px;">
+        <sc-for list="{{ s.cast }}" as="person" hint-placeholder-count="6">
+        <div onClick="{{ person.open }}" style="width:112px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:8px 0;border-radius:14px;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.06)">
+          <div style="width:88px;height:88px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#6e6969;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">{{ person.initials }}</div>
+          <div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:14.5px;font-weight:600;">{{ person.name }}</div><div style="font-size:13.5px;color:#91919a;">{{ person.role }}</div></div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ps.loadingGrid }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="{{ ps.label }}" style="padding:96px 40px 80px {{ pad }}px;display:flex;flex-direction:column;gap:26px;">
+  <div style="display:flex;align-items:center;gap:16px;height:53px;"><div style="width:300px;height:40px;border-radius:10px;background:rgba(255,255,255,.08);"></div><div style="width:120px;height:16px;border-radius:6px;background:rgba(255,255,255,.06);"></div></div>
+  <div style="width:230px;height:38px;border-radius:999px;background:rgba(255,255,255,.06);"></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:30px 22px;">
+    <sc-for list="{{ ps.cards }}" as="k" hint-placeholder-count="12"><div style="display:flex;flex-direction:column;gap:10px;"><div style="aspect-ratio:2/3;border-radius:10px;background:rgba(255,255,255,.06);"></div><div style="width:72%;height:14px;border-radius:5px;background:rgba(255,255,255,.07);"></div><div style="width:40%;height:12px;border-radius:5px;background:rgba(255,255,255,.04);"></div></div></sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ps.loadingDetail }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="{{ ps.label }}" style="padding:100px 56px 80px {{ pad }}px;display:grid;grid-template-columns:290px minmax(0,1fr);gap:48px;align-items:end;">
+  <div style="width:290px;height:435px;border-radius:16px;background:rgba(255,255,255,.06);"></div>
+  <div style="display:flex;flex-direction:column;gap:20px;">
+    <div style="width:80px;height:15px;border-radius:5px;background:rgba(255,255,255,.06);"></div>
+    <div style="width:520px;height:64px;border-radius:12px;background:rgba(255,255,255,.08);"></div>
+    <div style="width:340px;height:16px;border-radius:5px;background:rgba(255,255,255,.06);"></div>
+    <div style="display:flex;gap:12px;"><div style="width:170px;height:48px;border-radius:999px;background:rgba(255,255,255,.08);"></div><div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.06);"></div><div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.06);"></div></div>
+    <div style="display:flex;flex-direction:column;gap:10px;"><div style="width:660px;height:15px;border-radius:5px;background:rgba(255,255,255,.05);"></div><div style="width:620px;height:15px;border-radius:5px;background:rgba(255,255,255,.05);"></div><div style="width:380px;height:15px;border-radius:5px;background:rgba(255,255,255,.05);"></div></div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ps.notConnected }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="{{ ps.label }}" style="height:900px;padding:0 40px 0 {{ pad }}px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;">
+  <span style="font-family:'Material Symbols Rounded';font-size:48px;line-height:1;color:#64646d;">link_off</span>
+  <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Connect Jellyfin to browse your library</div>
+  <div style="font-size:16px;line-height:1.55;color:#91919a;max-width:480px;text-wrap:pretty;">Your lists, search and title details come from Biinge and still work. Connect your Jellyfin account to browse and play what Living Room holds.</div>
+  <div style="display:flex;gap:12px;margin-top:8px;">
+    <div onClick="{{ signIn }}" style="height:44px;padding:0 24px;display:flex;align-items:center;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.97)">Connect Jellyfin</div>
+    <div onClick="{{ goWant }}" style="height:44px;padding:0 22px;display:flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.14);font-size:16px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.2)">Open Want to Watch</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPerson }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="M27 Person" style="padding:100px 40px 80px {{ pad }}px;display:flex;flex-direction:column;gap:44px;">
+  <div style="display:flex;align-items:center;gap:40px;">
+    <div style="flex:none;width:200px;height:200px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-family:Archivo,-apple-system,sans-serif;font-size:64px;font-weight:600;color:#6e6969;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 24px 60px rgba(0,0,0,.4);">{{ pr.initials }}</div>
+    <div style="display:flex;flex-direction:column;gap:12px;min-width:0;max-width:720px;">
+      <div style="font-size:15px;font-weight:600;color:rgba(244,244,242,.72);">{{ pr.meta }}</div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:64px;line-height:1;letter-spacing:-.035em;">{{ pr.name }}</div>
+      <div style="font-size:18px;line-height:1.55;color:{{ pr.bioColor }};text-wrap:pretty;">{{ pr.bio }}</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:baseline;gap:14px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Filmography</div><div style="font-size:15px;color:#91919a;">{{ pr.count }}</div></div>
+      <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">
+        <sc-for list="{{ pr.filters }}" as="f" hint-placeholder-count="3"><div onClick="{{ f.go }}" style="height:32px;padding:0 15px;display:flex;align-items:center;border-radius:999px;font-size:14px;font-weight:500;background:{{ f.bg }};color:{{ f.color }};cursor:default;" style-hover="color:#fff">{{ f.label }}</div></sc-for>
+      </div>
+    </div>
+    <sc-if value="{{ pr.has }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:30px 22px;">
+      <sc-for list="{{ pr.items }}" as="p" hint-placeholder-count="6">
+      <div onClick="{{ p.open }}" style="display:flex;flex-direction:column;gap:10px;cursor:default;min-width:0;">
+        <div style="position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);transition:transform .2s,box-shadow .2s;" style-hover="transform:translateY(-3px);box-shadow:0 0 0 1px rgba(255,255,255,.2),0 16px 34px rgba(0,0,0,.45)">
+          <sc-if value="{{ p.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></sc-if>
+          <sc-if value="{{ p.noArt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;text-align:center;font-size:15px;line-height:1.3;color:#6e6969;">{{ p.title }}</div></sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+          <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.title }}</div>
+          <div style="font-size:13.5px;color:#91919a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.sub }}</div>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+    </sc-if>
+    <sc-if value="{{ pr.empty }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="M27 Person · no credits" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:60px 0;text-align:center;">
+      <span style="font-family:'Material Symbols Rounded';font-size:44px;line-height:1;color:#64646d;">movie</span>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:22px;letter-spacing:-.02em;">No credits yet</div>
+      <div style="font-size:16px;color:#91919a;max-width:420px;line-height:1.5;">{{ pr.emptyText }}</div>
+    </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDetails }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="M07 Movie Details" style="position:relative;min-height:900px;">
+  <div style="position:absolute;left:0;right:0;top:0;height:780px;overflow:hidden;">
+    <sc-if value="{{ m.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ m.poster }}" alt="" style="position:absolute;left:-120px;top:-120px;width:calc(100% + 240px);height:calc(100% + 240px);object-fit:cover;filter:blur(80px) saturate(1.5) brightness(.55);"></sc-if>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,16,20,0) 30%,#101014 100%);"></div>
+  </div>
+  <div style="position:relative;padding:100px 56px 80px {{ pad }}px;display:flex;flex-direction:column;gap:48px;">
+    <div style="display:grid;grid-template-columns:290px minmax(0,1fr);gap:48px;align-items:end;">
+      <div style="position:relative;width:290px;height:435px;border-radius:16px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 34px 80px rgba(0,0,0,.55);">
+        <sc-if value="{{ m.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ m.poster }}" alt="" style="width:100%;height:100%;object-fit:cover;"></sc-if>
+        <sc-if value="{{ m.noArt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-size:20px;color:#6e6969;">{{ m.title }}</div></sc-if>
+        <sc-if value="{{ m.pinned }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div></sc-if>
+        <sc-if value="{{ m.watched }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:10px;left:10px;width:28px;height:28px;border-radius:6px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;font-variation-settings:'wght' 700;">check</span></div></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:15px;font-weight:600;color:rgba(244,244,242,.75);margin-right:4px;">{{ m.kind }}</span>
+          <sc-for list="{{ m.quality }}" as="q" hint-placeholder-count="2"><span style="font-size:12px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:5px;box-shadow:inset 0 0 0 1.5px rgba(244,244,242,.45);color:rgba(244,244,242,.88);">{{ q }}</span></sc-for>
+        </div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:{{ m.titleSize }}px;line-height:1.02;letter-spacing:-.035em;text-wrap:balance;">{{ m.title }}</div>
+        <div style="display:flex;align-items:center;gap:16px;font-size:16px;color:rgba(244,244,242,.8);">
+          <span>{{ m.meta }}</span>
+          <span style="display:flex;align-items:center;gap:5px;color:#f4f4f2;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1,'wght' 400;">star</span>{{ m.rating }}</span>
+        </div>
+        <sc-if value="{{ m.hasProgress }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:240px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:{{ m.pct }}%;height:100%;background:#f4f4f2;"></div></div>
+          <span style="font-size:14.5px;color:rgba(244,244,242,.75);">{{ m.progressText }}</span>
+        </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <sc-for list="{{ m.btns }}" as="b" hint-placeholder-count="3">
+          <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;" style-hover="background:#ffffff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+          <sc-if value="{{ b.isS }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:7px;height:48px;padding:0 14px 0 16px;border-radius:999px;background:{{ b.bg }};font-size:17px;font-weight:600;white-space:nowrap;cursor:default;transition:transform .12s,background .15s;" style-hover="background:rgba(255,255,255,.22)" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}<sc-if value="{{ b.pin }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;margin-left:2px;">push_pin</span></sc-if><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;opacity:.6;margin-left:-2px;">expand_more</span></div></sc-if>
+          <sc-if value="{{ b.isI }}" hint-placeholder-val="{{ false }}"><div onClick="{{ b.go }}" title="{{ b.tip }}" style="flex:none;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.22)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">more_horiz</span></div></sc-if>
+          <sc-if value="{{ b.isD }}" hint-placeholder-val="{{ false }}"><div title="{{ b.tip }}" style="flex:none;display:flex;align-items:center;gap:6px;height:48px;padding:0 24px 0 18px;border-radius:999px;background:rgba(255,255,255,.07);color:rgba(244,244,242,.38);font-size:17px;font-weight:600;white-space:nowrap;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div></sc-if>
+          </sc-for>
+        </div>
+        <sc-if value="{{ m.offServer }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="M26 Not in library" style="display:flex;align-items:center;gap:8px;font-size:15px;color:rgba(244,244,242,.72);"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">dns</span>{{ m.offNote }}</div>
+        </sc-if>
+        <sc-if value="{{ m.unknown }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="{{ m.noteLabel }}" style="display:flex;align-items:center;gap:8px;font-size:15px;color:rgba(244,244,242,.72);"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;color:{{ m.noteColor }};">{{ m.noteIcon }}</span>{{ m.unknownNote }}<span onClick="{{ m.noteAction }}" style="color:#f4f4f2;font-weight:600;cursor:default;margin-left:4px;white-space:nowrap;" style-hover="text-decoration:underline">{{ m.noteCta }}</span></div>
+        </sc-if>
+        <div style="max-width:680px;font-size:18px;line-height:1.55;color:rgba(244,244,242,.82);text-wrap:pretty;">{{ m.overview }}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:24px;padding-top:24px;box-shadow:inset 0 1px 0 #26262d;">
+      <sc-for list="{{ m.facts }}" as="f" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+        <div style="font-size:13px;font-weight:500;color:#64646d;">{{ f.label }}</div>
+        <div style="font-size:16px;color:#c9c9c6;">{{ f.value }}</div>
+      </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">Cast &amp; Crew</div>
+      <div style="display:flex;gap:18px;">
+        <sc-for list="{{ m.cast }}" as="person" hint-placeholder-count="6">
+        <div onClick="{{ person.open }}" style="width:112px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:8px 0;border-radius:14px;cursor:default;transition:background .15s;" style-hover="background:rgba(255,255,255,.06)">
+          <div style="width:88px;height:88px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#6e6969;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);">{{ person.initials }}</div>
+          <div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:14.5px;font-weight:600;">{{ person.name }}</div><div style="font-size:13.5px;color:#91919a;">{{ person.role }}</div></div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-if value="{{ m.hasMore }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:28px;letter-spacing:-.02em;">More in Your Library</div>
+      <div style="display:flex;gap:18px;">
+        <sc-for list="{{ more }}" as="p" hint-placeholder-count="6">
+        <div onClick="{{ p.open }}" onDoubleClick="{{ p.play }}" style="flex:none;width:164px;display:flex;flex-direction:column;gap:10px;cursor:default;">
+          <div style="width:164px;height:246px;border-radius:10px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.07);transition:transform .2s;" style-hover="transform:translateY(-3px)"><img src="{{ p.img }}" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+          <div style="display:flex;flex-direction:column;gap:2px;"><div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.title }}</div><div style="font-size:13.5px;color:#91919a;">{{ p.sub }}</div></div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+</div>
+
+<div style="position:absolute;left:0;right:0;top:0;height:76px;pointer-events:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);-webkit-mask-image:linear-gradient(180deg,#000 30%,transparent);mask-image:linear-gradient(180deg,#000 30%,transparent);background:linear-gradient(180deg,rgba(16,16,20,.6),rgba(16,16,20,0));"></div>
+
+<div style="position:absolute;top:14px;right:20px;left:{{ toolbarLeft }}px;height:40px;display:flex;align-items:center;justify-content:space-between;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <sc-if value="{{ collapsed }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="display:flex;gap:8px;padding-left:6px;"><div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div><div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div><div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div></div>
+      <div onClick="{{ toggleSidebar }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);cursor:default;" style-hover="background:rgba(60,60,68,.55)"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;">left_panel_open</span></div>
+    </div>
+    </sc-if>
+    <div style="display:flex;align-items:center;height:40px;border-radius:999px;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);">
+      <div onClick="{{ goBack }}" style="width:44px;height:40px;display:flex;align-items:center;justify-content:center;color:{{ backColor }};cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;">chevron_left</span></div>
+      <div style="width:1px;height:18px;background:rgba(255,255,255,.12);"></div>
+      <div style="width:44px;height:40px;display:flex;align-items:center;justify-content:center;color:rgba(244,244,242,.32);"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;">chevron_right</span></div>
+    </div>
+    <div style="font-size:16px;font-weight:600;color:rgba(244,244,242,.9);padding-left:4px;opacity:{{ titleOpacity }};">{{ toolbarTitle }}</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div onClick="{{ openSearch }}" style="display:flex;align-items:center;gap:8px;width:264px;height:40px;padding:0 8px 0 14px;border-radius:999px;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);cursor:text;">
+      <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:rgba(244,244,242,.6);">search</span>
+      <span style="flex:1;font-size:15px;color:rgba(244,244,242,.5);">Search</span>
+      <span style="font-size:12.5px;font-weight:600;color:rgba(244,244,242,.5);padding:3px 8px;border-radius:7px;background:rgba(255,255,255,.08);">⌘K</span>
+    </div>
+    <div onClick="{{ openAccount }}" title="Tom · tom@example.com" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.25);font-size:15px;font-weight:600;cursor:default;" style-hover="background:rgba(60,60,68,.6)">T</div>
+  </div>
+</div>
+
+<sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:8px;top:8px;bottom:8px;width:248px;border-radius:18px;background:rgba(30,30,36,.52);backdrop-filter:blur(32px) saturate(1.7);-webkit-backdrop-filter:blur(32px) saturate(1.7);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 1px 0 rgba(255,255,255,.16),0 12px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;padding:12px 10px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;height:34px;padding:0 2px 0 8px;">
+    <div style="display:flex;gap:8px;"><div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div><div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div><div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div></div>
+    <div onClick="{{ toggleSidebar }}" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(244,244,242,.7);cursor:default;" style-hover="background:rgba(255,255,255,.08);color:#fff"><span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;">left_panel_close</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:2px;margin-top:12px;">
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="10">
+    <sc-if value="{{ n.header }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:600;color:rgba(244,244,242,.45);padding:16px 10px 6px;">{{ n.label }}</div></sc-if>
+    <sc-if value="{{ n.item }}" hint-placeholder-val="{{ true }}">
+    <div onClick="{{ n.go }}" style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;background:{{ n.bg }};color:{{ n.color }};font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)">
+      <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;font-variation-settings:'FILL' {{ n.fill }},'wght' 400;">{{ n.icon }}</span>
+      <span style="flex:1;">{{ n.label }}</span>
+      <span style="font-size:12.5px;color:rgba(244,244,242,.4);">{{ n.hint }}</span>
+    </div>
+    </sc-if>
+    </sc-for>
+  </div>
+  <div style="flex:1;"></div>
+  <div style="display:flex;flex-direction:column;gap:2px;">
+    <sc-if value="{{ sideIssue.show }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="{{ sideIssue.label }}" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:12px;background:rgba(255,255,255,.05);">
+      <span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;color:{{ sideIssue.color }};margin-top:1px;">{{ sideIssue.icon }}</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;">
+        <div style="font-size:13.5px;line-height:1.35;color:rgba(244,244,242,.85);text-wrap:pretty;">{{ sideIssue.text }}</div>
+        <div onClick="{{ sideIssue.act }}" style="align-self:flex-start;font-size:13px;font-weight:600;color:#f4f4f2;cursor:default;" style-hover="text-decoration:underline">{{ sideIssue.cta }}</div>
+      </div>
+    </div>
+    </sc-if>
+    <div onClick="{{ openSettings }}" style="display:flex;align-items:center;gap:11px;height:36px;padding:0 10px;border-radius:10px;color:rgba(244,244,242,.82);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.07)">
+      <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;width:22px;">settings</span><span style="flex:1;">Settings</span><span style="font-size:12.5px;color:rgba(244,244,242,.4);">⌘,</span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ctxOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:{{ ctx.x }}px;top:{{ ctx.y }}px;z-index:40;width:236px;padding:6px;border-radius:12px;background:rgba(40,40,46,.74);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.5);font-size:14px;">
+  <sc-for list="{{ ctx.items }}" as="ci" hint-placeholder-count="5">
+  <sc-if value="{{ ci.sep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;margin:5px 8px;background:rgba(255,255,255,.1);"></div></sc-if>
+  <sc-if value="{{ ci.row }}" hint-placeholder-val="{{ true }}"><div onClick="{{ ci.go }}" style="display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 10px;border-radius:7px;cursor:default;" style-hover="background:#3a72e8;color:#fff"><span>{{ ci.label }}</span><span style="font-size:12.5px;opacity:.5;">{{ ci.key }}</span></div></sc-if>
+  </sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ lmOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ stop }}" style="position:absolute;left:{{ lm.x }}px;top:{{ lm.y }}px;z-index:40;width:340px;padding:6px;border-radius:14px;background:rgba(40,40,46,.9);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.5);display:flex;flex-direction:column;">
+  <div style="padding:8px 12px 6px;font-size:12.5px;font-weight:650;color:rgba(244,244,242,.5);">{{ lm.title }}</div>
+  <sc-for list="{{ lm.rows }}" as="r" hint-placeholder-count="4">
+  <sc-if value="{{ r.isSep }}" hint-placeholder-val="{{ false }}"><div style="height:1px;margin:5px 10px;background:rgba(255,255,255,.1);"></div></sc-if>
+  <sc-if value="{{ r.isRow }}" hint-placeholder-val="{{ true }}"><div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px;cursor:default;" style-hover="background:rgba(255,255,255,.1)"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:{{ r.color }};font-variation-settings:'FILL' {{ r.fill }};transform:rotate({{ r.rot }}deg);">{{ r.icon }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;font-weight:550;color:{{ r.color }};">{{ r.label }}</span><sc-if value="{{ r.hasDesc }}" hint-placeholder-val="{{ true }}"><span style="font-size:12.5px;line-height:1.35;color:rgba(244,244,242,.55);">{{ r.desc }}</span></sc-if></div><sc-if value="{{ r.check }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:20px;line-height:1;font-variation-settings:'wght' 600;">check</span></sc-if><sc-if value="{{ r.toggle }}" hint-placeholder-val="{{ false }}"><span style="flex:none;position:relative;width:36px;height:22px;border-radius:11px;background:{{ r.swBg }};"><span style="position:absolute;top:2px;left:{{ r.swX }}px;width:18px;height:18px;border-radius:50%;background:{{ r.swKnob }};"></span></span></sc-if></div></sc-if>
+  </sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:{{ toastLeft }}px;right:0;bottom:28px;z-index:55;display:flex;justify-content:center;pointer-events:none;">
+  <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 20px 0 16px;border-radius:999px;background:rgba(40,40,46,.8);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.5);font-size:15px;font-weight:500;">
+    <span style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:{{ toast.color }};font-variation-settings:'FILL' 1;">{{ toast.icon }}</span>{{ toast.text }}
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="M11 Episode Details" onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;">
+  <div onClick="{{ stop }}" style="width:720px;border-radius:22px;overflow:hidden;background:#17171d;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 40px 100px rgba(0,0,0,.6);">
+    <div style="position:relative;height:340px;overflow:hidden;">
+      <img src="{{ sh.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ sh.pos }};transform:scale({{ sh.scale }});filter:{{ sh.filter }};">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,23,29,0) 50%,#17171d 100%);"></div>
+      <div onClick="{{ closeSheet }}" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(36,36,42,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">close</span></div>
+    </div>
+    <div style="padding:4px 32px 30px;display:flex;flex-direction:column;gap:14px;">
+      <div style="font-size:14.5px;font-weight:600;color:#91919a;">{{ sh.code }}</div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:34px;line-height:1.08;letter-spacing:-.03em;">{{ sh.title }}</div>
+      <div style="font-size:17px;line-height:1.55;color:#c9c9c6;">{{ sh.desc }}</div>
+      <sc-if value="{{ sh.hasProgress }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:14px;"><div style="width:200px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:{{ sh.pct }}%;height:100%;background:#f4f4f2;"></div></div><span style="font-size:14.5px;color:#91919a;">{{ sh.left }}</span></div>
+      </sc-if>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+        <div onClick="{{ sh.play }}" style="display:flex;align-items:center;gap:6px;height:48px;padding:0 26px 0 20px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:17px;font-weight:600;cursor:default;" style-hover="background:#fff" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">play_arrow</span>{{ sh.cta }}</div>
+        <div onClick="{{ sh.markEp }}" style="display:flex;align-items:center;gap:7px;height:48px;padding:0 22px 0 18px;border-radius:999px;background:rgba(255,255,255,.14);font-size:17px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.22)"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">{{ sh.watchIcon }}</span>{{ sh.watchLabel }}</div>
+        <span style="margin-left:auto;font-size:14.5px;color:#91919a;">{{ sh.dur }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="M12 Search" onClick="{{ closeSearch }}" style="position:absolute;inset:0;z-index:35;background:rgba(0,0,0,.45);">
+  <div onClick="{{ stop }}" style="position:absolute;top:86px;left:{{ searchLeft }}px;width:760px;border-radius:24px;background:rgba(34,34,40,.72);backdrop-filter:blur(40px) saturate(1.8);-webkit-backdrop-filter:blur(40px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),inset 0 1px 0 rgba(255,255,255,.18),0 40px 100px rgba(0,0,0,.6);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:12px;height:68px;padding:0 20px 0 22px;">
+      <span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;color:rgba(244,244,242,.6);">search</span>
+      <input ref="{{ inputRef }}" value="{{ query }}" onChange="{{ onQuery }}" onKeyDown="{{ onSearchKey }}" placeholder="Search movies, shows and people" style="flex:1;height:40px;border:0;outline:0;background:transparent;color:#f4f4f2;font-size:22px;font-family:inherit;">
+      <sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}"><div onClick="{{ clearQuery }}" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:default;" style-hover="background:rgba(255,255,255,.22)"><span style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1;">close</span></div></sc-if>
+      <span style="font-size:12.5px;font-weight:600;color:rgba(244,244,242,.5);padding:3px 8px;border-radius:7px;background:rgba(255,255,255,.08);">esc</span>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.08);"></div>
+    <div style="max-height:600px;overflow-y:auto;scrollbar-width:none;padding:10px 10px 12px;">
+      <sc-if value="{{ searchEmpty }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:8px 12px 4px;font-size:13px;font-weight:600;color:rgba(244,244,242,.45);">Recent Searches</div>
+      <sc-for list="{{ recentSearches }}" as="r" hint-placeholder-count="3"><div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:12px;height:42px;padding:0 12px;border-radius:10px;font-size:16px;cursor:default;" style-hover="background:rgba(255,255,255,.07)"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#91919a;">history</span>{{ r.label }}</div></sc-for>
+      <div style="padding:14px 12px 4px;font-size:13px;font-weight:600;color:rgba(244,244,242,.45);">Browse</div>
+      <div style="display:flex;gap:10px;padding:4px 12px 6px;">
+        <div onClick="{{ goMovies }}" style="display:flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.08);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">movie</span>Movies</div>
+        <div onClick="{{ goTv }}" style="display:flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.08);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">tv</span>TV Shows</div>
+        <div onClick="{{ goCollections }}" style="display:flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.08);font-size:15px;font-weight:500;cursor:default;" style-hover="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">video_library</span>Collections</div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ searchHasResults }}" hint-placeholder-val="{{ false }}">
+      <sc-for list="{{ resultGroups }}" as="g" hint-placeholder-count="2">
+      <div style="padding:10px 12px 6px;font-size:13px;font-weight:600;color:rgba(244,244,242,.45);">{{ g.label }}</div>
+      <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+      <div onClick="{{ r.open }}" onMouseEnter="{{ r.hover }}" style="display:flex;align-items:center;gap:14px;padding:8px 12px;border-radius:12px;background:{{ r.bg }};cursor:default;">
+        <sc-if value="{{ r.isTitle }}" hint-placeholder-val="{{ true }}"><div style="position:relative;flex:none;width:44px;height:66px;border-radius:6px;overflow:hidden;background:#282828;"><sc-if value="{{ r.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ r.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></sc-if></div></sc-if>
+        <sc-if value="{{ r.isPerson }}" hint-placeholder-val="{{ false }}"><div style="flex:none;width:44px;height:66px;display:flex;align-items:center;justify-content:center;"><div style="width:44px;height:44px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#8a8a92;">{{ r.initials }}</div></div></sc-if>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+          <div style="font-size:16.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.title }}</div>
+          <div style="font-size:14px;color:rgba(244,244,242,.6);">{{ r.sub }}</div>
+        </div>
+        <span style="font-size:13px;color:rgba(244,244,242,.5);opacity:{{ r.enterOpacity }};">Open ↩</span>
+      </div>
+      </sc-for>
+      </sc-for>
+      </sc-if>
+      <sc-if value="{{ searchLoading }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="M12 Search · loading" style="display:flex;flex-direction:column;">
+        <div style="padding:10px 12px 6px;font-size:13px;font-weight:600;color:rgba(244,244,242,.45);">Searching the catalog…</div>
+        <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:14px;padding:8px 12px;"><div style="width:44px;height:66px;border-radius:6px;background:rgba(255,255,255,.07);"></div><div style="display:flex;flex-direction:column;gap:8px;"><div style="width:240px;height:14px;border-radius:5px;background:rgba(255,255,255,.08);"></div><div style="width:160px;height:12px;border-radius:5px;background:rgba(255,255,255,.05);"></div></div></div></sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{ searchNoResults }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="M24 No Results" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:44px 24px 40px;text-align:center;">
+        <span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;color:#64646d;">search_off</span>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:22px;letter-spacing:-.02em;">No results for “{{ query }}”</div>
+        <div style="font-size:15.5px;line-height:1.5;color:rgba(244,244,242,.6);max-width:420px;">Search covers every movie, show and person in the Biinge catalog. Check the spelling, or try another name.</div>
+        <div onClick="{{ clearQuery }}" style="margin-top:8px;height:38px;padding:0 18px;display:flex;align-items:center;border-radius:999px;background:rgba(255,255,255,.12);font-size:15px;font-weight:600;cursor:default;" style-hover="background:rgba(255,255,255,.18)">Clear Search</div>
+      </div>
+      </sc-if>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;height:40px;padding:0 22px;font-size:12.5px;color:rgba(244,244,242,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);">
+      <span>↑↓ to move</span><span>↩ to open</span><span>esc to close</span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSettings }}" style="position:absolute;inset:0;z-index:45;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;">
+  <div onClick="{{ stop }}"><dc-import name="Biinge Mac Settings" data-state="{{ settingsState }}" on-close="{{ closeSettings }}" on-disconnect="{{ disconnect }}" on-log-out="{{ logOut }}" on-connect="{{ signIn }}" hint-size="640px,560px"></dc-import></div>
+</div>
+</sc-if>
+<sc-if value="{{ disconnected }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:60;"><dc-import name="Biinge Mac Setup" step="{{ setupStep }}" on-done="{{ setupDone }}" hint-size="1440px,900px"></dc-import></div>
+</sc-if>
+<sc-if value="{{ isPlayer }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:50;">
+  <dc-import name="Biinge Mac Player" theme="{{ theme }}" fill="{{ true }}" auto-hide="{{ true }}" media="{{ playerMedia }}" on-exit="{{ exitPlayer }}" style="width:100%;height:100%;" hint-size="100%,100%"></dc-import>
+</div>
+</sc-if>
+
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;movies&quot;,&quot;tv&quot;,&quot;series&quot;,&quot;details&quot;,&quot;collections&quot;,&quot;collection&quot;,&quot;continue&quot;,&quot;recent&quot;,&quot;want&quot;,&quot;watching&quot;,&quot;watched&quot;,&quot;person&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;movie&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;la-la-land&quot;,&quot;blade-runner-2049&quot;,&quot;dune-part-two&quot;,&quot;aftersun&quot;,&quot;zodiac&quot;,&quot;nightcrawler&quot;,&quot;poor-things&quot;,&quot;darjeeling&quot;,&quot;conclave&quot;,&quot;lotr-fellowship&quot;,&quot;arrival&quot;,&quot;drive&quot;,&quot;slow-horses&quot;,&quot;the-curse&quot;,&quot;silo&quot;],&quot;default&quot;:&quot;la-la-land&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;show&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mr-robot&quot;,&quot;chernobyl&quot;,&quot;band-of-brothers&quot;,&quot;breaking-bad&quot;],&quot;default&quot;:&quot;mr-robot&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;episode&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:12,&quot;tsType&quot;:&quot;number&quot;},&quot;season&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:1,&quot;min&quot;:1,&quot;max&quot;:2,&quot;tsType&quot;:&quot;number&quot;},&quot;sidebarCollapsed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;searchOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;query&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;person&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Ryan Gosling&quot;,&quot;Emma Stone&quot;,&quot;Rebecca Ferguson&quot;,&quot;Denis Villeneuve&quot;,&quot;Jake Gyllenhaal&quot;,&quot;Paul Mescal&quot;],&quot;default&quot;:&quot;Ryan Gosling&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;not-connected&quot;,&quot;unreachable&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+class Component extends DCLogic {
+  state = { listState: {}, listKind: null, listSort: 'added', personKind: null, toast: null, dataState: null, screen: null, params: null, history: [], collapsed: null, heroIdx: 0, watched: {}, filter: 'all', sort: 'added', view: 'grid', sortOpen: false, ctx: null, sheet: undefined, season: null, searchOpen: null, query: null, sel: 0 };
+  scroller = React.createRef();
+  rootRef = React.createRef();
+  inputRef = React.createRef();
+  hovered = false;
+
+  componentDidMount() {
+    if (!window.BIINGE) this.poll = setInterval(() => { if (window.BIINGE) { clearInterval(this.poll); this.forceUpdate(); } }, 60);
+    this.onKey = e => {
+      if (!this.hovered || this.cur().screen === 'player') return;
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'f')) { e.preventDefault(); this.openSearch(); }
+      else if (e.key === 'Escape') {
+        if (this.state.sheet || this.state.ctx || this.state.sortOpen) this.setState({ sheet: null, ctx: null, sortOpen: false });
+        else if (this.cur().screen !== 'home') this.back();
+      }
+    };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { clearInterval(this.poll); window.removeEventListener('keydown', this.onKey); }
+
+  cur() {
+    return { screen: this.state.screen ?? this.props.screen ?? 'home', params: this.state.params ?? { movie: this.props.movie ?? 'la-la-land', show: this.props.show ?? 'mr-robot', collection: 'neo-noir', person: this.props.person ?? 'Ryan Gosling' } };
+  }
+  isSearchOpen() { return this.state.searchOpen ?? this.props.searchOpen ?? false; }
+  go = (screen, params = {}) => {
+    const c = this.cur();
+    this.setState(s => ({ history: [...s.history, c], screen, params: { ...c.params, ...params }, searchOpen: false, sheet: null, ctx: null, sortOpen: false, ...(screen !== c.screen ? { filter: 'all' } : {}) }));
+    if (this.scroller.current && screen !== 'player') this.scroller.current.scrollTop = 0;
+  };
+  back = () => {
+    const h = this.state.history;
+    const prev = h.length ? h[h.length - 1] : { screen: 'home', params: this.cur().params };
+    this.setState({ history: h.slice(0, -1), screen: prev.screen, params: prev.params, sheet: null });
+  };
+  dataState() { return this.state.dataState ?? this.props.dataState ?? 'ready'; }
+  getList(id) { const LS = this.state.listState; return (id in LS) ? LS[id] : window.BIINGE.listOf(id); }
+  watchedAny(id) { return this.state.watched[id] ?? (this.getList(id) || {}).list === 'watched'; }
+  setList(id, v) { this.setState(s => ({ listState: { ...s.listState, [id]: v } })); }
+  toast(text, icon = 'check_circle', err = false) { clearTimeout(this.toastT); this.setState({ toast: { text, icon, color: err ? '#ff8a8d' : '#34c46f' } }); this.toastT = setTimeout(() => this.setState({ toast: null }), 3400); }
+  toggleWant(id) {
+    const e = this.getList(id);
+    if (e && e.list === 'want') { this.setList(id, null); this.toast('Removed from Want to Watch', 'bookmark_remove'); }
+    else { this.setList(id, { list: 'want', pin: false, t: Date.now() }); this.toast('Added to Want to Watch', 'bookmark_added'); }
+  }
+  togglePin(id) { const e = this.getList(id); if (!e) return; this.setList(id, { ...e, pin: !e.pin }); this.toast(e.pin ? 'Unpinned from Up Next' : 'Pinned to Up Next', 'push_pin'); }
+  listsFor(kind) {
+    const S = window.BIINGE.server;
+    return kind === 'show' ? [
+      { id: 'want', name: 'Want to Watch', icon: 'bookmark', pinnable: true, desc: 'Saved for later.' },
+      { id: 'watching', name: 'Watching', icon: 'clock_loader_40', pinnable: true, desc: 'Biinge follows your next episode.' },
+      { id: 'watched', name: 'Watched', icon: 'check_circle', pinnable: false, desc: `Marks every episode watched, here and on ${S}.` }]
+    : [
+      { id: 'want', name: 'Want to Watch', icon: 'bookmark', pinnable: true, desc: 'Saved for later.' },
+      { id: 'watched', name: 'Watched', icon: 'check_circle', pinnable: false, desc: `Also marks it played on ${S}.` }];
+  }
+  curListOf(id) { const e = this.getList(id); return e && e.list ? e.list : (this.watchedAny(id) ? 'watched' : null); }
+  openListMenu(kind, id) {
+    return e => {
+      e.stopPropagation();
+      const c = this.state.lm;
+      if (c && c.id === id) return this.setState({ lm: null });
+      const r = this.rootRef.current.getBoundingClientRect(), k = r.width / 1440, b = e.currentTarget.getBoundingClientRect();
+      const x = Math.min((b.left - r.left) / k, 1440 - 360), y = (b.bottom - r.top) / k + 8;
+      this.setState({ lm: { x, y, kind, id }, ctx: null, sortOpen: false });
+    };
+  }
+  pickList(id, kind, to) {
+    const L = this.listsFor(kind), e = this.getList(id), w = this.watchedAny(id), cur = this.curListOf(id), def = L.find(l => l.id === to);
+    this.setState({ lm: null });
+    if (!def || to === cur) return;
+    if (to === 'watched') { if (!w) return this.toggleWatchedFor(id); this.setList(id, { list: 'watched', pin: false, t: Date.now() }); return this.toast('Moved to Watched'); }
+    const listState = { ...this.state.listState, [id]: { list: to, pin: def.pinnable && e ? !!e.pin : false, t: Date.now() } };
+    this.setState(w ? { listState, watched: { ...this.state.watched, [id]: false } } : { listState });
+    this.toast(`${cur ? 'Moved' : 'Added'} to ${def.name}`, to === 'want' ? 'bookmark_added' : def.icon);
+  }
+  removeFromList(id, kind) {
+    const def = this.listsFor(kind).find(l => l.id === this.curListOf(id));
+    this.setState(st => ({ lm: null, listState: { ...st.listState, [id]: null }, watched: { ...st.watched, [id]: false } }));
+    this.toast(`Removed from ${def ? def.name : 'list'}`, 'do_not_disturb_on');
+  }
+  rowBtns(o) {
+    const L = this.listsFor(o.kind), e = this.getList(o.id), curId = this.curListOf(o.id), cur = L.find(l => l.id === curId);
+    const nb = x => Object.assign({ isP: false, isS: false, isI: false, isD: false, icon: '', label: '', pin: false, fill: 0, tip: '', bg: 'rgba(255,255,255,.14)', go: () => {} }, x);
+    const out = [];
+    if (o.playable) out.push(nb({ isP: true, icon: o.playIcon || 'play_arrow', label: o.playLabel, fill: 1, go: o.play, tip: o.playTip || o.playLabel }));
+    else if (o.disabled) out.push(nb({ isD: true, icon: 'play_arrow', label: o.playLabel, tip: `Unavailable until ${window.BIINGE.server} is back` }));
+    else if (!cur) out.push(nb({ isP: true, icon: 'bookmark_add', label: 'Add to Want to Watch', go: () => this.pickList(o.id, o.kind, 'want'), tip: 'Saves it to Want to Watch' }));
+    const lmOn = !!(this.state.lm && this.state.lm.id === o.id);
+    out.push(nb(Object.assign(cur ? { isS: true, icon: cur.icon, label: cur.name, fill: 1, pin: !!(e && e.pin), tip: 'Change list, pin or remove' } : { isS: true, icon: 'add', label: 'Add to List', tip: 'Choose a list' },
+      { go: this.openListMenu(o.kind, o.id), bg: lmOn ? 'rgba(255,255,255,.26)' : 'rgba(255,255,255,.14)' })));
+    out.push(nb({ isI: true, icon: 'more_horiz', go: o.more, tip: 'More' }));
+    return out;
+  }
+  toggleWatchedFor(id) {
+    const D = window.BIINGE, T = D.title(id), ds = this.dataState(), w = this.watchedAny(id), e = this.getList(id);
+    const listState = { ...this.state.listState };
+    if (!w) listState[id] = { list: 'watched', pin: false, t: Date.now() }; else if (e && e.list === 'watched') listState[id] = null;
+    this.setState({ watched: { ...this.state.watched, [id]: !w }, listState });
+    const verb = w ? 'unwatched' : 'watched';
+    if (!T.inLib || ds === 'not-connected') this.toast(`Marked ${verb} in Biinge`, w ? 'remove_done' : 'check_circle');
+    else if (ds === 'unreachable') this.toast(`Saved in Biinge. Couldn’t update ${D.server}.`, 'error', true);
+    else this.toast(`Marked ${verb} in Biinge and Jellyfin`, w ? 'remove_done' : 'check_circle');
+  }
+  retry = () => { this.setState({ dataState: 'loading' }); setTimeout(() => this.setState({ dataState: 'ready' }), 1200); };
+  openSearch = () => { this.setState({ searchOpen: true, query: this.state.query ?? '' , sel: 0 }); setTimeout(() => this.inputRef.current && this.inputRef.current.focus(), 30); };
+
+  playMovie(id, fromStart) {
+    const D = window.BIINGE, mv = D.movies[id];
+    return () => this.go('player', { media: { kind: 'movie', title: mv.title, sub: `${mv.year}  ·  ${D.fmtRun(mv.runtime)}`, poster: D.poster(id), runtime: mv.runtime, startPct: fromStart ? 0 : mv.progress, next: null } });
+  }
+  playEpisode(showId, season, n) {
+    const D = window.BIINGE, sh = D.shows[showId], eps = sh.seasons[season], e = eps.find(x => x.n === n), nx = eps.find(x => x.n === n + 1);
+    const code = (s, k) => sh.limited ? `E${k}` : `S${s} · E${k}`;
+    return () => this.go('player', { media: { kind: 'episode', title: sh.title, sub: `${code(season, n)}  ·  ${e.title}`, poster: D.poster(showId), runtime: e.min, startPct: e.progress || 0,
+      next: nx ? { code: code(season, nx.n), title: nx.title, desc: nx.desc, dur: D.fmtRun(nx.min), poster: D.poster(showId), runtime: nx.min, sub: `${code(season, nx.n)}  ·  ${nx.title}` } : null } });
+  }
+  playGeneric(title, sub, posterId, runtime, pct) {
+    const D = window.BIINGE;
+    return () => this.go('player', { media: { kind: 'episode', title, sub, poster: D.poster(posterId), runtime, startPct: pct, next: null } });
+  }
+  ctxFor(kind, id) {
+    return e => {
+      e.preventDefault(); e.stopPropagation();
+      const r = this.rootRef.current.getBoundingClientRect(), k = r.width / 1440;
+      const x = Math.min((e.clientX - r.left) / k, 1440 - 250), y = Math.min((e.clientY - r.top) / k, 900 - 220);
+      this.setState({ ctx: { x, y, kind, id }, sortOpen: false });
+    };
+  }
+
+  moreFor(kind, id) {
+    return e => {
+      e.stopPropagation();
+      const c = this.state.ctx;
+      if (c && c.more && c.id === id) return this.setState({ ctx: null });
+      const r = this.rootRef.current.getBoundingClientRect(), k = r.width / 1440, b = e.currentTarget.getBoundingClientRect();
+      const x = Math.min((b.left - r.left) / k, 1440 - 250), y = (b.bottom - r.top) / k + 8;
+      this.setState({ ctx: { x, y, kind, id, more: true }, sortOpen: false, lm: null });
+    };
+  }
+
+  renderVals() {
+    const D = window.BIINGE;
+    if (!D) return { ready: false };
+    const { screen, params } = this.cur();
+    const collapsed = this.state.collapsed ?? this.props.sidebarCollapsed ?? false;
+    const pad = collapsed ? 56 : 296;
+    const isWatched = id => this.state.watched[id] ?? !!D.movies[id]?.watched;
+    const noop = () => {};
+    const dataState = this.dataState();
+    const getList = id => this.getList(id);
+    const LS = this.state.listState;
+    const listIds = (L, kind) => {
+      const base = D.lists[L][kind].map(e => e[0]);
+      const extra = Object.keys(LS).filter(id => LS[id] && LS[id].list === L && !base.includes(id) && ((D.title(id).kind === 'movie') === (kind === 'movies'))).sort((a, b) => (LS[b].t || 0) - (LS[a].t || 0));
+      return [...extra, ...base].filter(id => (getList(id) || {}).list === L);
+    };
+    const openTitle = id => () => (D.shows[id] && D.shows[id].seasons) ? this.go('series', { show: id }) : this.go('details', { movie: id });
+    const listNames = { want: 'Want to Watch', watching: 'Watching', watched: 'Watched' };
+    const isList = !!listNames[screen];
+    const libScreens = ['home', 'movies', 'tv', 'collections', 'collection', 'continue', 'recent', 'series'];
+    const psActive = (dataState === 'loading' && (isList || screen === 'person' || screen === 'details')) || (dataState === 'not-connected' && libScreens.includes(screen));
+    const seriesReady = id => !!D.shows[id]?.seasons;
+
+    const posterItem = (kind, id) => {
+      if (kind === 'movie') {
+        const mv = D.movies[id];
+        return { title: mv.title, sub: `${mv.year}`, year: mv.year, genres: mv.genres, len: D.fmtRun(mv.runtime), rating: mv.rating.toFixed(1), img: D.poster(id), hasArt: !mv.noArt, noArt: !!mv.noArt,
+          watched: isWatched(id), checkColor: isWatched(id) ? '#34c46f' : 'rgba(244,244,242,.14)', isNew: mv.added <= 5, pinned: false, hasPie: false, pie: '', hasProgress: mv.progress > 0, pct: Math.round(mv.progress * 100),
+          open: () => this.go('details', { movie: id }), play: this.playMovie(id), ctx: this.ctxFor('movie', id), offServer: false, imgFilter: 'none' };
+      }
+      const sh = D.shows[id];
+      let w = 0, t = 0;
+      if (sh.seasons) Object.values(sh.seasons).forEach(es => es.forEach(e => { t++; if (e.watched) w++; }));
+      const pct = t ? Math.round(w / t * 100) : 0;
+      return { title: sh.title, sub: sh.limited ? 'Limited Series' : `${sh.seasonsTotal} Season${sh.seasonsTotal > 1 ? 's' : ''}`, year: sh.year, genres: sh.genres, len: sh.limited ? 'Limited' : `${sh.seasonsTotal} seasons`, rating: sh.rating.toFixed(1),
+        img: D.poster(id), hasArt: !sh.noArt, noArt: !!sh.noArt, watched: t > 0 && w === t, checkColor: 'rgba(244,244,242,.14)', pinned: false, isNew: sh.added <= 5, hasPie: pct > 0 && pct < 100, pie: `conic-gradient(#fff ${pct}%, rgba(0,0,0,.55) 0)`, hasProgress: false, pct: 0,
+        open: seriesReady(id) ? () => this.go('series', { show: id }) : noop, play: noop, ctx: this.ctxFor('show', id), offServer: false, imgFilter: 'none' };
+    };
+
+    // hero
+    const f = D.featured[this.state.heroIdx];
+    let hero;
+    if (f.movie) {
+      const mv = D.movies[f.movie];
+      hero = { eyebrow: `${f.eyebrow} · Movie`, title: mv.title, poster: D.poster(f.movie), meta: `${mv.year}  ·  ${D.fmtRun(mv.runtime)}  ·  ${mv.genres}`, rating: mv.rating.toFixed(1), overview: mv.overview, cta: mv.progress ? 'Resume' : 'Play', open: () => this.go('details', { movie: f.movie }), play: this.playMovie(f.movie) };
+    } else {
+      const sh = D.shows[f.show];
+      hero = { eyebrow: `${f.eyebrow} · TV Show`, title: sh.title, poster: D.poster(f.show), meta: f.meta, rating: sh.rating.toFixed(1), overview: sh.overview, cta: f.cta, open: noop, play: this.playGeneric(sh.title, 'S2 · E3  ·  Solo', f.show, 52, 0) };
+    }
+    const heroDots = D.featured.map((_, i) => ({ w: i === this.state.heroIdx ? 22 : 6, bg: i === this.state.heroIdx ? '#f4f4f2' : 'rgba(244,244,242,.35)', go: () => this.setState({ heroIdx: i }) }));
+
+    const continueWatching = D.continueWatching.map(c => {
+      if (c.movie) { const mv = D.movies[c.movie]; return { title: mv.title, sub: `Movie · ${mv.year}`, img: D.poster(c.movie), pos: mv.pos, left: D.fmtLeft(c.left), pct: c.pct, open: () => this.go('details', { movie: c.movie }), play: this.playMovie(c.movie) }; }
+      const sh = D.shows[c.show];
+      const play = c.season ? this.playEpisode(c.show, c.season, c.ep) : this.playGeneric(sh.title, c.sub.replace(/ · (?=[^·]*$)/, '  ·  '), c.show, 34, c.pct / 100);
+      return { title: sh.title, sub: c.sub, img: D.poster(c.show), pos: c.pos, left: D.fmtLeft(c.left), pct: c.pct, open: seriesReady(c.show) ? () => this.go('series', { show: c.show, season: c.season }) : play, play };
+    });
+    const nextUp = D.nextUp.map(n => {
+      const sh = D.shows[n.show];
+      const sn = sh.limited ? 1 : +n.code.match(/S(\d+)/)?.[1], en = +n.code.match(/E(\d+)/)[1];
+      const playable = sh.seasons && sh.seasons[sn] && sh.seasons[sn].find(x => x.n === en);
+      const play = playable ? this.playEpisode(n.show, sn, en) : this.playGeneric(sh.title, `${n.code}  ·  ${n.title}`, n.show, 50, 0);
+      return { ...n, showTitle: sh.title, img: D.poster(n.show), play: e => { e && e.stopPropagation(); play(); }, open: seriesReady(n.show) ? () => this.go('series', { show: n.show, season: sn }) : play };
+    });
+    const all = [...Object.keys(D.movies).map(id => ['movie', id, D.movies[id].added]), ...Object.keys(D.shows).map(id => ['show', id, D.shows[id].added])].sort((a, b) => a[2] - b[2]);
+    const recent = all.filter(([k, id]) => !(k === 'movie' ? D.movies[id].noArt : D.shows[id].noArt)).slice(0, 10).map(([k, id]) => posterItem(k, id));
+    const kindOf = id => D.movies[id] ? 'movie' : 'show';
+    const collTile = c => ({ name: c.name, count: `${c.items.length} titles`, p1: D.poster(c.items[0]), p2: D.poster(c.items[1]), p3: D.poster(c.items[2] || c.items[0]), open: () => this.go('collection', { collection: c.id }) });
+    const homeCollections = D.collections.slice(0, 3).map(collTile);
+    const allCollections = D.collections.map(collTile);
+
+    // library
+    let lib = {};
+    const isLibrary = (['movies', 'tv', 'collection', 'recent'].includes(screen) || isList) && !psActive;
+    if (isLibrary && !isList) {
+      let entries, title, label;
+      if (screen === 'movies') { entries = Object.keys(D.movies).map(id => ['movie', id]); title = 'Movies'; label = 'M06 Movies Library'; }
+      else if (screen === 'tv') { entries = Object.keys(D.shows).map(id => ['show', id]); title = 'TV Shows'; label = 'M08 TV Shows Library'; }
+      else if (screen === 'recent') { entries = all.slice(0, 14).map(([k, id]) => [k, id]); title = 'Recently Added'; label = 'Recently Added'; }
+      else { const c = D.collections.find(x => x.id === params.collection) || D.collections[0]; entries = c.items.map(id => [kindOf(id), id]); title = c.name; label = 'M15 Collection Details'; lib.desc = c.desc || `A Jellyfin collection from the Living Room server.`; lib.c1 = D.poster(c.items[0]); lib.c2 = D.poster(c.items[1]); lib.c3 = D.poster(c.items[2] || c.items[0]); lib.playAll = entries[0][0] === 'movie' ? this.playMovie(entries[0][1]) : noop; }
+      const get = ([k, id]) => k === 'movie' ? D.movies[id] : D.shows[id];
+      const fil = this.state.filter;
+      const played = ([k, id]) => { if (k === 'movie') return isWatched(id); const ss = D.shows[id].seasons; if (!ss) return false; const es = Object.values(ss).flat(); return es.length > 0 && es.every(x => x.watched); };
+      let items = entries.filter(e => fil === 'unwatched' ? !played(e) : fil === 'watched' ? played(e) : true);
+      const sorters = { added: (a, b) => get(a).added - get(b).added, title: (a, b) => get(a).title.localeCompare(get(b).title), year: (a, b) => get(b).year - get(a).year, runtime: (a, b) => (get(b).runtime || 0) - (get(a).runtime || 0), rating: (a, b) => get(b).rating - get(a).rating };
+      const sortNames = { added: 'Recently Added', title: 'Title', year: 'Release Year', runtime: 'Runtime', rating: 'Community Rating' };
+      if (screen !== 'recent') items = [...items].sort(sorters[this.state.sort]);
+      const unit = screen === 'tv' ? 'shows' : screen === 'movies' ? 'movies' : 'titles';
+      const filterDefs = [['all', 'All'], ['unwatched', 'Unwatched'], ['watched', 'Watched']];
+      lib = { ...lib, title, label, count: `${items.length} ${unit}`, isCollection: screen === 'collection', plainHeader: screen !== 'collection', showFilters: screen === 'movies' || screen === 'tv',
+        filters: filterDefs.map(([id, l]) => ({ label: l, bg: fil === id ? 'rgba(255,255,255,.16)' : 'transparent', color: fil === id ? '#fff' : 'rgba(244,244,242,.72)', go: () => this.setState({ filter: id }) })),
+        menus: screen === 'movies' ? ['Genre', 'Year', 'Collection'] : ['Genre', 'Year'],
+        sortLabel: sortNames[this.state.sort], sorts: Object.keys(sortNames).filter(k => !(screen === 'tv' && k === 'runtime')).map(k => ({ label: sortNames[k], check: this.state.sort === k ? 1 : 0, go: e => { e.stopPropagation(); this.setState({ sort: k, sortOpen: false }); } })),
+        grid: items.length > 0, list: false, empty: items.length === 0,
+        gridBg: this.state.view === 'grid' ? 'rgba(255,255,255,.16)' : 'transparent', listBg: this.state.view === 'list' ? 'rgba(255,255,255,.16)' : 'transparent',
+        lenLabel: screen === 'tv' ? 'Seasons' : 'Runtime',
+        items: items.map(([k, id]) => posterItem(k, id)),
+        showViewToggle: false, banner: false, emptyLabel: 'M23 Empty', emptyIcon: 'filter_alt_off', emptyTitle: 'Nothing here yet', emptyText: 'No titles match this filter. Clear it to see the whole library.', emptyCta: 'Clear Filter', emptyAction: () => this.setState({ filter: 'all' }) };
+    }
+    if (isLibrary && isList) {
+      const empty = dataState === 'empty';
+      const mi = empty ? [] : listIds(screen, 'movies'), si = empty ? [] : listIds(screen, 'shows');
+      const kind = screen === 'watching' ? 'shows' : (this.state.listKind || 'movies');
+      const T = id => D.title(id), ls = this.state.listSort;
+      const sorters = { title: (a, b) => T(a).title.localeCompare(T(b).title), year: (a, b) => T(b).year - T(a).year, rating: (a, b) => T(b).rating - T(a).rating };
+      let ids = kind === 'movies' ? mi : si;
+      if (sorters[ls]) ids = [...ids].sort(sorters[ls]);
+      const sortNames = { added: 'Date Added', title: 'Title', year: 'Release Year', rating: 'Rating' };
+      const total = mi.length + si.length, kw = kind === 'movies' ? 'movies' : 'shows', name = listNames[screen];
+      const E = { want: ['bookmark', 'Nothing in Want to Watch', 'Add movies and shows from search or any details page. The list is the same one you see on iPhone and Apple TV.'],
+        watching: ['clock_loader_40', 'No shows in progress', 'A show moves here when you start watching it on any device.'],
+        watched: ['check_circle', 'Nothing watched yet', 'Mark a title Watched and it shows up here, on iPhone and on Apple TV.'] }[screen];
+      const partial = total > 0 && ids.length === 0;
+      const listItem = id => {
+        const t = D.title(id), e = getList(id) || {}, art = !t.noArt, mv = D.movies[id];
+        return { title: t.title, sub: t.kind === 'movie' ? `${t.year}` : (t.limited ? 'Limited Series' : `${t.seasonsTotal} Season${t.seasonsTotal > 1 ? 's' : ''}`), year: t.year, genres: t.genres, len: '', rating: t.rating.toFixed(1),
+          img: art ? D.poster(id) : '', hasArt: art, noArt: !art, offServer: !t.inLib, imgFilter: t.inLib ? 'none' : 'saturate(.45) brightness(.8)', watched: false, checkColor: '', pinned: !!e.pin, isNew: false, hasProgress: !!(mv && t.inLib && mv.progress > 0), pct: mv ? Math.round((mv.progress || 0) * 100) : 0,
+          hasPie: e.pie > 0 && e.pie < 100, pie: `conic-gradient(#fff ${e.pie || 0}%, rgba(0,0,0,.55) 0)`, open: openTitle(id), play: mv && t.inLib && dataState !== 'not-connected' && dataState !== 'unreachable' ? this.playMovie(id) : noop, ctx: this.ctxFor('list', id) };
+      };
+      const banners = {
+        unreachable: { bannerLabel: 'Jellyfin unreachable', bannerIcon: 'cloud_off', bannerColor: '#ff8a8d', bannerText: `Can’t reach ${D.server}. Your lists still load from Biinge. Play comes back with the server.`, bannerCta: 'Retry', bannerAction: this.retry },
+        'not-connected': { bannerLabel: 'Jellyfin not connected', bannerIcon: 'link_off', bannerColor: '#91919a', bannerText: 'Jellyfin isn’t connected on this Mac. Your lists work. Connect Jellyfin to play what Living Room holds.', bannerCta: 'Connect Jellyfin', bannerAction: () => this.setState({ disconnected: true, setupStep: 'connect' }) },
+      };
+      lib = { title: name, label: `M25 My Lists · ${name}`, count: total ? `${total} ${screen === 'watching' ? (total === 1 ? 'show' : 'shows') : 'titles'}` : '', isCollection: false, plainHeader: true, showFilters: screen !== 'watching', showViewToggle: false, menus: [],
+        filters: [['movies', 'Movies', mi.length], ['shows', 'TV Shows', si.length]].map(([id, l, n]) => ({ label: `${l}  ${n}`, bg: kind === id ? 'rgba(255,255,255,.16)' : 'transparent', color: kind === id ? '#fff' : 'rgba(244,244,242,.72)', go: () => this.setState({ listKind: id }) })),
+        sortLabel: sortNames[ls], sorts: Object.keys(sortNames).map(k => ({ label: sortNames[k], check: ls === k ? 1 : 0, go: e => { e.stopPropagation(); this.setState({ listSort: k, sortOpen: false }); } })),
+        grid: ids.length > 0, list: false, empty: ids.length === 0,
+        emptyLabel: `M25 ${name} · empty`, emptyIcon: E[0], emptyTitle: partial ? `No ${kw} in ${name}` : E[1], emptyText: partial ? `Switch to ${kind === 'movies' ? 'TV Shows' : 'Movies'}, or add ${kw} from search.` : E[2],
+        emptyCta: 'Search the Catalog', emptyAction: e => { e && e.stopPropagation(); this.openSearch(); },
+        banner: !!banners[dataState], bannerLabel: '', bannerIcon: '', bannerColor: '', bannerText: '', bannerCta: '', bannerAction: noop, ...(banners[dataState] || {}),
+        items: ids.map(listItem) };
+    }
+
+    // person
+    let pr = {};
+    if (screen === 'person') {
+      const name = params.person || 'Ryan Gosling';
+      const all = [...Object.keys(D.movies), ...Object.keys(D.shows), ...Object.keys(D.catalog)];
+      let P = D.people[name];
+      if (!P) {
+        const credits = all.filter(id => (D.title(id).cast || []).some(c => c[0] === name)).map(id => [id, D.title(id).cast.find(c => c[0] === name)[1]]);
+        P = { dept: credits.length && credits.every(c => /Director|Creator/.test(c[1])) ? 'Directing' : 'Acting', born: '', bio: '', credits };
+      }
+      const cr = (dataState === 'empty' ? [] : P.credits).slice().sort((a, b) => D.title(b[0]).year - D.title(a[0]).year);
+      const mc = cr.filter(c => D.title(c[0]).kind === 'movie'), sc = cr.filter(c => D.title(c[0]).kind === 'show');
+      const pk = this.state.personKind || 'all';
+      const shown = pk === 'movies' ? mc : pk === 'shows' ? sc : cr;
+      pr = { name, initials: D.initials(name), meta: [P.dept, P.born].filter(Boolean).join('  ·  '), bio: P.bio || 'No biography in the Biinge catalog yet.', bioColor: P.bio ? 'rgba(244,244,242,.82)' : '#64646d',
+        count: `${cr.length} credit${cr.length === 1 ? '' : 's'}`,
+        filters: [['all', 'All', cr.length], ['movies', 'Movies', mc.length], ['shows', 'TV Shows', sc.length]].filter(f => f[0] === 'all' || f[2] > 0).map(([id, l]) => ({ label: l, bg: pk === id ? 'rgba(255,255,255,.16)' : 'transparent', color: pk === id ? '#fff' : 'rgba(244,244,242,.72)', go: () => this.setState({ personKind: id }) })),
+        items: shown.map(([id, role]) => { const t = D.title(id), art = t.inLib && !t.noArt; return { title: t.title, sub: `${t.year}  ·  ${role}`, img: art ? D.poster(id) : '', hasArt: art, noArt: !art, open: openTitle(id) }; }),
+        has: shown.length > 0, empty: shown.length === 0, emptyText: `The Biinge catalog has no movies or shows for ${name}.` };
+    }
+
+    // series
+    let s = {};
+    if (screen === 'series') {
+      const id = params.show && D.shows[params.show]?.seasons ? params.show : 'mr-robot';
+      const sh = D.shows[id];
+      const nums = Object.keys(sh.seasons).map(Number);
+      let w = 0, t = 0, next = null;
+      nums.forEach(sn => sh.seasons[sn].forEach(e => { t++; if (e.watched) w++; else if (!next) next = { sn, e }; }));
+      const season = this.state.season?.show === id ? this.state.season.n : (params.season && sh.seasons[params.season] ? params.season : (next ? next.sn : nums[0]));
+      const eps = sh.seasons[season];
+      const code = (sn, n) => sh.limited ? `E${n}` : `S${sn} · E${n}`;
+      const stills = [['50% 18%', 1.5], ['50% 62%', 1.15], ['30% 40%', 1.9], ['50% 92%', 1.3], ['70% 30%', 1.7], ['50% 45%', 1.05], ['40% 75%', 1.6], ['60% 10%', 1.25], ['50% 50%', 2.1], ['20% 60%', 1.4], ['80% 70%', 1.8], ['50% 30%', 1.2]];
+      const filters = ['none', 'hue-rotate(-12deg) saturate(1.2)', 'brightness(.8)', 'saturate(.6)', 'contrast(1.1) brightness(.9)', 'hue-rotate(15deg)'];
+      s = { title: sh.title, poster: D.poster(id), meta: `${sh.year}  ·  ${sh.genres}`, rating: sh.rating.toFixed(1), overview: sh.overview,
+        availability: sh.limited ? `Limited Series · ${t} episodes` : `${nums.length} of ${sh.seasonsTotal} seasons in library`,
+        pct: Math.round(w / t * 100), progressText: `${w} of ${t} episodes watched`,
+        cta: next ? `${next.e.progress ? 'Resume' : 'Play'} ${code(next.sn, next.e.n)}` : 'Play Again',
+        playNext: next ? this.playEpisode(id, next.sn, next.e.n) : noop,
+        seasonTabs: sh.limited ? [{ label: 'Episodes', bg: 'rgba(255,255,255,.16)', color: '#fff', go: noop }] : nums.map(n => ({ label: `Season ${n}`, bg: n === season ? 'rgba(255,255,255,.16)' : 'transparent', color: n === season ? '#fff' : 'rgba(244,244,242,.72)', go: () => this.setState({ season: { show: id, n } }) })),
+        missingTabs: sh.limited ? [] : Array.from({ length: sh.seasonsTotal - nums.length }, (_, i) => `Season ${nums.length + i + 1}`),
+        seasonMeta: `${eps.length} episodes · ${D.fmtRun(eps.reduce((a, e) => a + e.min, 0))}`,
+        cast: sh.cast.map(([name, role]) => ({ name, role, initials: D.initials(name), open: () => this.go('person', { person: name }) })),
+        ...(() => { const se = getList(id), sw = this.watchedAny(id); return {
+          wantRound: !(se && se.list === 'watching'), wantIcon: se && se.list === 'want' ? 'bookmark' : 'bookmark_add', wantFill: se && se.list === 'want' ? 1 : 0, wantHint: se && se.list === 'want' ? 'Remove from Want to Watch' : 'Add to Want to Watch',
+          watchedIcon: sw ? 'check_circle' : 'check', watchedFill: sw ? 1 : 0, watchedColor: sw ? '#34c46f' : '#f4f4f2', watchedHint: sw ? 'Mark as unwatched in Biinge and Jellyfin' : 'Mark as watched in Biinge and Jellyfin',
+          canPin: !!se && (se.list === 'want' || se.list === 'watching'), pinFill: se && se.pin ? 1 : 0, pinHint: se && se.pin ? 'Unpin' : 'Pin',
+          toggleWant: () => this.toggleWant(id), toggleWatched: () => this.toggleWatchedFor(id), togglePin: () => this.togglePin(id), openMore: this.moreFor('show', id),
+          btns: this.rowBtns({ id, kind: 'show', playable: true, playLabel: next ? `${next.e.progress ? 'Resume' : 'Play'} ${code(next.sn, next.e.n)}` : 'Play Again', playIcon: next ? 'play_arrow' : 'replay', play: next ? this.playEpisode(id, next.sn, next.e.n) : noop, more: this.moreFor('show', id) }) }; })(),
+        episodes: eps.map((e, i) => {
+          const isNext = next && next.sn === season && next.e.n === e.n;
+          const st = stills[(i + season * 3) % stills.length];
+          const play = this.playEpisode(id, season, e.n);
+          return { n: e.n, title: e.title, desc: e.desc, dur: D.fmtRun(e.min), img: D.poster(id), pos: st[0], scale: st[1], filter: filters[(i + season) % filters.length],
+            watched: !!e.watched, hasProgress: !!e.progress, pct: Math.round((e.progress || 0) * 100), upNext: !!isNext, upLabel: e.progress ? `RESUME · ${D.fmtLeft(Math.round(e.min * (1 - e.progress))).toUpperCase()}` : 'UP NEXT',
+            bg: isNext ? 'rgba(255,255,255,.05)' : 'transparent', play, playStop: ev => { ev.stopPropagation(); play(); },
+            open: () => this.setState({ sheet: { show: id, season, n: e.n, pos: st[0], scale: st[1], filter: filters[(i + season) % filters.length] } }) };
+        }) };
+    }
+
+    // sheet
+    let sh = {};
+    const sheet = this.state.sheet !== undefined ? this.state.sheet : (this.props.episode ? { show: params.show && D.shows[params.show]?.seasons ? params.show : 'mr-robot', season: this.props.season || 1, n: this.props.episode, pos: '50% 92%', scale: 1.3, filter: 'none' } : null);
+    if (sheet) {
+      const show = D.shows[sheet.show], e = show.seasons[sheet.season].find(x => x.n === sheet.n);
+      sh = { img: D.poster(sheet.show), pos: sheet.pos, scale: sheet.scale, filter: sheet.filter, code: `${show.title}  ·  ${show.limited ? '' : `Season ${sheet.season}  ·  `}Episode ${e.n}`, title: e.title, desc: e.desc, dur: D.fmtRun(e.min),
+        hasProgress: !!e.progress, pct: Math.round((e.progress || 0) * 100), left: D.fmtLeft(Math.round(e.min * (1 - (e.progress || 0)))),
+        cta: e.progress ? 'Resume' : (e.watched ? 'Play Again' : 'Play'), play: this.playEpisode(sheet.show, sheet.season, e.n),
+        watchIcon: e.watched ? 'remove_done' : 'check', watchLabel: e.watched ? 'Mark Unwatched' : 'Mark Watched',
+        markEp: () => this.toast(`Episode ${e.n} marked ${e.watched ? 'unwatched' : 'watched'}`, e.watched ? 'remove_done' : 'check_circle') };
+    }
+
+    // details: library movie, library show without episode data, or catalog title
+    const movieId = D.title(params.movie) ? params.movie : 'la-la-land';
+    const T = D.title(movieId), mv = D.movies[movieId] || null, isMovie = T.kind === 'movie';
+    const entry = getList(movieId), w = this.watchedAny(movieId), wanted = !!entry && entry.list === 'want';
+    const jfPlayed = !!(mv && mv.watched) && !w;
+    const unreachable = dataState === 'unreachable', notConn = dataState === 'not-connected', dup = T.inLib && T.dup > 1;
+    const canPlay = T.inLib && !unreachable && !notConn && !dup;
+    const prog = mv ? mv.progress : 0, at = mv ? Math.round(mv.runtime * prog) : 0;
+    const listLabel = (listNames[entry && entry.list] || (w ? 'Watched' : 'Not tracked')) + (entry && entry.pin ? ' · Pinned' : '');
+    const note = unreachable ? { noteLabel: 'M26 Details · Jellyfin unreachable', noteIcon: 'cloud_off', noteColor: '#ff8a8d', unknownNote: `Can’t reach ${D.server}, so Play isn’t available. Want and Watched still save to Biinge.`, noteCta: 'Retry', noteAction: this.retry }
+      : notConn ? { noteLabel: 'M26 Details · Jellyfin not connected', noteIcon: 'link_off', noteColor: '#91919a', unknownNote: 'Jellyfin isn’t connected on this Mac, so Play isn’t available.', noteCta: 'Connect Jellyfin', noteAction: () => this.setState({ disconnected: true, setupStep: 'connect' }) }
+      : jfPlayed ? { noteLabel: 'M28 Details · played in Jellyfin, not in Watched', noteIcon: 'check', noteColor: '#91919a', unknownNote: `Played on ${D.server}. Not in your Watched list.`, noteCta: '', noteAction: noop }
+      : dup ? { noteLabel: 'M26 Details · duplicate in library', noteIcon: 'content_copy', noteColor: '#eec01e', unknownNote: `${D.server} holds ${T.dup} copies of this title, so Biinge can’t tell which to play. Keep one in Jellyfin to play it here.`, noteCta: '', noteAction: noop } : null;
+    const m = { title: T.title, kind: isMovie ? 'Movie' : 'TV Show', titleSize: T.title.length > 30 ? 52 : 72, poster: D.poster(movieId), hasArt: !T.noArt, noArt: !!T.noArt, quality: T.inLib && !notConn && !unreachable ? (T.quality || []) : [], overview: T.overview,
+      meta: isMovie ? `${T.year}  ·  ${D.fmtRun(T.runtime)}  ·  ${T.genres}` : `${T.year}  ·  ${T.limited ? 'Limited Series' : `${T.seasonsTotal} Seasons`}  ·  ${T.genres}`, rating: T.rating.toFixed(1),
+      hasProgress: canPlay && prog > 0, pct: Math.round(prog * 100), progressText: `Stopped at ${at} min  ·  ${D.fmtLeft((mv ? mv.runtime : 0) - at)}`,
+      canPlay, cta: prog > 0 ? 'Resume' : (w ? 'Play Again' : 'Play'),
+      play: mv ? this.playMovie(movieId) : this.playGeneric(T.title, 'S1 · E1', movieId, 50, 0), playFromStart: mv ? this.playMovie(movieId, true) : noop,
+      watched: w && T.inLib, watchedIcon: w ? 'check_circle' : 'check', watchedFill: w ? 1 : 0, watchedColor: w ? '#34c46f' : '#f4f4f2',
+      watchedHint: `Mark as ${w ? 'unwatched' : 'watched'} in Biinge${T.inLib && !notConn ? ' and Jellyfin' : ''}`,
+      wantPill: !T.inLib && !wanted, wantedPill: !T.inLib && wanted, wantRound: T.inLib && !(entry && entry.list === 'watching'),
+      wantIcon: wanted ? 'bookmark' : 'bookmark_add', wantFill: wanted ? 1 : 0, wantHint: wanted ? 'Remove from Want to Watch' : 'Add to Want to Watch',
+      canPin: !!entry && (entry.list === 'want' || entry.list === 'watching'), pinned: !!(entry && entry.pin), pinFill: entry && entry.pin ? 1 : 0, pinHint: entry && entry.pin ? 'Unpin' : 'Pin',
+      offServer: !T.inLib && !unreachable && !notConn, offNote: `Not on ${D.server}. Add it to Jellyfin to play here.`,
+      unknown: !!note, noteLabel: '', noteIcon: '', noteColor: '', unknownNote: '', noteCta: '', noteAction: noop, ...(note || {}),
+      facts: isMovie
+        ? [{ label: 'Director', value: T.director }, { label: 'Released', value: T.released }, ...(T.inLib && !notConn && !unreachable ? [{ label: 'Audio', value: T.audio }, { label: 'Subtitles', value: T.subs }] : [{ label: 'Genres', value: T.genres }]), { label: 'Status', value: listLabel }]
+        : [{ label: 'Created by', value: T.creator }, { label: 'First aired', value: `${T.year}` }, { label: 'Seasons', value: T.limited ? 'Limited series' : `${T.seasonsTotal}` }, { label: 'Status', value: listLabel }],
+      cast: (T.cast || []).slice(0, 8).map(([name, role]) => ({ name, role, initials: D.initials(name), open: () => this.go('person', { person: name }) })), hasMore: !!mv && !notConn,
+      btns: this.rowBtns({ id: movieId, kind: isMovie ? 'movie' : 'show', playable: canPlay, disabled: T.inLib && unreachable && !dup,
+        playLabel: prog > 0 ? `Resume · ${D.fmtLeft((mv ? mv.runtime : 0) - at)}` : (w ? 'Play Again' : 'Play'), playIcon: !prog && w ? 'replay' : 'play_arrow',
+        play: mv ? this.playMovie(movieId) : this.playGeneric(T.title, 'S1 · E1', movieId, 50, 0), more: this.moreFor(isMovie ? 'movie' : 'show', movieId) }) };
+    const more = Object.keys(D.movies).filter(k => k !== movieId && !D.movies[k].noArt).slice(0, 6).map(k => posterItem('movie', k));
+
+    // search
+    const searchOpen = this.isSearchOpen();
+    const q = (this.state.query ?? this.props.query ?? '').trim();
+    const ql = q.toLowerCase();
+    let resultGroups = [], flat = [];
+    if (ql && dataState !== 'loading') {
+      const ids = [...Object.keys(D.movies), ...Object.keys(D.shows), ...Object.keys(D.catalog)];
+      const hit = id => D.title(id).title.toLowerCase().includes(ql);
+      const mm = ids.filter(id => D.title(id).kind === 'movie' && hit(id)).map(id => ({ kind: 'movie', id, t: D.title(id) }));
+      const ss = ids.filter(id => D.title(id).kind === 'show' && hit(id)).map(id => ({ kind: 'show', id, t: D.title(id) }));
+      const names = [...new Set([...Object.keys(D.people), ...ids.flatMap(id => (D.title(id).cast || []).map(c => c[0]))])];
+      const pp = names.filter(n => n.toLowerCase().includes(ql)).map(n => ({ kind: 'person', n }));
+      const known = n => (D.people[n] ? D.people[n].credits.map(c => c[0]) : ids.filter(id => (D.title(id).cast || []).some(c => c[0] === n))).slice(0, 2).map(id => D.title(id).title).join(', ');
+      const row = r => r.kind === 'person'
+        ? { title: r.n, sub: `${D.people[r.n] ? D.people[r.n].dept : 'Acting'}  ·  ${known(r.n)}`, isPerson: true, isTitle: false, initials: D.initials(r.n), img: '', hasArt: false, open: () => this.go('person', { person: r.n }) }
+        : { title: r.t.title, sub: r.kind === 'movie' ? `Movie  ·  ${r.t.year}  ·  ${r.t.director}` : `TV Show  ·  ${r.t.year}  ·  ${r.t.limited ? 'Limited Series' : `${r.t.seasonsTotal} Seasons`}`, isPerson: false, isTitle: true, initials: '', img: D.poster(r.id), hasArt: r.t.inLib && !r.t.noArt, open: openTitle(r.id) };
+      if (mm.length) resultGroups.push({ label: 'Movies', src: mm.slice(0, 5) });
+      if (ss.length) resultGroups.push({ label: 'TV Shows', src: ss.slice(0, 3) });
+      if (pp.length) resultGroups.push({ label: 'People', src: pp.slice(0, 3) });
+      let idx = 0;
+      const total = resultGroups.reduce((a, g) => a + g.src.length, 0);
+      const sel = Math.min(this.state.sel, total - 1);
+      resultGroups = resultGroups.map(g => ({ label: g.label, rows: g.src.map(r => { const i = idx++; const o = row(r); flat.push(o); return { ...o, bg: i === sel ? 'rgba(255,255,255,.1)' : 'transparent', enterOpacity: i === sel ? 1 : 0, hover: () => this.setState({ sel: i }) }; }) }));
+    }
+    this.flat = flat;
+
+    // nav
+    const activeMap = { home: 'home', movies: 'movies', details: 'movies', tv: 'tv', series: 'tv', collections: 'collections', collection: 'collections', continue: 'cw', recent: 'home', want: 'want', watching: 'watching', watched: 'watched' };
+    let active = activeMap[screen];
+    if (screen === 'details') active = T.inLib ? (isMovie ? 'movies' : 'tv') : ((entry || {}).list || '');
+    const listCount = L => dataState === 'loading' ? '' : dataState === 'empty' ? '0' : `${listIds(L, 'movies').length + listIds(L, 'shows').length}`;
+    const navDef = [
+      { header: true, label: 'Library' },
+      { id: 'home', icon: 'home', label: 'Home', go: () => this.go('home') },
+      { id: 'movies', icon: 'movie', label: 'Movies', go: () => this.go('movies') },
+      { id: 'tv', icon: 'tv', label: 'TV Shows', go: () => this.go('tv') },
+      { id: 'collections', icon: 'video_library', label: 'Collections', go: () => this.go('collections') },
+      { id: 'cw', icon: 'play_circle', label: 'Continue Watching', go: () => this.go('continue') },
+      { header: true, label: 'My Lists' },
+      { id: 'want', icon: 'bookmark', label: 'Want to Watch', hint: listCount('want'), go: () => this.go('want') },
+      { id: 'watching', icon: 'clock_loader_40', label: 'Watching', hint: listCount('watching'), go: () => this.go('watching') },
+      { id: 'watched', icon: 'check_circle', label: 'Watched', hint: listCount('watched'), go: () => this.go('watched') },
+      { header: true, label: 'Global' },
+      { id: 'search', icon: 'search', label: 'Search', hint: '⌘K', go: e => { e.stopPropagation(); this.openSearch(); } },
+    ];
+    const nav = navDef.map(n => n.header ? { ...n, item: false } : { ...n, header: false, item: true, hint: n.hint || '',
+      bg: n.id === active ? 'rgba(255,255,255,.13)' : 'transparent', color: n.id === active ? '#ffffff' : 'rgba(244,244,242,.82)', fill: n.id === active ? 1 : 0 });
+
+    const titles = { want: 'Want to Watch', watching: 'Watching', watched: 'Watched', person: params.person || '', details: m.title, series: s.title, movies: 'Movies', tv: 'TV Shows', collections: 'Collections', collection: lib.title, continue: 'Continue Watching', recent: 'Recently Added' };
+
+    const lmS = this.state.lm;
+    let lmVals = { x: 0, y: 0, title: '', rows: [] };
+    if (lmS) {
+      const L = this.listsFor(lmS.kind), le = this.getList(lmS.id) || {}, curId = this.curListOf(lmS.id), cur = L.find(l => l.id === curId);
+      const R = o => Object.assign({ isRow: true, isSep: false, icon: '', label: '', desc: '', check: false, toggle: false, color: '#f4f4f2', fill: 0, rot: 0, swBg: '', swX: 0, swKnob: '', go: () => {} }, o, { hasDesc: !!o.desc });
+      const sep = () => R({ isRow: false, isSep: true });
+      const rows = L.map(l => R({ icon: l.icon, label: l.name, desc: l.desc, check: l.id === curId, fill: l.id === curId ? 1 : 0, go: ev => { ev.stopPropagation(); this.pickList(lmS.id, lmS.kind, l.id); } }));
+      if (cur && cur.pinnable) rows.push(sep(), R({ icon: 'push_pin', rot: 25, fill: le.pin ? 1 : 0, label: 'Pin to Up Next', desc: 'Keeps it at the top of Up Next and the list.', toggle: true, swBg: le.pin ? '#f4f4f2' : 'rgba(255,255,255,.2)', swX: le.pin ? 16 : 2, swKnob: le.pin ? '#101014' : '#f4f4f2', go: ev => { ev.stopPropagation(); this.setState({ lm: null }); this.togglePin(lmS.id); } }));
+      if (cur) rows.push(sep(), R({ icon: 'do_not_disturb_on', label: `Remove from ${cur.name}`, color: '#ff8a8d', go: ev => { ev.stopPropagation(); this.removeFromList(lmS.id, lmS.kind); } }));
+      lmVals = { x: lmS.x, y: lmS.y, title: cur ? 'Lists' : 'Add to List', rows };
+    }
+    const ctx = this.state.ctx;
+    let ctxVals = { x: 0, y: 0, items: [] };
+    if (ctx && ctx.more) {
+      const e = getList(ctx.id), nm = e && listNames[e.list];
+      const close = fn => ev => { ev.stopPropagation(); this.setState({ ctx: null }); fn && fn(); };
+      ctxVals = { x: ctx.x, y: ctx.y, items: [
+        ...(ctx.kind === 'movie' && D.movies[ctx.id] && D.movies[ctx.id].progress ? [{ row: true, sep: false, label: 'Start Over', key: '', go: close(this.playMovie(ctx.id, true)) }, { row: false, sep: true }] : []),
+        { row: true, sep: false, label: 'Add to Collection…', key: '', go: close() },
+        { row: false, sep: true },
+        { row: true, sep: false, label: 'Copy Link', key: '⌘C', go: close(() => this.toast('Link copied', 'link')) },
+        { row: true, sep: false, label: 'Open in New Window', key: '⌥↩', go: close() },
+        { row: true, sep: false, label: 'Show in Jellyfin', key: '', go: close() },
+      ] };
+    } else if (ctx && ctx.kind === 'list') {
+      const e = getList(ctx.id) || {}, nm = listNames[e.list] || 'list';
+      const close = fn => ev => { ev.stopPropagation(); this.setState({ ctx: null }); fn && fn(); };
+      ctxVals = { x: ctx.x, y: ctx.y, items: [
+        { row: true, sep: false, label: 'Open Details', key: '↩', go: close(openTitle(ctx.id)) },
+        { row: false, sep: true },
+        ...(e.list !== 'watched' ? [{ row: true, sep: false, label: e.pin ? 'Unpin' : 'Pin', key: '', go: close(() => this.togglePin(ctx.id)) }] : []),
+        { row: true, sep: false, label: e.list === 'watched' ? 'Mark as Unwatched' : 'Mark as Watched', key: '⇧⌘U', go: close(() => this.toggleWatchedFor(ctx.id)) },
+        { row: true, sep: false, label: `Remove from ${nm}`, key: '⌫', go: close(() => { this.setList(ctx.id, null); this.toast(`Removed from ${nm}`, 'bookmark_remove'); }) },
+      ] };
+    } else if (ctx) {
+      const isM = ctx.kind === 'movie';
+      const close = fn => e => { e.stopPropagation(); this.setState({ ctx: null }); fn && fn(); };
+      const wd = isM && isWatched(ctx.id);
+      ctxVals = { x: ctx.x, y: ctx.y, items: [
+        { row: true, sep: false, label: isM && D.movies[ctx.id].progress ? 'Resume' : 'Play', key: '↩', go: close(isM ? this.playMovie(ctx.id) : null) },
+        { row: true, sep: false, label: isM ? 'Open Details' : 'Open Show', key: '⌘↓', go: close(isM ? () => this.go('details', { movie: ctx.id }) : (seriesReady(ctx.id) ? () => this.go('series', { show: ctx.id }) : null)) },
+        { row: false, sep: true },
+        { row: true, sep: false, label: (getList(ctx.id) || {}).list === 'want' ? 'Remove from Want to Watch' : 'Add to Want to Watch', key: '', go: close(() => this.toggleWant(ctx.id)) },
+        { row: true, sep: false, label: wd ? 'Mark as Unwatched' : 'Mark as Watched', key: '⇧⌘U', go: close(isM ? () => this.setState(st => ({ watched: { ...st.watched, [ctx.id]: !wd } })) : null) },
+        { row: true, sep: false, label: 'Add to Collection…', key: '', go: close() },
+        { row: false, sep: true },
+        { row: true, sep: false, label: 'Open in New Window', key: '⌥↩', go: close() },
+        { row: true, sep: false, label: 'Show in Jellyfin', key: '', go: close() },
+      ] };
+    }
+
+    return {
+      ready: true, scroller: this.scroller, rootRef: this.rootRef, inputRef: this.inputRef,
+      settingsOpen: !!this.state.settings, settingsPane: this.state.settings || 'general', disconnected: !!this.state.disconnected,
+      openSettings: e => { e && e.stopPropagation(); this.setState({ settings: 'general' }); }, openJellyfin: e => { e && e.stopPropagation(); this.setState({ settings: 'jellyfin' }); }, openAccount: e => { e && e.stopPropagation(); this.setState({ settings: 'general' }); },
+      closeSettings: () => this.setState({ settings: null }), disconnect: () => this.setState({ settings: null, disconnected: true, setupStep: 'connect' }), logOut: () => this.setState({ settings: null, disconnected: true, setupStep: 'login' }),
+      setupStep: this.state.setupStep || 'connect', setupDone: r => this.setState({ disconnected: false, setupStep: null, dataState: r === 'skipped' ? 'not-connected' : 'ready', screen: 'home', history: [] }), settingsState: dataState,
+      onEnter: () => { this.hovered = true; }, onLeave: () => { this.hovered = false; },
+      closeMenus: () => (this.state.sortOpen || this.state.ctx || this.state.lm) && this.setState({ sortOpen: false, ctx: null, lm: null }),
+      lmOpen: !!lmS, lm: lmVals,
+      stop: e => e.stopPropagation(),
+      isHome: screen === 'home' && !psActive, isLibrary, isCollections: screen === 'collections' && !psActive, isContinue: screen === 'continue' && !psActive, isSeries: screen === 'series' && !psActive, isDetails: screen === 'details' && !psActive, isPerson: screen === 'person' && !psActive, pr,
+      ps: { loadingGrid: psActive && dataState === 'loading' && screen !== 'details', loadingDetail: psActive && dataState === 'loading' && screen === 'details', notConnected: psActive && dataState === 'not-connected', label: dataState === 'loading' ? 'Loading' : 'Jellyfin not connected', cards: Array.from({ length: 12 }, (_, i) => i) },
+      skel3: [0, 1, 2], retry: this.retry, signIn: () => this.setState({ settings: null, disconnected: true, setupStep: 'connect' }), goWant: () => this.go('want'),
+      toastOpen: !!this.state.toast, toast: this.state.toast || { text: '', icon: '', color: '' }, toastLeft: collapsed ? 0 : 256,
+      sideIssue: dataState === 'unreachable' ? { show: true, label: 'Sidebar · library unreachable', icon: 'cloud_off', color: '#ff8a8d', text: 'Can’t reach your library', cta: 'Retry', act: e => { e.stopPropagation(); this.retry(); } }
+        : dataState === 'not-connected' ? { show: true, label: 'Sidebar · library not connected', icon: 'link_off', color: '#91919a', text: 'Library not connected', cta: 'Connect…', act: e => { e.stopPropagation(); this.setState({ settings: null, disconnected: true, setupStep: 'connect' }); } }
+        : { show: false, label: '', icon: '', color: '', text: '', cta: '', act: () => {} },
+      toggleWant: () => this.toggleWant(movieId), togglePin: () => this.togglePin(movieId), openMoreMovie: this.moreFor('movie', movieId),
+      isPlayer: screen === 'player',
+      pad, collapsed, sidebarOpen: !collapsed, toolbarLeft: collapsed ? 20 : 296,
+      toolbarTitle: titles[screen] || '', titleOpacity: ['home', 'details', 'series', 'person'].includes(screen) ? 0 : 1,
+      hero, heroDots,
+      heroPrev: () => this.setState(st => ({ heroIdx: (st.heroIdx + D.featured.length - 1) % D.featured.length })),
+      heroNext: () => this.setState(st => ({ heroIdx: (st.heroIdx + 1) % D.featured.length })),
+      continueWatching, nextUp, recent, homeCollections, allCollections, collectionsCount: `${D.collections.length} collections`,
+      lib, sortOpen: this.state.sortOpen, toggleSort: e => { e.stopPropagation(); this.setState(st => ({ sortOpen: !st.sortOpen, ctx: null })); },
+      setGrid: () => this.setState({ view: 'grid' }), setList: () => this.setState({ view: 'list' }), clearFilter: () => this.setState({ filter: 'all' }),
+      s, m, more, nav,
+      sheetOpen: !!sheet, sh, closeSheet: () => this.setState({ sheet: null }),
+      ctxOpen: !!ctx, ctx: ctxVals,
+      searchOpen, query: this.state.query ?? this.props.query ?? '', hasQuery: !!q, searchEmpty: !q, searchLoading: !!q && dataState === 'loading', searchHasResults: !!q && flat.length > 0, searchNoResults: !!q && flat.length === 0 && dataState !== 'loading',
+      resultGroups, searchLeft: collapsed ? 340 : 460,
+      recentSearches: ['gosling', 'villeneuve', 'slow horses'].map(r => ({ label: r, go: () => this.setState({ query: r, sel: 0 }) })),
+      onQuery: e => this.setState({ query: e.target.value, sel: 0 }),
+      onSearchKey: e => {
+        e.stopPropagation();
+        if (e.key === 'Escape') this.setState({ searchOpen: false });
+        else if (e.key === 'ArrowDown') { e.preventDefault(); this.setState(st => ({ sel: Math.min(st.sel + 1, Math.max(0, this.flat.length - 1)) })); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); this.setState(st => ({ sel: Math.max(0, st.sel - 1) })); }
+        else if (e.key === 'Enter' && this.flat.length) this.flat[Math.min(this.state.sel, this.flat.length - 1)].open();
+      },
+      clearQuery: () => { this.setState({ query: '', sel: 0 }); this.inputRef.current && this.inputRef.current.focus(); },
+      openSearch: e => { e && e.stopPropagation(); this.openSearch(); }, closeSearch: () => this.setState({ searchOpen: false }),
+      goMovies: () => this.go('movies'), goTv: () => this.go('tv'), goCollections: () => this.go('collections'), goContinue: () => this.go('continue'), goRecent: () => this.go('recent'),
+      playerMedia: params.media, exitPlayer: () => this.back(),
+      backColor: screen === 'home' && !this.state.history.length ? 'rgba(244,244,242,.32)' : '#f4f4f2',
+      goBack: () => (screen !== 'home' || this.state.history.length) && this.back(),
+      toggleSidebar: () => this.setState({ collapsed: !collapsed }),
+      toggleWatched: () => this.toggleWatchedFor(movieId),
+    };
+  }
+}
+</script>
+</body>
+</html>

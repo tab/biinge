@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<script src="biinge-data.js"></script>
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}
+</style>
+<script src="biinge-theme.js"></script>
+</helmet>
+<div onMouseEnter="{{ onEnter }}" onMouseLeave="{{ onLeave }}" data-screen-label="Apple TV" data-theme="{{ theme }}" style="width:1920px;height:1080px;position:relative;overflow:hidden;background:#101014;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 50px 120px rgba(0,0,0,.55);">
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="T04 Home" style="position:absolute;inset:0;">
+  <div style="position:absolute;inset:0;opacity:{{ heroOpacity }};transition:opacity .45s;">
+    <img src="{{ hero.poster }}" alt="" style="position:absolute;left:-160px;top:-160px;width:calc(100% + 320px);height:calc(100% + 320px);object-fit:cover;filter:blur(90px) saturate(1.5) brightness(.6);">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,16,20,.75) 0%,rgba(16,16,20,.1) 70%);"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,16,20,0) 40%,#101014 82%);"></div>
+  </div>
+  <div style="position:absolute;left:0;right:0;top:0;transform:translateY(-{{ scrollY }}px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+    <div style="position:relative;height:860px;">
+      <img src="{{ hero.poster }}" alt="" style="position:absolute;right:120px;top:150px;width:400px;height:600px;object-fit:cover;border-radius:20px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 40px 90px rgba(0,0,0,.6);">
+      <div style="position:absolute;left:96px;top:250px;width:1100px;display:flex;flex-direction:column;gap:26px;">
+        <div style="font-size:28px;font-weight:600;color:rgba(244,244,242,.75);">{{ hero.eyebrow }}</div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:{{ hero.titleSize }}px;line-height:.98;letter-spacing:-.035em;text-wrap:balance;">{{ hero.title }}</div>
+        <div style="display:flex;align-items:center;gap:22px;font-size:29px;color:rgba(244,244,242,.82);">
+          <span>{{ hero.meta }}</span>
+          <span style="display:flex;align-items:center;gap:6px;color:#f4f4f2;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>{{ hero.rating }}</span>
+        </div>
+        <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.82);max-width:940px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ hero.overview }}</div>
+        <div style="display:flex;gap:22px;margin-top:12px;">
+          <sc-for list="{{ heroButtons }}" as="b" hint-placeholder-count="2">
+          <div onClick="{{ b.select }}" style="display:flex;align-items:center;gap:10px;height:76px;padding:0 40px 0 32px;border-radius:999px;font-size:31px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .22s cubic-bezier(.2,.7,.2,1);cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;font-variation-settings:'FILL' 1,'wght' 500;">{{ b.icon }}</span>{{ b.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="position:absolute;right:120px;top:780px;width:400px;display:flex;justify-content:center;gap:10px;">
+        <sc-for list="{{ heroDots }}" as="d" hint-placeholder-count="3"><div style="width:{{ d.w }}px;height:10px;border-radius:5px;background:{{ d.bg }};transition:all .3s;"></div></sc-for>
+      </div>
+    </div>
+
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+    <div style="padding-left:96px;margin-bottom:72px;">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:40px;letter-spacing:-.02em;color:{{ r.headColor }};margin-bottom:28px;transition:color .2s;">{{ r.title }}</div>
+      <div style="display:flex;gap:{{ r.gap }}px;transform:translateX(-{{ r.offset }}px);transition:transform .45s cubic-bezier(.2,.7,.2,1);">
+        <sc-for list="{{ r.items }}" as="it" hint-placeholder-count="4">
+        <div onClick="{{ it.select }}" style="flex:none;width:{{ it.w }}px;display:flex;flex-direction:column;gap:22px;cursor:default;">
+          <div style="position:relative;width:{{ it.w }}px;height:{{ it.h }}px;border-radius:{{ it.r }}px;overflow:hidden;background:#282828;transform:{{ it.tf }};box-shadow:{{ it.shadow }};transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s;">
+            <sc-if value="{{ it.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ it.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ it.pos }};display:block;"></sc-if>
+            <sc-if value="{{ it.isWide }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ it.img }}" alt="" style="position:absolute;left:-80px;top:-80px;width:calc(100% + 160px);height:calc(100% + 160px);object-fit:cover;filter:blur(46px) saturate(1.4) brightness(.5);">
+            <img src="{{ it.p1 }}" alt="" style="position:absolute;right:{{ it.fanRight1 }}px;top:44px;width:150px;height:225px;object-fit:cover;border-radius:12px;transform:rotate(-9deg);box-shadow:0 14px 34px rgba(0,0,0,.5);">
+            <img src="{{ it.p3 }}" alt="" style="position:absolute;right:{{ it.fanRight3 }}px;top:44px;width:150px;height:225px;object-fit:cover;border-radius:12px;transform:rotate(9deg);box-shadow:0 14px 34px rgba(0,0,0,.5);">
+            <img src="{{ it.img }}" alt="" style="position:absolute;right:{{ it.fanRight2 }}px;top:30px;width:158px;height:237px;object-fit:cover;border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.6);">
+            <div style="position:absolute;left:36px;bottom:32px;display:flex;flex-direction:column;gap:6px;">
+              <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:{{ it.nameSize }}px;letter-spacing:-.025em;line-height:1;">{{ it.name }}</div>
+              <div style="font-size:25px;color:rgba(244,244,242,.75);">{{ it.count }}</div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ it.noArt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-size:26px;color:#6e6969;">{{ it.title }}</div></sc-if>
+            <sc-if value="{{ it.hasProgress }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,.75) 100%);"></div>
+            <div style="position:absolute;left:22px;bottom:34px;font-size:24px;font-weight:600;">{{ it.left }}</div>
+            <div style="position:absolute;left:22px;right:22px;bottom:18px;height:7px;border-radius:4px;background:rgba(255,255,255,.3);overflow:hidden;"><div style="width:{{ it.pct }}%;height:100%;background:#f4f4f2;"></div></div>
+            </sc-if>
+            <sc-if value="{{ it.hasCode }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:16px;top:16px;padding:5px 12px;border-radius:8px;background:rgba(0,0,0,.6);font-size:22px;font-weight:700;">{{ it.code }}</div></sc-if>
+            <sc-if value="{{ it.watched }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:12px;left:12px;width:40px;height:40px;border-radius:8px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;font-variation-settings:'wght' 700;">check</span></div></sc-if>
+            <div style="position:absolute;inset:0;pointer-events:none;opacity:{{ it.glare }};background:linear-gradient(125deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 42%);transition:opacity .28s;"></div>
+          </div>
+          <sc-if value="{{ it.hasText }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:4px;transform:translateY({{ it.textShift }}px);transition:transform .28s;">
+            <div style="font-size:29px;font-weight:600;color:{{ it.titleColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ it.title }}</div>
+            <div style="font-size:25px;color:rgba(244,244,242,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ it.sub }}</div>
+          </div>
+          </sc-if>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDetails }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="T06 Movie Details" style="position:absolute;inset:0;">
+  <div style="position:absolute;inset:0;">
+    <sc-if value="{{ m.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ m.poster }}" alt="" style="position:absolute;left:-160px;top:-160px;width:calc(100% + 320px);height:calc(100% + 320px);object-fit:cover;filter:blur(90px) saturate(1.5) brightness(.55);"></sc-if>
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,16,20,.7) 0%,rgba(16,16,20,.1) 75%);"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,16,20,0) 50%,#101014 92%);"></div>
+  </div>
+  <div style="position:absolute;left:0;right:0;top:0;transform:translateY(-{{ dScroll }}px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+    <div style="position:relative;height:1080px;">
+      <div style="position:absolute;right:120px;top:130px;width:440px;height:660px;border-radius:22px;overflow:hidden;background:#282828;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 40px 90px rgba(0,0,0,.6);">
+        <sc-if value="{{ m.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ m.poster }}" alt="" style="width:100%;height:100%;object-fit:cover;"></sc-if>
+        <sc-if value="{{ m.noArt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;font-size:40px;line-height:1.25;color:#6e6969;">{{ m.title }}</div></sc-if>
+        <sc-if value="{{ m.pinned }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:18px;right:18px;width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div></sc-if>
+      </div>
+      <div style="position:absolute;left:96px;top:190px;width:1160px;display:flex;flex-direction:column;gap:26px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-size:28px;font-weight:600;color:rgba(244,244,242,.75);margin-right:6px;">{{ m.kind }}</span>
+          <sc-for list="{{ m.quality }}" as="q" hint-placeholder-count="2"><span style="font-size:21px;font-weight:700;letter-spacing:.04em;padding:3px 12px;border-radius:7px;box-shadow:inset 0 0 0 2px rgba(244,244,242,.5);color:rgba(244,244,242,.9);">{{ q }}</span></sc-for>
+        </div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:{{ m.titleSize }}px;line-height:.98;letter-spacing:-.035em;text-wrap:balance;">{{ m.title }}</div>
+        <div style="display:flex;align-items:center;gap:22px;font-size:29px;color:rgba(244,244,242,.82);">
+          <span>{{ m.meta }}</span>
+          <span style="display:flex;align-items:center;gap:6px;color:#f4f4f2;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;color:#eec01e;font-variation-settings:'FILL' 1;">star</span>{{ m.rating }}</span>
+        </div>
+        <sc-if value="{{ m.hasProgress }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:20px;">
+          <div style="width:420px;height:8px;border-radius:4px;background:rgba(255,255,255,.22);overflow:hidden;"><div style="width:{{ m.pct }}%;height:100%;background:#f4f4f2;"></div></div>
+          <span style="font-size:26px;color:rgba(244,244,242,.75);">{{ m.left }}</span>
+        </div>
+        </sc-if>
+        <div style="display:flex;gap:22px;margin-top:8px;">
+          <sc-for list="{{ dButtons }}" as="b" hint-placeholder-count="4">
+          <div onClick="{{ b.select }}" style="display:flex;align-items:center;justify-content:center;gap:10px;height:76px;min-width:76px;padding:{{ b.padding }};border-radius:999px;font-size:31px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .22s cubic-bezier(.2,.7,.2,1);cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:40px;line-height:1;font-variation-settings:'FILL' {{ b.fill }},'wght' 500;">{{ b.icon }}</span>{{ b.label }}<sc-if value="{{ b.pin }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:30px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></sc-if><sc-if value="{{ b.chev }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;opacity:.6;margin-left:-6px;">expand_more</span></sc-if></div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ m.hasNote }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="{{ m.noteLabel }}" style="display:flex;align-items:center;gap:14px;font-size:28px;color:rgba(244,244,242,.78);"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;color:{{ m.noteColor }};">{{ m.noteIcon }}</span>{{ m.note }}</div>
+        </sc-if>
+        <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.82);max-width:1080px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">{{ m.overview }}</div>
+        <div style="display:flex;gap:48px;font-size:25px;color:rgba(244,244,242,.55);margin-top:4px;">
+          <sc-for list="{{ m.facts }}" as="fa" hint-placeholder-count="3"><span>{{ fa.label }}  <span style="color:#c9c9c6;">{{ fa.value }}</span></span></sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 0 80px 96px;display:flex;flex-direction:column;gap:72px;margin-top:-120px;">
+      <div style="display:flex;flex-direction:column;gap:28px;">
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:40px;letter-spacing:-.02em;color:{{ castHead }};">Cast &amp; Crew</div>
+        <div style="display:flex;gap:44px;">
+          <sc-for list="{{ cast }}" as="p" hint-placeholder-count="6">
+          <div onClick="{{ p.select }}" style="width:180px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;cursor:default;">
+            <div style="width:160px;height:160px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:600;color:#6e6969;transform:{{ p.tf }};box-shadow:{{ p.shadow }};transition:all .25s;">{{ p.initials }}</div>
+            <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:26px;font-weight:600;color:{{ p.color }};">{{ p.name }}</div><div style="font-size:23px;color:rgba(244,244,242,.55);">{{ p.role }}</div></div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:28px;">
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:40px;letter-spacing:-.02em;color:{{ moreHead }};">More in Your Library</div>
+        <div style="display:flex;gap:48px;">
+          <sc-for list="{{ more }}" as="it" hint-placeholder-count="6">
+          <div onClick="{{ it.select }}" style="flex:none;width:260px;display:flex;flex-direction:column;gap:22px;cursor:default;">
+            <div style="position:relative;width:260px;height:390px;border-radius:16px;overflow:hidden;background:#282828;transform:{{ it.tf }};box-shadow:{{ it.shadow }};transition:transform .28s,box-shadow .28s;"><img src="{{ it.img }}" alt="" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;inset:0;opacity:{{ it.glare }};background:linear-gradient(125deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 42%);"></div></div>
+            <div style="font-size:29px;font-weight:600;color:{{ it.titleColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translateY({{ it.textShift }}px);transition:transform .28s;">{{ it.title }}</div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{ isPage }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="{{ pageLabel }}" style="position:absolute;inset:0;background:#101014;">
+  <div style="position:absolute;left:0;right:0;top:0;transform:translateY(-{{ pageScroll }}px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+
+    <sc-if value="{{ isListsHead }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:190px 96px 56px;display:flex;flex-direction:column;gap:22px;">
+      <div style="display:flex;align-items:baseline;gap:24px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:88px;line-height:1;letter-spacing:-.035em;">My Lists</div><div style="font-size:28px;color:rgba(244,244,242,.55);">From your Biinge account</div></div>
+      <sc-if value="{{ banner.show }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="{{ banner.label }}" style="display:flex;align-items:center;gap:16px;font-size:28px;color:rgba(244,244,242,.8);"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;color:{{ banner.color }};">{{ banner.icon }}</span>{{ banner.text }}</div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isSearchHead }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="T12 Search" style="padding:190px 96px 64px;display:flex;flex-direction:column;align-items:center;gap:36px;">
+      <div style="display:flex;align-items:center;gap:20px;width:1100px;height:100px;padding:0 36px;border-radius:26px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12);font-size:44px;">
+        <span style="font-family:'Material Symbols Rounded';font-size:48px;line-height:1;color:rgba(244,244,242,.55);">search</span>
+        <span>{{ query }}</span><span style="width:3px;height:52px;margin-left:-16px;background:#f4f4f2;opacity:{{ caret }};"></span>
+        <span style="color:rgba(244,244,242,.35);">{{ queryPlaceholder }}</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <sc-for list="{{ keys }}" as="k" hint-placeholder-count="28"><div onClick="{{ k.select }}" style="width:{{ k.w }}px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;background:{{ k.bg }};color:{{ k.color }};transform:{{ k.tf }};transition:all .15s;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;display:{{ k.iconDisplay }};">{{ k.icon }}</span>{{ k.label }}</div></sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isPersonHead }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="T25 Person" style="padding:160px 96px 64px;display:flex;align-items:center;gap:64px;">
+      <div style="flex:none;width:300px;height:300px;border-radius:50%;background:#282828;display:flex;align-items:center;justify-content:center;font-family:Archivo,-apple-system,sans-serif;font-size:100px;font-weight:600;color:#6e6969;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06),0 40px 90px rgba(0,0,0,.5);">{{ person.initials }}</div>
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div style="font-size:30px;font-weight:600;color:rgba(244,244,242,.7);">{{ person.meta }}</div>
+        <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:112px;line-height:1;letter-spacing:-.035em;">{{ person.name }}</div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isConnectState }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="T05 Home · Jellyfin not connected" style="height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;padding-bottom:120px;">
+      <span style="font-family:'Material Symbols Rounded';font-size:96px;line-height:1;color:#64646d;">link_off</span>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:72px;letter-spacing:-.03em;">Connect Jellyfin to browse</div>
+      <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.65);max-width:1100px;">Your lists and search come from Biinge and still work. Connect your Jellyfin account to browse and play what Living Room holds.</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ hasMessage }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="{{ messageLabel }}" style="display:flex;flex-direction:column;align-items:center;gap:18px;padding:40px 96px;text-align:center;">
+      <span style="font-family:'Material Symbols Rounded';font-size:72px;line-height:1;color:#64646d;">{{ messageIcon }}</span>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:48px;letter-spacing:-.02em;">{{ messageTitle }}</div>
+      <div style="font-size:28px;line-height:1.45;color:rgba(244,244,242,.6);max-width:1000px;">{{ messageText }}</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ hasBtnRow }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;justify-content:{{ btnJustify }};gap:22px;padding:0 96px 64px;margin-top:{{ btnTop }}px;">
+      <sc-for list="{{ btnRow }}" as="b" hint-placeholder-count="3">
+      <div onClick="{{ b.select }}" style="display:flex;align-items:center;gap:10px;height:76px;padding:0 36px 0 30px;border-radius:999px;font-size:30px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .2s cubic-bezier(.2,.7,.2,1);cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;">{{ b.icon }}</span>{{ b.label }}</div>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <sc-for list="{{ pRows }}" as="r" hint-placeholder-count="0">
+    <div style="padding-left:96px;margin-bottom:64px;">
+      <div style="display:flex;align-items:baseline;gap:18px;margin-bottom:28px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:40px;letter-spacing:-.02em;color:{{ r.headColor }};transition:color .2s;">{{ r.title }}</div><div style="font-size:26px;color:rgba(244,244,242,.45);">{{ r.count }}</div></div>
+      <div style="display:flex;gap:{{ r.gap }}px;transform:translateX(-{{ r.offset }}px);transition:transform .45s cubic-bezier(.2,.7,.2,1);">
+        <sc-for list="{{ r.items }}" as="it" hint-placeholder-count="6">
+        <div onClick="{{ it.select }}" style="flex:none;width:{{ it.w }}px;display:flex;flex-direction:column;align-items:{{ it.align }};gap:22px;cursor:default;">
+          <div style="position:relative;width:{{ it.w }}px;height:{{ it.h }}px;border-radius:{{ it.r }};overflow:hidden;background:{{ it.tileBg }};transform:{{ it.tf }};box-shadow:{{ it.shadow }};transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s;">
+            <sc-if value="{{ it.hasArt }}" hint-placeholder-val="{{ true }}"><img src="{{ it.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;filter:{{ it.imgFilter }};"></sc-if>
+            <sc-if value="{{ it.offServer }}" hint-placeholder-val="{{ false }}"><div title="Not on Living Room" style="position:absolute;left:14px;bottom:14px;width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1;color:rgba(255,255,255,.92);">hide_source</span></div></sc-if>
+            <sc-if value="{{ it.noArt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-size:{{ it.phSize }}px;font-weight:{{ it.phWeight }};line-height:1.3;color:{{ it.phColor }};">{{ it.ph }}</div></sc-if>
+            <sc-if value="{{ it.pinned }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;transform:rotate(25deg);font-variation-settings:'FILL' 1;">push_pin</span></div></sc-if>
+            <sc-if value="{{ it.hasPie }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:16px;left:16px;width:36px;height:36px;border-radius:50%;box-shadow:0 0 0 3px #fff,0 2px 8px rgba(0,0,0,.4);background:{{ it.pie }};"></div></sc-if>
+            <div style="position:absolute;inset:0;pointer-events:none;opacity:{{ it.glare }};background:linear-gradient(125deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 42%);transition:opacity .28s;"></div>
+          </div>
+          <sc-if value="{{ it.hasText }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;align-items:{{ it.align }};gap:4px;max-width:{{ it.w }}px;transform:translateY({{ it.textShift }}px);transition:transform .28s;">
+            <div style="font-size:29px;font-weight:600;color:{{ it.titleColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:{{ it.w }}px;">{{ it.title }}</div>
+            <div style="font-size:25px;color:rgba(244,244,242,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:{{ it.w }}px;">{{ it.sub }}</div>
+          </div>
+          </sc-if>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:25;">
+  <dc-import name="Biinge TV Settings" theme="{{ theme }}" data-state="{{ settingsDs }}" on-data-state="{{ settingsSetDs }}" on-tab="{{ settingsTab }}" on-back="{{ settingsBack }}" is-active="{{ settingsActive }}" hint-size="1920px,1080px"></dc-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:64px;z-index:30;display:flex;justify-content:center;pointer-events:none;">
+  <div style="display:flex;align-items:center;gap:16px;height:84px;padding:0 40px 0 30px;border-radius:999px;background:rgba(40,40,46,.8);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.16),0 24px 60px rgba(0,0,0,.5);font-size:30px;font-weight:500;">
+    <span style="font-family:'Material Symbols Rounded';font-size:38px;line-height:1;color:{{ toast.color }};font-variation-settings:'FILL' 1;">{{ toast.icon }}</span>{{ toast.text }}
+  </div>
+</div>
+</sc-if>
+
+<div style="position:absolute;top:44px;left:0;right:0;display:flex;justify-content:center;opacity:{{ tabOpacity }};transform:translateY({{ tabShift }}px);transition:all .4s;pointer-events:{{ tabPointer }};">
+  <div style="display:flex;align-items:center;gap:6px;height:84px;padding:0 10px;border-radius:999px;background:rgba(36,36,42,.45);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),inset 0 1px 0 rgba(255,255,255,.2),0 14px 40px rgba(0,0,0,.35);">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+    <div onClick="{{ t.select }}" style="display:flex;align-items:center;justify-content:center;height:64px;min-width:64px;padding:{{ t.padding }};border-radius:999px;font-size:29px;font-weight:600;background:{{ t.bg }};color:{{ t.color }};transform:{{ t.tf }};transition:all .2s;cursor:default;"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;">{{ t.icon }}</span></sc-if>{{ t.label }}</div>
+    </sc-for>
+  </div>
+</div>
+
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="{{ sheet.label }}" style="position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(10,10,12,.55);backdrop-filter:blur(40px) saturate(1.3);-webkit-backdrop-filter:blur(40px) saturate(1.3);">
+  <div style="display:flex;align-items:center;gap:80px;">
+    <div style="width:640px;height:360px;border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 40px 90px rgba(0,0,0,.6);position:relative;">
+      <img src="{{ sheet.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ sheet.pos }};">
+      <sc-if value="{{ sheet.hasPct }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:24px;right:24px;bottom:22px;height:8px;border-radius:4px;background:rgba(255,255,255,.3);overflow:hidden;"><div style="width:{{ sheet.pct }}%;height:100%;background:#f4f4f2;"></div></div></sc-if>
+    </div>
+    <div style="width:620px;display:flex;flex-direction:column;gap:16px;">
+      <div style="font-size:27px;font-weight:600;color:rgba(244,244,242,.65);">{{ sheet.eyebrow }}</div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:56px;line-height:1.02;letter-spacing:-.03em;">{{ sheet.title }}</div>
+      <div style="font-size:27px;color:rgba(244,244,242,.7);margin-bottom:18px;">{{ sheet.sub }}</div>
+      <sc-for list="{{ sheetButtons }}" as="b" hint-placeholder-count="3">
+      <div onClick="{{ b.select }}" style="display:flex;align-items:center;gap:16px;min-height:82px;padding:12px 32px;box-sizing:border-box;border-radius:20px;font-size:31px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .2s;cursor:default;"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:38px;line-height:1;font-variation-settings:'FILL' {{ b.fill }};transform:rotate({{ b.rot }}deg);">{{ b.icon }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><span>{{ b.label }}</span><sc-if value="{{ b.hasDesc }}" hint-placeholder-val="{{ false }}"><span style="font-size:21px;font-weight:450;opacity:.62;">{{ b.desc }}</span></sc-if></span><sc-if value="{{ b.check }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-family:'Material Symbols Rounded';font-size:38px;line-height:1;font-variation-settings:'wght' 600;">check</span></sc-if><sc-if value="{{ b.hasRight }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:26px;font-weight:650;opacity:.7;">{{ b.right }}</span></sc-if></div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<div style="position:absolute;right:56px;top:74px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:18px;color:rgba(244,244,242,.4);pointer-events:none;opacity:{{ tabOpacity }};transition:opacity .4s;">
+  <span>Arrow keys · Siri Remote swipe</span><span>Return · Select</span><span>Esc · Back</span>
+</div>
+
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;details&quot;,&quot;lists&quot;,&quot;search&quot;,&quot;person&quot;,&quot;settings&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;movie&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;la-la-land&quot;,&quot;nightcrawler&quot;,&quot;blade-runner-2049&quot;,&quot;dune-part-two&quot;,&quot;poor-things&quot;,&quot;zodiac&quot;,&quot;aftersun&quot;,&quot;lotr-fellowship&quot;,&quot;arrival&quot;,&quot;slow-horses&quot;,&quot;silo&quot;],&quot;default&quot;:&quot;la-la-land&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;person&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Ryan Gosling&quot;,&quot;Emma Stone&quot;,&quot;Rebecca Ferguson&quot;,&quot;Denis Villeneuve&quot;,&quot;Jake Gyllenhaal&quot;],&quot;default&quot;:&quot;Ryan Gosling&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;query&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;not-connected&quot;,&quot;unreachable&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;},&quot;focusRow&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:-1,&quot;max&quot;:6,&quot;tsType&quot;:&quot;number&quot;},&quot;focusCol&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:8,&quot;tsType&quot;:&quot;number&quot;},&quot;sheetIndex&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:null,&quot;min&quot;:0,&quot;max&quot;:4,&quot;tsType&quot;:&quot;number&quot;}}">
+const FOCUS_SHADOW = '0 0 0 1px rgba(255,255,255,.25),0 36px 70px rgba(0,0,0,.65)';
+const REST_SHADOW = '0 0 0 1px rgba(255,255,255,.06),0 10px 24px rgba(0,0,0,.3)';
+const KEYS = 'abcdefghijklmnopqrstuvwxyz'.split('').concat(['space', 'del']);
+const LISTS = [['want', 'Want to Watch'], ['watching', 'Watching'], ['watched', 'Watched']];
+
+class Component extends DCLogic {
+  state = { screen: null, movie: null, person: null, focus: null, cols: {}, stack: [], settings: null, heroIdx: 0, sheet: undefined, sheetIdx: 0, watched: {}, listState: {}, query: null, toast: null, dataState: null };
+  hovered = false;
+
+  componentDidMount() {
+    if (!window.BIINGE) this.poll = setInterval(() => { if (window.BIINGE) { clearInterval(this.poll); this.forceUpdate(); } }, 60);
+    this.onKey = e => {
+      if (!this.hovered || this.settingsOpen()) return;
+      const map = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
+      const onSearch = this.screen() === 'search';
+      if (map[e.key]) { e.preventDefault(); this.move(...map[e.key]); }
+      else if (e.key === 'Enter' || (e.key === ' ' && !onSearch)) { e.preventDefault(); this.select(); }
+      else if (onSearch && /^[a-z0-9 ]$/i.test(e.key)) { e.preventDefault(); this.type(e.key.toLowerCase()); }
+      else if (onSearch && e.key === 'Backspace') { e.preventDefault(); this.type(null); }
+      else if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); this.back(); }
+    };
+    window.addEventListener('keydown', this.onKey);
+    this.heroT = setInterval(() => { if (this.focus().r !== 0 && !this.curSheet && this.screen() === 'home' && this.dataState() !== 'not-connected') this.setState(s => ({ heroIdx: (s.heroIdx + 1) % 3 })); }, 9000);
+  }
+  componentWillUnmount() { clearInterval(this.poll); clearInterval(this.heroT); clearTimeout(this.toastT); window.removeEventListener('keydown', this.onKey); }
+
+  settingsOpen() { return this.state.settings ?? this.props.screen === 'settings'; }
+  screen() { const s = this.state.screen ?? this.props.screen ?? 'home'; return s === 'settings' ? 'home' : s; }
+  movieId() { return this.state.movie ?? this.props.movie ?? 'la-la-land'; }
+  personName() { return this.state.person ?? this.props.person ?? 'Ryan Gosling'; }
+  query() { return this.state.query ?? this.props.query ?? ''; }
+  dataState() { return this.state.dataState ?? this.props.dataState ?? 'ready'; }
+  focus() { return this.state.focus ?? { r: this.props.focusRow ?? 0, c: this.props.focusCol ?? 0 }; }
+  col(r) { const f = this.focus(); return f.r === r ? f.c : (this.state.cols[r] ?? 0); }
+  getList(id) { const LS = this.state.listState; return (id in LS) ? LS[id] : window.BIINGE.listOf(id); }
+  watchedAny(id) { return this.state.watched[id] ?? (this.getList(id) || {}).list === 'watched'; }
+  toast(text, icon = 'check_circle', err = false) { clearTimeout(this.toastT); this.setState({ toast: { text, icon, color: err ? '#ff8a8d' : '#34c46f' } }); this.toastT = setTimeout(() => this.setState({ toast: null }), 3000); }
+  setList(id, v) { this.setState(s => ({ listState: { ...s.listState, [id]: v } })); }
+  listsFor(kind) {
+    const S = window.BIINGE.server;
+    return kind === 'show' ? [
+      { id: 'want', name: 'Want to Watch', icon: 'bookmark', pinnable: true, desc: 'Saved for later.' },
+      { id: 'watching', name: 'Watching', icon: 'clock_loader_40', pinnable: true, desc: 'Biinge follows your next episode.' },
+      { id: 'watched', name: 'Watched', icon: 'check_circle', pinnable: false, desc: `Marks every episode watched, here and on ${S}.` }]
+    : [
+      { id: 'want', name: 'Want to Watch', icon: 'bookmark', pinnable: true, desc: 'Saved for later.' },
+      { id: 'watched', name: 'Watched', icon: 'check_circle', pinnable: false, desc: `Also marks it played on ${S}.` }];
+  }
+  curListOf(id) { const e = this.getList(id); return e && e.list ? e.list : (this.watchedAny(id) ? 'watched' : null); }
+  togglePin(id) { const e = this.getList(id); if (!e) return; this.setList(id, { ...e, pin: !e.pin }); this.toast(e.pin ? 'Unpinned from Up Next' : 'Pinned to Up Next', 'push_pin'); }
+  pickList(id, kind, to) {
+    const L = this.listsFor(kind), e = this.getList(id), w = this.watchedAny(id), cur = this.curListOf(id), def = L.find(l => l.id === to);
+    if (!def || to === cur) return;
+    if (to === 'watched') { if (!w) return this.toggleWatched(id); this.setList(id, { list: 'watched', pin: false, t: Date.now() }); return this.toast('Moved to Watched'); }
+    const listState = { ...this.state.listState, [id]: { list: to, pin: def.pinnable && e ? !!e.pin : false, t: Date.now() } };
+    this.setState(w ? { listState, watched: { ...this.state.watched, [id]: false } } : { listState });
+    this.toast(`${cur ? 'Moved' : 'Added'} to ${def.name}`, to === 'want' ? 'bookmark_added' : def.icon);
+  }
+  removeFromList(id, kind) {
+    const def = this.listsFor(kind).find(l => l.id === this.curListOf(id));
+    this.setState(st => ({ listState: { ...st.listState, [id]: null }, watched: { ...st.watched, [id]: false } }));
+    this.toast(`Removed from ${def ? def.name : 'list'}`, 'do_not_disturb_on');
+  }
+  toggleWant(id) { const e = this.getList(id); if (e && e.list === 'want') { this.setList(id, null); this.toast('Removed from Want to Watch', 'bookmark_remove'); } else { this.setList(id, { list: 'want', pin: false, t: Date.now() }); this.toast('Added to Want to Watch', 'bookmark_added'); } }
+  toggleWatched(id) {
+    const D = window.BIINGE, T = D.title(id), ds = this.dataState(), w = this.watchedAny(id), e = this.getList(id);
+    const listState = { ...this.state.listState };
+    if (!w) listState[id] = { list: 'watched', pin: false, t: Date.now() }; else if (e && e.list === 'watched') listState[id] = null;
+    this.setState({ watched: { ...this.state.watched, [id]: !w }, listState });
+    const verb = w ? 'unwatched' : 'watched';
+    if (!T.inLib || ds === 'not-connected') this.toast(`Marked ${verb} in Biinge`);
+    else if (ds === 'unreachable') this.toast(`Saved in Biinge. Couldn’t update ${D.server}.`, 'error', true);
+    else this.toast(`Marked ${verb} in Biinge and Jellyfin`, w ? 'remove_done' : 'check_circle');
+  }
+  type(ch) {
+    const q = this.query();
+    this.setState({ query: ch == null ? q.slice(0, -1) : (q + ch).replace(/^ /, '') });
+  }
+
+  move(dr, dc) {
+    if (this.curSheet) { if (dr) this.setState(s => ({ sheetIdx: Math.max(0, Math.min(this.lens.sheet - 1, s.sheetIdx + dr)) })); return; }
+    const f = this.focus(), lens = this.lens.rows, minR = this.lens.minR;
+    if (dr) {
+      let r = f.r + dr;
+      while (r >= minR && r < lens.length - 1 && lens[r + 1] === 0) r += dr;
+      r = Math.max(minR, Math.min(lens.length - 2, r));
+      if (r === f.r || !lens[r + 1]) return;
+      this.setState(s => ({ cols: { ...s.cols, [f.r]: f.c }, focus: { r, c: Math.min(s.cols[r] ?? (r === -1 ? this.lens.tabHome : 0), lens[r + 1] - 1) } }));
+    } else {
+      const c = Math.max(0, Math.min(lens[f.r + 1] - 1, f.c + dc));
+      this.setState({ focus: { r: f.r, c } });
+    }
+  }
+  select() {
+    if (this.curSheet) { const b = this.sheetActions[this.state.sheetIdx]; b && b(); return; }
+    const a = this.actions[`${this.focus().r}:${this.focus().c}`];
+    a && a();
+  }
+  snapshot() { return { screen: this.screen(), movie: this.movieId(), person: this.personName(), focus: this.focus(), cols: this.state.cols }; }
+  push(screen, extra = {}) { this.setState(s => ({ stack: [...s.stack, this.snapshot()], screen, focus: { r: 0, c: 0 }, cols: {}, sheet: null, ...extra })); }
+  tab(screen) { this.setState({ screen, stack: [], focus: { r: screen === 'home' ? 0 : 0, c: 0 }, cols: {}, sheet: null }); }
+  back() {
+    if (this.curSheet) return this.setState({ sheet: null });
+    const st = this.state.stack;
+    if (st.length) { const p = st[st.length - 1]; return this.setState({ stack: st.slice(0, -1), screen: p.screen, movie: p.movie, person: p.person, focus: p.focus, cols: p.cols }); }
+    const f = this.focus();
+    if (f.r > 0) this.setState(s => ({ cols: { ...s.cols, [f.r]: f.c }, focus: { r: 0, c: 0 } }));
+    else if (f.r === 0) this.setState({ focus: { r: -1, c: this.lens.tabHome } });
+  }
+  openTitle(id) { this.push('details', { movie: id }); }
+  clickAt(r, c, fn) { return () => { const f = this.focus(); if (f.r === r && f.c === c) fn && fn(); else this.setState({ focus: { r, c } }); }; }
+
+  renderVals() {
+    const D = window.BIINGE;
+    if (!D) return { ready: false };
+    const screen = this.screen(), f = this.focus(), ds = this.dataState();
+    const actions = {}, lens = [7];
+    this.actions = actions;
+    const sheetUp = !!(this.state.sheet || (this.state.sheet === undefined && this.props.sheetIndex != null && screen === 'home'));
+    const isF = (r, c) => f.r === r && f.c === c && !sheetUp;
+    const btn = (r, c, label, icon, fn, opts = {}) => {
+      actions[`${r}:${c}`] = fn;
+      const on = isF(r, c);
+      const restBg = opts.disabled ? 'rgba(255,255,255,.07)' : opts.primary ? 'rgba(244,244,242,.88)' : 'rgba(255,255,255,.16)';
+      const restColor = opts.disabled ? 'rgba(244,244,242,.38)' : opts.primary ? '#101014' : '#f4f4f2';
+      return { label, icon, fill: opts.fill ?? 1, padding: label ? (opts.chev ? '0 26px 0 32px' : '0 40px 0 32px') : '0', select: this.clickAt(r, c, fn), pin: !!opts.pin, chev: !!opts.chev,
+        bg: on ? (opts.disabled ? 'rgba(255,255,255,.2)' : '#f4f4f2') : restBg, color: on ? (opts.disabled ? 'rgba(244,244,242,.6)' : '#101014') : restColor, tf: on ? 'scale(1.08)' : 'scale(1)', shadow: on ? '0 18px 40px rgba(0,0,0,.45)' : 'none' };
+    };
+    const card = (r, c, base, fn) => {
+      actions[`${r}:${c}`] = fn;
+      const on = isF(r, c);
+      return { ...base, select: this.clickAt(r, c, fn), tf: on ? 'scale(1.1) translateY(-4px)' : 'scale(1)', shadow: on ? FOCUS_SHADOW : REST_SHADOW, glare: on ? 1 : 0,
+        titleColor: on ? '#ffffff' : 'rgba(244,244,242,.78)', textShift: on ? Math.round(base.h * 0.05) + 6 : 0 };
+    };
+    const notConn = ds === 'not-connected', unreachable = ds === 'unreachable';
+    const tabIds = ['search', 'home', 'movies', 'tv', 'collections', 'lists', 'settings'];
+    const curTab = { home: 'home', search: 'search', lists: 'lists' }[screen] || (this.state.stack[0] ? ({ home: 'home', search: 'search', lists: 'lists' }[this.state.stack[0].screen]) : 'home');
+    const tabDefs = [['search', '', 'search'], ['home', 'Home'], ['movies', 'Movies'], ['tv', 'TV Shows'], ['collections', 'Collections'], ['lists', 'My Lists'], ['settings', '', 'settings']];
+    const tabs = tabDefs.map(([id, label, icon], i) => {
+      const on = isF(-1, i), sel = id === curTab;
+      actions[`-1:${i}`] = ['home', 'search', 'lists'].includes(id) ? () => this.tab(id) : id === 'settings' ? () => this.setState({ settings: true, focus: { r: -1, c: i } }) : null;
+      return { label, icon: icon || '', isIcon: !!icon, padding: icon ? '0' : '0 30px', select: this.clickAt(-1, i, actions[`-1:${i}`]),
+        bg: on ? '#f4f4f2' : sel ? 'rgba(255,255,255,.18)' : 'transparent', color: on ? '#101014' : 'rgba(244,244,242,.9)', tf: on ? 'scale(1.06)' : 'scale(1)' };
+    });
+    const blank = { offServer: false, imgFilter: 'none', hasArt: false, noArt: false, pinned: false, hasPie: false, pie: '', hasText: true, title: '', sub: '', img: '', ph: '', phSize: 28, phWeight: 400, phColor: '#6e6969', tileBg: '#282828', align: 'flex-start', r: '16px' };
+    const posterBase = (id, sub, extra = {}) => {
+      const t = D.title(id), art = !t.noArt, e = this.getList(id) || {};
+      return { ...blank, title: t.title, sub: t.inLib ? sub : `${sub} · Not on ${D.server}`, offServer: !t.inLib, imgFilter: t.inLib ? 'none' : 'saturate(.45) brightness(.8)', img: art ? D.poster(id) : '', hasArt: art, noArt: !art, ph: t.title, w: 260, h: 390, ...extra,
+        pinned: extra.showPin ? !!e.pin : false, hasPie: extra.showPie ? e.pie > 0 && e.pie < 100 : false, pie: `conic-gradient(#fff ${e.pie || 0}%, rgba(0,0,0,.55) 0)` };
+    };
+    const rowOffset = (r, n, w, gap) => { const c = this.col(r), step = w + gap, fit = Math.floor(1728 / step); return Math.max(0, Math.min(c - Math.max(0, fit - 2), n - fit)) * step; };
+    const mkRow = (r, title, count, items, w, gap) => { lens.push(items.length); return { title, count, gap, offset: Math.max(0, rowOffset(r, items.length, w, gap)), headColor: f.r === r ? '#ffffff' : 'rgba(244,244,242,.7)', items }; };
+
+    let vals = {}, page = null, minR = -1;
+    if (screen === 'home' && notConn) {
+      const btnRow = [btn(0, 0, 'Connect Jellyfin', 'link', null), btn(0, 1, 'Open My Lists', 'bookmark', () => this.tab('lists'))];
+      lens.push(2);
+      page = { pageLabel: 'T05 Home · Jellyfin not connected', isConnectState: true, hasBtnRow: true, btnRow, btnJustify: 'center', btnTop: -260, pRows: [], pageScroll: 0 };
+    } else if (screen === 'home') {
+      const fe = D.featured[this.state.heroIdx];
+      let hero, heroButtons;
+      if (fe.movie) {
+        const mv = D.movies[fe.movie];
+        hero = { eyebrow: `${fe.eyebrow} · Movie`, title: mv.title, poster: D.poster(fe.movie), meta: `${mv.year}  ·  ${D.fmtRun(mv.runtime)}  ·  ${mv.genres}`, rating: mv.rating.toFixed(1), overview: mv.overview };
+        heroButtons = [btn(0, 0, mv.progress ? 'Resume' : 'Play', 'play_arrow', null), btn(0, 1, 'Details', 'info', () => this.openTitle(fe.movie), { fill: 0 })];
+      } else {
+        const sh = D.shows[fe.show];
+        hero = { eyebrow: `${fe.eyebrow} · TV Show`, title: sh.title, poster: D.poster(fe.show), meta: fe.meta, rating: sh.rating.toFixed(1), overview: sh.overview };
+        heroButtons = [btn(0, 0, fe.cta, 'play_arrow', null), btn(0, 1, 'Details', 'info', () => this.openTitle(fe.show), { fill: 0 })];
+      }
+      hero.titleSize = hero.title.length > 14 ? 104 : 128;
+      lens.push(2);
+      const rowsDef = [];
+      rowsDef.push({ title: 'Continue Watching', w: 520, h: 292, gap: 48, items: D.continueWatching.map(c => {
+        const t = c.movie ? D.movies[c.movie] : D.shows[c.show];
+        return { base: { title: t.title, sub: c.movie ? `Movie · ${t.year}` : c.sub, img: D.poster(c.movie || c.show), pos: c.movie ? t.pos : c.pos, hasArt: true, hasProgress: true, pct: c.pct, left: D.fmtLeft(c.left), hasText: true },
+          fn: () => this.setState({ sheet: { ...c, title: t.title, sub: c.movie ? `${t.year}  ·  ${D.fmtRun(t.runtime)}` : c.sub, img: D.poster(c.movie || c.show), pos: c.movie ? t.pos : c.pos }, sheetIdx: 0 }) };
+      }) });
+      rowsDef.push({ title: 'Next Up', w: 440, h: 248, gap: 44, items: D.nextUp.map(n => ({ base: { title: D.shows[n.show].title, sub: `${n.title} · ${n.dur}`, img: D.poster(n.show), pos: n.pos, hasArt: true, hasCode: true, code: n.code, hasText: true }, fn: null })) });
+      const byAdded = o => Object.keys(o).filter(k => !o[k].noArt).sort((a, b) => o[a].added - o[b].added);
+      rowsDef.push({ title: 'Recently Added Movies', w: 260, h: 390, gap: 48, items: byAdded(D.movies).slice(0, 9).map(id => ({ base: { title: D.movies[id].title, sub: `${D.movies[id].year}`, img: D.poster(id), pos: 'center', hasArt: true, watched: this.watchedAny(id), hasText: true }, fn: () => this.openTitle(id) })) });
+      rowsDef.push({ title: 'Recently Added TV Shows', w: 260, h: 390, gap: 48, items: byAdded(D.shows).map(id => ({ base: { title: D.shows[id].title, sub: D.shows[id].limited ? 'Limited Series' : `${D.shows[id].seasonsTotal} Seasons`, img: D.poster(id), pos: 'center', hasArt: true, hasText: true }, fn: () => this.openTitle(id) })) });
+      rowsDef.push({ title: 'Collections', w: 640, h: 360, gap: 48, items: D.collections.map(c => ({ base: { isWide: true, name: c.name, count: `${c.items.length} titles`, nameSize: 44, img: D.poster(c.items[1]), p1: D.poster(c.items[0]), p3: D.poster(c.items[2] || c.items[0]), fanRight1: 196, fanRight2: 112, fanRight3: 30, hasText: false }, fn: null })) });
+      rowsDef.push({ title: 'Browse Your Library', w: 840, h: 300, gap: 48, items: [
+        { base: { isWide: true, name: 'Movies', count: `${Object.keys(D.movies).length} movies`, nameSize: 64, img: D.poster('dune-part-two'), p1: D.poster('la-la-land'), p3: D.poster('zodiac'), fanRight1: 196, fanRight2: 112, fanRight3: 30, hasText: false }, fn: null },
+        { base: { isWide: true, name: 'TV Shows', count: `${Object.keys(D.shows).length} shows`, nameSize: 64, img: D.poster('silo'), p1: D.poster('the-bear'), p3: D.poster('chernobyl'), fanRight1: 196, fanRight2: 112, fanRight3: 30, hasText: false }, fn: null },
+      ] });
+      const heights = rowsDef.map(r => 40 + 28 + r.h + (r.items[0].base.hasText ? 22 + 80 : 0) + 72);
+      let scrollY = 0;
+      if (f.r >= 1) scrollY = 860 + heights.slice(0, f.r - 1).reduce((a, b) => a + b, 0) - 150;
+      const rows = rowsDef.map((rd, i) => {
+        const r = i + 1;
+        lens.push(rd.items.length);
+        return { title: rd.title, gap: rd.gap, offset: Math.max(0, rowOffset(r, rd.items.length, rd.w, rd.gap)), headColor: f.r === r ? '#ffffff' : 'rgba(244,244,242,.7)',
+          items: rd.items.map((it, j) => card(r, j, { hasArt: false, noArt: false, isWide: false, hasProgress: false, hasCode: false, watched: false, hasText: true, sub: '', title: '', pos: 'center', name: '', count: '', p1: '', p3: '', nameSize: 44, fanRight1: 0, fanRight2: 0, fanRight3: 0, pct: 0, left: '', code: '', ...it.base, w: rd.w, h: rd.h, r: rd.h > 300 && rd.w < 400 ? 16 : 20 }, it.fn)) };
+      });
+      vals = { hero, heroButtons, rows, scrollY, heroOpacity: f.r >= 2 ? 0.25 : 1,
+        heroDots: [0, 1, 2].map(i => ({ w: i === this.state.heroIdx ? 34 : 10, bg: i === this.state.heroIdx ? '#f4f4f2' : 'rgba(244,244,242,.35)' })) };
+    } else if (screen === 'details') {
+      const id = this.movieId(), T = D.title(id), mv = D.movies[id] || null, isMovie = T.kind === 'movie';
+      const e = this.getList(id), w = this.watchedAny(id), wanted = !!e && e.list === 'want', dup = T.inLib && T.dup > 1;
+      const jfPlayed = !!(mv && mv.watched) && !w;
+      const canPlay = T.inLib && !notConn && !unreachable && !dup && ds !== 'loading';
+      const prog = mv && canPlay ? mv.progress : 0;
+      const dButtons = [];
+      let c = 0;
+      const kind = isMovie ? 'movie' : 'show', L = this.listsFor(kind), curId = this.curListOf(id), cur = L.find(l => l.id === curId);
+      const playLabel = prog ? `Resume  ·  ${D.fmtLeft(Math.round(mv.runtime * (1 - prog)))}` : (w ? 'Play Again' : 'Play');
+      if (canPlay) dButtons.push(btn(0, c++, playLabel, !prog && w ? 'replay' : 'play_arrow', null, { primary: true }));
+      else if (T.inLib && unreachable && !dup) dButtons.push(btn(0, c++, playLabel, 'play_arrow', () => this.toast(`Can’t reach ${D.server}`, 'cloud_off', true), { disabled: true }));
+      else if (!cur) dButtons.push(btn(0, c++, 'Add to Want to Watch', 'bookmark_add', () => this.pickList(id, kind, 'want'), { primary: true, fill: 0 }));
+      dButtons.push(btn(0, c++, cur ? cur.name : 'Add to List', cur ? cur.icon : 'add', () => this.setState({ sheet: { menu: 'list', id, kind }, sheetIdx: 0 }), { chev: true, pin: !!(e && e.pin), fill: cur ? 1 : 0 }));
+      dButtons.push(btn(0, c++, '', 'more_horiz', () => this.setState({ sheet: { menu: 'more', id, kind }, sheetIdx: 0 })));
+      lens.push(c);
+      const note = unreachable ? ['T26 Details · Jellyfin unreachable', 'cloud_off', '#ff8a8d', `Can’t reach ${D.server}, so Play isn’t available.`]
+        : notConn ? ['T26 Details · Jellyfin not connected', 'link_off', '#91919a', 'Jellyfin isn’t connected on this Apple TV, so Play isn’t available.']
+        : jfPlayed ? ['T27 Details · played in Jellyfin, not in Watched', 'check', 'rgba(244,244,242,.6)', `Played on ${D.server}. Not in your Watched list.`]
+        : dup ? ['T26 Details · duplicate in library', 'content_copy', '#eec01e', `${D.server} holds ${T.dup} copies of this title, so Biinge can’t choose one to play.`]
+        : !T.inLib ? ['T26 Details · not in library', 'dns', 'rgba(244,244,242,.6)', `Not on ${D.server}. Add it to Jellyfin to play here.`] : null;
+      const castList = (T.cast || []).slice(0, 7);
+      lens.push(castList.length);
+      const cast = castList.map(([name, role], ci) => { const on = isF(1, ci); const fn = () => this.push('person', { person: name }); actions[`1:${ci}`] = fn; return { name, role, initials: D.initials(name), select: this.clickAt(1, ci, fn), tf: on ? 'scale(1.12)' : 'scale(1)', shadow: on ? FOCUS_SHADOW : 'none', color: on ? '#fff' : 'rgba(244,244,242,.85)' }; });
+      const moreIds = mv && !notConn ? Object.keys(D.movies).filter(k => k !== id && !D.movies[k].noArt).slice(0, 6) : [];
+      lens.push(moreIds.length);
+      const more = moreIds.map((k, mc) => card(2, mc, { title: D.movies[k].title, img: D.poster(k), h: 390 }, () => this.openTitle(k)));
+      const at = mv ? Math.round(mv.runtime * mv.progress) : 0;
+      const listLabel = ({ want: 'Want to Watch', watching: 'Watching', watched: 'Watched' }[e && e.list]) || (w ? 'Watched' : 'Not tracked');
+      vals = { m: { title: T.title, kind: isMovie ? 'Movie' : 'TV Show', titleSize: T.title.length > 28 ? 84 : T.title.length > 14 ? 104 : 128, poster: D.poster(id), hasArt: !T.noArt, noArt: !!T.noArt, pinned: !!(e && e.pin),
+          quality: canPlay ? (T.quality || []) : [], overview: T.overview, rating: T.rating.toFixed(1),
+          meta: isMovie ? `${T.year}  ·  ${D.fmtRun(T.runtime)}  ·  ${T.genres}` : `${T.year}  ·  ${T.limited ? 'Limited Series' : `${T.seasonsTotal} Seasons`}  ·  ${T.genres}`,
+          hasProgress: prog > 0, pct: Math.round(prog * 100), left: `Stopped at ${at} min  ·  ${D.fmtLeft((mv ? mv.runtime : 0) - at)}`,
+          hasNote: !!note, noteLabel: note ? note[0] : '', noteIcon: note ? note[1] : '', noteColor: note ? note[2] : '', note: note ? note[3] : '',
+          facts: isMovie ? [{ label: 'Director', value: T.director }, ...(canPlay ? [{ label: 'Audio', value: T.audio }] : []), { label: 'Biinge', value: listLabel }] : [{ label: 'Created by', value: T.creator }, { label: 'Biinge', value: listLabel }] },
+        dButtons, cast, more, hasMore: moreIds.length > 0, dScroll: f.r <= 0 ? 0 : f.r === 1 ? 560 : 900,
+        castHead: f.r === 1 ? '#fff' : 'rgba(244,244,242,.7)', moreHead: f.r === 2 ? '#fff' : 'rgba(244,244,242,.7)' };
+    } else if (screen === 'lists') {
+      minR = -1;
+      const loading = ds === 'loading', empty = ds === 'empty';
+      const listIds = L => { const LS = this.state.listState; const base = [...D.lists[L].movies, ...D.lists[L].shows].map(x => x[0]); const extra = Object.keys(LS).filter(id => LS[id] && LS[id].list === L && !base.includes(id)).sort((a, b) => (LS[b].t || 0) - (LS[a].t || 0)); return [...extra, ...base].filter(id => (this.getList(id) || {}).list === L); };
+      const pRows = LISTS.map(([L, name], i) => {
+        const ids = empty ? [] : listIds(L);
+        let items;
+        if (loading) items = [0, 1, 2, 3, 4, 5].map(k => card(i, k, { ...blank, w: 260, h: 390, tileBg: 'rgba(255,255,255,.06)', hasText: false }, null));
+        else if (!ids.length) items = [card(i, 0, { ...blank, w: 640, h: 390, tileBg: 'rgba(255,255,255,.05)', noArt: true, hasText: false, ph: { want: 'Nothing in Want to Watch. Add titles on iPhone, on Mac, or from any details page here.', watching: 'No shows in progress. A show moves here when you start watching it.', watched: 'Nothing watched yet. Titles you mark Watched show up here.' }[L], phSize: 30, phColor: 'rgba(244,244,242,.6)' }, null)];
+        else items = ids.map((id, k) => { const t = D.title(id); return card(i, k, posterBase(id, t.kind === 'movie' ? `${t.year}` : (t.limited ? 'Limited Series' : `${t.seasonsTotal} Seasons`), { showPin: L !== 'watched', showPie: L === 'watching' }), () => this.openTitle(id)); });
+        return mkRow(i, name, loading || !ids.length ? '' : `${ids.length}`, items, items[0].w, 48);
+      });
+      const banner = unreachable ? { show: true, label: 'T24 My Lists · Jellyfin unreachable', icon: 'cloud_off', color: '#ff8a8d', text: `Can’t reach ${D.server}. Lists still work. Play comes back with the server.` }
+        : notConn ? { show: true, label: 'T24 My Lists · Jellyfin not connected', icon: 'link_off', color: '#91919a', text: 'Jellyfin isn’t connected. Lists still work. Connect it in Settings to play.' }
+        : { show: false, label: '', icon: '', color: '', text: '' };
+      page = { pageLabel: loading ? 'T24 My Lists · loading' : empty ? 'T24 My Lists · empty' : 'T24 My Lists', isListsHead: true, banner, pRows, pageScroll: f.r <= 0 ? 0 : 260 + (f.r - 1) * 600 };
+    } else if (screen === 'search') {
+      minR = -1;
+      const q = this.query(), ql = q.trim().toLowerCase();
+      const keys = KEYS.map((k, i) => { const on = isF(0, i); const fn = () => this.type(k === 'space' ? ' ' : k === 'del' ? null : k); actions[`0:${i}`] = fn;
+        return { label: k.length === 1 ? k : '', icon: k === 'space' ? 'space_bar' : k === 'del' ? 'backspace' : '', iconDisplay: k.length > 1 ? 'inline' : 'none', w: k.length > 1 ? 96 : 54, select: this.clickAt(0, i, fn),
+          bg: on ? '#f4f4f2' : 'rgba(255,255,255,.1)', color: on ? '#101014' : '#f4f4f2', tf: on ? 'scale(1.15)' : 'scale(1)' }; });
+      lens.push(KEYS.length);
+      let pRows = [], msg = null, btnRow = [];
+      if (!ql) {
+        btnRow = ['gosling', 'villeneuve', 'slow horses'].map((r, i) => btn(1, i, r, 'history', () => this.setState({ query: r, focus: { r: 2, c: 0 } }), { fill: 0 }));
+        lens.push(btnRow.length);
+      } else if (ds === 'loading') {
+        msg = ['T12 Search · loading', 'hourglass_empty', 'Searching the catalog…', ''];
+      } else {
+        const ids = [...Object.keys(D.movies), ...Object.keys(D.shows), ...Object.keys(D.catalog)];
+        const hit = id => D.title(id).title.toLowerCase().includes(ql);
+        const mm = ids.filter(id => D.title(id).kind === 'movie' && hit(id)), ss = ids.filter(id => D.title(id).kind === 'show' && hit(id));
+        const names = [...new Set([...Object.keys(D.people), ...ids.flatMap(id => (D.title(id).cast || []).map(c => c[0]))])].filter(n => n.toLowerCase().includes(ql));
+        let r = 1;
+        if (mm.length) { const rr = r++; pRows.push(mkRow(rr, 'Movies', `${mm.length}`, mm.map((id, k) => card(rr, k, posterBase(id, `${D.title(id).year}`, { w: 220, h: 330 }), () => this.openTitle(id))), 220, 40)); }
+        if (ss.length) { const rr = r++; pRows.push(mkRow(rr, 'TV Shows', `${ss.length}`, ss.map((id, k) => card(rr, k, posterBase(id, `${D.title(id).year}`, { w: 220, h: 330 }), () => this.openTitle(id))), 220, 40)); }
+        if (names.length) { const rr = r++; pRows.push(mkRow(rr, 'People', `${names.length}`, names.map((n, k) => card(rr, k, { ...blank, w: 200, h: 200, r: '50%', noArt: true, ph: D.initials(n), phSize: 64, phWeight: 600, align: 'center', title: n, sub: D.people[n] ? D.people[n].dept : 'Acting' }, () => this.push('person', { person: n }))), 200, 44)); }
+        if (!pRows.length) msg = ['T23 Search · no results', 'search_off', `No results for “${q.trim()}”`, 'Search covers every movie, show and person in the Biinge catalog. Try another spelling or name.'];
+      }
+      page = { pageLabel: ql ? 'T13 Search Results' : 'T12 Search', isSearchHead: true, keys, query: q, queryPlaceholder: q ? '' : 'Movies, shows and people', caret: f.r === 0 ? 1 : 0,
+        hasBtnRow: btnRow.length > 0, btnRow, btnJustify: 'center', btnTop: 0,
+        hasMessage: !!msg, messageLabel: msg ? msg[0] : '', messageIcon: msg ? msg[1] : '', messageTitle: msg ? msg[2] : '', messageText: msg ? msg[3] : '',
+        pRows, pageScroll: f.r <= 1 ? 0 : 330 + (f.r - 2) * 480 };
+    } else if (screen === 'person') {
+      minR = 0;
+      const name = this.personName();
+      const all = [...Object.keys(D.movies), ...Object.keys(D.shows), ...Object.keys(D.catalog)];
+      const P = D.people[name] || { dept: 'Acting', born: '', credits: all.filter(id => (D.title(id).cast || []).some(c => c[0] === name)).map(id => [id, D.title(id).cast.find(c => c[0] === name)[1]]) };
+      const cr = (ds === 'empty' ? [] : P.credits).slice().sort((a, b) => D.title(b[0]).year - D.title(a[0]).year);
+      const pRows = cr.length ? [mkRow(0, 'Filmography', `${cr.length}`, cr.map(([id, role], k) => card(0, k, posterBase(id, `${D.title(id).year}  ·  ${role}`), () => this.openTitle(id))), 260, 48)] : [];
+      if (!cr.length) lens.push(0);
+      page = { pageLabel: 'T25 Person', isPersonHead: true, person: { name, initials: D.initials(name), meta: [P.dept, P.born].filter(Boolean).join('  ·  ') },
+        hasMessage: !cr.length, messageLabel: 'T25 Person · no credits', messageIcon: 'movie', messageTitle: 'No credits yet', messageText: `The Biinge catalog has no movies or shows for ${name}.`, pRows, pageScroll: 0 };
+    }
+
+    // resume action sheet
+    let sheetVals = {}, sheetButtons = [];
+    let sh = this.state.sheet;
+    if (sh === undefined && this.props.sheetIndex != null && screen === 'home') {
+      const c = D.continueWatching[this.props.sheetIndex], t = c.movie ? D.movies[c.movie] : D.shows[c.show];
+      sh = { ...c, title: t.title, sub: c.movie ? `${t.year}  ·  ${D.fmtRun(t.runtime)}` : c.sub, img: D.poster(c.movie || c.show), pos: c.movie ? t.pos : c.pos };
+    }
+    this.curSheet = sh || null;
+    this.sheetLen = 3;
+    if (sh && sh.menu) {
+      const T = D.title(sh.id), mv = D.movies[sh.id], L = this.listsFor(sh.kind), le = this.getList(sh.id) || {}, curId = this.curListOf(sh.id), cur = L.find(l => l.id === curId);
+      const close = fn => () => { this.setState({ sheet: null }); fn && fn(); };
+      let defs;
+      if (sh.menu === 'list') {
+        defs = L.map(l => ({ icon: l.icon, label: l.name, desc: l.desc, check: l.id === curId, fill: l.id === curId ? 1 : 0, fn: close(() => this.pickList(sh.id, sh.kind, l.id)) }));
+        if (cur && cur.pinnable) defs.push({ icon: 'push_pin', rot: 25, fill: le.pin ? 1 : 0, label: 'Pin to Up Next', desc: 'Keeps it at the top of Up Next and the list.', right: le.pin ? 'On' : 'Off', fn: () => this.togglePin(sh.id) });
+        if (cur) defs.push({ icon: 'do_not_disturb_on', label: `Remove from ${cur.name}`, red: true, fn: close(() => this.removeFromList(sh.id, sh.kind)) });
+      } else {
+        defs = [...(mv && mv.progress && T.inLib ? [{ icon: 'replay', label: 'Start Over', desc: 'From 0:00', fn: close() }] : []), { icon: 'library_add', label: 'Add to Collection…', fn: close() }, ...(T.inLib ? [{ icon: 'open_in_new', label: 'Show in Jellyfin', fn: close() }] : [])];
+      }
+      this.sheetLen = defs.length;
+      this.sheetActions = defs.map(d => d.fn);
+      const si = Math.min(this.state.sheetIdx, defs.length - 1);
+      sheetButtons = defs.map((d, i) => { const on = si === i; return { icon: d.icon, label: d.label, desc: d.desc || '', hasDesc: !!d.desc, check: !!d.check, right: d.right || '', hasRight: !!d.right, fill: d.fill || 0, rot: d.rot || 0,
+        select: () => (on ? this.sheetActions[i]() : this.setState({ sheetIdx: i })), bg: on ? '#f4f4f2' : 'rgba(255,255,255,.1)', color: on ? (d.red ? '#c4262b' : '#101014') : (d.red ? '#ff8a8d' : '#f4f4f2'), tf: on ? 'scale(1.05)' : 'scale(1)', shadow: on ? '0 18px 40px rgba(0,0,0,.4)' : 'none' }; });
+      sheetVals = { label: sh.menu === 'list' ? 'T27 List menu' : 'T28 More menu', img: D.poster(sh.id), pos: 'center 30%', pct: 0, hasPct: false, eyebrow: sh.menu === 'list' ? (cur ? 'Lists' : 'Add to List') : 'More', title: T.title, sub: sh.menu === 'list' ? 'Back closes without changes.' : '' };
+    } else if (sh) {
+      const defs = [['play_arrow', `Resume  ·  ${D.fmtLeft(sh.left)}`, null], ['replay', 'Play from Beginning', null], ['info', sh.movie ? 'Go to Movie' : 'Go to Show', () => this.openTitle(sh.movie || sh.show)]];
+      this.sheetActions = defs.map(d => d[2] || (() => this.setState({ sheet: null })));
+      sheetButtons = defs.map(([icon, label], i) => { const on = this.state.sheetIdx === i; return { icon, label, desc: '', hasDesc: false, check: false, right: '', hasRight: false, fill: 1, rot: 0, select: () => (on ? this.sheetActions[i]() : this.setState({ sheetIdx: i })), bg: on ? '#f4f4f2' : 'rgba(255,255,255,.1)', color: on ? '#101014' : '#f4f4f2', tf: on ? 'scale(1.05)' : 'scale(1)', shadow: on ? '0 18px 40px rgba(0,0,0,.4)' : 'none' }; });
+      sheetVals = { label: 'T15 Resume Action', hasPct: true, img: sh.img, pos: sh.pos || 'center', pct: sh.pct, eyebrow: sh.movie ? 'Continue Watching · Movie' : 'Continue Watching · TV Show', title: sh.title, sub: sh.sub };
+    }
+
+    this.lens = { rows: lens, sheet: this.sheetLen, minR, tabHome: tabIds.indexOf(curTab) };
+    const tabFocused = f.r === -1;
+    const showTabs = tabFocused || (f.r === 0 && ['home', 'lists', 'search'].includes(screen));
+    const pageDefaults = { pageLabel: '', isListsHead: false, isSearchHead: false, isPersonHead: false, isConnectState: false, banner: { show: false, label: '', icon: '', color: '', text: '' }, keys: [], query: '', queryPlaceholder: '', caret: 0, person: { name: '', initials: '', meta: '' },
+      hasMessage: false, messageLabel: '', messageIcon: '', messageTitle: '', messageText: '', hasBtnRow: false, btnRow: [], btnJustify: 'center', btnTop: 0, pRows: [], pageScroll: 0 };
+    return {
+      settingsOpen: this.settingsOpen(), settingsDs: ['ready', 'unreachable', 'not-connected'].includes(ds) ? ds : 'ready',
+      settingsSetDs: v => this.setState({ dataState: v === 'refused' ? 'unreachable' : v }),
+      settingsTab: id => { if (['home', 'search', 'lists'].includes(id)) { this.setState({ settings: false }); this.tab(id); } },
+      settingsBack: () => this.setState({ settings: false, focus: { r: -1, c: 6 } }), settingsActive: () => this.hovered,
+      ready: true, onEnter: () => { this.hovered = true; }, onLeave: () => { this.hovered = false; },
+      isHome: screen === 'home' && !page, isDetails: screen === 'details', isPage: !!page, ...pageDefaults, ...(page || {}), tabs,
+      tabOpacity: showTabs ? 1 : 0, tabShift: showTabs ? 0 : -30, tabPointer: showTabs ? 'auto' : 'none',
+      sheetOpen: !!sh, sheet: sheetVals, sheetButtons,
+      toastOpen: !!this.state.toast, toast: this.state.toast || { text: '', icon: '', color: '' },
+      ...vals,
+    };
+  }
+}
+</script>
+</body>
+</html>

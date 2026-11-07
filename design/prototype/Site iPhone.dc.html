@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block"><script src="biinge-theme.js"></script><script src="./image-slot.js"></script><style>@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}body{margin:0;background:#101014;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}a:hover{color:inherit}</style></helmet>
+<div ref="{{ rootRef }}" data-theme="{{ theme }}" style="position:relative;container-type:inline-size;min-height:100vh;background:#101014;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip;">
+
+<dc-import name="Site Header" page="iphone" theme="{{ theme }}" narrow="{{ narrow }}" on-toggle-theme="{{ toggleTheme }}" style="position:sticky;top:0;z-index:50;" hint-size="100%,64px"></dc-import>
+
+<section data-screen-label="iPhone · Hero" style="position:relative;isolation:isolate;overflow:hidden;padding:clamp(56px,6cqw,88px) 0 0;background:#101014;">
+  <div style="position:absolute;left:50%;top:38%;width:1100px;height:700px;margin-left:-550px;z-index:-1;background:radial-gradient(closest-side,rgba(238,192,30,.09),rgba(16,16,20,0));"></div>
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:22px;">
+    <div style="display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);font-size:14px;font-weight:600;">
+      <a href="Site%20iPhone.dc.html" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 11px;border-radius:999px;background:rgba(255,255,255,.14);color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">smartphone</span>iPhone</a>
+      <a href="Site%20Mac.dc.html" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 11px;border-radius:999px;color:rgba(244,244,242,.6);" style-hover="color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">laptop_mac</span>Mac</a>
+      <a href="Site%20Apple%20TV.dc.html" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 11px;border-radius:999px;color:rgba(244,244,242,.6);" style-hover="color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">tv</span>Apple TV</a>
+    </div>
+    <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);margin-top:18px;">Biinge for iPhone</div>
+    <h1 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:clamp(44px,6cqw,84px);line-height:1.02;letter-spacing:-.034em;text-wrap:balance;">Track, discover and play.</h1>
+    <p style="margin:0;max-width:60ch;font-size:clamp(17px,1.5cqw,20px);line-height:1.55;color:rgba(244,244,242,.7);text-wrap:pretty;">The Biinge tracker, restyled, with your library built in. Your lists, episode progress, games and statistics work as before, and anything on your server plays without leaving the app.</p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px 28px;margin-top:6px;">
+      <a href="https://github.com/tab/biinge" style="display:flex;align-items:center;gap:8px;height:50px;padding:0 28px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;">Get it on GitHub<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">north_east</span></a>
+      <a href="#requirements" style="display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600;">What you need<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">arrow_downward</span></a>
+    </div>
+    <div style="display:flex;justify-content:center;align-items:flex-end;gap:clamp(16px,3cqw,40px);margin-top:48px;">
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+      <div data-media="" style="flex:none;width:{{ ph.side }}px;padding:8px;border-radius:46px;background:#0a0a0c;box-shadow:0 0 0 1.5px rgba(214,214,220,.3),0 40px 80px rgba(0,0,0,.45);transform:translateY(-36px);">
+        <div style="aspect-ratio:1179/2556;"><image-slot id="iphone-hero-library" shape="rounded" radius="38" placeholder="iPhone screenshot · Movies, Library view"></image-slot></div>
+      </div>
+      </sc-if>
+      <div data-media="" style="flex:none;width:{{ ph.main }}px;padding:9px;border-radius:52px;background:#0a0a0c;box-shadow:0 0 0 1.5px rgba(214,214,220,.35),0 50px 100px rgba(0,0,0,.55);">
+        <div style="aspect-ratio:1179/2556;"><image-slot id="iphone-hero-details" shape="rounded" radius="43" placeholder="iPhone screenshot · Movie details with Resume"></image-slot></div>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+      <div data-media="" style="flex:none;width:{{ ph.side }}px;padding:8px;border-radius:46px;background:#0a0a0c;box-shadow:0 0 0 1.5px rgba(214,214,220,.3),0 40px 80px rgba(0,0,0,.45);transform:translateY(-36px);">
+        <div style="aspect-ratio:1179/2556;"><image-slot id="iphone-hero-upnext" shape="rounded" radius="38" placeholder="iPhone screenshot · Up Next"></image-slot></div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:180px;background:linear-gradient(0deg,#101014 0%,rgba(16,16,20,0) 100%);pointer-events:none;"></div>
+</section>
+
+<section data-screen-label="iPhone · Lists and library" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,7cqw,112px);">
+    <div style="flex:1 1 340px;min-width:0;max-width:560px;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Movies and TV</div>
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Lists and library under one switch.</h2>
+      <p style="margin:0;font-size:17.5px;line-height:1.62;color:rgba(244,244,242,.66);text-wrap:pretty;">Movies has Want, Watched and Library. TV adds Watching. Library holds Continue Watching, Recently Added and everything on your Jellyfin server, with a sort for the full grid.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;font-size:16px;line-height:1.5;color:rgba(244,244,242,.78);">
+        <div style="display:flex;gap:12px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.2;color:#34c46f;">check</span>Posters you can play show their resume bar, even in your lists.</div>
+        <div style="display:flex;gap:12px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.2;color:#34c46f;">check</span>Pins, progress pies and NEW badges match the Mac and Apple TV.</div>
+      </div>
+    </div>
+    <div data-media="" style="flex:none;width:{{ ph.feat }}px;padding:8px;border-radius:46px;background:#0a0a0c;box-shadow:0 0 0 1.5px rgba(214,214,220,.3),0 30px 60px rgba(0,0,0,.35);">
+      <div style="aspect-ratio:1179/2556;"><image-slot id="iphone-f-library" shape="rounded" radius="38" placeholder="iPhone screenshot · TV, Library"></image-slot></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="iPhone · Play" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,7cqw,112px);">
+    <div data-media="" style="flex:none;order:{{ flipOrder }};width:{{ ph.feat }}px;padding:8px;border-radius:46px;background:#0a0a0c;box-shadow:0 0 0 1.5px rgba(214,214,220,.3),0 30px 60px rgba(0,0,0,.35);">
+      <div style="aspect-ratio:1179/2556;"><image-slot id="iphone-f-play" shape="rounded" radius="38" placeholder="iPhone screenshot · Series details, episode sheet"></image-slot></div>
+    </div>
+    <div style="flex:1 1 340px;min-width:0;max-width:560px;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Details</div>
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Play or Resume, right from the details.</h2>
+      <p style="margin:0;font-size:17.5px;line-height:1.62;color:rgba(244,244,242,.66);text-wrap:pretty;">A title on your server gets a white Play or Resume button. Episodes play from their own sheet, and playback turns sideways to fill the screen.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;font-size:16px;line-height:1.5;color:rgba(244,244,242,.78);">
+        <div style="display:flex;gap:12px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.2;color:#34c46f;">check</span>Watched and Want sit beside Play as round buttons.</div>
+        <div style="display:flex;gap:12px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.2;color:#34c46f;">check</span>Finish an episode and it’s ticked in Biinge and on your server.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="iPhone · Up Next" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:56px clamp(40px,7cqw,112px);">
+    <div style="flex:1 1 340px;min-width:0;max-width:560px;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Up Next</div>
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">What you’re watching, then what’s coming.</h2>
+      <p style="margin:0;font-size:17.5px;line-height:1.62;color:rgba(244,244,242,.66);text-wrap:pretty;">Up Next opens with Continue Watching and the next episode of every show you’ve started. New episodes and release days for everything you track follow underneath.</p>
+    </div>
+    <div data-media="" style="flex:none;width:{{ ph.feat }}px;padding:8px;border-radius:46px;background:#0a0a0c;box-shadow:0 0 0 1.5px rgba(214,214,220,.3),0 30px 60px rgba(0,0,0,.35);">
+      <div style="aspect-ratio:1179/2556;"><image-slot id="iphone-f-upnext" shape="rounded" radius="38" placeholder="iPhone screenshot · Up Next sheet"></image-slot></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="iPhone · Games and stats" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;gap:48px;">
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:680px;">
+      <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Only on iPhone</div>
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;">Games and statistics stay.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:20px;">
+      <div style="display:flex;flex-direction:column;gap:22px;padding:28px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="aspect-ratio:16/10;"><image-slot id="iphone-f-games" shape="rounded" radius="14" placeholder="iPhone screenshot crop · Games, Playing"></image-slot></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div style="font-size:19px;font-weight:600;">Games</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.64);">Want, Playing and Played, with IGDB’s time to beat for the main story and the 100% run. Pin an upcoming game and it shows in Up Next on release day.</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:22px;padding:28px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+        <div style="aspect-ratio:16/10;"><image-slot id="iphone-f-stats" shape="rounded" radius="14" placeholder="iPhone screenshot crop · Statistics"></image-slot></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div style="font-size:19px;font-weight:600;">Statistics</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.64);">Every movie and episode adds its runtime when you mark it. Compare movies and TV by week, month, year or all time.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="iPhone · Tabs" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;gap:40px;">
+    <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;">Five tabs, as before.</h2>
+    <div style="display:flex;flex-direction:column;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:6px 32px;padding:20px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);"><div style="display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">movie</span>Movies</div><div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.66);">Want · Watched · Library</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:6px 32px;padding:20px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);"><div style="display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">tv</span>TV</div><div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.66);">Want · Watching · Watched · Library</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:6px 32px;padding:20px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);"><div style="display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">sports_esports</span>Games</div><div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.66);">Want · Playing · Played</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:6px 32px;padding:20px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);"><div style="display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">search</span>Search</div><div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.66);">Movies, shows, games and people from the whole catalog</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:6px 32px;padding:20px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(255,255,255,.08);"><div style="display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600;"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;">account_circle</span>Profile</div><div style="font-size:16px;line-height:1.55;color:rgba(244,244,242,.66);">Your account, the server connection, statistics and appearance</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="requirements" data-screen-label="iPhone · Requirements" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px;">
+    <div style="display:flex;flex-direction:column;gap:20px;padding:32px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:26px;letter-spacing:-.02em;">What you need</div>
+      <div style="display:flex;flex-direction:column;gap:14px;font-size:16px;line-height:1.5;">
+        <div style="display:flex;gap:14px;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1.1;">smartphone</span><div>An iPhone on iOS 26</div></div>
+        <div style="display:flex;gap:14px;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1.1;">dns</span><div>A Biinge server for your account, lists and progress</div></div>
+        <div style="display:flex;gap:14px;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1.1;">video_library</span><div>A Jellyfin server, 12.3 or later, for your library and playback</div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px;padding:32px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:26px;letter-spacing:-.02em;">How to install</div>
+      <div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.7);text-wrap:pretty;">Biinge isn’t on the App Store. Build it from the repository with Xcode and install it on your iPhone from your Mac. Sign in with your Biinge account, then with your Jellyfin user.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:auto;">
+        <a href="https://github.com/tab/biinge" style="display:flex;align-items:center;gap:8px;height:44px;padding:0 22px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:15px;font-weight:600;">Get it on GitHub<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">north_east</span></a>
+        <a href="#" style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;">Setup guide<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">arrow_forward</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="iPhone · Other apps" style="padding:0 0 clamp(80px,9cqw,128px);background:#101014;">
+  <div style="max-width:1120px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;gap:24px;">
+    <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Also on</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;">
+      <a href="Site%20Mac.dc.html" style="display:flex;align-items:center;gap:20px;padding:24px 26px;border-radius:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);" style-hover="background:rgba(255,255,255,.04);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;font-variation-settings:'wght' 300;">laptop_mac</span><div style="flex:1;display:flex;flex-direction:column;gap:2px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:22px;letter-spacing:-.02em;">Mac</div><div style="font-size:15px;color:rgba(244,244,242,.62);">Browse and watch.</div></div><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">arrow_forward</span></a>
+      <a href="Site%20Apple%20TV.dc.html" style="display:flex;align-items:center;gap:20px;padding:24px 26px;border-radius:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);" style-hover="background:rgba(255,255,255,.04);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;font-variation-settings:'wght' 300;">tv</span><div style="flex:1;display:flex;flex-direction:column;gap:2px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:22px;letter-spacing:-.02em;">Apple TV</div><div style="font-size:15px;color:rgba(244,244,242,.62);">Relax and watch.</div></div><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">arrow_forward</span></a>
+    </div>
+  </div>
+</section>
+
+<dc-import name="Site Footer" hint-size="100%,110px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { w: 1440, theme: null };
+  rootRef = React.createRef();
+  componentDidMount() {
+    const el = this.rootRef.current;
+    if (el && window.ResizeObserver) {
+      this.ro = new ResizeObserver(e => { const w = Math.round(e[0].contentRect.width); if (w && w !== this.state.w) this.setState({ w }); });
+      this.ro.observe(el);
+    }
+  }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); }
+  componentDidUpdate(pp) { if (pp.theme !== this.props.theme && this.state.theme) this.setState({ theme: null }); }
+  renderVals() {
+    const w = this.state.w, theme = this.state.theme ?? this.props.theme ?? 'dark';
+    const pad = Math.max(20, Math.min(64, w * 0.05)), narrow = w < 760, contentW = Math.min(w, 1120) - 2 * pad;
+    return {
+      rootRef: this.rootRef, theme, narrow, wide: !narrow,
+      toggleTheme: () => this.setState({ theme: theme === 'light' ? 'dark' : 'light' }),
+      ph: (() => { const g = Math.max(16, Math.min(40, w * 0.03)), main = narrow ? Math.min(280, contentW - 40) : Math.min(320, contentW * 0.36);
+        return { main: Math.round(main), side: Math.round(Math.min(260, (contentW - main - 2 * g) / 2)), feat: narrow ? Math.min(260, contentW - 60) : 300 }; })(),
+      flipOrder: contentW < 760 ? 0 : -1,
+    };
+  }
+}
+</script>
+</body>
+</html>

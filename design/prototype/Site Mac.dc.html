@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block"><script src="biinge-theme.js"></script><script src="./image-slot.js"></script><style>@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-display:swap}body{margin:0;background:#101014;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}a:hover{color:inherit}</style></helmet>
+<div ref="{{ rootRef }}" data-theme="{{ theme }}" style="position:relative;container-type:inline-size;min-height:100vh;background:#101014;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip;">
+
+<dc-import name="Site Header" page="mac" theme="{{ theme }}" narrow="{{ narrow }}" on-toggle-theme="{{ toggleTheme }}" style="position:sticky;top:0;z-index:50;" hint-size="100%,64px"></dc-import>
+
+<section data-screen-label="Mac · Hero" style="position:relative;isolation:isolate;overflow:hidden;padding:clamp(56px,6cqw,88px) 0 clamp(72px,8cqw,112px);background:#101014;">
+  <div style="position:absolute;left:50%;top:44%;width:1400px;height:800px;margin-left:-700px;z-index:-1;background:radial-gradient(closest-side,rgba(120,140,255,.08),rgba(16,16,20,0));"></div>
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:22px;">
+    <div style="display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);font-size:14px;font-weight:600;">
+      <a href="Site%20iPhone.dc.html" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 11px;border-radius:999px;color:rgba(244,244,242,.6);" style-hover="color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">smartphone</span>iPhone</a>
+      <a href="Site%20Mac.dc.html" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 11px;border-radius:999px;background:rgba(255,255,255,.14);color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">laptop_mac</span>Mac</a>
+      <a href="Site%20Apple%20TV.dc.html" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 11px;border-radius:999px;color:rgba(244,244,242,.6);" style-hover="color:#f4f4f2;"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">tv</span>Apple TV</a>
+    </div>
+    <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);margin-top:18px;">Biinge for Mac</div>
+    <h1 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:660;font-size:clamp(44px,6cqw,84px);line-height:1.02;letter-spacing:-.034em;text-wrap:balance;">Browse and watch.</h1>
+    <p style="margin:0;max-width:60ch;font-size:clamp(17px,1.5cqw,20px);line-height:1.55;color:rgba(244,244,242,.7);text-wrap:pretty;">A media center for your library, built for the Mac. A sidebar for everything, rich details when you want them, and a player that lives in a window or fills the screen.</p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px 28px;margin-top:6px;">
+      <a href="https://github.com/tab/biinge" style="display:flex;align-items:center;gap:8px;height:50px;padding:0 28px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:16px;font-weight:600;">Get it on GitHub<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">north_east</span></a>
+      <a href="#requirements" style="display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600;">What you need<span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;">arrow_downward</span></a>
+    </div>
+    <div data-media="" style="width:100%;max-width:1180px;margin-top:52px;border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,.14),0 60px 120px rgba(0,0,0,.55);">
+      <div style="aspect-ratio:16/10;"><image-slot id="mac-hero-home" shape="rounded" radius="14" placeholder="Mac screenshot · Home window, 2880 × 1800"></image-slot></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Mac · Home" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;gap:48px clamp(40px,6cqw,88px);">
+    <div style="flex:1 1 320px;min-width:0;max-width:440px;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Home</div>
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Home answers what’s next.</h2>
+      <p style="margin:0;font-size:17.5px;line-height:1.62;color:rgba(244,244,242,.66);text-wrap:pretty;">Continue Watching, Next Up, Recently Added and your collections, under a featured title you can play straight away. You never have to go looking for the episode you stopped in.</p>
+    </div>
+    <div data-media="" style="flex:1 1 520px;min-width:0;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 30px 60px rgba(0,0,0,.35);">
+      <div style="aspect-ratio:16/10;"><image-slot id="mac-f-continue" shape="rounded" radius="12" placeholder="Mac screenshot · Continue Watching and Next Up rows"></image-slot></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Mac · Series" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;gap:48px clamp(40px,6cqw,88px);">
+    <div data-media="" style="flex:1 1 520px;min-width:0;order:{{ flipOrder }};border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 30px 60px rgba(0,0,0,.35);">
+      <div style="aspect-ratio:16/10;"><image-slot id="mac-f-series" shape="rounded" radius="12" placeholder="Mac screenshot · Series details with season picker and episodes"></image-slot></div>
+    </div>
+    <div style="flex:1 1 320px;min-width:0;max-width:440px;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">TV Shows</div>
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">Every season at a glance.</h2>
+      <p style="margin:0;font-size:17.5px;line-height:1.62;color:rgba(244,244,242,.66);text-wrap:pretty;">Series pages show overall progress, a season picker and every episode with its runtime, progress and watched mark. The next unwatched episode is the one Play starts.</p>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Mac · Player" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;align-items:center;gap:48px clamp(40px,6cqw,88px);">
+    <div style="flex:1 1 320px;min-width:0;max-width:440px;display:flex;flex-direction:column;gap:18px;">
+      <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Player</div>
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;text-wrap:balance;">A player that fits the Mac.</h2>
+      <p style="margin:0;font-size:17.5px;line-height:1.62;color:rgba(244,244,242,.66);text-wrap:pretty;">Play in a window or full screen. Audio and subtitles share one panel, speed runs from 0.5× to 2×, and the next episode counts down at the credits.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;font-size:16px;line-height:1.5;color:rgba(244,244,242,.78);">
+        <div style="display:flex;gap:12px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.2;color:#34c46f;">check</span>Subtitle size, background, position and timing, set once for every title.</div>
+        <div style="display:flex;gap:12px;"><span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1.2;color:#34c46f;">check</span>Keep the tracks you pick for the rest of a series.</div>
+      </div>
+    </div>
+    <div data-media="" style="flex:1 1 520px;min-width:0;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 30px 60px rgba(0,0,0,.35);">
+      <div style="aspect-ratio:16/10;"><image-slot id="mac-f-player" shape="rounded" radius="12" placeholder="Mac screenshot · Player with Audio and Subtitles panel"></image-slot></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Mac · Lists and collections" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:20px;">
+    <div style="display:flex;flex-direction:column;gap:24px;padding:28px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div data-media="" style="aspect-ratio:16/10;"><image-slot id="mac-f-lists" shape="rounded" radius="12" placeholder="Mac screenshot crop · Want to Watch"></image-slot></div>
+      <div style="display:flex;flex-direction:column;gap:8px;"><div style="font-size:19px;font-weight:600;">My Lists in the sidebar</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.64);">Want to Watch, Watching and Watched from Biinge, each with its count. Posters on your server show their resume bar, and a double-click plays them.</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;padding:28px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div data-media="" style="aspect-ratio:16/10;"><image-slot id="mac-f-collections" shape="rounded" radius="12" placeholder="Mac screenshot crop · Collections"></image-slot></div>
+      <div style="display:flex;flex-direction:column;gap:8px;"><div style="font-size:19px;font-weight:600;">Collections and search</div><div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.64);">Browse the collections you keep in Jellyfin. Search the whole catalog for movies, shows and people from anywhere in the app.</div></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Mac · Keyboard" style="padding:clamp(80px,9cqw,128px) 0;background:#17171d;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-wrap:wrap;gap:40px clamp(40px,6cqw,88px);">
+    <div style="flex:1 1 300px;max-width:440px;display:flex;flex-direction:column;gap:16px;">
+      <h2 style="margin:0;font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:clamp(30px,3.4cqw,44px);line-height:1.06;letter-spacing:-.026em;">Made for the keyboard.</h2>
+      <p style="margin:0;font-size:17.5px;line-height:1.62;color:rgba(244,244,242,.66);text-wrap:pretty;">A Mac app should work without reaching for the trackpad. Right-click any poster for its actions, and collapse the sidebar when you want the room.</p>
+    </div>
+    <div style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);font-size:16px;"><span>Search</span><span style="display:flex;gap:6px;"><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">⌘</span><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">F</span></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);font-size:16px;"><span>Close search or go back</span><span style="display:flex;gap:6px;"><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">esc</span></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);font-size:16px;"><span>Play or pause</span><span style="display:flex;gap:6px;"><span style="min-width:30px;height:30px;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">space</span></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);font-size:16px;"><span>Skip back or ahead</span><span style="display:flex;gap:6px;"><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">←</span><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">→</span></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(255,255,255,.08);font-size:16px;"><span>Full screen</span><span style="display:flex;gap:6px;"><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">⌃</span><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">⌘</span><span style="min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.08);box-shadow:inset 0 -1px 0 rgba(255,255,255,.1);font-size:14px;font-weight:600;">F</span></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="requirements" data-screen-label="Mac · Requirements" style="padding:clamp(80px,9cqw,128px) 0;background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px;">
+    <div style="display:flex;flex-direction:column;gap:20px;padding:32px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:26px;letter-spacing:-.02em;">What you need</div>
+      <div style="display:flex;flex-direction:column;gap:14px;font-size:16px;line-height:1.5;">
+        <div style="display:flex;gap:14px;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1.1;">laptop_mac</span><div>A Mac on macOS 26</div></div>
+        <div style="display:flex;gap:14px;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1.1;">dns</span><div>A Biinge server for your account, lists and progress</div></div>
+        <div style="display:flex;gap:14px;"><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1.1;">video_library</span><div>A Jellyfin server, 12.3 or later, for your library and playback</div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px;padding:32px;border-radius:24px;background:#17171d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);">
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:620;font-size:26px;letter-spacing:-.02em;">How to install</div>
+      <div style="font-size:16px;line-height:1.6;color:rgba(244,244,242,.7);text-wrap:pretty;">Biinge isn’t on the App Store. Build the Mac app from the repository with Xcode. Sign in with your Biinge account, then with your Jellyfin user. Biinge finds your server for you.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:auto;">
+        <a href="https://github.com/tab/biinge" style="display:flex;align-items:center;gap:8px;height:44px;padding:0 22px;border-radius:999px;background:#f4f4f2;color:#101014;font-size:15px;font-weight:600;">Get it on GitHub<span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;">north_east</span></a>
+        <a href="#" style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;">Setup guide<span style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;">arrow_forward</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Mac · Other apps" style="padding:0 0 clamp(80px,9cqw,128px);background:#101014;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,5cqw,64px);display:flex;flex-direction:column;gap:24px;">
+    <div style="font-size:15px;font-weight:500;color:rgba(244,244,242,.6);">Also on</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;">
+      <a href="Site%20iPhone.dc.html" style="display:flex;align-items:center;gap:20px;padding:24px 26px;border-radius:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);" style-hover="background:rgba(255,255,255,.04);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;font-variation-settings:'wght' 300;">smartphone</span><div style="flex:1;display:flex;flex-direction:column;gap:2px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:22px;letter-spacing:-.02em;">iPhone</div><div style="font-size:15px;color:rgba(244,244,242,.62);">Track, discover and play.</div></div><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">arrow_forward</span></a>
+      <a href="Site%20Apple%20TV.dc.html" style="display:flex;align-items:center;gap:20px;padding:24px 26px;border-radius:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);" style-hover="background:rgba(255,255,255,.04);"><span style="font-family:'Material Symbols Rounded';font-size:32px;line-height:1;font-variation-settings:'wght' 300;">tv</span><div style="flex:1;display:flex;flex-direction:column;gap:2px;"><div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:22px;letter-spacing:-.02em;">Apple TV</div><div style="font-size:15px;color:rgba(244,244,242,.62);">Relax and watch.</div></div><span style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;">arrow_forward</span></a>
+    </div>
+  </div>
+</section>
+
+<dc-import name="Site Footer" hint-size="100%,110px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { w: 1440, theme: null };
+  rootRef = React.createRef();
+  componentDidMount() {
+    const el = this.rootRef.current;
+    if (el && window.ResizeObserver) {
+      this.ro = new ResizeObserver(e => { const w = Math.round(e[0].contentRect.width); if (w && w !== this.state.w) this.setState({ w }); });
+      this.ro.observe(el);
+    }
+  }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); }
+  componentDidUpdate(pp) { if (pp.theme !== this.props.theme && this.state.theme) this.setState({ theme: null }); }
+  renderVals() {
+    const w = this.state.w, theme = this.state.theme ?? this.props.theme ?? 'dark';
+    const pad = Math.max(20, Math.min(64, w * 0.05)), narrow = w < 760, contentW = Math.min(w, 1320) - 2 * pad;
+    return {
+      rootRef: this.rootRef, theme, narrow,
+      toggleTheme: () => this.setState({ theme: theme === 'light' ? 'dark' : 'light' }),
+      flipOrder: contentW < 900 ? 0 : -1,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -11,6 +11,44 @@
 		9F1A0BE8050014A037F24A34 /* StatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E133E92B21DD737238466E94 /* StatsTests.swift */; };
 		9F1A0BE8050014A037F24A35 /* GameDetailsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E133E92B21DD737238466E95 /* GameDetailsTests.swift */; };
 		AA0000000000000000000013 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000012 /* Sentry */; };
+		AA0000000000000000000023 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000022 /* JellyfinAPI */; };
+		AA0000000000000000000025 /* JellyfinConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000024 /* JellyfinConnectionTests.swift */; };
+		AA0000000000000000000029 /* MockJellyfinService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000028 /* MockJellyfinService.swift */; };
+		AA000000000000000000002B /* PlaybackReporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000002A /* PlaybackReporterTests.swift */; };
+		AA000000000000000000002D /* MonitoringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000002C /* MonitoringTests.swift */; };
+		AA000000000000000000002F /* PlaybackSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000002E /* PlaybackSessionTests.swift */; };
+		AA0000000000000000000035 /* LibraryQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000034 /* LibraryQueryTests.swift */; };
+		AA0000000000000000000039 /* HomeHeroTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000038 /* HomeHeroTests.swift */; };
+		AA000000000000000000003F /* DetailsDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000003E /* DetailsDecodingTests.swift */; };
+		AA0000000000000000000041 /* DetailsTitleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000040 /* DetailsTitleTests.swift */; };
+		AA0000000000000000000043 /* ListEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000042 /* ListEntryTests.swift */; };
+		AA0000000000000000000045 /* PlayedMarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000044 /* PlayedMarkTests.swift */; };
+		AA0000000000000000000047 /* LibraryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000046 /* LibraryStoreTests.swift */; };
+		AA0000000000000000000049 /* SeasonEpisodesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000048 /* SeasonEpisodesTests.swift */; };
+		AA000000000000000000004B /* NextEpisodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000004A /* NextEpisodeTests.swift */; };
+		AA000000000000000000004D /* RecentSearchesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000004C /* RecentSearchesTests.swift */; };
+		AA000000000000000000004F /* AuthManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000004E /* AuthManagerTests.swift */; };
+		AA0000000000000000000051 /* UpNextSectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000050 /* UpNextSectionTests.swift */; };
+		AA0000000000000000000053 /* SearchResultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000052 /* SearchResultsTests.swift */; };
+		AA0000000000000000000061 /* ListStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000060 /* ListStateTests.swift */; };
+		AA0000000000000000000071 /* NextEpisodePickTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000070 /* NextEpisodePickTests.swift */; };
+		AA0000000000000000000081 /* MotionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000080 /* MotionTests.swift */; };
+		AA0000000000000000000091 /* UpNextStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000090 /* UpNextStoreTests.swift */; };
+		AA00000000000000000000A1 /* ToastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000A0 /* ToastTests.swift */; };
+		AA00000000000000000000B1 /* StackOriginsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000B0 /* StackOriginsTests.swift */; };
+		AA00000000000000000000C1 /* DeviceInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000C0 /* DeviceInfoTests.swift */; };
+		AA00000000000000000000C3 /* ListChangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000C2 /* ListChangeTests.swift */; };
+		AA00000000000000000000C5 /* SeriesDetailsStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000C4 /* SeriesDetailsStateTests.swift */; };
+		AA00000000000000000000C7 /* PlayNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000C6 /* PlayNoteTests.swift */; };
+		AA00000000000000000000C9 /* PagedLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000C8 /* PagedLibraryTests.swift */; };
+		AA00000000000000000000CB /* HomeFeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000CA /* HomeFeedTests.swift */; };
+		AA00000000000000000000CD /* ConnectFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000CC /* ConnectFlowTests.swift */; };
+		AA00000000000000000000CF /* LoginFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000CE /* LoginFlowTests.swift */; };
+		AA00000000000000000000D1 /* TrackLabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000D0 /* TrackLabelTests.swift */; };
+		AA00000000000000000000E1 /* HeroRotationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000E0 /* HeroRotationTests.swift */; };
+		AA00000000000000000000F1 /* LibraryStoreGameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000F0 /* LibraryStoreGameTests.swift */; };
+		AA00000000000000000000F3 /* DetailFactsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000F2 /* DetailFactsTests.swift */; };
+		AB0000000000000000000002 /* JellyfinDeviceIDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000001 /* JellyfinDeviceIDTests.swift */; };
 		B4FC64E474064EEB6EE1DAD1 /* WatchProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */; };
 		DC7601986612F3D072689188 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC77ED4BCBCD9C6813A11A00 /* Foundation.framework */; };
 /* End PBXBuildFile section */
@@ -28,6 +66,43 @@
 /* Begin PBXFileReference section */
 		7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchProgressTests.swift; sourceTree = "<group>"; };
 		AA0000000000000000000004 /* Biinge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Biinge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000024 /* JellyfinConnectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JellyfinConnectionTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000028 /* MockJellyfinService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockJellyfinService.swift; sourceTree = "<group>"; };
+		AA000000000000000000002A /* PlaybackReporterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlaybackReporterTests.swift; sourceTree = "<group>"; };
+		AA000000000000000000002C /* MonitoringTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MonitoringTests.swift; sourceTree = "<group>"; };
+		AA000000000000000000002E /* PlaybackSessionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlaybackSessionTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000034 /* LibraryQueryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LibraryQueryTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000038 /* HomeHeroTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeHeroTests.swift; sourceTree = "<group>"; };
+		AA000000000000000000003E /* DetailsDecodingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DetailsDecodingTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000040 /* DetailsTitleTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DetailsTitleTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000042 /* ListEntryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ListEntryTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000044 /* PlayedMarkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayedMarkTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000046 /* LibraryStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LibraryStoreTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000048 /* SeasonEpisodesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SeasonEpisodesTests.swift; sourceTree = "<group>"; };
+		AA000000000000000000004A /* NextEpisodeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NextEpisodeTests.swift; sourceTree = "<group>"; };
+		AA000000000000000000004C /* RecentSearchesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecentSearchesTests.swift; sourceTree = "<group>"; };
+		AA000000000000000000004E /* AuthManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthManagerTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000050 /* UpNextSectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpNextSectionTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000052 /* SearchResultsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SearchResultsTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000060 /* ListStateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ListStateTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000070 /* NextEpisodePickTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NextEpisodePickTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000080 /* MotionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MotionTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000090 /* UpNextStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpNextStoreTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000A0 /* ToastTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000B0 /* StackOriginsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StackOriginsTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000C0 /* DeviceInfoTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceInfoTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000C2 /* ListChangeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ListChangeTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000C4 /* SeriesDetailsStateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SeriesDetailsStateTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000C6 /* PlayNoteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayNoteTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000C8 /* PagedLibraryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PagedLibraryTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000CA /* HomeFeedTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeFeedTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000CC /* ConnectFlowTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConnectFlowTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000CE /* LoginFlowTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginFlowTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000D0 /* TrackLabelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrackLabelTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000E0 /* HeroRotationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HeroRotationTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000F0 /* LibraryStoreGameTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LibraryStoreGameTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000F2 /* DetailFactsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DetailFactsTests.swift; sourceTree = "<group>"; };
+		AB0000000000000000000001 /* JellyfinDeviceIDTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JellyfinDeviceIDTests.swift; sourceTree = "<group>"; };
 		E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SeriesDetailsCountsTests.swift; sourceTree = "<group>"; };
 		E133E92B21DD737238466E94 /* StatsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsTests.swift; sourceTree = "<group>"; };
 		E133E92B21DD737238466E95 /* GameDetailsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GameDetailsTests.swift; sourceTree = "<group>"; };
@@ -53,6 +128,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0000000000000000000013 /* Sentry in Frameworks */,
+				AA0000000000000000000023 /* JellyfinAPI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +175,43 @@
 			children = (
 				E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */,
 				7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */,
+				AA0000000000000000000028 /* MockJellyfinService.swift */,
+				AA0000000000000000000024 /* JellyfinConnectionTests.swift */,
+				AB0000000000000000000001 /* JellyfinDeviceIDTests.swift */,
+				AA0000000000000000000034 /* LibraryQueryTests.swift */,
+				AA00000000000000000000E0 /* HeroRotationTests.swift */,
+				AA00000000000000000000F0 /* LibraryStoreGameTests.swift */,
+				AA0000000000000000000038 /* HomeHeroTests.swift */,
+				AA000000000000000000003E /* DetailsDecodingTests.swift */,
+				AA0000000000000000000040 /* DetailsTitleTests.swift */,
+				AA0000000000000000000042 /* ListEntryTests.swift */,
+				AA0000000000000000000060 /* ListStateTests.swift */,
+				AA0000000000000000000046 /* LibraryStoreTests.swift */,
+				AA0000000000000000000044 /* PlayedMarkTests.swift */,
+				AA0000000000000000000048 /* SeasonEpisodesTests.swift */,
+				AA0000000000000000000070 /* NextEpisodePickTests.swift */,
+				AA0000000000000000000080 /* MotionTests.swift */,
+				AA00000000000000000000A0 /* ToastTests.swift */,
+				AA00000000000000000000F2 /* DetailFactsTests.swift */,
+				AA00000000000000000000B0 /* StackOriginsTests.swift */,
+				AA00000000000000000000C0 /* DeviceInfoTests.swift */,
+				AA00000000000000000000C2 /* ListChangeTests.swift */,
+				AA00000000000000000000C4 /* SeriesDetailsStateTests.swift */,
+				AA00000000000000000000C6 /* PlayNoteTests.swift */,
+				AA00000000000000000000C8 /* PagedLibraryTests.swift */,
+				AA00000000000000000000CA /* HomeFeedTests.swift */,
+				AA00000000000000000000CC /* ConnectFlowTests.swift */,
+				AA00000000000000000000CE /* LoginFlowTests.swift */,
+				AA00000000000000000000D0 /* TrackLabelTests.swift */,
+				AA000000000000000000004A /* NextEpisodeTests.swift */,
+				AA000000000000000000004C /* RecentSearchesTests.swift */,
+				AA000000000000000000004E /* AuthManagerTests.swift */,
+				AA0000000000000000000050 /* UpNextSectionTests.swift */,
+				AA0000000000000000000090 /* UpNextStoreTests.swift */,
+				AA0000000000000000000052 /* SearchResultsTests.swift */,
+				AA000000000000000000002E /* PlaybackSessionTests.swift */,
+				AA000000000000000000002C /* MonitoringTests.swift */,
+				AA000000000000000000002A /* PlaybackReporterTests.swift */,
 				E133E92B21DD737238466E94 /* StatsTests.swift */,
 				E133E92B21DD737238466E95 /* GameDetailsTests.swift */,
 			);
@@ -145,6 +258,7 @@
 			name = Biinge;
 			packageProductDependencies = (
 				AA0000000000000000000012 /* Sentry */,
+				AA0000000000000000000022 /* JellyfinAPI */,
 			);
 			productName = Biinge;
 			productReference = AA0000000000000000000004 /* Biinge.app */;
@@ -177,6 +291,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				AA0000000000000000000011 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				AA0000000000000000000021 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
 			);
 			productRefGroup = AA0000000000000000000002 /* Products */;
 			projectDirPath = "";
@@ -237,6 +352,43 @@
 				9F1A0BE8050014A037F24A33 /* SeriesDetailsCountsTests.swift in Sources */,
 				B4FC64E474064EEB6EE1DAD1 /* WatchProgressTests.swift in Sources */,
 				9F1A0BE8050014A037F24A34 /* StatsTests.swift in Sources */,
+				AA0000000000000000000025 /* JellyfinConnectionTests.swift in Sources */,
+				AA0000000000000000000035 /* LibraryQueryTests.swift in Sources */,
+				AA00000000000000000000E1 /* HeroRotationTests.swift in Sources */,
+				AA00000000000000000000F1 /* LibraryStoreGameTests.swift in Sources */,
+				AA0000000000000000000039 /* HomeHeroTests.swift in Sources */,
+				AA000000000000000000003F /* DetailsDecodingTests.swift in Sources */,
+				AA0000000000000000000041 /* DetailsTitleTests.swift in Sources */,
+				AA0000000000000000000043 /* ListEntryTests.swift in Sources */,
+				AA0000000000000000000061 /* ListStateTests.swift in Sources */,
+				AA0000000000000000000047 /* LibraryStoreTests.swift in Sources */,
+				AA0000000000000000000045 /* PlayedMarkTests.swift in Sources */,
+				AA0000000000000000000049 /* SeasonEpisodesTests.swift in Sources */,
+				AA0000000000000000000071 /* NextEpisodePickTests.swift in Sources */,
+				AA0000000000000000000081 /* MotionTests.swift in Sources */,
+				AA00000000000000000000A1 /* ToastTests.swift in Sources */,
+				AA00000000000000000000F3 /* DetailFactsTests.swift in Sources */,
+				AA00000000000000000000B1 /* StackOriginsTests.swift in Sources */,
+				AA00000000000000000000C1 /* DeviceInfoTests.swift in Sources */,
+				AA00000000000000000000C3 /* ListChangeTests.swift in Sources */,
+				AA00000000000000000000C5 /* SeriesDetailsStateTests.swift in Sources */,
+				AA00000000000000000000C7 /* PlayNoteTests.swift in Sources */,
+				AA00000000000000000000C9 /* PagedLibraryTests.swift in Sources */,
+				AA00000000000000000000CB /* HomeFeedTests.swift in Sources */,
+				AA00000000000000000000CD /* ConnectFlowTests.swift in Sources */,
+				AB0000000000000000000002 /* JellyfinDeviceIDTests.swift in Sources */,
+				AA00000000000000000000CF /* LoginFlowTests.swift in Sources */,
+				AA00000000000000000000D1 /* TrackLabelTests.swift in Sources */,
+				AA000000000000000000004B /* NextEpisodeTests.swift in Sources */,
+				AA000000000000000000004D /* RecentSearchesTests.swift in Sources */,
+				AA000000000000000000004F /* AuthManagerTests.swift in Sources */,
+				AA0000000000000000000051 /* UpNextSectionTests.swift in Sources */,
+				AA0000000000000000000091 /* UpNextStoreTests.swift in Sources */,
+				AA0000000000000000000053 /* SearchResultsTests.swift in Sources */,
+				AA000000000000000000002F /* PlaybackSessionTests.swift in Sources */,
+				AA000000000000000000002D /* MonitoringTests.swift in Sources */,
+				AA000000000000000000002B /* PlaybackReporterTests.swift in Sources */,
+				AA0000000000000000000029 /* MockJellyfinService.swift in Sources */,
 				9F1A0BE8050014A037F24A35 /* GameDetailsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -269,13 +421,17 @@
 				DEVELOPMENT_TEAM = GUNG7F2T7B;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.biinge.BiingeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,3";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Biinge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Biinge";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -289,13 +445,17 @@
 				DEVELOPMENT_TEAM = GUNG7F2T7B;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.biinge.BiingeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,3";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Biinge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Biinge";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
@@ -303,24 +463,70 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletv*]" = TVAppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=macosx*]" = DesktopAppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = GUNG7F2T7B;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=appletv*]" = (
+					"Platforms/iOS/*",
+					"Platforms/iOS/*/*",
+					"Platforms/iOS/*/*/*",
+					"Platforms/macOS/*",
+					"Platforms/macOS/*/*",
+					"Platforms/macOS/*/*/*",
+				);
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphone*]" = (
+					"Platforms/macOS/*",
+					"Platforms/macOS/*/*",
+					"Platforms/macOS/*/*/*",
+					"Platforms/tvOS/*",
+					"Platforms/tvOS/*/*",
+					"Platforms/tvOS/*/*/*",
+				);
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=macosx*]" = (
+					"Platforms/iOS/*",
+					"Platforms/iOS/*/*",
+					"Platforms/iOS/*/*/*",
+					"Platforms/tvOS/*",
+					"Platforms/tvOS/*/*",
+					"Platforms/tvOS/*/*/*",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
+				"INFOPLIST_FILE[sdk=appletv*]" = "Info-tvOS.plist";
+				"INFOPLIST_FILE[sdk=iphone*]" = "Info-iOS.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Biinge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.7.1;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					AVKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.biinge.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,3";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
@@ -328,24 +534,70 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletv*]" = TVAppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=macosx*]" = DesktopAppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = GUNG7F2T7B;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=appletv*]" = (
+					"Platforms/iOS/*",
+					"Platforms/iOS/*/*",
+					"Platforms/iOS/*/*/*",
+					"Platforms/macOS/*",
+					"Platforms/macOS/*/*",
+					"Platforms/macOS/*/*/*",
+				);
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphone*]" = (
+					"Platforms/macOS/*",
+					"Platforms/macOS/*/*",
+					"Platforms/macOS/*/*/*",
+					"Platforms/tvOS/*",
+					"Platforms/tvOS/*/*",
+					"Platforms/tvOS/*/*/*",
+				);
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=macosx*]" = (
+					"Platforms/iOS/*",
+					"Platforms/iOS/*/*",
+					"Platforms/iOS/*/*/*",
+					"Platforms/tvOS/*",
+					"Platforms/tvOS/*/*",
+					"Platforms/tvOS/*/*/*",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
+				"INFOPLIST_FILE[sdk=appletv*]" = "Info-tvOS.plist";
+				"INFOPLIST_FILE[sdk=iphone*]" = "Info-iOS.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Biinge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.7.1;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					AVKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.biinge.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,3";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};
@@ -439,6 +691,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		AA0000000000000000000021 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jellyfin/jellyfin-sdk-swift";
+			requirement = {
+				kind = exactVersion;
+				version = 3.3.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -446,6 +706,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA0000000000000000000011 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
+		};
+		AA0000000000000000000022 /* JellyfinAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0000000000000000000021 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
+			productName = JellyfinAPI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

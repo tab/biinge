@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
+<script src="biinge-theme.js"></script>
+<style>
+@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+body{margin:0;background:#1a1a1f}
+a{color:#f4f4f2;text-decoration:none}a:hover{color:#fff}
+</style>
+</helmet>
+<div onMouseEnter="{{ onEnter }}" onMouseLeave="{{ onLeave }}" data-screen-label="{{ label }}" data-theme="{{ theme }}" style="width:1920px;height:1080px;position:relative;overflow:hidden;background:#101014;color:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 50px 120px rgba(0,0,0,.55);">
+  <div style="position:absolute;left:0;right:0;top:44px;display:flex;justify-content:center;">
+    <div style="display:flex;align-items:center;gap:6px;padding:8px;border-radius:999px;background:rgba(255,255,255,.08);">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="7"><div onClick="{{ t.go }}" style="height:64px;padding:0 {{ t.pad }}px;display:flex;align-items:center;border-radius:999px;font-size:28px;font-weight:600;background:{{ t.bg }};color:{{ t.color }};transform:{{ t.tf }};transition:all .2s;cursor:default;"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;font-variation-settings:'FILL' {{ t.fill }};">{{ t.icon }}</span></sc-if>{{ t.label }}</div></sc-for>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;top:180px;bottom:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:0 80px 120px;text-align:center;">
+      <div style="position:relative;width:300px;height:300px;border-radius:64px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 2px rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;">
+        <span style="font-family:'Material Symbols Rounded';font-size:150px;line-height:1;color:rgba(244,244,242,.85);">dns</span>
+        <div style="position:absolute;right:-10px;bottom:-10px;width:56px;height:56px;border-radius:50%;background:{{ dot }};box-shadow:0 0 0 10px #101014;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;color:#101014;font-variation-settings:'wght' 700;">{{ dotIcon }}</span></div>
+      </div>
+      <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:64px;letter-spacing:-.03em;">Living Room</div>
+      <div style="font-size:30px;color:{{ statusColor }};">{{ statusText }}</div>
+      <div style="font-size:24px;line-height:1.45;color:rgba(244,244,242,.5);max-width:620px;">{{ helpText }}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:14px;padding:0 140px 140px 40px;">
+      <div style="display:flex;flex-direction:column;border-radius:28px;background:rgba(255,255,255,.05);padding:10px;">
+        <sc-for list="{{ facts }}" as="r" hint-placeholder-count="3">
+        <div style="min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 26px;font-size:28px;"><span>{{ r.label }}</span><span style="color:rgba(244,244,242,.55);">{{ r.value }}</span></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
+        <sc-for list="{{ actions }}" as="a" hint-placeholder-count="3">
+        <div onClick="{{ a.go }}" style="min-height:88px;display:flex;align-items:center;gap:20px;padding:0 32px;border-radius:22px;font-size:30px;font-weight:600;background:{{ a.bg }};color:{{ a.color }};transform:{{ a.tf }};box-shadow:{{ a.shadow }};transition:all .2s;cursor:default;"><span style="font-family:'Material Symbols Rounded';font-size:36px;line-height:1;">{{ a.icon }}</span><span style="flex:1;">{{ a.label }}</span></div>
+        </sc-for>
+      </div>
+      <div style="font-size:22px;line-height:1.45;color:rgba(244,244,242,.4);padding:16px 8px 0;">Apple TV follows the system appearance. Subtitle Style lives in the player.</div>
+    </div>
+  </div>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="{{ confirmLabel }}" style="position:absolute;inset:0;z-index:20;background:rgba(10,10,12,.7);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;">
+    <div style="font-family:Archivo,-apple-system,sans-serif;font-weight:640;font-size:60px;letter-spacing:-.03em;">{{ confirmTitle }}</div>
+    <div style="font-size:30px;line-height:1.45;color:rgba(244,244,242,.7);max-width:1000px;">{{ confirmBody }}</div>
+    <div style="display:flex;flex-direction:column;gap:16px;width:640px;margin-top:24px;">
+      <sc-for list="{{ confirmButtons }}" as="b" hint-placeholder-count="2">
+      <div onClick="{{ b.go }}" style="height:88px;display:flex;align-items:center;justify-content:center;border-radius:22px;font-size:30px;font-weight:600;background:{{ b.bg }};color:{{ b.color }};transform:{{ b.tf }};box-shadow:{{ b.shadow }};transition:all .2s;cursor:default;">{{ b.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;unreachable&quot;,&quot;refused&quot;,&quot;not-connected&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;confirm&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;disconnect&quot;,&quot;logout&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const FOCUS = { bg: '#f4f4f2', color: '#101014', tf: 'scale(1.04)', shadow: '0 18px 40px rgba(0,0,0,.45)' };
+const TABS = [['search', '', 'search'], ['home', 'Home'], ['movies', 'Movies'], ['tv', 'TV Shows'], ['collections', 'Collections'], ['lists', 'My Lists'], ['settings', '', 'settings']];
+const REST = { bg: 'rgba(255,255,255,.08)', color: '#f4f4f2', tf: 'scale(1)', shadow: 'none' };
+
+class Component extends DCLogic {
+  state = { ds: null, confirm: undefined, focus: null, cIdx: 1 };
+  componentDidMount() {
+    this.onKey = e => {
+      const active = this.props.isActive ? this.props.isActive() : this.hovered;
+      const k = e.key;
+      if (!active || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Escape', 'Backspace'].includes(k)) return;
+      e.preventDefault();
+      const ok = k === 'Enter' || k === ' ', esc = k === 'Escape' || k === 'Backspace';
+      if (this._confirm) {
+        if (k === 'ArrowUp' || k === 'ArrowDown') this.setState({ cIdx: k === 'ArrowUp' ? 0 : 1 });
+        else if (ok) this._confirm[this.state.cIdx]();
+        else if (esc) this.setState({ confirm: null });
+        return;
+      }
+      if (esc) return this.props.onBack && this.props.onBack();
+      const f = this.foc(), n = this._acts.length;
+      if (f.r === -1) {
+        if (k === 'ArrowLeft' || k === 'ArrowRight') this.setState({ focus: { r: -1, c: Math.max(0, Math.min(TABS.length - 1, f.c + (k === 'ArrowLeft' ? -1 : 1))) } });
+        else if (k === 'ArrowDown') this.setState({ focus: { r: 0, c: 0 } });
+        else if (ok) this.goTab(TABS[f.c][0]);
+      } else {
+        if (k === 'ArrowUp') this.setState({ focus: f.c === 0 ? { r: -1, c: TABS.length - 1 } : { r: 0, c: f.c - 1 } });
+        else if (k === 'ArrowDown') this.setState({ focus: { r: 0, c: Math.min(n - 1, f.c + 1) } });
+        else if (ok) this._acts[f.c][2]();
+      }
+    };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this.onKey); }
+  foc() { return this.state.focus ?? { r: 0, c: 0 }; }
+  goTab(id) { if (id !== 'settings' && this.props.onTab) this.props.onTab(id); }
+  setDs(ds) { this.setState({ ds, focus: { r: 0, c: 0 } }); this.props.onDataState && this.props.onDataState(ds); }
+  ask(confirm) { this.setState({ confirm, cIdx: 1 }); }
+  renderVals() {
+    const ds = this.props.onDataState ? (this.props.dataState ?? 'ready') : (this.state.ds ?? this.props.dataState ?? 'ready');
+    const confirm = this.state.confirm !== undefined ? this.state.confirm : (this.props.confirm || null);
+    const S = {
+      ready: { dot: '#34c46f', dotIcon: 'check', status: 'Connected', color: 'rgba(244,244,242,.7)', help: 'Movies and TV Shows from Living Room play on this Apple TV.' },
+      unreachable: { dot: '#e5484d', dotIcon: 'priority_high', status: 'Can’t reach the server · last seen 2 min ago', color: '#ff8a8d', help: 'My Lists and Search still work. The library and Play come back when Living Room does.' },
+      refused: { dot: '#e5484d', dotIcon: 'priority_high', status: 'Sign-in refused', color: '#ff8a8d', help: 'Living Room no longer accepts this Apple TV’s sign-in. The Jellyfin password may have changed. Sign in again to keep playing.' },
+      'not-connected': { dot: '#64646d', dotIcon: 'remove', status: 'Not connected on this Apple TV', color: 'rgba(244,244,242,.7)', help: 'Sign in with your Jellyfin account to browse and play Living Room. My Lists and Search work without it.' },
+    }[ds] || null;
+    const acts = ds === 'not-connected' ? [['link', 'Connect Jellyfin', () => this.setDs('ready')], ['logout', 'Log Out of Biinge…', () => this.ask('logout')]]
+      : ds === 'refused' ? [['login', 'Sign In Again', () => this.setDs('ready')], ['link_off', 'Disconnect…', () => this.ask('disconnect')], ['logout', 'Log Out of Biinge…', () => this.ask('logout')]]
+      : [['refresh', ds === 'unreachable' ? 'Try Again' : 'Reconnect', () => this.setDs('ready')], ['link_off', 'Disconnect…', () => this.ask('disconnect')], ['logout', 'Log Out of Biinge…', () => this.ask('logout')]];
+    const fo = this.foc(), f = fo.r === 0 ? fo.c : -1;
+    this._acts = acts;
+    const C = {
+      disconnect: { title: 'Disconnect Jellyfin?', body: 'This Apple TV stops playing from Living Room. You stay logged in to Biinge, and your lists and watched history stay.', cta: 'Disconnect', after: () => { this.setState({ confirm: null }); this.setDs('not-connected'); } },
+      logout: { title: 'Log out of Biinge?', body: 'This Apple TV signs out of Biinge and Jellyfin. You’ll need your Biinge email and password to log back in.', cta: 'Log Out', after: () => this.setState({ confirm: null }) },
+    }[confirm];
+    this._confirm = C ? [C.after, () => this.setState({ confirm: null })] : null;
+    const names = { ready: 'connected', unreachable: 'server unreachable', refused: 'sign-in refused', 'not-connected': 'not connected' };
+    return {
+      label: `T21 Settings · ${names[ds]}`, theme: this.props.theme,
+      onEnter: () => { this.hovered = true; }, onLeave: () => { this.hovered = false; },
+      tabs: TABS.map(([id, l, icon], i) => { const on = fo.r === -1 && fo.c === i && !C, sel = id === 'settings'; return { label: l, icon: icon || '', isIcon: !!icon, pad: icon ? 18 : 28, fill: sel ? 1 : 0, go: () => on ? this.goTab(id) : this.setState({ focus: { r: -1, c: i } }), bg: on ? '#f4f4f2' : sel ? 'rgba(255,255,255,.18)' : 'transparent', color: on ? '#101014' : sel ? '#f4f4f2' : 'rgba(244,244,242,.6)', tf: on ? 'scale(1.06)' : 'scale(1)' }; }),
+      dot: S.dot, dotIcon: S.dotIcon, statusText: S.status, statusColor: S.color, helpText: S.help,
+      facts: [{ label: 'Server', value: 'Set by your Biinge server' }, { label: 'Jellyfin account', value: ds === 'not-connected' ? '—' : 'tom' }, { label: 'Biinge account', value: 'tom@example.com' }],
+      actions: acts.map(([icon, l, go], i) => ({ icon, label: l, go: () => { this.setState({ focus: { r: 0, c: i } }); go(); }, ...(i === f && !C ? FOCUS : REST), color: !(i === f && !C) && /Disconnect|Log Out/.test(l) ? '#ff8a8d' : (i === f && !C ? FOCUS.color : REST.color) })),
+      confirmOpen: !!C, confirmLabel: C ? `T21 Settings · ${C.cta} confirmation` : '', confirmTitle: C ? C.title : '', confirmBody: C ? C.body : '',
+      confirmButtons: C ? [{ label: C.cta, go: C.after, ...(this.state.cIdx === 0 ? FOCUS : { ...REST, color: '#ff8a8d' }) }, { label: 'Cancel', go: () => this.setState({ confirm: null }), ...(this.state.cIdx === 1 ? FOCUS : REST) }] : [],
+    };
+  }
+}
+</script>
+</body>
+</html>

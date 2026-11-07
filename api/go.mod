@@ -5,7 +5,7 @@ go 1.25.0
 toolchain go1.27.2
 
 require (
-	github.com/getsentry/sentry-go v0.46.2
+	github.com/getsentry/sentry-go v0.50.0
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-chi/cors v1.2.2
 	github.com/go-chi/httprate v0.16.1
@@ -45,5 +45,5 @@ require (
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/text v0.41.0 // indirect
 )

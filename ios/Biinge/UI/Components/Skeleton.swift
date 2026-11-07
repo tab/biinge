@@ -74,13 +74,13 @@ struct LoadingSkeleton: ViewModifier {
             }
     }
 
-    /// Waits out the 300 ms delay, then calls `held` with true and, once the 500 ms hold ends, false (a cancel during the delay calls nothing, and one during the hold ends it at once)
-    static func time(held: (Bool) -> Void) async {
+    /// Waits out the 300 ms delay through `sleep`, then calls `held` with true and, once the 500 ms hold ends, false (a cancel during the delay calls nothing, and one during the hold ends it at once)
+    static func time(sleep: (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }, held: (Bool) -> Void) async {
         // a load that lands first removes the skeleton, which cancels the sleep
-        guard (try? await Task.sleep(for: .seconds(MotionDuration.skeletonDelay))) != nil else { return }
+        guard (try? await sleep(MotionDuration.skeletonDelay)) != nil else { return }
         held(true)
         // a skeleton that leaves the screen sooner, such as a closed screen, ends its hold too
-        try? await Task.sleep(for: .seconds(MotionDuration.loadingHold))
+        try? await sleep(MotionDuration.loadingHold)
         held(false)
     }
 }

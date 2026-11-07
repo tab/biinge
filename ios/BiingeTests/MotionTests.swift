@@ -51,15 +51,14 @@ struct MotionTests {
         #expect(MotionDuration.stallWait(isBuffering: true, shownAt: .now, now: .now) == nil)
     }
 
-    @MainActor @Test func aSkeletonNeverShowsForALoadUnder300Ms() async throws {
+    @MainActor @Test func aSkeletonNeverShowsForALoadUnder300Ms() async {
+        var asked: [TimeInterval] = []
         var calls: [Bool] = []
-        let timing = Task { await LoadingSkeleton.time { calls.append($0) } }
 
-        // the load lands at 100 ms, which removes the skeleton and cancels its task
-        try await Task.sleep(for: .milliseconds(100))
-        timing.cancel()
-        await timing.value
+        // the load lands during the delay, which removes the skeleton and cancels its sleep
+        await LoadingSkeleton.time(sleep: { asked.append($0); throw CancellationError() }, held: { calls.append($0) })
 
+        #expect(asked == [MotionDuration.skeletonDelay])
         #expect(calls.isEmpty)
     }
 
@@ -77,22 +76,15 @@ struct MotionTests {
         #expect(calls[1].at - calls[0].at >= .milliseconds(500))
     }
 
-    @MainActor @Test func aSkeletonThatLeavesDuringItsHoldEndsTheHold() async throws {
-        let clock = ContinuousClock()
-        var calls: [(held: Bool, at: ContinuousClock.Instant)] = []
-        let timing = Task { await LoadingSkeleton.time { calls.append(($0, clock.now)) } }
-        for _ in 0..<100 where calls.isEmpty {
-            try await Task.sleep(for: .milliseconds(10))
-        }
-        try #require(calls.map(\.held) == [true])
+    @MainActor @Test func aSkeletonThatLeavesDuringItsHoldEndsTheHold() async {
+        var asked: [TimeInterval] = []
+        var calls: [Bool] = []
 
         // a closed screen cancels the skeleton's task mid-hold
-        timing.cancel()
-        await timing.value
+        await LoadingSkeleton.time(sleep: { asked.append($0); if asked.count == 2 { throw CancellationError() } }, held: { calls.append($0) })
 
-        #expect(calls.map(\.held) == [true, false])
-        guard calls.count == 2 else { return }
-        #expect(calls[1].at - calls[0].at < .milliseconds(500))
+        #expect(asked == [MotionDuration.skeletonDelay, MotionDuration.loadingHold])
+        #expect(calls == [true, false])
     }
 
     @Test func postersStaggerOverTheFirstScreenfulOnly() {

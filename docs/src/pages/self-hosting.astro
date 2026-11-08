@@ -3,12 +3,11 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CodeBlock from "../components/CodeBlock.astro";
-import "../styles/guide.css";
 
 const clone = `git clone https://github.com/tab/biinge.git
 cd biinge`;
 
-const env = `# api/.env.development.local — gitignored, never commit it
+const env = `# api/.env.development.local: gitignored, never commit it
 TMDB_API_READ_ACCESS_TOKEN=<your TMDB v4 read token>
 IGDB_CLIENT_ID=<your Twitch app client id>
 IGDB_CLIENT_SECRET=<your Twitch app client secret>
@@ -41,143 +40,417 @@ const config = [
 ---
 
 <Layout
-  title="Self-hosting — biinge"
+  title="Self-hosting - biinge"
   description="Run the biinge API with Docker and connect the native iOS app to your own server."
 >
   <Header />
-  <main class="page">
-    <div class="container">
-      <div class="page-head">
-        <p class="eyebrow-label">Self-hosting</p>
-        <h1>Run Biinge on your own server.</h1>
-        <p class="lead">
-          Run the Go API with PostgreSQL and Redis, then connect the native iOS
-          app. The steps below create a local development stack; review the
-          <a href="#production">production checklist</a> before exposing it to
-          the internet.
-        </p>
-      </div>
-
-      <div class="prereq">
-        <h2>Before you start</h2>
-        <ul>
-          <li><strong>Docker with Compose</strong> — runs Postgres, Redis and the API</li>
-          <li>
-            A free <a href="https://developer.themoviedb.org" target="_blank" rel="noopener">TMDB</a>
-            v4 read access token — provides movie and TV search, details and trending
-          </li>
-          <li>
-            A <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener">Twitch application</a>
-            client ID and secret — gives the API access to
-            <a href="https://api-docs.igdb.com" target="_blank" rel="noopener">IGDB</a>
-            game data
-          </li>
-          <li>
-            <a href="https://github.com/pressly/goose" target="_blank" rel="noopener">goose</a>
-            — applies database migrations
-          </li>
-          <li><strong>Xcode 26</strong> — to build the iOS app</li>
-        </ul>
-      </div>
-
-      <ol class="steps">
-        <li class="step">
-          <div class="step-head"><span class="num">1</span><h3>Clone the repo</h3></div>
-          <CodeBlock code={clone} label="bash" />
-        </li>
-
-        <li class="step">
-          <div class="step-head"><span class="num">2</span><h3>Add your API keys</h3></div>
-          <p>
-            Create <code>api/.env.development.local</code> for your credentials.
-            The file is gitignored and loaded after the committed development
-            defaults, whether the API runs in Docker or directly.
-          </p>
-          <CodeBlock code={env} label="env" />
-          <p class="note">
-            In development, missing IGDB credentials leave saved games available
-            but return no game search results. Other environments will not start
-            without them.
-          </p>
-        </li>
-
-        <li class="step">
-          <div class="step-head"><span class="num">3</span><h3>Bring up the stack</h3></div>
-          <CodeBlock code={stack} label="bash" />
-          <p class="note">
-            To run only the API outside Docker, use
-            <code>cd api && GO_ENV=development go run ./cmd/biinge</code>. If you
-            have Fuku installed, <code>fuku up</code> starts it and waits on
-            <code>/ready</code>. The health endpoints are <code>GET /live</code>
-            for liveness and <code>GET /ready</code> for readiness.
-          </p>
-        </li>
-
-        <li class="step">
-          <div class="step-head"><span class="num">4</span><h3>Connect and build the app</h3></div>
-          <p>
-            Open <code>ios/Biinge.xcodeproj</code> in Xcode 26 and run it on a
-            simulator or your own device. To check it compiles without leaving
-            the terminal:
-          </p>
-          <CodeBlock code={app} label="bash" />
-          <p class="note">
-            The app targets <code>http://localhost:8080/api/v1</code> by default.
-            To point it somewhere else, copy <code>ios/.env.example</code> to
-            <code>ios/.env</code> and set <code>API_BASE_URL</code> — on a real
-            device that has to be a host the phone can reach, not localhost.
-          </p>
-        </li>
-      </ol>
-
-      <div class="config">
-        <h2>Configuration</h2>
-        <p class="config-lead">
-          These are the settings you are most likely to change. The complete
-          development defaults live in <code>api/.env.development</code>.
-        </p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Variable</th><th>Purpose</th></tr>
-            </thead>
-            <tbody>
-              {config.map((row) => (
-                <tr>
-                  <td><code>{row.name}</code></td>
-                  <td>{row.purpose}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="config" id="production">
-        <h2>Before exposing the API</h2>
-        <p class="config-lead">
-          The Compose stack above is for local development. It uses default
-          database credentials, publishes the database and Redis ports, and
-          serves the API over plain HTTP. A public deployment needs at least:
-        </p>
-        <ul class="prod-list">
-          <li>
-            <code>GO_ENV=production</code>, complete production environment
-            values, a random <code>JWT_SECRET_KEY</code> of at least 32 bytes,
-            and a unique PostgreSQL password
-          </li>
-          <li>
-            A reverse proxy terminating TLS in front of the API; if a browser
-            client calls it, add that HTTPS origin to <code>CLIENT_URL</code>
-          </li>
-          <li>
-            The database and Redis ports unpublished, reachable only on the
-            Compose network
-          </li>
-          <li>Backups of the Postgres volume, and a plan for applying migrations on upgrade</li>
-        </ul>
-      </div>
+  <main class="guide">
+    <div class="head">
+      <p class="eyebrow">Self-hosting</p>
+      <h1>Run Biinge on your own server</h1>
+      <p class="lede">
+        Run the Go API with PostgreSQL and Redis, then connect the native iOS
+        app. The steps below create a local development stack; review the
+        <a href="#production">production checklist</a> before exposing it to
+        the internet.
+      </p>
     </div>
+
+    <section class="prereq">
+      <h2>Before you start</h2>
+      <ul>
+        <li><strong>Docker with Compose</strong>: runs Postgres, Redis and the API</li>
+        <li>
+          A free <a href="https://developer.themoviedb.org" target="_blank" rel="noopener">TMDB</a>
+          v4 read access token: provides movie and TV search, details and trending
+        </li>
+        <li>
+          A <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener">Twitch application</a>
+          client ID and secret: gives the API access to
+          <a href="https://api-docs.igdb.com" target="_blank" rel="noopener">IGDB</a>
+          game data
+        </li>
+        <li>
+          <a href="https://github.com/pressly/goose" target="_blank" rel="noopener">goose</a>:
+          applies database migrations
+        </li>
+        <li><strong>Xcode 26</strong>: to build the iOS app</li>
+      </ul>
+    </section>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-head"><span class="num">1</span><h3>Clone the repo</h3></div>
+        <CodeBlock code={clone} label="bash" />
+      </li>
+
+      <li class="step">
+        <div class="step-head"><span class="num">2</span><h3>Add your API keys</h3></div>
+        <p>
+          Create <code>api/.env.development.local</code> for your credentials.
+          The file is gitignored and loaded after the committed development
+          defaults, whether the API runs in Docker or directly.
+        </p>
+        <CodeBlock code={env} label="env" />
+        <p class="note">
+          In development, missing IGDB credentials leave saved games available
+          but return no game search results. Other environments will not start
+          without them.
+        </p>
+      </li>
+
+      <li class="step">
+        <div class="step-head"><span class="num">3</span><h3>Bring up the stack</h3></div>
+        <CodeBlock code={stack} label="bash" />
+        <p class="note">
+          To run only the API outside Docker, use
+          <code>cd api && GO_ENV=development go run ./cmd/biinge</code>. When
+          the API runs in Docker, <code>docker compose logs -f api</code> follows
+          its logs. The health endpoints are <code>GET /live</code> for liveness
+          and <code>GET /ready</code> for readiness.
+        </p>
+      </li>
+
+      <li class="step">
+        <div class="step-head"><span class="num">4</span><h3>Connect and build the app</h3></div>
+        <p>
+          Open <code>ios/Biinge.xcodeproj</code> in Xcode 26 and run it on a
+          simulator or your own device. To check it compiles without leaving
+          the terminal:
+        </p>
+        <CodeBlock code={app} label="bash" />
+        <p class="note">
+          The app targets <code>http://localhost:8080/api/v1</code> by default.
+          To point it somewhere else, copy <code>ios/.env.example</code> to
+          <code>ios/.env</code> and set <code>API_BASE_URL</code>. On a real
+          device that has to be a host the phone can reach, not localhost.
+        </p>
+      </li>
+    </ol>
+
+    <section class="config">
+      <h2>Configuration</h2>
+      <p class="body">
+        These are the settings you are most likely to change. The complete
+        development defaults live in <code>api/.env.development</code>.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Variable</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            {config.map((row) => (
+              <tr>
+                <td><code>{row.name}</code></td>
+                <td>{row.purpose}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="config" id="production">
+      <h2>Before exposing the API</h2>
+      <p class="body">
+        The Compose stack above is for local development. It uses default
+        database credentials, publishes the database and Redis ports, and
+        serves the API over plain HTTP. A public deployment needs at least:
+      </p>
+      <ul class="prod-list">
+        <li>
+          <code>GO_ENV=production</code>, complete production environment
+          values, a random <code>JWT_SECRET_KEY</code> of at least 32 bytes,
+          and a unique PostgreSQL password
+        </li>
+        <li>
+          A reverse proxy terminating TLS in front of the API; if a browser
+          client calls it, add that HTTPS origin to <code>CLIENT_URL</code>
+        </li>
+        <li>
+          The database and Redis ports unpublished, reachable only on the
+          Compose network
+        </li>
+        <li>Backups of the Postgres volume, and a plan for applying migrations on upgrade</li>
+      </ul>
+    </section>
   </main>
   <Footer />
 </Layout>
+
+<!-- the head, type scale and surfaces follow About, so the two inner pages read as one set -->
+<style>
+  .guide {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(56px, 7vw, 96px) clamp(20px, 5vw, 64px) clamp(80px, 9vw, 128px);
+  }
+
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 860px;
+  }
+
+  .eyebrow {
+    font-size: 15px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 640;
+    font-size: clamp(40px, 5.4vw, 64px);
+    line-height: 1.04;
+    letter-spacing: -0.033em;
+  }
+
+  .lede {
+    font-size: clamp(17px, 1.5vw, 19.5px);
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 610;
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  .body,
+  .step p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  /* links read as underlined text, as on About */
+  main a {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--text) 35%, transparent);
+    text-underline-offset: 3px;
+  }
+
+  main a:hover {
+    text-decoration-color: var(--text);
+  }
+
+  strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* inline code in prose; the CodeBlock component styles its own */
+  p code,
+  li code,
+  td code {
+    font-family: var(--mono);
+    font-size: 0.84em;
+    color: var(--text);
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--text) 7%, transparent);
+  }
+
+  .prereq {
+    max-width: 780px;
+    margin-top: 72px;
+    padding: 28px 30px;
+    border-radius: 20px;
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 7%, transparent);
+  }
+
+  .prereq h2 {
+    margin-bottom: 18px;
+    font-size: 22px;
+  }
+
+  .prereq ul,
+  .prod-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .prereq li,
+  .prod-list li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  .prereq li::before,
+  .prod-list li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.62em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--text) 35%, transparent);
+  }
+
+  .steps {
+    list-style: none;
+    max-width: 780px;
+    margin-top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* a ring like the state marks, holding the step number */
+  .num {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--text) 24%, transparent);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .step h3 {
+    font-family: var(--display);
+    font-weight: 610;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .config {
+    max-width: 780px;
+    margin-top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  #production {
+    scroll-margin-top: 80px;
+  }
+
+  .table-wrap {
+    margin-top: 10px;
+    overflow-x: auto;
+    border-radius: 20px;
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 7%, transparent);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15.5px;
+  }
+
+  th,
+  td {
+    padding: 14px 20px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  }
+
+  th {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+  }
+
+  td {
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  td code {
+    white-space: nowrap;
+  }
+
+  .prod-list {
+    margin-top: 6px;
+  }
+
+  @media (max-width: 768px) {
+    .prereq {
+      padding: 24px;
+    }
+
+    .steps {
+      gap: 44px;
+    }
+
+    .steps,
+    .config {
+      margin-top: 64px;
+    }
+
+    td code {
+      white-space: normal;
+    }
+  }
+
+  /* on a phone each row stacks, the variable over its purpose, since the long names leave the purpose column a few words wide */
+  @media (max-width: 600px) {
+    thead {
+      display: none;
+    }
+
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      padding: 14px 20px;
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    td {
+      padding: 0;
+      border-bottom: none;
+    }
+
+    td + td {
+      margin-top: 6px;
+    }
+
+    td code {
+      overflow-wrap: anywhere;
+    }
+  }
+</style>

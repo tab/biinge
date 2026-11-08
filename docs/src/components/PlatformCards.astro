@@ -1,0 +1,116 @@
+---
+import DeviceFrame from "./DeviceFrame.astro";
+
+interface Card {
+  title: string;
+  text: string;
+  // screenshot path under public without the -light/-dark.webp suffix
+  src: string;
+  alt: string;
+  // the crop's shape (16:10 unless set)
+  width?: number;
+  height?: number;
+  // which part of a taller capture the crop keeps, as an object-position
+  position?: string;
+  // the capture exists only in dark, as the player does
+  fixedDark?: boolean;
+}
+
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  cards: Card[];
+}
+
+const { eyebrow, title, cards } = Astro.props;
+---
+
+<section class="cards-section">
+  <div class="inner">
+    {title && (
+      <div class="head">
+        {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+        <h2>{title}</h2>
+      </div>
+    )}
+    <div class="cards">
+      {cards.map((c) => (
+        <div class="card">
+          <DeviceFrame device="crop" src={c.src} alt={c.alt} width={c.width} height={c.height} position={c.position} fixedDark={c.fixedDark} />
+          <div class="text">
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- the page sets --measure, the widest its sections run -->
+<style>
+  .cards-section {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg);
+  }
+
+  .inner {
+    max-width: var(--measure, 1320px);
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 680px;
+  }
+
+  .eyebrow {
+    font-size: 15px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 620;
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 48px 32px;
+  }
+
+  /* no box: the rounded capture and its caption make the card */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  h3 {
+    font-size: 19px;
+    font-weight: 600;
+  }
+
+  .text p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 64%, transparent);
+  }
+</style>

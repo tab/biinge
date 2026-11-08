@@ -4,67 +4,62 @@ const base = import.meta.env.BASE_URL;
 
 <footer class="footer">
   <div class="footer-inner">
-    <span>Made in Estonia</span>
-    <div class="links">
+    <a href={base} class="home" aria-label="biinge home">
+      <img src={`${base}icon.png`} width="22" height="22" alt="" />
+    </a>
+    <nav class="links" aria-label="Footer">
+      <a href={`${base}iphone/`}>iPhone</a>
+      <a href={`${base}mac/`}>Mac</a>
+      <a href={`${base}apple-tv/`}>Apple TV</a>
       <a href={`${base}about/`}>About</a>
-      <span class="sep">&middot;</span>
       <a href={`${base}self-hosting/`}>Self-host</a>
-      <span class="sep">&middot;</span>
       <a href={`${base}docs/api/`}>API</a>
-      <span class="sep">&middot;</span>
       <a href="https://github.com/tab/biinge" target="_blank" rel="noopener">GitHub</a>
-      <span class="sep">&middot;</span>
-      <a href="https://github.com/tab/biinge/blob/master/LICENSE" target="_blank" rel="noopener">License</a>
-    </div>
+      <a href="https://github.com/tab/biinge/blob/master/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </nav>
   </div>
 </footer>
 
 <style>
   .footer {
-    background: #050506;
+    background: var(--footer-bg);
   }
 
   .footer-inner {
     max-width: 1320px;
     margin: 0 auto;
-    padding: 40px 64px;
+    padding: 44px clamp(20px, 5vw, 64px);
     font-family: var(--sans);
-    font-size: 0.82rem;
-    color: #8a8a8a;
+    font-size: 13.5px;
+    color: var(--footer-text);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px 32px;
+  }
+
+  .home img {
+    display: block;
+    border-radius: 6px;
+    opacity: 0.9;
   }
 
   .links {
     display: flex;
-    gap: 8px;
-    align-items: center;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 18px;
   }
 
   .links a {
-    color: #8a8a8a;
+    color: var(--footer-text);
     text-decoration: none;
     transition: color 0.15s;
   }
 
   .links a:hover {
-    color: #fafafa;
+    color: var(--text);
     text-decoration: none;
-  }
-
-  .sep {
-    color: rgba(255, 255, 255, 0.2);
-  }
-
-  @media (max-width: 768px) {
-    .footer-inner {
-      padding: 24px;
-      flex-direction: column;
-      text-align: center;
-    }
   }
 </style>

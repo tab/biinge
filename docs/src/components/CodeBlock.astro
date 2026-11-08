@@ -57,21 +57,21 @@ const highlighted = lines.map(highlight).join("\n");
 </div>
 
 <style>
+  /* the site's dark surfaces in both themes, as a terminal stays dark */
   .code-ide {
-    border-radius: 10px;
+    border-radius: 16px;
     overflow: hidden;
-    background: #1a1620;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    background: #17171d;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   }
 
   .code-titlebar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 12px;
-    height: 38px;
-    background: #14111a;
+    padding: 0 12px 0 16px;
+    height: 40px;
+    background: #131317;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
@@ -79,18 +79,18 @@ const highlighted = lines.map(highlight).join("\n");
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #a89ba6;
+    color: #91919a;
     font-size: 0.8rem;
     font-family: var(--mono);
   }
 
   .file-icon {
-    color: #6c6472;
+    color: #6b6b74;
     flex-shrink: 0;
   }
 
   .tab-name {
-    color: #e8dfe6;
+    color: #c8c8c4;
   }
 
   .copy-btn {
@@ -99,7 +99,7 @@ const highlighted = lines.map(highlight).join("\n");
     justify-content: center;
     background: none;
     border: none;
-    color: #6c6472;
+    color: #6b6b74;
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;
@@ -107,7 +107,7 @@ const highlighted = lines.map(highlight).join("\n");
   }
 
   .copy-btn:hover {
-    color: #e8dfe6;
+    color: #f4f4f2;
     background: rgba(255, 255, 255, 0.06);
   }
 
@@ -116,7 +116,7 @@ const highlighted = lines.map(highlight).join("\n");
   }
 
   .copy-btn.copied {
-    color: #a6e3a1;
+    color: #34c46f;
   }
 
   .check-icon {
@@ -149,10 +149,10 @@ const highlighted = lines.map(highlight).join("\n");
     font-family: var(--mono);
     font-size: 0.82rem;
     line-height: 1.7;
-    color: #e8dfe6;
+    color: #f4f4f2;
   }
 
-  :global(.hl-comment) { color: #6c6472; font-style: italic; }
-  :global(.hl-cmd) { color: #fb7185; }
-  :global(.hl-flag) { color: #fbbf72; }
+  :global(.hl-comment) { color: #6b6b74; font-style: italic; }
+  :global(.hl-cmd) { color: #ff6b70; }
+  :global(.hl-flag) { color: #eec01e; }
 </style>

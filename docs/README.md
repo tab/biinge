@@ -49,11 +49,14 @@ of every change.
 
 ```
 src/
-  pages/        one file per route: index, about, self-hosting, docs/api
-  components/   the page sections (Hero, Chapter, DeviceFlow, StateRing, ...)
+  pages/        one file per route: index, iphone, mac, apple-tv, about,
+                self-hosting, docs/api
+  components/   the shell (Header, Footer, ThemeToggle) and the page sections
+                (HomeHero, PlatformHero, PlatformSection, Recording, ...)
   layouts/      Layout.astro, which owns head, canonical and Open Graph tags
-  styles/       global.css
-public/         fonts, icons, Open Graph images, and the screenshots under screens/
+  styles/       global.css (each page and component scopes its own styles)
+public/         fonts, icons, the Open Graph image and its SVG source, and the
+                captures under media/, which the root README also shows
 ```
 
 `src/pages/docs/api.astro` keeps its own hand-written endpoint list. It does not

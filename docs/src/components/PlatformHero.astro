@@ -1,0 +1,201 @@
+---
+import { platforms, type Platform } from "./platforms";
+
+interface Props {
+  page: Platform;
+  eyebrow: string;
+  title: string;
+  lede: string;
+  // the tint of the soft light behind the devices
+  glow: string;
+  // the devices run into the next section under a fade, instead of sitting above a bottom margin
+  fade?: boolean;
+}
+
+const { page, eyebrow, title, lede, glow, fade = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<section class:list={["hero", { fade }]} style={`--glow: ${glow}`}>
+  <div class="inner">
+    <nav class="switcher" aria-label="Apps">
+      {platforms.map((p) => (
+        <a href={`${base}${p.path}`} class:list={{ current: p.key === page }} aria-current={p.key === page ? "page" : undefined}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={p.icon} />
+          {p.name}
+        </a>
+      ))}
+    </nav>
+    <p class="eyebrow">{eyebrow}</p>
+    <h1>{title}</h1>
+    <p class="lede">{lede}</p>
+    <div class="actions">
+      <a class="primary" href="https://github.com/tab/biinge" target="_blank" rel="noopener">
+        Get it on GitHub
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+      </a>
+      <a class="secondary" href="#requirements">
+        What you need
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>
+      </a>
+    </div>
+    <div class="media">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(56px, 6vw, 88px) 0 clamp(72px, 8vw, 112px);
+    background: var(--bg);
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: 50%;
+    top: 42%;
+    width: 1300px;
+    height: 800px;
+    margin-left: -650px;
+    background: radial-gradient(closest-side, var(--glow), transparent);
+  }
+
+  .fade {
+    padding-bottom: 0;
+  }
+
+  /* the lower phones sink into the page ground */
+  .fade::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 180px;
+    background: linear-gradient(0deg, var(--bg), transparent);
+    pointer-events: none;
+  }
+
+  .inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    text-align: center;
+  }
+
+  .switcher {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text) 6%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .switcher a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px 0 11px;
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .switcher a:hover {
+    color: var(--text);
+  }
+
+  .switcher a.current {
+    background: color-mix(in srgb, var(--text) 14%, transparent);
+    color: var(--text);
+  }
+
+  .eyebrow {
+    margin-top: 18px;
+    font-size: 15px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 660;
+    font-size: clamp(44px, 6vw, 84px);
+    line-height: 1.02;
+    letter-spacing: -0.034em;
+  }
+
+  .lede {
+    max-width: 60ch;
+    font-size: clamp(17px, 1.5vw, 20px);
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--text) 70%, transparent);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px 28px;
+    margin-top: 6px;
+  }
+
+  .actions a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.12s;
+  }
+
+  .primary {
+    height: 50px;
+    padding: 0 28px;
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .primary:hover {
+    opacity: 0.86;
+  }
+
+  .primary:active {
+    transform: scale(0.97);
+  }
+
+  .secondary {
+    color: var(--text);
+  }
+
+  .media {
+    width: 100%;
+    margin-top: 48px;
+    display: flex;
+    justify-content: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .primary:active {
+      transform: none;
+    }
+  }
+</style>

@@ -1,0 +1,214 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import PlatformHero from "../components/PlatformHero.astro";
+import PlatformSection from "../components/PlatformSection.astro";
+import PlatformCards from "../components/PlatformCards.astro";
+import PlatformInstall from "../components/PlatformInstall.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+import Footer from "../components/Footer.astro";
+
+const remote = [
+  {
+    action: "Swipe to move focus",
+    where: "Rows and grids",
+    icon: '<path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/>',
+  },
+  {
+    action: "Click to open or play",
+    where: "Cards and buttons",
+    icon: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor"/>',
+  },
+  {
+    action: "Play or pause",
+    where: "In the player",
+    icon: '<path d="M4 6.5l7 5.5-7 5.5z"/><path d="M15 6.5v11M19 6.5v11"/>',
+  },
+  {
+    action: "Back",
+    where: "Out of a panel, a page or the player",
+    icon: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  },
+];
+---
+
+<Layout
+  title="Biinge for Apple TV"
+  description="The Apple TV app shows your lists and your Jellyfin library as large rows. You browse and play with the Siri Remote."
+>
+  <Header page="tv" />
+  <main>
+    <PlatformHero
+      page="tv"
+      glow="rgba(255, 150, 80, 0.08)"
+      eyebrow="Biinge for Apple TV"
+      title="Relax and watch"
+      lede="The Apple TV app shows your lists and your Jellyfin library as large rows. You browse and play with the Siri Remote."
+    >
+      <div class="hero-tv">
+        <DeviceFrame device="tv" stand src="media/tv/home" eager alt="Biinge Home on Apple TV, with a featured title above the rows" />
+      </div>
+    </PlatformHero>
+
+    <PlatformSection
+      raised
+      media="wide"
+      eyebrow="Home"
+      title="Home opens on what you're watching"
+      body="A featured title, then rows for Continue Watching, Next Episodes, recent additions and your collections. A Continue Watching or Next Episodes card plays when you select it."
+    >
+      <DeviceFrame device="tv" src="media/tv/continue" alt="The Continue Watching row on Apple TV, with a card in focus" />
+    </PlatformSection>
+
+    <PlatformSection
+      flip
+      media="wide"
+      eyebrow="Focus"
+      title="The focused poster lifts"
+      body="The poster in focus lifts and catches the light. With Reduce Motion on, a ring marks focus instead."
+    >
+      <DeviceFrame device="tv" src="media/tv/movie" alt="A movie's details on Apple TV" />
+    </PlatformSection>
+
+    <PlatformSection
+      raised
+      media="wide"
+      eyebrow="TV Shows"
+      title="Seasons and episodes on one screen"
+      body="Each episode shows its watched mark and runtime. At the credits, the next episode counts down beside the picture."
+    >
+      <DeviceFrame device="tv" src="media/tv/season" alt="A season and its episodes on Apple TV" />
+    </PlatformSection>
+
+    <PlatformCards
+      cards={[
+        {
+          title: "My Lists",
+          text: "Want to Watch, Watching and Watched as three poster rows. Select a title to see where it stands and play it from there.",
+          src: "media/tv/lists",
+          alt: "My Lists on Apple TV, with three rows of posters",
+          width: 1600,
+          height: 900,
+        },
+        {
+          title: "Audio and subtitles from the remote",
+          text: "Open Audio & Subtitles from the player's controls to change tracks or the subtitle style. Your server's default tracks are already picked.",
+          src: "media/tv/player",
+          alt: "The player on Apple TV, with the audio and subtitle choices open",
+          width: 1600,
+          height: 900,
+          fixedDark: true,
+        },
+      ]}
+    />
+
+    <section class="remote">
+      <div class="inner">
+        <div class="intro">
+          <h2>Siri Remote controls</h2>
+          <p>
+            To type, use the on-screen keyboard or your iPhone.
+          </p>
+        </div>
+        <ul>
+          {remote.map((r) => (
+            <li>
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={r.icon} />
+              <span class="label">
+                <span>{r.action}</span>
+                <span class="where">{r.where}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <PlatformInstall
+      page="tv"
+      device="An Apple TV on tvOS 26"
+      install="Biinge isn't on the App Store. Build the Apple TV app with Xcode and install it from your Mac over the network. Sign in once with your Biinge account and your Jellyfin user."
+    />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .hero-tv {
+    width: 100%;
+    max-width: 1180px;
+  }
+
+  .remote {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg-elevated);
+  }
+
+  .remote .inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px clamp(40px, 6vw, 88px);
+  }
+
+  .intro {
+    flex: 1 1 300px;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 620;
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+  }
+
+  .intro p {
+    font-size: 17.5px;
+    line-height: 1.62;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  ul {
+    flex: 1 1 420px;
+    min-width: 0;
+    list-style: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 0;
+    border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+    font-size: 16px;
+  }
+
+  li svg {
+    flex: none;
+    box-sizing: content-box;
+    padding: 9.5px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+  }
+
+  /* on a narrow screen the note drops under its action rather than under the icon */
+  .label {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 20px;
+  }
+
+  .where {
+    color: color-mix(in srgb, var(--text) 55%, transparent);
+  }
+</style>

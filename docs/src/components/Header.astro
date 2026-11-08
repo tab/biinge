@@ -2,17 +2,23 @@
 import ThemeToggle from "./ThemeToggle.astro";
 
 interface Props {
-  section?: "about";
+  // the nav entry marked as the current page
+  page?: "home" | "iphone" | "mac" | "tv" | "about";
   wide?: boolean;
   // set on pages that open with a dark hero the bar can sit over
   over?: boolean;
 }
 
-const { section, wide, over } = Astro.props;
+const { page, wide, over } = Astro.props;
 const base = import.meta.env.BASE_URL;
 
 // self-hosting and the API reference are reached from the footer
-const links = [{ label: "About", href: `${base}about/`, key: "about" }];
+const links = [
+  { label: "iPhone", href: `${base}iphone/`, key: "iphone" },
+  { label: "Mac", href: `${base}mac/`, key: "mac" },
+  { label: "Apple TV", href: `${base}apple-tv/`, key: "tv" },
+  { label: "About", href: `${base}about/`, key: "about" },
+];
 ---
 
 <header class:list={["topbar", { over }]}>
@@ -21,13 +27,13 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   <div class:list={["topbar-inner", { wide }]}>
     <div class="topbar-left">
       <a href={`${base}`} class="logo">
-        <img class="mark" src={`${base}icon.png`} width="26" height="26" alt="" aria-hidden="true" />
+        <img class="mark" src={`${base}icon.png`} width="28" height="28" alt="" aria-hidden="true" />
         <span class="brand-name">biinge</span>
       </a>
 
       <nav class="topbar-nav">
         {links.map((link) => (
-          <a href={link.href} class:list={["nav-link", { active: section === link.key }]}>{link.label}</a>
+          <a href={link.href} class:list={["nav-link", { active: page === link.key }]} aria-current={page === link.key ? "page" : undefined}>{link.label}</a>
         ))}
       </nav>
     </div>
@@ -35,7 +41,7 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
       <ThemeToggle />
       <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="github-cta">
         GitHub
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
       </a>
       <label for="mobile-toggle" class="mobile-menu-btn">
         <svg class="icon-menu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -56,7 +62,7 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     <div class="mobile-menu-inner">
       <nav>
         {links.map((link) => (
-          <a href={link.href} class:list={["mobile-link", { active: section === link.key }]}>{link.label}</a>
+          <a href={link.href} class:list={["mobile-link", { active: page === link.key }]} aria-current={page === link.key ? "page" : undefined}>{link.label}</a>
         ))}
         <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="mobile-link">GitHub</a>
       </nav>
@@ -70,26 +76,35 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
     top: 0;
     z-index: 100;
     background: var(--header-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(18px) saturate(1.6);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
     border-bottom: 1px solid var(--border);
     transition: background 0.3s, border-color 0.3s;
   }
 
   /*
    * Over the hero the bar carries no ground of its own, so it borrows the
-   * hero's palette until the page scrolls out from under it
+   * hero's palette until the page scrolls out from under it or the menu opens
    */
-  .topbar.over:not(.is-stuck) {
+  .topbar.over:not(.is-stuck):not(:has(.mobile-toggle:checked)) {
     --text: #f4f4f2;
     --text-muted: rgba(255, 255, 255, 0.74);
     --bg: #101014;
     --border: rgba(255, 255, 255, 0.2);
     --nav-hover-bg: rgba(255, 255, 255, 0.12);
-    background: transparent;
+    --fill: rgba(255, 255, 255, 0.1);
+    --fill-hover: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(180deg, rgba(16, 16, 20, 0.7) 0%, rgba(16, 16, 20, 0) 100%);
+    /* from the border edge, or the gradient repeats a dark hairline into the transparent border */
+    background-origin: border-box;
     border-bottom-color: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+  }
+
+  /* the open menu is solid, or the dark Home hero muddies its lower links in light */
+  .topbar:has(.mobile-toggle:checked) {
+    background: var(--bg);
   }
 
   /*
@@ -118,11 +133,12 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   .topbar-inner {
     max-width: 1320px;
     margin: 0 auto;
-    padding: 0 64px;
-    height: 60px;
+    padding: 0 clamp(20px, 5vw, 64px);
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 24px;
   }
 
   .topbar-inner.wide {
@@ -132,16 +148,16 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   .topbar-left {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 36px;
   }
 
   .logo {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 10px;
     font-family: var(--display);
     font-variation-settings: "wdth" 100, "wght" 640;
-    font-size: 1.15rem;
+    font-size: 19px;
     color: var(--text);
     text-decoration: none;
     letter-spacing: -0.028em;
@@ -154,21 +170,21 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   .mark {
     border-radius: 7px;
     display: block;
-    border: 1px solid var(--border);
+    box-shadow: 0 0 0 1px var(--fill);
   }
 
   .topbar-nav {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
   }
 
   .nav-link {
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: var(--text-muted);
+    font-size: 14.5px;
+    font-weight: 450;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
     text-decoration: none;
-    padding: 6px 12px;
+    padding: 7px 12px;
     border-radius: 8px;
     transition: color 0.2s;
   }
@@ -190,19 +206,20 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   .topbar-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
 
   .github-cta {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 18px;
+    height: 36px;
+    padding: 0 18px;
     border-radius: 999px;
     background: var(--text);
     color: var(--bg);
-    font-size: 0.84rem;
-    font-weight: 550;
+    font-size: 14px;
+    font-weight: 600;
     text-decoration: none;
     transition: opacity 0.15s, transform 0.12s;
   }
@@ -224,13 +241,18 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
 
   .mobile-menu-btn {
     display: none;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--fill);
+    color: var(--text);
     cursor: pointer;
-    color: var(--text-muted);
-    padding: 4px;
   }
 
   .mobile-menu-btn:active {
-    color: var(--text);
+    background: var(--fill-hover);
   }
 
   .icon-close {
@@ -252,7 +274,7 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   .mobile-menu nav {
     display: flex;
     flex-direction: column;
-    padding: 12px 24px;
+    padding: 12px clamp(20px, 5vw, 64px);
     gap: 2px;
   }
 
@@ -284,10 +306,6 @@ const links = [{ label: "About", href: `${base}about/`, key: "about" }];
   }
 
   @media (max-width: 768px) {
-    .topbar-inner {
-      padding: 0 24px;
-    }
-
     .topbar-nav {
       display: none;
     }

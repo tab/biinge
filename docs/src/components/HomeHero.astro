@@ -1,0 +1,454 @@
+---
+interface Slide {
+  slug: string;
+  title: string;
+  eyebrow: string;
+  // resume position, only for a title with one
+  pct?: number;
+  left?: string;
+}
+
+const base = import.meta.env.BASE_URL;
+const icons = {
+  iphone: '<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/>',
+  mac: '<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/>',
+  tv: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8"/>',
+};
+
+// featured titles from the capture account, each label true to its state there
+const slides: Slide[] = [
+  { slug: "dune-part-two", title: "Dune: Part Two", eyebrow: "Continue Watching · Movie", pct: 45, left: "1h 31m left" },
+  { slug: "severance", title: "Severance", eyebrow: "Watching · TV Show" },
+  { slug: "one-battle-after-another", title: "One Battle After Another", eyebrow: "Continue Watching · Movie", pct: 32, left: "1h 49m left" },
+  { slug: "interstellar", title: "Interstellar", eyebrow: "Watched · Movie" },
+  { slug: "andor", title: "Andor", eyebrow: "Want to Watch · TV Show" },
+  { slug: "mad-max-fury-road", title: "Mad Max: Fury Road", eyebrow: "Watched · Movie" },
+];
+const platforms = [
+  { label: "iPhone", href: `${base}iphone/`, icon: icons.iphone },
+  { label: "Mac", href: `${base}mac/`, icon: icons.mac },
+  { label: "Apple TV", href: `${base}apple-tv/`, icon: icons.tv },
+];
+---
+
+<section class="hero" data-hero>
+  {slides.map((s, i) => (
+    <img
+      class:list={["backdrop", { on: i === 0 }]}
+      data-i={i}
+      src={`${base}media/hero/${s.slug}.webp`}
+      alt=""
+      width="780"
+      height="1170"
+      fetchpriority={i === 0 ? "high" : undefined}
+    />
+  ))}
+  <div class="scrim"></div>
+
+  <div class="inner">
+    <div class="copy">
+      <p class="eyebrow">iPhone, Mac and Apple TV · Self-hosted, open source</p>
+      <h1>A self-hosted tracker and player for Jellyfin</h1>
+      <p class="lead">
+        You run the Biinge API next to your Jellyfin server, on your own hardware. The iPhone, Mac and Apple TV apps
+        track movies, TV shows and games, and play what your server holds.
+      </p>
+      <div class="actions">
+        <a class="primary" href="https://github.com/tab/biinge" target="_blank" rel="noopener">
+          Get it on GitHub
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </a>
+        <a class="secondary" href="#features">
+          See the features
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <nav class="chips" aria-label="Platforms">
+        {platforms.map((p) => (
+          <a href={p.href}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={p.icon} />
+            {p.label}
+          </a>
+        ))}
+      </nav>
+    </div>
+
+    <!-- the rotating card is decoration over the same titles, so readers skip it -->
+    <div class="card" aria-hidden="true">
+      <div class="poster">
+        {slides.map((s, i) => (
+          <img class:list={{ on: i === 0 }} data-i={i} src={`${base}media/hero/${s.slug}.webp`} alt="" width="780" height="1170" />
+        ))}
+      </div>
+      <div class="captions">
+        {slides.map((s, i) => (
+          <div class:list={["caption", { on: i === 0 }]} data-i={i}>
+            <div class="caption-eyebrow">{s.eyebrow}</div>
+            <div class="caption-title">{s.title}</div>
+            {s.pct !== undefined && (
+              <div class="progress">
+                <div class="bar"><div style={`width: ${s.pct}%`}></div></div>
+                {s.left}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div class="dots">
+        {slides.map((_, i) => <span class:list={["dot", { on: i === 0 }]} data-i={i}></span>)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    var hero = document.querySelector("[data-hero]");
+    if (!hero) return;
+
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var parts = hero.querySelectorAll("[data-i]");
+    var count = hero.querySelectorAll(".dot").length;
+    var active = 0;
+    var timer = null;
+    var onScreen = true;
+
+    function show(i) {
+      active = i;
+      parts.forEach(function (el) {
+        el.classList.toggle("on", Number(el.getAttribute("data-i")) === active);
+      });
+    }
+
+    function advance() {
+      show((active + 1) % count);
+    }
+
+    // rotates only while the hero is on screen, the tab is visible and motion is allowed
+    function sync() {
+      var run = onScreen && !document.hidden && !reduce.matches;
+      if (run && !timer) timer = window.setInterval(advance, 5600);
+      if (!run && timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    new IntersectionObserver(function (entries) {
+      onScreen = entries[0].isIntersecting;
+      sync();
+    }).observe(hero);
+    document.addEventListener("visibilitychange", sync);
+    reduce.addEventListener("change", function () {
+      // under reduced motion the first title stays as a still
+      if (reduce.matches) show(0);
+      sync();
+    });
+  })();
+</script>
+
+<!--
+  The hero sits on artwork, so it keeps the prototype's dark values in both site
+  themes. It slides up under the transparent header (64px bar plus its border)
+-->
+<style>
+  .hero {
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin-top: -65px;
+    min-height: clamp(700px, 60vw, 900px);
+    display: flex;
+    align-items: flex-end;
+    background: #0b0b0e;
+    color: #f4f4f2;
+  }
+
+  .backdrop {
+    position: absolute;
+    left: -80px;
+    top: -80px;
+    z-index: -3;
+    width: calc(100% + 160px);
+    height: calc(100% + 160px);
+    object-fit: cover;
+    filter: blur(56px) saturate(1.45) brightness(0.62);
+    opacity: 0;
+    transition: opacity 800ms var(--ease);
+  }
+
+  .scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background:
+      linear-gradient(90deg, rgba(16, 16, 20, 0.9) 0%, rgba(16, 16, 20, 0.62) 46%, rgba(16, 16, 20, 0.2) 100%),
+      linear-gradient(0deg, #101014 0%, rgba(16, 16, 20, 0) 34%);
+  }
+
+  .inner {
+    position: relative;
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 150px clamp(20px, 5vw, 64px) clamp(64px, 7vw, 96px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 56px;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    max-width: 680px;
+    min-width: 0;
+  }
+
+  .eyebrow {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.68);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 660;
+    font-size: clamp(46px, 6.2vw, 90px);
+    line-height: 1.02;
+    letter-spacing: -0.034em;
+  }
+
+  .lead {
+    max-width: 56ch;
+    font-size: clamp(17px, 1.5vw, 20px);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 28px;
+    margin-top: 6px;
+  }
+
+  .actions a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.12s;
+  }
+
+  .primary {
+    height: 50px;
+    padding: 0 28px;
+    border-radius: 999px;
+    background: #f4f4f2;
+    color: #101014;
+  }
+
+  .primary:hover {
+    opacity: 0.86;
+  }
+
+  .primary:active {
+    transform: scale(0.97);
+  }
+
+  .secondary {
+    color: #f4f4f2;
+  }
+
+  .secondary svg {
+    transition: transform 0.18s;
+  }
+
+  .secondary:hover svg {
+    transform: translateX(3px);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .chips a {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 36px;
+    padding: 0 14px 0 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    font-size: 14px;
+    font-weight: 500;
+    color: #f4f4f2;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .chips a:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .card {
+    flex: none;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .poster {
+    position: relative;
+    width: 300px;
+    height: 450px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #282828;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 40px 80px rgba(0, 0, 0, 0.55);
+  }
+
+  /* the outgoing poster holds its zoom until it has faded, then resets out of sight */
+  .poster img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1);
+    transition:
+      opacity 800ms var(--ease),
+      transform 0ms linear 800ms;
+  }
+
+  .poster img.on {
+    transform: scale(1.06);
+    transition:
+      opacity 800ms var(--ease),
+      transform 6400ms linear;
+  }
+
+  .backdrop.on,
+  .poster img.on {
+    opacity: 1;
+  }
+
+  .captions {
+    position: relative;
+    height: 96px;
+  }
+
+  .caption {
+    position: absolute;
+    inset: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 200ms cubic-bezier(0.4, 0, 1, 1),
+      transform 200ms cubic-bezier(0.4, 0, 1, 1);
+  }
+
+  .caption.on {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 450ms var(--ease) 300ms,
+      transform 450ms var(--ease) 300ms;
+  }
+
+  .caption-eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .caption-title {
+    font-family: var(--display);
+    font-weight: 640;
+    font-size: 24px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .bar div {
+    height: 100%;
+    border-radius: 2px;
+    background: #f4f4f2;
+  }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(244, 244, 242, 0.35);
+    transition:
+      width 280ms var(--ease),
+      background 280ms;
+  }
+
+  .dot.on {
+    width: 22px;
+    background: #f4f4f2;
+  }
+
+  @media (max-width: 759px) {
+    .card {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .backdrop,
+    .poster img,
+    .caption,
+    .dot,
+    .secondary svg,
+    .primary {
+      transition: none;
+    }
+
+    .poster img.on,
+    .secondary:hover svg,
+    .primary:active {
+      transform: none;
+    }
+  }
+</style>

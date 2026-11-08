@@ -1,0 +1,253 @@
+---
+import { platforms, type Platform } from "./platforms";
+
+interface Props {
+  page: Platform;
+  // the first requirement, naming the device and its OS
+  device: string;
+  install: string;
+}
+
+const { page, device, install } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const current = platforms.find((p) => p.key === page)!;
+const others = platforms.filter((p) => p.key !== page);
+
+const needs = [
+  { text: device, icon: current.icon },
+  {
+    text: "A Biinge server for your account, lists and progress",
+    icon: '<rect x="4" y="4" width="16" height="7" rx="1.5"/><rect x="4" y="13" width="16" height="7" rx="1.5"/><path d="M8 7.5h.01M8 16.5h.01"/>',
+  },
+  {
+    text: "A Jellyfin server on https, for your library and playback (optional, your lists work without it)",
+    icon: '<rect x="7" y="3" width="14" height="14" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h12"/><path d="M12.5 7.5v5l4-2.5z"/>',
+  },
+];
+---
+
+<section id="requirements" class="requirements">
+  <div class="inner grid">
+    <div class="card">
+      <h2>What you need</h2>
+      <ul class="needs">
+        {needs.map((n) => (
+          <li>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={n.icon} />
+            {n.text}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="card">
+      <h2>How to install</h2>
+      <p class="install">{install}</p>
+      <div class="actions">
+        <a class="primary" href="https://github.com/tab/biinge" target="_blank" rel="noopener">
+          Get it on GitHub
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </a>
+        <a class="secondary" href={`${base}self-hosting/`}>
+          Setup guide
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="also">
+  <div class="inner">
+    <h2 class="label">Also on</h2>
+    <div class="grid">
+      {others.map((p) => (
+        <a class="app" href={`${base}${p.path}`}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={p.icon} />
+          <span class="names">
+            <span class="name">{p.name}</span>
+            <span class="tagline">{p.tagline}</span>
+          </span>
+          <svg class="go" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- the page sets --measure, the widest its sections run -->
+<style>
+  .requirements {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg);
+  }
+
+  .also {
+    padding: 0 0 clamp(80px, 9vw, 128px);
+    background: var(--bg);
+  }
+
+  .inner {
+    max-width: var(--measure, 1320px);
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 32px;
+    border-radius: 24px;
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 7%, transparent);
+  }
+
+  .card h2 {
+    font-family: var(--display);
+    font-weight: 620;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+  }
+
+  .needs {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    list-style: none;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .needs li {
+    display: flex;
+    gap: 14px;
+  }
+
+  .needs svg {
+    flex: none;
+    margin-top: 1px;
+  }
+
+  .install {
+    font-size: 16px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 70%, transparent);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+    margin-top: auto;
+  }
+
+  .actions a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.12s;
+  }
+
+  .primary {
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .primary:hover {
+    opacity: 0.86;
+  }
+
+  .primary:active {
+    transform: scale(0.97);
+  }
+
+  .secondary {
+    color: var(--text);
+  }
+
+  .label {
+    margin-bottom: 24px;
+    font-size: 15px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+  }
+
+  .also .grid {
+    gap: 16px;
+  }
+
+  .app {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 26px;
+    border-radius: 22px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 10%, transparent);
+    color: var(--text);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .app:hover {
+    background: color-mix(in srgb, var(--text) 4%, transparent);
+    text-decoration: none;
+  }
+
+  .names {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .name {
+    font-family: var(--display);
+    font-weight: 640;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .tagline {
+    font-size: 15px;
+    color: color-mix(in srgb, var(--text) 62%, transparent);
+  }
+
+  .go {
+    flex: none;
+    transition: transform 0.18s;
+  }
+
+  .app:hover .go {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 480px) {
+    .card {
+      padding: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .go {
+      transition: none;
+    }
+
+    .app:hover .go,
+    .primary:active {
+      transform: none;
+    }
+  }
+</style>

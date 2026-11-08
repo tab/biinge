@@ -1,0 +1,197 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import PlatformHero from "../components/PlatformHero.astro";
+import PlatformSection from "../components/PlatformSection.astro";
+import PlatformCards from "../components/PlatformCards.astro";
+import PlatformInstall from "../components/PlatformInstall.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+import Footer from "../components/Footer.astro";
+
+const keys = [
+  { action: "Search", keys: ["⌘", "K"] },
+  { action: "Back", keys: ["⌘", "["] },
+  { action: "Close search or go back", keys: ["esc"] },
+  { action: "Play or pause", keys: ["space"] },
+  { action: "Skip back or ahead 10 seconds", keys: ["←", "→"] },
+  { action: "Full screen while playing", keys: ["F"] },
+];
+---
+
+<Layout
+  title="Biinge for Mac"
+  description="The Mac app shows your lists and your Jellyfin library in a sidebar layout. The player runs full screen or in a window."
+>
+  <Header page="mac" />
+  <main>
+    <PlatformHero
+      page="mac"
+      glow="rgba(120, 140, 255, 0.08)"
+      eyebrow="Biinge for Mac"
+      title="Browse and watch"
+      lede="The Mac app shows your lists and your Jellyfin library in a sidebar layout. The player runs full screen or in a window."
+    >
+      <div class="hero-window">
+        <DeviceFrame device="mac" src="media/mac/home" eager alt="The Biinge Home window on Mac, with a featured title above Continue Watching" />
+      </div>
+    </PlatformHero>
+
+    <PlatformSection
+      raised
+      media="wide"
+      eyebrow="Home"
+      title="Home shows what to play next"
+      body="Continue Watching, Next Episodes, Recently Added and your collections, under a featured title you can play."
+    >
+      <DeviceFrame device="mac" src="media/mac/rows" alt="The Continue Watching and Next Episodes rows on Mac" />
+    </PlatformSection>
+
+    <PlatformSection
+      flip
+      media="wide"
+      eyebrow="TV Shows"
+      title="Seasons and episodes on one page"
+      body="A show's page has its watched count, season tabs and every episode with its runtime, resume bar and watched mark. Play starts the first episode you haven't watched."
+    >
+      <DeviceFrame device="mac" src="media/mac/series" alt="A show's details on Mac, with its season tabs and episodes" />
+    </PlatformSection>
+
+    <PlatformSection
+      raised
+      media="wide"
+      eyebrow="Player"
+      title="Full screen or in a window"
+      body="Playback fills the screen and keeps going in a window when you leave full screen. Audio and subtitles share one panel, speed runs from 0.5× to 2×, and the next episode counts down at the credits."
+      checks={[
+        "Subtitle size, weight, background, position and timing, set once on this Mac for every title.",
+        "Audio and subtitles start on your server's default tracks.",
+      ]}
+    >
+      <DeviceFrame device="mac" src="media/mac/player" fixedDark alt="The player on Mac, with the Audio and Subtitles panel open" />
+    </PlatformSection>
+
+    <PlatformCards
+      cards={[
+        {
+          title: "My Lists in the sidebar",
+          text: "Want to Watch, Watching and Watched from Biinge, each with its count. Posters on your server show their resume bar, and a click opens the details.",
+          src: "media/mac/want",
+          alt: "The Want to Watch list on Mac",
+        },
+        {
+          title: "Collections and search",
+          text: "Browse the collections you keep in Jellyfin. Search for movies, TV shows and people from anywhere in the app.",
+          src: "media/mac/collections",
+          alt: "Collections on Mac",
+        },
+      ]}
+    />
+
+    <section class="keyboard">
+      <div class="inner">
+        <div class="intro">
+          <h2>Keyboard shortcuts</h2>
+          <p>
+            Right-click a poster on Home or in My Lists for its actions. The sidebar collapses.
+          </p>
+        </div>
+        <ul>
+          {keys.map((k) => (
+            <li>
+              <span>{k.action}</span>
+              <span class="keys">{k.keys.map((key) => <kbd>{key}</kbd>)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <PlatformInstall
+      page="mac"
+      device="A Mac on macOS 26"
+      install="Biinge isn't on the App Store. Build the Mac app from the repository with Xcode. Sign in with your Biinge account, then with your Jellyfin user. The Jellyfin address comes from Biinge."
+    />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .hero-window {
+    width: 100%;
+    max-width: 1180px;
+  }
+
+  .keyboard {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg-elevated);
+  }
+
+  .keyboard .inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px clamp(40px, 6vw, 88px);
+  }
+
+  .intro {
+    flex: 1 1 300px;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 620;
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+  }
+
+  .intro p {
+    font-size: 17.5px;
+    line-height: 1.62;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  ul {
+    flex: 1 1 420px;
+    min-width: 0;
+    list-style: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 0;
+    border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+    font-size: 16px;
+  }
+
+  .keys {
+    flex: none;
+    display: flex;
+    gap: 6px;
+  }
+
+  kbd {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--text) 10%, transparent);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+  }
+</style>

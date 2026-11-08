@@ -1,68 +1,166 @@
 ---
 interface Props {
-  name: string;
-  alt: string;
+  // screenshot path under public without the -light/-dark.webp suffix, e.g. media/iphone/up-next (leave out when a Recording goes in the slot)
+  src?: string;
+  alt?: string;
   eager?: boolean;
   // a dark section shows the dark screenshot whatever the page theme is
   fixedDark?: boolean;
+  // "crop" is a bare rounded cut of a capture, for the cards that show part of a screen
+  device?: "iphone" | "mac" | "tv" | "crop";
+  // the capture's pixel size, which sets the screen's aspect ratio
+  width?: number;
+  height?: number;
+  // the small foot the prototype draws under the TV in a hero
+  stand?: boolean;
+  // which part of the capture stays in view when the screen is a different shape, as an object-position
+  position?: string;
 }
 
-const { name, alt, eager = false, fixedDark = false } = Astro.props;
+const sizes = { iphone: [1206, 2622], mac: [2880, 1800], tv: [3840, 2160], crop: [1600, 1000] };
+const { src, alt = "", eager = false, fixedDark = false, device = "iphone", stand = false, position } = Astro.props;
+const width = Astro.props.width ?? sizes[device][0];
+const height = Astro.props.height ?? sizes[device][1];
 const base = import.meta.env.BASE_URL;
 const loading = eager ? "eager" : "lazy";
+// an iPhone held sideways keeps its bezel and corners in proportion to its short side
+const landscape = device === "iphone" && width > height;
 ---
 
-<div class="device">
-  <div class="device-screen">
-    <!--
-      src is set by the theme script rather than in the markup: two <img> tags
-      with one hidden still downloads both files, and there are twenty frames
-    -->
-    <img
-      data-screen
-      data-light={`${base}screens/${name}-light.jpg`}
-      data-dark={`${base}screens/${name}-dark.jpg`}
-      data-fixed={fixedDark ? "dark" : undefined}
-      alt={alt}
-      width="1206"
-      height="2622"
-      loading={loading}
-      decoding="async"
-    />
+<!--
+  An image's src is set by the theme script rather than in the markup: two <img>
+  tags with one hidden still downloads both files
+-->
+<div class:list={["device", device, { landscape }]}>
+  <div class="frame">
+    <div class="screen" style={`aspect-ratio: ${width} / ${height}`}>
+      {Astro.slots.has("default") ? (
+        <slot />
+      ) : (
+        <img
+          data-screen
+          data-light={`${base}${src}-light.webp`}
+          data-dark={`${base}${src}-dark.webp`}
+          data-fixed={fixedDark ? "dark" : undefined}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={loading}
+          decoding="async"
+          style={position && `object-position: ${position}`}
+        />
+      )}
+    </div>
   </div>
+  {device === "tv" && stand && <div class="stand" aria-hidden="true"></div>}
 </div>
 
+<!--
+  The chrome is the prototype's, drawn in the dark it uses in both themes. The
+  iPhone scales its bezel with its width through container units, so a small
+  phone keeps the proportions of a large one
+-->
 <style>
   .device {
-    position: relative;
     width: 100%;
-    padding: 7px; /* room for the bezel box-shadow */
+    container-type: inline-size;
   }
 
-  /*
-   * the screen carries the exact screenshot aspect ratio so object-fit never
-   * crops the app's side margins; black bezel + titanium rail via box-shadow
-   */
-  .device-screen {
+  .frame {
+    background: #0a0a0c;
+  }
+
+  .screen {
     position: relative;
     width: 100%;
-    aspect-ratio: 1206 / 2622;
-    border-radius: 12% / 5.5%;
-    border: 1px solid var(--screen-edge);
     overflow: hidden;
     background: #000;
-    box-shadow:
-      0 0 0 5px var(--bezel),
-      0 0 0 6px var(--bezel-rail),
-      var(--shadow-lg);
   }
 
-  .device-screen img {
+  .screen > :global(img),
+  .screen > :global(video) {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  .iphone .frame {
+    padding: 2.8cqw;
+    border-radius: 16cqw;
+    box-shadow:
+      0 0 0 1.5px rgba(214, 214, 220, 0.3),
+      0 40px 80px rgba(0, 0, 0, 0.45);
+  }
+
+  .iphone .screen {
+    border-radius: 13.4cqw;
+  }
+
+  /* the portrait values scaled by the screen's 1206 / 2622 sides, since cqw follows the long side here */
+  .iphone.landscape .frame {
+    padding: 1.29cqw;
+    border-radius: 7.36cqw;
+  }
+
+  .iphone.landscape .screen {
+    border-radius: 6.16cqw;
+  }
+
+  /*
+    the Mac capture is the whole window, so the frame is only its edge and shadow.
+    The capture's corners, and its edge rows for 60 of its 1920 px, are flattened
+    onto black. So the capture overhangs the screen by ten of its pixels (0.5cqw,
+    enough that a small render's downscaling never samples the black edge), the
+    screen rounds a little past the black corner (2.3cqw, 44 px), and nothing
+    dark sits behind it, leaving no dark pixel on the curve at any size
+  */
+  .mac .frame,
+  .mac .screen {
+    border-radius: 2.3cqw;
+    background: transparent;
+  }
+
+  .mac .frame {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 30px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  .mac .screen > :global(img),
+  .mac .screen > :global(video),
+  .crop .screen > :global(img) {
+    inset: -0.5cqw;
+    width: calc(100% + 1cqw);
+    height: calc(100% + 1cqw);
+  }
+
+  .tv .frame {
+    padding: clamp(6px, 1cqw, 12px);
+    border-radius: clamp(8px, 1.2cqw, 16px);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 30px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  .tv .screen {
+    border-radius: 6px;
+  }
+
+  /* no bezel, so nothing fills behind the cut, or its dark corners show (the Mac rounding also hides a whole Mac window's black corners) */
+  .crop .frame,
+  .crop .screen {
+    border-radius: max(12px, 2.3cqw);
+    background: transparent;
+  }
+
+  .stand {
+    width: 18%;
+    height: clamp(6px, 0.9cqw, 12px);
+    margin: 0 auto;
+    border-radius: 0 0 6px 6px;
+    background: #1a1a1e;
   }
 </style>

@@ -1,171 +1,519 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
-import Hero from "../components/Hero.astro";
-import Search from "../components/Search.astro";
-import ShowStates from "../components/ShowStates.astro";
-import Chapter from "../components/Chapter.astro";
-import Pin from "../components/Pin.astro";
-import UpNext from "../components/UpNext.astro";
-import Cta from "../components/Cta.astro";
+import HomeHero from "../components/HomeHero.astro";
+import Feature from "../components/Feature.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+import Recording from "../components/Recording.astro";
 import Footer from "../components/Footer.astro";
 
-// Search comes first because nothing reaches a library without it, then the
-// chapters run in the order the tabs sit in the app. Grounds alternate so no two
-// sections touch on the same tone - in dark theme `plain` and `focus` resolve to
-// the same colour, so those two may never end up adjacent. With a dark hero at
-// one end and a dark CTA at the other, an even section count can't alternate all
-// the way through: Search and Movies share the tint, and read as one band -
-// find it, then track it
-const movies = {
-  id: "movies",
-  state: "watched" as const,
-  label: "Movies",
-  tone: "tint" as const,
-  title: "Save movies for later. Mark what you've seen.",
-  thesis:
-    "Movies have two clear states: Want and Watched. Add one when it catches your eye, then move it to Watched when the credits roll.",
-  features: [
-    {
-      title: "Find your next movie",
-      desc: "Search by title, or open Search to browse the movies that are trending now.",
-    },
-    {
-      title: "Check the details",
-      desc: "See the rating, release date, runtime and synopsis together, with the trailer one tap away.",
-    },
-    {
-      title: "Keep your lists current",
-      desc: "Move a movie between Want and Watched, pin it to the top, or remove it from your library from the same menu.",
-    },
-  ],
-  // Movies is a state machine, so the taps explain it faster than the copy
-  // beside them can. The captions are the accessible version of the sequence
-  flow: [
-    { name: "flow-1-library", caption: "Your Want list, as you left it." },
-    { name: "flow-2-untracked", caption: "A movie you haven't added yet." },
-    { name: "flow-3-want", caption: "Tap Want, and it joins the list." },
-    { name: "flow-4-actions", caption: "Tap it again for the rest of the options." },
-    { name: "flow-5-pinned", caption: "Pin it to keep it at the top." },
-    { name: "flow-6-watched", caption: "Mark it Watched when you're done." },
-  ],
-};
+const base = import.meta.env.BASE_URL;
 
-const tv = {
-  id: "tv",
-  state: "watching" as const,
-  label: "TV",
-  tone: "focus" as const,
-  flip: true,
-  title: "Tick an episode. The show keeps up.",
-  thesis:
-    "Mark an episode and Biinge moves the show to Watching. Finish an ended series and it moves to Watched. You record what you've seen; Biinge keeps the show's state in sync.",
-  features: [
-    {
-      title: "Mark progress at any level",
-      desc: "Tick one episode, a whole season, or the entire show. Its progress and state update to match.",
-    },
-    {
-      title: "Correct progress anytime",
-      desc: "Untick an episode and Biinge recalculates the show, moving it back to Watching when needed.",
-    },
-    {
-      title: "Stay ready for new episodes",
-      desc: "A returning series stays in Watching when you're caught up, ready for the next season.",
-    },
-  ],
-  // the cascade is the hardest thing on the page to describe, so this one runs
-  // library to library - out of Want, through both granularities of marking, and
-  // back into Watching. Nine frames, so it runs a shorter beat than Movies
-  step: "2s",
-  flow: [
-    { name: "tvflow-1-library", caption: "Shows you mean to get to." },
-    { name: "tvflow-2-details", caption: "Open one you haven't started." },
-    { name: "tvflow-3-season", caption: "Season one, nothing ticked yet." },
-    { name: "tvflow-4-episode", caption: "Open a single episode and mark it." },
-    { name: "tvflow-5-marked", caption: "Only that one is ticked." },
-    { name: "tvflow-6-state", caption: "The show is now Watching." },
-    { name: "tvflow-7-filled", caption: "Or take a whole season in one tap." },
-    { name: "tvflow-8-next", caption: "Still airing, so it stays at Watching, with season two next." },
-    { name: "tvflow-9-watching", caption: "Back to the library, alongside everything else you've started." },
-  ],
-};
-
-const games = {
-  id: "games",
-  state: "watching" as const,
-  label: "Games",
-  tone: "plain" as const,
-  title: "Plan what to play next.",
-  thesis:
-    "Keep games in Want, Playing or Played, and check the estimated time to beat before you begin. You control every move between the three lists.",
-  features: [
-    {
-      title: "Move between three lists",
-      desc: "Set a game to Want, Playing or Played from the same menu, whenever you like.",
-    },
-    {
-      title: "Time to beat",
-      desc: "IGDB's estimate for a main playthrough, with the 100% run beside it when that one is longer.",
-    },
-    {
-      title: "Remember upcoming releases",
-      desc: "Pin a game you're waiting for and it appears in Up Next on release day.",
-    },
-  ],
-  screen: {
-    name: "games",
-    alt: "The Games library, with Want, Playing and Played tabs",
+const platforms = [
+  {
+    name: "iPhone",
+    href: `${base}iphone/`,
+    tagline: "Track, discover and play",
+    text: "Lists, episode progress, games, statistics and Up Next, plus playback from your Jellyfin server.",
+    icon: '<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/>',
   },
-};
-
-// the last chapter: what the three libraries add up to
-const statistics = {
-  id: "stats",
-  state: "watched" as const,
-  label: "Statistics",
-  tone: "tint" as const,
-  flip: true,
-  title: "See your watch time add up.",
-  thesis:
-    "Every movie and episode contributes its runtime when you mark it, so your watch totals build automatically. There is no timer to start and nothing extra to log.",
-  features: [
-    {
-      title: "Choose a time range",
-      desc: "Review this week, this month, this year, or everything you've tracked.",
-    },
-    {
-      title: "Compare movies and TV",
-      desc: "See each share of your total watch time and how both change across the selected period.",
-    },
-    {
-      title: "Count every list",
-      desc: "See how many movies, shows and games are waiting, in progress or finished. Game estimates are never counted as time played.",
-    },
-  ],
-  screen: {
-    name: "stats",
-    alt: "Statistics: the watch activity chart and the watch-time split",
+  {
+    name: "Mac",
+    href: `${base}mac/`,
+    tagline: "Browse and watch",
+    text: "A sidebar, keyboard shortcuts and a player that runs full screen or in a window.",
+    icon: '<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/>',
   },
-};
+  {
+    name: "Apple TV",
+    href: `${base}apple-tv/`,
+    tagline: "Relax and watch",
+    text: "Large rows you move through with the Siri Remote. Continue Watching and Next Episodes cards play when selected.",
+    icon: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8"/>',
+  },
+];
+
+const more = [
+  {
+    title: "Search",
+    text: "Movies, TV shows and people, on your server or not. Games too on iPhone.",
+    icon: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/>',
+  },
+  {
+    title: "Up Next",
+    text: "On iPhone, what you've started, then new episodes of pinned shows and pinned movies and games once they're out.",
+    icon: '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M10 15h6M13.5 12.5L16 15l-2.5 2.5"/>',
+  },
+  {
+    title: "Collections",
+    text: "Browse the collections you keep on your server, on Mac and Apple TV.",
+    icon: '<rect x="7" y="3" width="14" height="14" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h12M11 3v7l2.5-1.8L16 10V3"/>',
+  },
+  {
+    title: "Statistics",
+    text: "Marked titles add their runtime. View totals by week, month, year or all time, in all three apps.",
+    icon: '<path d="M5 20V11M12 20V5M19 20v-6"/>',
+  },
+  {
+    title: "Pins",
+    text: "Pinned titles stay at the top of a list and show in Up Next.",
+    icon: '<path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/>',
+  },
+  {
+    title: "Light and dark",
+    text: "iPhone and Mac follow the system or the theme you pick. Apple TV follows the system. The player stays dark.",
+    icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/>',
+  },
+];
+
+const stack = ["Go", "PostgreSQL", "Redis", "SwiftUI", "Jellyfin", "MIT"];
 ---
 
 <Layout
-  title="biinge — a self-hosted tracker for movies, TV shows and games"
-  description="Track movies, TV shows and games in a native iOS app, backed by a server you run yourself."
+  title="Biinge: a self-hosted tracker and player for Jellyfin"
+  description="Self-hosted tracking for movies, TV shows and games, with iPhone, Mac and Apple TV apps that play your Jellyfin library."
 >
-  <Header over />
+  <Header page="home" over />
   <main>
-    <Hero />
-    <Search />
-    <Chapter {...movies} />
-    <Chapter {...tv} />
-    <ShowStates />
-    <Chapter {...games} />
-    <Pin />
-    <UpNext />
-    <Chapter {...statistics} />
-    <Cta />
+    <HomeHero />
+
+    <section class="platforms">
+      <div class="inner">
+        <div class="head">
+          <h2>Apps for iPhone, Mac and Apple TV</h2>
+          <p>
+            All three apps use the same Biinge server and the same Jellyfin server. Lists, progress and playback
+            positions match across them.
+          </p>
+        </div>
+        <div class="cards">
+          {platforms.map((p) => (
+            <a class="platform" href={p.href}>
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={p.icon} />
+              <div class="names">
+                <h3>{p.name}</h3>
+                <p class="tagline">{p.tagline}</p>
+              </div>
+              <p class="text">{p.text}</p>
+              <span class="more">
+                Biinge for {p.name}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <Feature
+      id="features"
+      raised
+      mark="watching"
+      eyebrow="Continue Watching"
+      title="Resume in any of the apps"
+      body="Jellyfin stores the playback position. Pause an episode on the Mac and resume it on the Apple TV from the same point."
+      points={[
+        { title: "Continue Watching", text: "On Mac and Apple TV, Home opens with what you've started. Each card shows the time left." },
+        { title: "Next Episodes", text: "The next episode of each show you're partway through." },
+        { title: "Resume or start over", text: "Choose from the card or the details page." },
+      ]}
+    >
+      <DeviceFrame src="media/iphone/up-next" alt="Up Next on iPhone, with Continue Watching above Next Episodes" />
+    </Feature>
+
+    <Feature
+      flip
+      mark="want"
+      eyebrow="Lists and library"
+      title="Lists in Biinge, media in Jellyfin"
+      body="Lists hold what you plan to watch. The library holds what your Jellyfin server has. On iPhone, a switch at the top of Movies and TV moves between them."
+      points={[
+        { title: "Want, Watching and Watched", text: "Add any movie or show, on your server or not. Pin titles to the top." },
+        { title: "Library", text: "Continue Watching, Recently Added and every movie and show on your Jellyfin server." },
+        { title: "Play from any page", text: "A title on your server shows Play in its details, from a list, search or a cast member's page." },
+      ]}
+    >
+      <DeviceFrame>
+        <Recording src="media/iphone/lists" themed width={1206} height={2622} label="TV shows on iPhone, switching from Watching to Library and back" />
+      </DeviceFrame>
+    </Feature>
+
+    <Feature
+      raised
+      mark="watching"
+      eyebrow="TV progress"
+      title="Episode marks set the show's state"
+      body="Mark an episode, a season or the whole show. Biinge moves the show between Want, Watching and Watched. An episode you finish in the player is marked watched."
+      points={[
+        { title: "Marks reach Jellyfin", text: "A mark made in Biinge is written to Jellyfin. With sync turned on, a mark made in Jellyfin comes back within a couple of minutes." },
+        { title: "Unmark an episode", text: "Biinge works out the show's progress and state again." },
+        { title: "Returning shows", text: "A returning show stays in Watching when you're caught up." },
+      ]}
+    >
+      <DeviceFrame>
+        <Recording src="media/iphone/tick" themed width={1206} height={2622} label="Marking season 3 of The Bear watched on iPhone, then the show's progress on its details" />
+      </DeviceFrame>
+    </Feature>
+
+    <Feature
+      flip
+      mark="watched"
+      filled
+      eyebrow="Playback"
+      title="Streams from your Jellyfin server"
+      body="Every app streams from your server through Apple's video engine. Controls hide after a few idle seconds. Near the end, a countdown starts the next episode."
+      points={[
+        { title: "Audio and subtitles in one panel", text: "Each track shows its language and format. Subtitle size, weight, background, position and timing are one level down." },
+        { title: "Next episode", text: "In the last 30 seconds the video moves aside and a 10-second countdown starts the next episode." },
+        { title: "Your server's defaults", text: "Audio and subtitles start on the tracks your server picks, so the languages you set there apply." },
+      ]}
+      landscape
+    >
+      <DeviceFrame width={1280} height={588}>
+        <Recording src="media/iphone/play-dark" width={1280} height={588} label="Severance season 2, episode 5 resumed in the player on iPhone, held sideways" />
+      </DeviceFrame>
+    </Feature>
+
+    <Feature
+      raised
+      mark="want"
+      eyebrow="Games"
+      title="Games have their own lists"
+      body="Games use Want, Playing and Played. Time to beat comes from IGDB when it has an estimate, and you can pin a game you're waiting for."
+      points={[
+        { title: "Three lists", text: "You move a game between Want, Playing and Played by hand." },
+        { title: "Time to beat", text: "IGDB's estimate for the main story, when IGDB has one. Mac and Apple TV add the 100% run when it takes longer." },
+        { title: "Up Next on iPhone", text: "Pin a game you want and it shows up in Up Next on iPhone once it's out." },
+      ]}
+    >
+      <DeviceFrame src="media/iphone/games-playing" alt="The Games list on iPhone, showing the games being played" />
+    </Feature>
+
+    <section class="also">
+      <div class="inner">
+        <h2>Also in Biinge</h2>
+        <div class="grid">
+          {more.map((m) => (
+            <div class="item">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={m.icon} />
+              <h3>{m.title}</h3>
+              <p>{m.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="source" style={`--wall: url(${base}media/hero/poster-wall.webp)`}>
+      <div class="inner">
+        <p class="eyebrow">Open source</p>
+        <h2>Run it on your own server</h2>
+        <p class="body">
+          The Go API and the iPhone, Mac and Apple TV apps are in one repository. You run the API next to your
+          Jellyfin server. The setup guide covers the steps.
+        </p>
+        <div class="actions">
+          <a class="primary" href="https://github.com/tab/biinge" target="_blank" rel="noopener">
+            Get it on GitHub
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+          </a>
+          <a class="secondary" href={`${base}self-hosting/`}>
+            Read the setup guide
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <ul class="stack">
+          {stack.map((s) => <li>{s}</li>)}
+        </ul>
+      </div>
+    </section>
   </main>
   <Footer />
 </Layout>
+
+<style>
+  .inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 620;
+    letter-spacing: -0.026em;
+  }
+
+  .platforms {
+    padding: clamp(80px, 9vw, 128px) 0 clamp(72px, 8vw, 112px);
+    background: var(--bg);
+  }
+
+  .platforms .inner {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 760px;
+  }
+
+  .head h2 {
+    font-size: clamp(34px, 3.9vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.028em;
+  }
+
+  .head p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  /* one card per row until all three fit side by side, so no card is left alone on a row */
+  .cards {
+    display: grid;
+    gap: 16px;
+  }
+
+  @media (min-width: 900px) {
+    .cards {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .platform {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 30px 30px 28px;
+    border-radius: 24px;
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 7%, transparent);
+    color: var(--text);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .platform:hover {
+    background: var(--surface-raised);
+    text-decoration: none;
+  }
+
+  .names {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 18px;
+  }
+
+  .names h3 {
+    font-family: var(--display);
+    font-weight: 640;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .tagline {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .text {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 62%, transparent);
+  }
+
+  .more {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 10px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .more svg {
+    transition: transform 0.18s;
+  }
+
+  .platform:hover .more svg {
+    transform: translateX(3px);
+  }
+
+  .also {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg);
+  }
+
+  .also .inner {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+  }
+
+  .also h2 {
+    font-size: clamp(30px, 3.2vw, 42px);
+    line-height: 1.08;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 40px 48px;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .item h3 {
+    margin-top: 6px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .item p {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 62%, transparent);
+  }
+
+  /* the closing band sits on a poster wall, so it keeps its dark values in both themes */
+  .source {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(88px, 9vw, 136px) 0;
+    background: #0b0b0e;
+    color: #f4f4f2;
+  }
+
+  .source::before,
+  .source::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .source::before {
+    z-index: -2;
+    background: var(--wall) center 18% / cover;
+    transform: scale(1.04);
+  }
+
+  .source::after {
+    z-index: -1;
+    background: linear-gradient(110deg, rgba(16, 16, 20, 0.95) 0%, rgba(16, 16, 20, 0.86) 52%, rgba(16, 16, 20, 0.6) 100%);
+  }
+
+  .source .inner {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .source .eyebrow {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .source h2 {
+    font-weight: 660;
+    font-size: clamp(36px, 5vw, 62px);
+    line-height: 1.03;
+    letter-spacing: -0.032em;
+  }
+
+  .source .body {
+    max-width: 60ch;
+    font-size: 18px;
+    line-height: 1.62;
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 28px;
+    margin-top: 12px;
+  }
+
+  .actions a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.12s;
+  }
+
+  .primary {
+    height: 50px;
+    padding: 0 28px;
+    border-radius: 999px;
+    background: #f4f4f2;
+    color: #101014;
+  }
+
+  .primary:hover {
+    opacity: 0.86;
+  }
+
+  .primary:active {
+    transform: scale(0.97);
+  }
+
+  .secondary {
+    color: #f4f4f2;
+  }
+
+  .secondary svg {
+    transition: transform 0.18s;
+  }
+
+  .secondary:hover svg {
+    transform: translateX(3px);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+    list-style: none;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .stack li {
+    padding: 6px 15px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .more svg,
+    .secondary svg {
+      transition: none;
+    }
+
+    .platform:hover .more svg,
+    .secondary:hover svg,
+    .primary:active {
+      transform: none;
+    }
+  }
+</style>

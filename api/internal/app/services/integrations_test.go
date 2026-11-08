@@ -34,7 +34,7 @@ func Test_Integrations_JellyfinNotConfigured(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewIntegrations(&config.Config{}, repository, client, newTestLogger())
+	service := NewIntegrations(&config.Config{}, repository, client, NewMockPlayedMemory(ctrl), newTestLogger())
 
 	userId := uuid.New()
 
@@ -57,7 +57,8 @@ func Test_Integrations_Connect(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewIntegrations(newTestJellyfinConfig(), repository, client, newTestLogger())
+	memory := NewMockPlayedMemory(ctrl)
+	service := NewIntegrations(newTestJellyfinConfig(), repository, client, memory, newTestLogger())
 
 	userId := uuid.MustParse("11111111-2222-3333-4444-555555555555")
 	deviceId := "biinge-api-11111111-2222-3333-4444-555555555555"
@@ -101,6 +102,7 @@ func Test_Integrations_Connect(t *testing.T) {
 				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
 				client.EXPECT().SignIn(ctx, deviceId, credentials).Return(session, nil)
 				expectUpsert()
+				memory.EXPECT().Forget(userId)
 			},
 			expected: connected,
 		},
@@ -111,6 +113,7 @@ func Test_Integrations_Connect(t *testing.T) {
 				gomock.InOrder(
 					client.EXPECT().SignIn(ctx, deviceId, credentials).Return(session, nil),
 					expectUpsert(),
+					memory.EXPECT().Forget(userId),
 					client.EXPECT().SignOut(ctx, deviceId, "old-token").Return(nil),
 				)
 			},
@@ -122,6 +125,7 @@ func Test_Integrations_Connect(t *testing.T) {
 				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(earlier, nil)
 				client.EXPECT().SignIn(ctx, deviceId, credentials).Return(session, nil)
 				expectUpsert()
+				memory.EXPECT().Forget(userId)
 				client.EXPECT().SignOut(ctx, deviceId, "old-token").Return(jellyfin.ErrUnavailable)
 			},
 			expected: connected,
@@ -134,6 +138,7 @@ func Test_Integrations_Connect(t *testing.T) {
 					Return(&models.Integration{UserId: userId, Token: []byte("not a sealed token")}, nil)
 				client.EXPECT().SignIn(ctx, deviceId, credentials).Return(session, nil)
 				expectUpsert()
+				memory.EXPECT().Forget(userId)
 			},
 			expected: connected,
 		},
@@ -197,7 +202,7 @@ func Test_Integrations_Status(t *testing.T) {
 
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
-	service := NewIntegrations(newTestJellyfinConfig(), repository, jellyfin.NewMockClient(ctrl), newTestLogger())
+	service := NewIntegrations(newTestJellyfinConfig(), repository, jellyfin.NewMockClient(ctrl), NewMockPlayedMemory(ctrl), newTestLogger())
 
 	userId := uuid.New()
 
@@ -263,7 +268,8 @@ func Test_Integrations_Disconnect(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewIntegrations(newTestJellyfinConfig(), repository, client, newTestLogger())
+	memory := NewMockPlayedMemory(ctrl)
+	service := NewIntegrations(newTestJellyfinConfig(), repository, client, memory, newTestLogger())
 
 	userId := uuid.MustParse("11111111-2222-3333-4444-555555555555")
 	deviceId := "biinge-api-11111111-2222-3333-4444-555555555555"

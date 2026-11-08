@@ -71,6 +71,21 @@ func (mr *MockIntegrationRepositoryMockRecorder) FindByUser(ctx, userId, provide
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUser", reflect.TypeOf((*MockIntegrationRepository)(nil).FindByUser), ctx, userId, provider)
 }
 
+// ListUsers mocks base method.
+func (m *MockIntegrationRepository) ListUsers(ctx context.Context, provider string) ([]uuid.UUID, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUsers", ctx, provider)
+	ret0, _ := ret[0].([]uuid.UUID)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUsers indicates an expected call of ListUsers.
+func (mr *MockIntegrationRepositoryMockRecorder) ListUsers(ctx, provider any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockIntegrationRepository)(nil).ListUsers), ctx, provider)
+}
+
 // UpsertConnection mocks base method.
 func (m *MockIntegrationRepository) UpsertConnection(ctx context.Context, params *models.Integration) (*models.Integration, error) {
 	m.ctrl.T.Helper()

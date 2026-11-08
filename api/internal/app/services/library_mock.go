@@ -83,6 +83,21 @@ func (mr *MockLibraryMockRecorder) MovieIds(ctx, userId, tmdbIds any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MovieIds", reflect.TypeOf((*MockLibrary)(nil).MovieIds), ctx, userId, tmdbIds)
 }
 
+// Played mocks base method.
+func (m *MockLibrary) Played(ctx context.Context, userId uuid.UUID) (*JellyfinRead, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Played", ctx, userId)
+	ret0, _ := ret[0].(*JellyfinRead)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Played indicates an expected call of Played.
+func (mr *MockLibraryMockRecorder) Played(ctx, userId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Played", reflect.TypeOf((*MockLibrary)(nil).Played), ctx, userId)
+}
+
 // Series mocks base method.
 func (m *MockLibrary) Series(ctx context.Context, userId uuid.UUID, tmdbId uint64) string {
 	m.ctrl.T.Helper()

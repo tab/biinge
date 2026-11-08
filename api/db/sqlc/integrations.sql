@@ -38,3 +38,6 @@ WHERE user_id = $1 AND provider = $2;
 
 -- name: DeleteIntegration :exec
 DELETE FROM integrations WHERE user_id = $1 AND provider = $2;
+
+-- name: ListIntegrationUsers :many
+SELECT user_id FROM integrations WHERE provider = $1 ORDER BY created_at;

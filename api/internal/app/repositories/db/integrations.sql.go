@@ -60,6 +60,30 @@ func (q *Queries) FindIntegrationByUser(ctx context.Context, arg FindIntegration
 	return i, err
 }
 
+const listIntegrationUsers = `-- name: ListIntegrationUsers :many
+SELECT user_id FROM integrations WHERE provider = $1 ORDER BY created_at
+`
+
+func (q *Queries) ListIntegrationUsers(ctx context.Context, provider ProviderType) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, listIntegrationUsers, provider)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var user_id uuid.UUID
+		if err := rows.Scan(&user_id); err != nil {
+			return nil, err
+		}
+		items = append(items, user_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const upsertIntegration = `-- name: UpsertIntegration :one
 INSERT INTO integrations (
   user_id,

@@ -22,9 +22,10 @@ const (
 	episodesPath = "/Shows/{seriesId}/Episodes"
 	playedPath   = "/UserPlayedItems/{itemId}"
 
-	// ItemTypeMovie and ItemTypeSeries are the item types Items returns
-	ItemTypeMovie  = "Movie"
-	ItemTypeSeries = "Series"
+	// ItemTypeMovie, ItemTypeSeries and ItemTypeEpisode are the item types Items and LibraryItems return
+	ItemTypeMovie   = "Movie"
+	ItemTypeSeries  = "Series"
+	ItemTypeEpisode = "Episode"
 
 	// authorization names the API as a Jellyfin client on a device (device id, then app version)
 	authorization = `MediaBrowser Client="biinge", Device="biinge API", DeviceId="%s", Version="%s"`
@@ -64,10 +65,23 @@ type Episode struct {
 	Number *int
 }
 
-// PlayedState is the played flag to set on one Jellyfin item
+// LibraryItem is a movie or episode in the user's library with its played state (TmdbId is empty and Season, Number and LastPlayed are nil when Jellyfin holds none)
+type LibraryItem struct {
+	Id         string
+	Type       string
+	TmdbId     string
+	SeriesId   string
+	Season     *int
+	Number     *int
+	Played     bool
+	LastPlayed *time.Time
+}
+
+// PlayedState is the played flag to set on one Jellyfin item (DatePlayed is sent only when Played is true and the date is set)
 type PlayedState struct {
-	ItemId string
-	Played bool
+	ItemId     string
+	Played     bool
+	DatePlayed *time.Time
 }
 
 // Client signs a user in to and out of the instance's Jellyfin server, each sign-in as its own device, and reads and marks their library
@@ -75,6 +89,7 @@ type Client interface {
 	SignIn(ctx context.Context, deviceId string, credentials Credentials) (*Session, error)
 	SignOut(ctx context.Context, deviceId string, token string) error
 	Items(ctx context.Context, connection Connection) ([]Item, error)
+	LibraryItems(ctx context.Context, connection Connection) ([]LibraryItem, error)
 	Episodes(ctx context.Context, connection Connection, seriesId string) ([]Episode, error)
 	SetPlayed(ctx context.Context, connection Connection, state PlayedState) error
 }
@@ -261,6 +276,87 @@ func (c *client) Items(ctx context.Context, connection Connection) ([]Item, erro
 	}
 }
 
+func (c *client) LibraryItems(ctx context.Context, connection Connection) ([]LibraryItem, error) {
+	// The Authorization header carries the token, so only the path template and status are logged
+	response, err := c.apiClient.R().
+		SetContext(ctx).
+		SetHeader("Authorization", fmt.Sprintf(authorization+`, Token="%s"`, connection.DeviceId, c.version, connection.AccessToken)).
+		SetPathParam("userId", connection.UserId).
+		SetQueryParams(map[string]string{
+			"IncludeItemTypes": ItemTypeMovie + "," + ItemTypeEpisode,
+			"Recursive":        "true",
+			"Fields":           "ProviderIds",
+			"EnableImages":     "false",
+			"EnableUserData":   "true",
+		}).
+		Get(itemsPath)
+	if err != nil {
+		c.log.Error().
+			Err(err).
+			Str("endpoint", itemsPath).
+			Msg("Failed to reach Jellyfin")
+
+		return nil, ErrUnavailable
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		var result struct {
+			Items []struct {
+				Id                string
+				Type              string
+				SeriesId          string
+				ParentIndexNumber *int
+				IndexNumber       *int
+				ProviderIds       map[string]string
+				UserData          struct {
+					Played         bool
+					LastPlayedDate *time.Time
+				}
+			}
+		}
+		if err = json.Unmarshal(response.Body(), &result); err != nil {
+			c.log.Error().
+				Err(err).
+				Str("endpoint", itemsPath).
+				Int("statusCode", response.StatusCode()).
+				Msg("Failed to decode the Jellyfin library items")
+
+			return nil, ErrUnavailable
+		}
+
+		items := make([]LibraryItem, 0, len(result.Items))
+		for _, item := range result.Items {
+			items = append(items, LibraryItem{
+				Id:         item.Id,
+				Type:       item.Type,
+				TmdbId:     item.ProviderIds["Tmdb"],
+				SeriesId:   item.SeriesId,
+				Season:     item.ParentIndexNumber,
+				Number:     item.IndexNumber,
+				Played:     item.UserData.Played,
+				LastPlayed: item.UserData.LastPlayedDate,
+			})
+		}
+
+		return items, nil
+	case http.StatusUnauthorized:
+		c.log.Warn().
+			Str("endpoint", itemsPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Jellyfin rejected the token")
+
+		return nil, ErrInvalidCredentials
+	default:
+		c.log.Error().
+			Str("endpoint", itemsPath).
+			Int("statusCode", response.StatusCode()).
+			Msg("Unexpected response from Jellyfin")
+
+		return nil, ErrUnavailable
+	}
+}
+
 func (c *client) Episodes(ctx context.Context, connection Connection, seriesId string) ([]Episode, error) {
 	// The Authorization header carries the token, so only the path template and status are logged
 	response, err := c.apiClient.R().
@@ -333,12 +429,18 @@ func (c *client) SetPlayed(ctx context.Context, connection Connection, state Pla
 	}
 
 	// The Authorization header carries the token, so only the path template and status are logged
-	response, err := c.apiClient.R().
+	request := c.apiClient.R().
 		SetContext(ctx).
 		SetHeader("Authorization", fmt.Sprintf(authorization+`, Token="%s"`, connection.DeviceId, c.version, connection.AccessToken)).
 		SetPathParam("itemId", state.ItemId).
-		SetQueryParam("userId", connection.UserId).
-		Execute(method, playedPath)
+		SetQueryParam("userId", connection.UserId)
+
+	// Jellyfin reads datePlayed only on the POST that marks an item played
+	if state.Played && state.DatePlayed != nil {
+		request.SetQueryParam("datePlayed", state.DatePlayed.UTC().Format(time.RFC3339))
+	}
+
+	response, err := request.Execute(method, playedPath)
 	if err != nil {
 		c.log.Error().
 			Err(err).

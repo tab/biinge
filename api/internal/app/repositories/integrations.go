@@ -14,6 +14,7 @@ type IntegrationRepository interface {
 	UpsertConnection(ctx context.Context, params *models.Integration) (*models.Integration, error)
 	FindByUser(ctx context.Context, userId uuid.UUID, provider string) (*models.Integration, error)
 	ClearConnection(ctx context.Context, userId uuid.UUID, provider string) error
+	ListUsers(ctx context.Context, provider string) ([]uuid.UUID, error)
 }
 
 type integration struct {
@@ -59,6 +60,11 @@ func (i *integration) ClearConnection(ctx context.Context, userId uuid.UUID, pro
 		UserID:   userId,
 		Provider: db.ProviderType(provider),
 	})
+}
+
+// ListUsers returns the id of every user linked to a provider, oldest link first
+func (i *integration) ListUsers(ctx context.Context, provider string) ([]uuid.UUID, error) {
+	return i.client.Queries().ListIntegrationUsers(ctx, db.ProviderType(provider))
 }
 
 // integrationFromRow maps a stored row to the model

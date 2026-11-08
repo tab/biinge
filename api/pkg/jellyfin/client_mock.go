@@ -70,6 +70,21 @@ func (mr *MockClientMockRecorder) Items(ctx, connection any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Items", reflect.TypeOf((*MockClient)(nil).Items), ctx, connection)
 }
 
+// LibraryItems mocks base method.
+func (m *MockClient) LibraryItems(ctx context.Context, connection Connection) ([]LibraryItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LibraryItems", ctx, connection)
+	ret0, _ := ret[0].([]LibraryItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LibraryItems indicates an expected call of LibraryItems.
+func (mr *MockClientMockRecorder) LibraryItems(ctx, connection any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LibraryItems", reflect.TypeOf((*MockClient)(nil).LibraryItems), ctx, connection)
+}
+
 // SetPlayed mocks base method.
 func (m *MockClient) SetPlayed(ctx context.Context, connection Connection, state PlayedState) error {
 	m.ctrl.T.Helper()

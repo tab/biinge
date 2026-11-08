@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -46,6 +47,58 @@ func Test_LoadConfig(t *testing.T) {
 					APIReadAccessToken: "SECRET",
 					Locale:             "en-US",
 				},
+				Jellyfin: JellyfinConfig{
+					SyncInterval:      2 * time.Minute,
+					ReconcileInterval: time.Hour,
+				},
+			},
+		},
+		{
+			name: "Jellyfin sync enabled from the environment",
+			args: []string{},
+			env: map[string]string{
+				"JELLYFIN_SYNC_ENABLED": "true",
+			},
+			expected: &Config{
+				AppEnv:       TestEnv,
+				AppAddr:      "localhost:8080",
+				ClientURL:    "http://localhost:3000",
+				DatabaseDSN:  "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
+				JWTSecretKey: "SECRET",
+				TMDBConfig: TMDBConfig{
+					BaseURL:            "https://api.themoviedb.org/3",
+					APIReadAccessToken: "SECRET",
+					Locale:             "en-US",
+				},
+				Jellyfin: JellyfinConfig{
+					SyncEnabled:       true,
+					SyncInterval:      2 * time.Minute,
+					ReconcileInterval: time.Hour,
+				},
+			},
+		},
+		{
+			name: "Jellyfin intervals from the environment",
+			args: []string{},
+			env: map[string]string{
+				"JELLYFIN_SYNC_INTERVAL":      "30s",
+				"JELLYFIN_RECONCILE_INTERVAL": "6h",
+			},
+			expected: &Config{
+				AppEnv:       TestEnv,
+				AppAddr:      "localhost:8080",
+				ClientURL:    "http://localhost:3000",
+				DatabaseDSN:  "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
+				JWTSecretKey: "SECRET",
+				TMDBConfig: TMDBConfig{
+					BaseURL:            "https://api.themoviedb.org/3",
+					APIReadAccessToken: "SECRET",
+					Locale:             "en-US",
+				},
+				Jellyfin: JellyfinConfig{
+					SyncInterval:      30 * time.Second,
+					ReconcileInterval: 6 * time.Hour,
+				},
 			},
 		},
 	}
@@ -67,6 +120,9 @@ func Test_LoadConfig(t *testing.T) {
 			assert.Equal(t, tt.expected.BaseURL, result.BaseURL)
 			assert.Equal(t, tt.expected.APIReadAccessToken, result.APIReadAccessToken)
 			assert.Equal(t, tt.expected.Locale, result.Locale)
+			assert.Equal(t, tt.expected.Jellyfin.SyncEnabled, result.Jellyfin.SyncEnabled)
+			assert.Equal(t, tt.expected.Jellyfin.SyncInterval, result.Jellyfin.SyncInterval)
+			assert.Equal(t, tt.expected.Jellyfin.ReconcileInterval, result.Jellyfin.ReconcileInterval)
 
 			t.Cleanup(func() {
 				for key := range tt.env {
@@ -92,6 +148,16 @@ func Test_Config_Validate(t *testing.T) {
 				ClientID:     "igdb-client-id",
 				ClientSecret: "igdb-client-secret",
 			},
+		}
+	}
+
+	// jellyfin is a valid Jellyfin configuration
+	jellyfin := func() JellyfinConfig {
+		return JellyfinConfig{
+			BaseURL:           "http://jellyfin:8096",
+			TokenKey:          "0123456789abcdef0123456789abcdef",
+			SyncInterval:      time.Minute,
+			ReconcileInterval: time.Hour,
 		}
 	}
 
@@ -143,9 +209,34 @@ func Test_Config_Validate(t *testing.T) {
 			mutate: func(c *Config) { c.AppEnv = DevelopmentEnv; c.JWTSecretKey = "SECRET" },
 		},
 		{
-			name: "Jellyfin with a 32-byte token key",
+			name:   "Jellyfin with a 32-byte token key",
+			mutate: func(c *Config) { c.Jellyfin = jellyfin() },
+		},
+		{
+			name:    "Jellyfin with a zero sync interval",
+			mutate:  func(c *Config) { c.Jellyfin = jellyfin(); c.Jellyfin.SyncInterval = 0 },
+			wantErr: "JELLYFIN_SYNC_INTERVAL must be positive",
+		},
+		{
+			name:    "Jellyfin with a negative sync interval",
+			mutate:  func(c *Config) { c.Jellyfin = jellyfin(); c.Jellyfin.SyncInterval = -time.Minute },
+			wantErr: "JELLYFIN_SYNC_INTERVAL must be positive when JELLYFIN_BASE_URL is set, got -1m0s",
+		},
+		{
+			name:    "Jellyfin with a zero reconcile interval",
+			mutate:  func(c *Config) { c.Jellyfin = jellyfin(); c.Jellyfin.ReconcileInterval = 0 },
+			wantErr: "JELLYFIN_RECONCILE_INTERVAL must be positive",
+		},
+		{
+			name:    "Jellyfin with a negative reconcile interval",
+			mutate:  func(c *Config) { c.Jellyfin = jellyfin(); c.Jellyfin.ReconcileInterval = -time.Hour },
+			wantErr: "JELLYFIN_RECONCILE_INTERVAL must be positive when JELLYFIN_BASE_URL is set, got -1h0m0s",
+		},
+		{
+			name: "Nonpositive intervals without Jellyfin are ignored",
 			mutate: func(c *Config) {
-				c.Jellyfin = JellyfinConfig{BaseURL: "http://jellyfin:8096", TokenKey: "0123456789abcdef0123456789abcdef"}
+				c.Jellyfin.SyncInterval = 0
+				c.Jellyfin.ReconcileInterval = -time.Hour
 			},
 		},
 		{

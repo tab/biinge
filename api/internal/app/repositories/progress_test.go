@@ -2,9 +2,12 @@ package repositories
 
 import (
 	"context"
+	"maps"
 	"os"
+	"slices"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -386,4 +389,72 @@ func Test_SeriesProgressRepository_UpsertKeepsCountsOnZero(t *testing.T) {
 
 	assert.Equal(t, uint64(1), stored.SeasonsCount, "seasons_count survives a zero-count upsert")
 	assert.Equal(t, uint64(3), stored.EpisodesCount, "episodes_count survives a zero-count upsert")
+}
+
+func Test_SeriesProgressRepository_WatchedEpisodes(t *testing.T) {
+	if os.Getenv("GO_ENV") == "ci" {
+		t.Skip("integration test requires a database")
+	}
+
+	ctx := context.Background()
+	cfg := &config.Config{DatabaseDSN: os.Getenv("DATABASE_DSN")}
+
+	client, err := postgres.NewPostgresClient(cfg)
+	require.NoError(t, err)
+
+	repository := NewSeriesProgressRepository(client)
+	userID := newProgressTestUser(t, client, "tv.watched")
+	otherID := newProgressTestUser(t, client, "tv.watched.other")
+
+	const seriesID uint64 = 400
+
+	defer func() {
+		_, _ = repository.UnmarkSeriesWatched(ctx, userID, seriesID)
+		_, _ = repository.UnmarkSeriesWatched(ctx, otherID, seriesID)
+		_, _ = repository.UnmarkSeriesWatched(ctx, userID, 401)
+	}()
+
+	before := time.Now().Add(-time.Minute)
+
+	for _, episode := range []uint64{1, 2} {
+		_, err = repository.MarkEpisodeWatched(ctx, userID, seriesInput(seriesID, 3, "Ended"), seasonInput(410, 3), episodeInput(episode))
+		require.NoError(t, err)
+	}
+
+	// another user's episode of the show and the user's episode of another show stay out
+	_, err = repository.MarkEpisodeWatched(ctx, otherID, seriesInput(seriesID, 3, "Ended"), seasonInput(410, 3), episodeInput(3))
+	require.NoError(t, err)
+
+	_, err = repository.MarkEpisodeWatched(ctx, userID, seriesInput(401, 3, "Ended"), seasonInput(420, 3), episodeInput(4))
+	require.NoError(t, err)
+
+	tests := []struct {
+		name     string
+		seriesId uint64
+		expected []uint64
+	}{
+		{
+			name:     "Watched episodes of the show",
+			seriesId: seriesID,
+			expected: []uint64{1, 2},
+		},
+		{
+			name:     "Untracked show",
+			seriesId: 499,
+			expected: []uint64{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			episodes, err := repository.WatchedEpisodes(ctx, userID, tt.seriesId)
+			require.NoError(t, err)
+
+			assert.ElementsMatch(t, tt.expected, slices.Collect(maps.Keys(episodes)))
+
+			for _, watchedAt := range episodes {
+				assert.True(t, watchedAt.After(before))
+			}
+		})
+	}
 }

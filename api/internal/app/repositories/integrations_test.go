@@ -127,3 +127,32 @@ func Test_IntegrationRepository_ClearConnection(t *testing.T) {
 	require.ErrorIs(t, err, pgx.ErrNoRows)
 	assert.Nil(t, result)
 }
+
+func Test_IntegrationRepository_ListUsers(t *testing.T) {
+	ctx := context.Background()
+	client := newRepoTestClient(t)
+	repository := NewIntegrationRepository(client)
+	linkedID := newProgressTestUser(t, client, "integr.list.linked")
+	clearedID := newProgressTestUser(t, client, "integr.list.cleared")
+	unlinkedID := newProgressTestUser(t, client, "integr.list.none")
+
+	for _, userID := range []uuid.UUID{linkedID, clearedID} {
+		_, err := repository.UpsertConnection(ctx, &models.Integration{
+			UserId:         userID,
+			Provider:       models.JellyfinProvider,
+			ExternalUserId: "jf-list",
+			Username:       "list",
+			Token:          []byte("sealed-list"),
+		})
+		require.NoError(t, err)
+	}
+
+	require.NoError(t, repository.ClearConnection(ctx, clearedID, models.JellyfinProvider))
+
+	// other tests leave their own rows in the shared database, so only these users are checked
+	result, err := repository.ListUsers(ctx, models.JellyfinProvider)
+	require.NoError(t, err)
+	assert.Contains(t, result, linkedID)
+	assert.NotContains(t, result, clearedID)
+	assert.NotContains(t, result, unlinkedID)
+}

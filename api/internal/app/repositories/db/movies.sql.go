@@ -22,7 +22,7 @@ INSERT INTO movies (
   state,
   watched_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, CASE WHEN $6 = 'watched'::state_types THEN NOW() ELSE NULL END
+  $1, $2, $3, $4, $5, $6, CASE WHEN $6 = 'watched'::state_types THEN COALESCE($7::timestamptz, NOW()) ELSE NULL END
 )
 RETURNING
   id,
@@ -45,6 +45,7 @@ type CreateMovieParams struct {
 	PosterPath string
 	Runtime    uint64
 	State      StateTypes
+	WatchedAt  pgtype.Timestamptz
 }
 
 type CreateMovieRow struct {
@@ -69,6 +70,7 @@ func (q *Queries) CreateMovie(ctx context.Context, arg CreateMovieParams) (Creat
 		arg.PosterPath,
 		arg.Runtime,
 		arg.State,
+		arg.WatchedAt,
 	)
 	var i CreateMovieRow
 	err := row.Scan(
@@ -421,7 +423,7 @@ UPDATE movies
 SET
   state = $3,
   pinned = $4,
-  watched_at = CASE WHEN $3 = 'watched'::state_types THEN COALESCE(watched_at, NOW()) ELSE NULL END,
+  watched_at = CASE WHEN $3 = 'watched'::state_types THEN COALESCE(watched_at, $5::timestamptz, NOW()) ELSE NULL END,
   updated_at = NOW()
 WHERE tmdb_id = $1 AND user_id = $2
 RETURNING
@@ -439,10 +441,11 @@ RETURNING
 `
 
 type UpdateMovieByTmdbIdParams struct {
-	TmdbID uint64
-	UserID uuid.UUID
-	State  StateTypes
-	Pinned bool
+	TmdbID    uint64
+	UserID    uuid.UUID
+	State     StateTypes
+	Pinned    bool
+	WatchedAt pgtype.Timestamptz
 }
 
 type UpdateMovieByTmdbIdRow struct {
@@ -465,6 +468,7 @@ func (q *Queries) UpdateMovieByTmdbId(ctx context.Context, arg UpdateMovieByTmdb
 		arg.UserID,
 		arg.State,
 		arg.Pinned,
+		arg.WatchedAt,
 	)
 	var i UpdateMovieByTmdbIdRow
 	err := row.Scan(

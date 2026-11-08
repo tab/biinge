@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -110,6 +111,7 @@ func Test_Movies_Create(t *testing.T) {
 		PosterPath: "/matrix.jpg",
 		Runtime:    136,
 		State:      "want",
+		WatchedAt:  time.Date(2026, 11, 1, 20, 30, 0, 0, time.UTC),
 	}
 
 	tests := []struct {
@@ -246,10 +248,11 @@ func Test_Movies_UpdateByTmdbId(t *testing.T) {
 	userId := uuid.New()
 
 	params := &models.Movie{
-		TmdbId: 100,
-		UserId: userId,
-		State:  "watched",
-		Pinned: true,
+		TmdbId:    100,
+		UserId:    userId,
+		State:     "watched",
+		Pinned:    true,
+		WatchedAt: time.Date(2026, 11, 1, 20, 30, 0, 0, time.UTC),
 	}
 
 	tests := []struct {

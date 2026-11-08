@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -21,6 +22,7 @@ type SeriesProgressRepository interface {
 	MarkEpisodeWatched(ctx context.Context, userId uuid.UUID, series models.SeriesInput, season models.SeasonInput, episode models.EpisodeInput) (*models.SeriesProgress, error)
 	UnmarkEpisodeWatched(ctx context.Context, userId uuid.UUID, seriesTmdbId, seasonTmdbId, episodeTmdbId uint64) (*models.SeriesProgress, error)
 	Progress(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error)
+	WatchedEpisodes(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (map[uint64]time.Time, error)
 }
 
 type seriesProgress struct {
@@ -249,6 +251,21 @@ func (r *seriesProgress) UnmarkEpisodeWatched(ctx context.Context, userId uuid.U
 
 func (r *seriesProgress) Progress(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (*models.SeriesProgress, error) {
 	return buildProgress(ctx, r.client.Queries(), userId, seriesTmdbId)
+}
+
+// WatchedEpisodes maps each watched episode's TMDB id of the show to its watched_at (empty when the show is untracked)
+func (r *seriesProgress) WatchedEpisodes(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (map[uint64]time.Time, error) {
+	rows, err := r.client.Queries().FindWatchedEpisodesBySeriesTmdbId(ctx, db.FindWatchedEpisodesBySeriesTmdbIdParams{UserID: userId, TmdbID: seriesTmdbId})
+	if err != nil {
+		return nil, err
+	}
+
+	episodes := make(map[uint64]time.Time, len(rows))
+	for _, row := range rows {
+		episodes[row.TmdbID] = row.WatchedAt.Time
+	}
+
+	return episodes, nil
 }
 
 // upsertSeries inserts or updates the series row and returns it

@@ -1,0 +1,51 @@
+---
+interface Props {
+  // path under public without extension, e.g. media/iphone/tick
+  src: string;
+  // ships -light and -dark variants of the clip and its poster, picked by the active theme
+  themed?: boolean;
+  // still under public without extension, shown before play and under reduced motion (defaults to src)
+  poster?: string;
+  width: number;
+  height: number;
+  label: string;
+}
+
+const { src, themed = false, poster = src, width, height, label } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const clip = (variant: string) => `${base}${src}${variant}.mp4`;
+const still = (variant: string) => `${base}${poster}${variant}.webp`;
+---
+
+<!--
+  src and poster are set by the layout's theme script, like the screenshots, so
+  only the variant the theme shows is ever fetched. The same script plays the
+  clip while it is on screen and leaves it on the poster under reduced motion
+-->
+<video
+  class="recording"
+  data-screen
+  data-recording
+  data-light={clip(themed ? "-light" : "")}
+  data-dark={clip(themed ? "-dark" : "")}
+  data-poster-light={still(themed ? "-light" : "")}
+  data-poster-dark={still(themed ? "-dark" : "")}
+  width={width}
+  height={height}
+  style={`aspect-ratio: ${width} / ${height}`}
+  aria-label={label}
+  muted
+  playsinline
+  loop
+  preload="none"
+></video>
+
+<style>
+  .recording {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    background: #000;
+  }
+</style>

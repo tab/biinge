@@ -12,35 +12,36 @@
   font-display: swap;
 }
 
+/* Dark is the default: the site opens dark until the toggle saves light */
 :root,
-[data-theme="light"] {
-  --bg: #ffffff;
-  --bg-elevated: #f4f4f2;
-  --border: #e8e8e3;
-  --border-strong: #d4d4ce;
-  --text: #14141a;
-  --text-secondary: #3d3d45;
-  --text-muted: #6b6b75;
-  --text-faint: #9b9ba3;
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101014;
+  --bg-elevated: #17171d;
+  --surface-raised: #1b1b20;
+  --border: #26262d;
+  --border-strong: #3a3a43;
+  --text: #f4f4f2;
+  --text-muted: #91919a;
 
   /* the three watch states, taken from the status bars in the app's stats screen */
-  --want: #5f6672;
-  --watching: #a67c05;
-  --watched: #167c46;
+  --want: #aab0bd;
+  --watching: #eec01e;
+  --watched: #34c46f;
 
   /* the red the app puts on its actions */
-  --accent: #d93b41;
+  --accent: #e5484d;
 
-  /* white on the white page, but the elevated grey once the page goes dark */
-  --card-bg: #ffffff;
-  --code-bg: rgba(0, 0, 0, 0.045);
-  --code-border: rgba(0, 0, 0, 0.09);
-  --header-bg: rgba(255, 255, 255, 0.82);
-  --nav-hover-bg: rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 24px 60px rgba(20, 20, 26, 0.14);
-  --bezel: #16161a;
-  --bezel-rail: rgba(120, 120, 128, 0.4);
-  --screen-edge: rgba(0, 0, 0, 0.06);
+  --card-bg: #17171d;
+  --code-bg: rgba(255, 255, 255, 0.06);
+  --code-border: rgba(255, 255, 255, 0.1);
+  --header-bg: rgba(16, 16, 20, 0.82);
+  --nav-hover-bg: rgba(255, 255, 255, 0.07);
+  /* the round header buttons and other quiet chips */
+  --fill: rgba(255, 255, 255, 0.1);
+  --fill-hover: rgba(255, 255, 255, 0.18);
+  --footer-bg: #050506;
+  --footer-text: #8a8a90;
 
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
@@ -48,32 +49,32 @@
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, monospace;
 }
 
-[data-theme="dark"] {
-  --bg: #101014;
-  --bg-elevated: #17171d;
-  --border: #26262d;
-  --border-strong: #3a3a43;
-  --text: #f4f4f2;
-  --text-secondary: #c9c9c6;
-  --text-muted: #91919a;
-  --text-faint: #64646d;
+/* the prototype's light theme: white fills turn to black at three quarters of their alpha */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f3f1;
+  --bg-elevated: #eaeae7;
+  --surface-raised: #ffffff;
+  --border: #e0e0dc;
+  --border-strong: #cececa;
+  --text: #16161a;
+  --text-muted: #62626a;
 
-  /* brightened so the same three states hold up on a dark ground */
-  --want: #aab0bd;
-  --watching: #eec01e;
-  --watched: #34c46f;
+  --want: #5f6672;
+  --watching: #a77d00;
+  --watched: #1f9a52;
 
-  --accent: #e5484d;
+  --accent: #d93b41;
 
-  --card-bg: #17171d;
-  --code-bg: rgba(255, 255, 255, 0.06);
-  --code-border: rgba(255, 255, 255, 0.1);
-  --header-bg: rgba(16, 16, 20, 0.8);
-  --nav-hover-bg: rgba(255, 255, 255, 0.07);
-  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
-  --bezel: #0a0a0c;
-  --bezel-rail: rgba(214, 214, 220, 0.4);
-  --screen-edge: rgba(255, 255, 255, 0.14);
+  --card-bg: #ffffff;
+  --code-bg: rgba(0, 0, 0, 0.045);
+  --code-border: rgba(0, 0, 0, 0.09);
+  --header-bg: rgba(243, 243, 241, 0.82);
+  --nav-hover-bg: rgba(0, 0, 0, 0.05);
+  --fill: rgba(0, 0, 0, 0.075);
+  --fill-hover: rgba(0, 0, 0, 0.135);
+  --footer-bg: #f8f8f8;
+  --footer-text: #717177;
 }
 
 *,
@@ -128,83 +129,6 @@ code {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
-}
-
-.container {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 64px;
-}
-
-/*
- * Dark is a tool, not the ground: a section opts into it where the screenshot
- * is the whole point, and stays dark in both site themes. Overriding the
- * palette tokens here means everything inside follows without its own rules
- */
-.focus {
-  --bg: #101014;
-  --bg-elevated: #17171d;
-  --text: #f4f4f2;
-  --text-secondary: #d4d4d0;
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --text-faint: rgba(255, 255, 255, 0.42);
-  --border: rgba(255, 255, 255, 0.13);
-  --border-strong: rgba(255, 255, 255, 0.28);
-  --want: #aab0bd;
-  --watching: #eec01e;
-  --watched: #34c46f;
-  --accent: #e5484d;
-  --screen-edge: rgba(255, 255, 255, 0.14);
-  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
-
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* The soft grey block that separates one section from the next without a rule */
-.tint {
-  background: var(--bg-elevated);
-}
-
-.display {
-  font-family: var(--display);
-  font-variation-settings: "wdth" 100, "wght" 660;
-  font-weight: 660;
-  line-height: 1.03;
-  letter-spacing: -0.032em;
-  color: var(--text);
-}
-
-.display-soft {
-  font-family: var(--display);
-  font-variation-settings: "wdth" 100, "wght" 600;
-  font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: -0.026em;
-  color: var(--text);
-}
-
-/* Inner pages all open the same way: small label, display heading, one lead */
-.page-head {
-  max-width: 760px;
-  margin-bottom: 52px;
-}
-
-.page-head h1 {
-  font-family: var(--display);
-  font-variation-settings: "wdth" 100, "wght" 640;
-  font-weight: 640;
-  font-size: clamp(2.4rem, 5.4vw, 3.9rem);
-  line-height: 1.04;
-  letter-spacing: -0.033em;
-  color: var(--text);
-  margin-bottom: 20px;
-}
-
-.page-head .lead {
-  font-size: 1.18rem;
-  line-height: 1.58;
-  color: var(--text-muted);
 }
 
 /* A plain category label, the way a product page names its subject */
@@ -267,56 +191,12 @@ code {
   border-color: var(--text-muted);
 }
 
-/* The quiet secondary action: a text link that leans forward on hover */
-.btn-text {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.97rem;
-  font-weight: 550;
-  color: var(--text);
-}
-
-.btn-text svg {
-  transition: transform 0.18s;
-}
-
-.btn-text:hover {
-  text-decoration: none;
-}
-
-.btn-text:hover svg {
-  transform: translateX(3px);
-}
-
-.btn-text:active {
-  opacity: 0.6;
-}
-
-/*
- * Sections lift into place as they arrive. Gated behind .js so the content is
- * never left invisible when the observer doesn't run
- */
-.js [data-reveal] {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
-    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
-}
-
-.js [data-reveal].is-revealed {
-  opacity: 1;
-  transform: none;
-}
-
 /*
  * Light and dark are two very different grounds, so the swap eases instead of
- * cutting. The class rides on <html> only for the length of the toggle, and
- * revealing sections keep their own transition
+ * cutting. The class rides on <html> only for the length of the toggle
  */
 .theme-switching,
-.theme-switching *:not([data-reveal]) {
+.theme-switching * {
   transition: background-color 0.25s ease, border-color 0.25s ease,
     color 0.25s ease, fill 0.25s ease !important;
 }
@@ -326,24 +206,8 @@ code {
     scroll-behavior: auto;
   }
 
-  .btn-text:hover svg {
-    transform: none;
-  }
-
   /* the press still reads, it just stops moving */
   .btn:active {
     transform: none;
-  }
-
-  .js [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding-inline: 24px;
   }
 }

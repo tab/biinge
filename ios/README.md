@@ -8,7 +8,7 @@ crash reporting and jellyfin-sdk-swift for Jellyfin.
 ## Requirements
 
 - Xcode 26 with the SDKs and simulator runtimes for the platforms you run: iOS 26 and tvOS 26
-  (the Mac app targets macOS 15.6 and needs no runtime). `make test` and `make build` run all three
+  (the Mac app targets macOS 26 and needs no runtime). `make test` and `make build` run all three
 - A running [Biinge API](../api/README.md) (the app defaults to `http://localhost:8080/api/v1`)
 - Optional: [SwiftLint](https://github.com/realm/SwiftLint), which `make lint` skips when it is not installed
 

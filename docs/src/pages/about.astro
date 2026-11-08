@@ -2,25 +2,44 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import StateRing from "../components/StateRing.astro";
+import { platforms } from "../components/platforms";
 
 const base = import.meta.env.BASE_URL;
 
+const tracks = [
+  "Account",
+  "Want, Watching, Watched",
+  "Episode progress",
+  "Up Next",
+  "Games",
+  "Statistics",
+  "Catalog from TMDB and IGDB",
+];
+
+const plays = [
+  "Your movies and shows",
+  "Streaming",
+  "Playback position",
+  "Audio and subtitle tracks",
+  "Collections",
+];
+
+// each mark is the app's poster badge: hollow for want and watching, solid for watched
 const states = [
   {
-    state: "want" as const,
     name: "Want",
-    desc: "Movies, TV shows and games you plan to start. Each medium keeps its own list.",
+    mark: "want",
+    text: "Movies, shows and games you plan to start. Each keeps its own list.",
   },
   {
-    state: "watching" as const,
     name: "Watching",
-    desc: "TV shows move here after the first episode you mark. Games use Playing, which you set yourself.",
+    mark: "watching",
+    text: "Shows move here after the first episode you mark or finish. Games use Playing.",
   },
   {
-    state: "watched" as const,
     name: "Watched",
-    desc: "Finished movies and ended TV shows. Games use Played; completed movies and episodes contribute to watch-time totals.",
+    mark: "watched",
+    text: "Finished movies, and shows that have ended and are fully watched. Games use Played. Watched movies and episodes add their runtime to your totals.",
   },
 ];
 
@@ -34,183 +53,392 @@ const stack = [
   "Redis",
   "TMDB",
   "IGDB",
+  "Jellyfin",
   "SwiftUI",
-  "iOS 26",
+  "AVKit",
+  "iOS · macOS · tvOS 26",
 ];
 ---
 
 <Layout
-  title="About — biinge"
-  description="How biinge tracks movies, TV shows and games in a self-hosted iOS app."
+  title="About Biinge"
+  description="Biinge is open source and self-hosted. It tracks movies, TV shows and games, and its iPhone, Mac and Apple TV apps play your Jellyfin library."
 >
-  <Header section="about" />
-  <main class="page">
-    <div class="container">
-      <div class="page-head">
-        <p class="eyebrow-label">About</p>
-        <h1>Built to keep your lists current.</h1>
-        <p class="lead">
-          Biinge is an open-source, self-hosted iOS app for tracking movies, TV
-          shows and games. It organizes each medium in a way that fits, while
-          keeping your library in a database you control.
-        </p>
-      </div>
+  <Header page="about" />
+  <main class="about">
+    <div class="head">
+      <p class="eyebrow">About</p>
+      <h1>Biinge tracks what you watch and plays your Jellyfin library</h1>
+      <p class="lede">
+        Biinge is open source and self-hosted. You run the Biinge API and
+        Jellyfin on your own hardware, and use the iPhone, Mac and Apple TV
+        apps. Biinge keeps the lists. Jellyfin holds the media.
+      </p>
+    </div>
 
-      <div class="prose">
+    <section class="fits">
+      <h2>How it fits together</h2>
+      <div class="diagram">
+        <ul class="apps">
+          {platforms.map((p) => (
+            <li>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={p.icon} />
+              {p.name}
+            </li>
+          ))}
+        </ul>
+        <div class="servers">
+          <div class="server">
+            <div class="server-head">
+              <img src={`${base}icon.png`} width="34" height="34" alt="" />
+              <div>
+                <h3>Biinge server</h3>
+                <p>What you track</p>
+              </div>
+            </div>
+            <ul class="tags">
+              {tracks.map((t) => <li>{t}</li>)}
+            </ul>
+          </div>
+          <div class="server">
+            <div class="server-head">
+              <span class="server-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="3" width="14" height="14" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h12"/><path d="M12.5 7.5v5l4-2.5z"/></svg>
+              </span>
+              <div>
+                <h3>Jellyfin server</h3>
+                <p>What you can play</p>
+              </div>
+            </div>
+            <ul class="tags">
+              {plays.map((t) => <li>{t}</li>)}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <p class="body">
+        Every app signs in to both. Biinge supplies the address of your Jellyfin
+        server, so you only enter a username and password. A watched mark made
+        in Biinge reaches Jellyfin. With sync turned on, a mark made in Jellyfin
+        comes back to Biinge within a couple of minutes.
+      </p>
+    </section>
+
+    <section class="states">
+      <div class="states-head">
         <h2>Progress sets the state</h2>
-        <p>
+        <p class="body">
           Movies move from Want to Watched. TV shows add Watching in between,
           and Biinge works out where a show belongs from the episodes you mark.
-          Games use Want, Playing and Played, with every state under your control.
+          Games use Want, Playing and Played, with every move under your control.
         </p>
       </div>
-
-      <ul class="states">
+      <ul class="cards">
         {states.map((s) => (
           <li>
-            <StateRing state={s.state} size={20} />
+            <span class:list={["mark", { filled: s.mark === "watched" }]} style={`--mark: var(--${s.mark})`} aria-hidden="true"></span>
             <div>
               <h3>{s.name}</h3>
-              <p>{s.desc}</p>
+              <p>{s.text}</p>
             </div>
           </li>
         ))}
       </ul>
+    </section>
 
-      <div class="prose">
-        <h2>Your library stays current</h2>
-        <p>
-          Release dates change and finished shows sometimes return. A background
-          worker periodically refreshes eligible movies and TV shows from
-          <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a>
-          so corrected details reach your library without you reopening every
-          title. If an ended show is renewed, it returns to <em>Watching</em>.
+    <div class="prose">
+      <section>
+        <h2>Details stay up to date</h2>
+        <p class="body">
+          A background worker refreshes movies and shows from TMDB. Changed
+          release dates and details reach your lists. If an ended show is
+          renewed, it returns to Watching.
         </p>
+      </section>
 
-        <h2>Your server, your database</h2>
-        <p>
-          There is no hosted Biinge service. You run the API, create an account
-          on it, and keep your library and watch history in your own PostgreSQL
-          database. There is no advertising and nothing to subscribe to.
+      <section>
+        <h2>Where your data lives</h2>
+        <p class="body">
+          There is no hosted Biinge service. You run the API next to your
+          Jellyfin server. Your lists and watch history stay in your own
+          PostgreSQL database. There are no ads and no subscription.
         </p>
-        <p>
-          Your server requests movie and TV metadata from TMDB and game metadata
-          from IGDB. Optional Sentry crash reporting remains off until you
-          configure it.
+        <p class="body">
+          Your server asks TMDB for movie and TV metadata and IGDB for games.
+          Optional Sentry crash reporting stays off until you configure it.
         </p>
+      </section>
 
+      <section>
         <h2>How it's built</h2>
-        <p>
-          A Go REST API owns the library, episode progress, Up Next and
-          statistics. It talks to TMDB and IGDB on the app's behalf, keeping
-          provider credentials on your server instead of inside the app. The
-          native client is built with SwiftUI for iOS 26.
+        <p class="body">
+          A Go REST API owns lists, episode progress, Up Next and statistics, and
+          keeps the TMDB and IGDB credentials on your server instead of in the
+          apps. The iPhone, Mac and Apple TV apps share one SwiftUI codebase and
+          play through Apple's own video engine.
         </p>
         <ul class="stack">
-          {stack.map((s) => (
-            <li>{s}</li>
-          ))}
+          {stack.map((s) => <li>{s}</li>)}
         </ul>
+      </section>
 
+      <section>
         <h2>Open source</h2>
-        <p>
-          The API and iOS app live in one repository, each with its own build and
-          tests. The project is
-          <a href="https://github.com/tab/biinge/blob/master/LICENSE" target="_blank" rel="noopener">MIT licensed</a>;
-          fork it, run it and make it your own.
+        <p class="body">
+          The API and the apps live in one repository, each with its own build
+          and tests. The project is
+          <a href="https://github.com/tab/biinge/blob/master/LICENSE" target="_blank" rel="noopener">MIT licensed</a>.
         </p>
-      </div>
+      </section>
+    </div>
 
-      <div class="actions">
-        <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-primary">
-          View on GitHub
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
-        </a>
-        <a href={`${base}self-hosting/`} class="btn btn-ghost">Read the setup guide</a>
-      </div>
+    <div class="actions">
+      <a href="https://github.com/tab/biinge" target="_blank" rel="noopener" class="btn btn-primary">
+        View on GitHub
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+      </a>
+      <a href={`${base}self-hosting/`} class="btn btn-ghost">
+        Read the setup guide
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </a>
     </div>
   </main>
   <Footer />
 </Layout>
 
 <style>
-  .page {
-    padding: 80px 0 120px;
+  .about {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(56px, 7vw, 96px) clamp(20px, 5vw, 64px) clamp(80px, 9vw, 128px);
   }
 
-  .page-head {
-    max-width: 880px;
-    margin-bottom: 64px;
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 860px;
   }
 
-  .prose {
-    max-width: 800px;
+  .eyebrow {
+    font-size: 15px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
   }
 
-  .prose h2 {
+  h1 {
     font-family: var(--display);
-    font-variation-settings: "wdth" 100, "wght" 610;
+    font-weight: 640;
+    font-size: clamp(40px, 5.4vw, 64px);
+    line-height: 1.04;
+    letter-spacing: -0.033em;
+  }
+
+  .lede {
+    font-size: clamp(17px, 1.5vw, 19.5px);
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  h2 {
+    font-family: var(--display);
     font-weight: 610;
-    font-size: 1.65rem;
+    font-size: 28px;
+    line-height: 1.15;
     letter-spacing: -0.025em;
+  }
+
+  .body {
+    max-width: 760px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  .body a {
     color: var(--text);
-    margin: 56px 0 14px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
-  .prose > h2:first-child {
-    margin-top: 0;
+  .fits {
+    margin-top: 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
   }
 
-  .prose p {
-    font-size: 1.08rem;
-    line-height: 1.72;
-    color: var(--text-muted);
+  .apps {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
   }
 
-  .prose p + p {
-    margin-top: 18px;
+  .apps li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 20px 0 16px;
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+    font-size: 16px;
+    font-weight: 600;
   }
 
-  .prose em {
-    color: var(--text);
-    font-style: italic;
+  .servers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+    gap: 16px;
+  }
+
+  .server {
+    position: relative;
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px;
+    border-radius: 22px;
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  }
+
+  /* the line from the apps above into each server */
+  .server::before {
+    content: "";
+    position: absolute;
+    top: -36px;
+    left: calc(50% - 0.75px);
+    width: 1.5px;
+    height: 36px;
+    background: color-mix(in srgb, var(--text) 18%, transparent);
+  }
+
+  .server-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .server-head img,
+  .server-icon {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: block;
+  }
+
+  .server-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--text) 10%, transparent);
+  }
+
+  .server h3 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .server-head p {
+    font-size: 14px;
+    line-height: 1.35;
+    color: color-mix(in srgb, var(--text) 55%, transparent);
+  }
+
+  .tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .tags li {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text) 8%, transparent);
   }
 
   .states {
-    list-style: none;
-    max-width: 1050px;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin: 36px 0 72px;
+    margin-top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
 
-  .states li {
+  .states-head {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* one card per row until all three fit side by side, so no card is left alone on a row */
+  .cards {
+    list-style: none;
+    display: grid;
+    gap: 16px;
+  }
+
+  @media (min-width: 860px) {
+    .cards {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .cards li {
+    display: flex;
     gap: 14px;
     padding: 26px;
-    border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 20px;
     background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 7%, transparent);
   }
 
-  .states li :global(.ring) {
-    margin-top: 4px;
+  .mark {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 3px var(--mark);
   }
 
-  .states h3 {
-    font-size: 1.05rem;
+  .mark.filled {
+    background: var(--mark);
+  }
+
+  .cards h3 {
+    font-size: 17px;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--text);
-    margin-bottom: 3px;
+    line-height: 1.4;
   }
 
-  .states p {
-    font-size: 1rem;
-    line-height: 1.62;
-    color: var(--text-muted);
+  .cards p {
+    margin-top: 4px;
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 62%, transparent);
+  }
+
+  .prose {
+    margin-top: 80px;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .prose section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
 
   .stack {
@@ -218,44 +446,22 @@ const stack = [
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 22px;
+    margin-top: 8px;
   }
 
   .stack li {
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
+    font: 500 12.5px var(--mono);
+    letter-spacing: 0.03em;
+    padding: 6px 13px;
     border-radius: 999px;
-    padding: 5px 13px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 14%, transparent);
+    color: color-mix(in srgb, var(--text) 80%, transparent);
   }
 
   .actions {
     display: flex;
-    gap: 12px;
     flex-wrap: wrap;
+    gap: 12px;
     margin-top: 64px;
-  }
-
-  @media (max-width: 860px) {
-    .states {
-      grid-template-columns: 1fr;
-      max-width: 800px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .page {
-      padding: 44px 0 64px;
-    }
-
-    .states {
-      margin-bottom: 56px;
-    }
-
-    .states li {
-      padding: 22px 20px;
-    }
   }
 </style>

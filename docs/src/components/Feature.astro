@@ -1,0 +1,181 @@
+---
+interface Point {
+  title: string;
+  text: string;
+}
+
+interface Props {
+  id?: string;
+  eyebrow: string;
+  // the badge before the eyebrow: a ring in a state's colour, or the filled dot
+  mark: "want" | "watching" | "watched";
+  filled?: boolean;
+  title: string;
+  body: string;
+  points: Point[];
+  // the raised ground, which alternates with the plain one down the page
+  raised?: boolean;
+  // puts the media first on a wide screen
+  flip?: boolean;
+  // a landscape capture takes most of the panel's width
+  landscape?: boolean;
+}
+
+const { id, eyebrow, mark, filled = false, title, body, points, raised = false, flip = false, landscape = false } = Astro.props;
+---
+
+<section id={id} class:list={["feature", { raised, flip, landscape }]}>
+  <div class="inner">
+    <div class="copy">
+      <p class="eyebrow">
+        <span class:list={["mark", { filled }]} style={`--mark: var(--${mark})`}></span>
+        {eyebrow}
+      </p>
+      <h2>{title}</h2>
+      <p class="body">{body}</p>
+      <dl class="points">
+        {points.map((p) => (
+          <div>
+            <dt>{p.title}</dt>
+            <dd>{p.text}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    <div class="media">
+      <div class="device">
+        <slot />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .feature {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg);
+  }
+
+  .raised {
+    background: var(--bg-elevated);
+  }
+
+  .inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    gap: 56px clamp(40px, 6vw, 96px);
+  }
+
+  .copy {
+    min-width: 0;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+  }
+
+  .mark {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2.5px var(--mark);
+  }
+
+  .mark.filled {
+    background: var(--mark);
+    box-shadow: none;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+    font-family: var(--display);
+    font-weight: 620;
+    font-size: clamp(32px, 3.6vw, 48px);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+  }
+
+  .body {
+    margin-bottom: 40px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  .points {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .points div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  dt {
+    font-size: 16.5px;
+    font-weight: 600;
+  }
+
+  dd {
+    font-size: 16px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--text) 62%, transparent);
+  }
+
+  /* the device sits on the section ground, centred under the copy until the two go side by side */
+  .media {
+    width: min(440px, 100%);
+    margin: 0 auto;
+  }
+
+  .landscape .media {
+    width: min(560px, 100%);
+  }
+
+  .device {
+    width: min(280px, 64%);
+    margin: 0 auto;
+  }
+
+  .landscape .device {
+    width: min(480px, 88%);
+  }
+
+  /* side by side, a flipped section leads with its media */
+  @media (min-width: 960px) {
+    .inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .copy {
+      flex: 1 1 340px;
+    }
+
+    .media {
+      flex: 0 1 auto;
+      margin: 0;
+    }
+
+    .flip .media {
+      order: -1;
+    }
+  }
+</style>

@@ -1,22 +1,13 @@
 # biinge
 
-Movie, TV and game tracker. Keep separate lists of what you want to start,
-what you're in the middle of and what you've finished.
+An open-source, self-hosted tracker and player for movies, TV shows and games.
+You run the Biinge API next to your Jellyfin server on your own hardware. The
+iPhone, Mac and Apple TV apps track your lists and play what the server holds.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/public/screens/flow-1-library-dark.jpg">
-    <img src="docs/public/screens/flow-1-library-light.jpg" alt="Movies library" width="200">
-  </picture>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/public/screens/tv-watching-dark.jpg">
-    <img src="docs/public/screens/tv-watching-light.jpg" alt="TV shows you're watching" width="200">
-  </picture>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/public/screens/games-dark.jpg">
-    <img src="docs/public/screens/games-light.jpg" alt="Games you're playing" width="200">
-  </picture>
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/public/media/readme/devices-dark.webp">
+  <img src="docs/public/media/readme/devices-light.webp" alt="Biinge on iPhone, Mac and Apple TV">
+</picture>
 
 ## Features
 
@@ -50,7 +41,7 @@ make -C api db:migrate                              # apply migrations
 cd api && GO_ENV=development go run ./cmd/biinge     # http://localhost:8080
 ```
 
-Or boot the API with a readiness wait via [fuku](https://github.com/tab/fuku): `fuku up`.
+Or run the API in Docker too: after the migrations, `docker compose up -d api` starts it on :8080.
 
 **2. Run the app** (details in [ios/README.md](ios/README.md)):
 
@@ -60,7 +51,7 @@ make -C ios build:ios     # or open ios/Biinge.xcodeproj in Xcode 26
 
 The app targets `http://localhost:8080/api/v1` by default. Library lists are
 DB-backed; detail, search, and trending proxy TMDB, so the API needs a real
-TMDB token — see [api/README.md](api/README.md#configuration).
+TMDB token. See [api/README.md](api/README.md#configuration).
 
 ## Conventions
 
@@ -69,4 +60,4 @@ The Go module is rooted inside `api/` (no `go.work`); CI in `.github/workflows/`
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

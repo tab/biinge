@@ -204,7 +204,7 @@ const paging: QueryParam[] = [
 
 const endpoints: Endpoint[] = [
   { id: "get-live", group: "Health", method: "GET", path: "/live", desc: "Liveness probe. No authentication required.", resp: liveJson },
-  { id: "get-ready", group: "Health", method: "GET", path: "/ready", desc: "Readiness probe — 503 until Postgres answers. No authentication required.", resp: readyJson },
+  { id: "get-ready", group: "Health", method: "GET", path: "/ready", desc: "Readiness probe: 503 until Postgres answers. No authentication required.", resp: readyJson },
   { id: "get-health", group: "Health", method: "GET", path: "/health", desc: "Plain-text heartbeat, answered by middleware ahead of the router. Accepts HEAD as well as GET. No authentication required.", resp: esc(".") },
 
   { id: "register", group: "Users", method: "POST", path: "/api/v1/users/registrations", desc: "Create a new account.", body: `{
@@ -310,7 +310,7 @@ const endpoints: Endpoint[] = [
   ]
 }` },
   { id: "show-unwatched", group: "Progress", method: "DELETE", path: "/api/v1/series/{id}/watched", desc: "Unmark the whole show, dropping every season and episode recorded for it.", note: "With your Jellyfin account connected, an unmark that changes your watched episodes also marks the show and each of its matched episodes unplayed in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. A title without exactly one library match is skipped." },
-  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", note: "The episodes array is what actually gets recorded. Send the season's episodes in it — without them the show ends up with no watched episodes, and nothing is tracked. With your Jellyfin account connected, a mark that changes your watched episodes also marks each matched episode of the season played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped.", body: `{
+  { id: "season-watched", group: "Progress", method: "POST", path: "/api/v1/series/{id}/seasons/{seasonId}/watched", desc: "Mark a season watched.", note: "The episodes array is what actually gets recorded. Send the season's episodes in it. Without them the show ends up with no watched episodes, and nothing is tracked. With your Jellyfin account connected, a mark that changes your watched episodes also marks each matched episode of the season played in Jellyfin. That write runs in the background. The response never waits for it or reports it, and a failure is only logged on the server. An episode without exactly one library match is skipped.", body: `{
   "series": {
     "title": "Severance",
     "posterPath": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
@@ -522,7 +522,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
             <p>
               A failure inside a controller returns a JSON body with an
               <code>error</code> message and one of these status codes. Responses
-              from the middleware around it — rate limiting, an unmatched route —
+              from the middleware around it (rate limiting, an unmatched route)
               are plain text.
             </p>
             <table>
@@ -532,7 +532,7 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
                 <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid or expired access token, or wrong login credentials</td></tr>
                 <tr><td><code>404</code></td><td>Not Found</td><td>The Jellyfin connection routes, when this instance has no Jellyfin server configured</td></tr>
                 <tr><td><code>409</code></td><td>Conflict</td><td>Registering a login or email that is already taken</td></tr>
-                <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>The request was well formed but the work failed — including a title the upstream provider doesn't have, or a Jellyfin username and password that Jellyfin rejects</td></tr>
+                <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>The request was well formed but the work failed, including a title the upstream provider doesn't have, or a Jellyfin username and password that Jellyfin rejects</td></tr>
                 <tr><td><code>429</code></td><td>Too Many Requests</td><td>More than 5 requests a minute per IP to the public <code>/users</code> routes or 120 a minute per user everywhere else</td></tr>
                 <tr><td><code>500</code></td><td>Internal Server Error</td><td>Registration or a Jellyfin connection route failed for a reason the API won't detail</td></tr>
                 <tr><td><code>502</code></td><td>Bad Gateway</td><td>The Jellyfin server could not be reached</td></tr>

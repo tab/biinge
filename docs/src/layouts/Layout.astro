@@ -48,15 +48,12 @@ const ogImage = `${site}${base}og.png`;
     <title>{title}</title>
     <script is:inline>
       (function () {
-        var saved = localStorage.getItem("theme");
-        var theme =
-          saved ||
-          (window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
+        // dark until the toggle saves light, whatever the system appearance
+        var theme = "dark";
+        try {
+          if (localStorage.getItem("theme") === "light") theme = "light";
+        } catch (_) {}
         document.documentElement.setAttribute("data-theme", theme);
-        // the reveal styles only apply once this lands, so nothing hides without JS
-        document.documentElement.classList.add("js");
       })();
     </script>
   </head>
@@ -66,23 +63,65 @@ const ogImage = `${site}${base}og.png`;
       (function () {
         var root = document.documentElement;
 
-        // The screenshots ship without a src, because two <img> tags with one
-        // hidden downloads both files. This picks the one the theme actually
-        // shows, and runs again whenever the theme changes
+        // The screenshots and recordings ship without a src, because two tags
+        // with one hidden downloads both files. This picks the one the theme
+        // actually shows, and runs again whenever the theme changes
         function paintScreens() {
           var dark = root.getAttribute("data-theme") === "dark";
-          var screens = document.querySelectorAll("img[data-screen]");
+          var screens = document.querySelectorAll("[data-screen]");
           for (var i = 0; i < screens.length; i++) {
-            var img = screens[i];
-            var wantsDark = img.getAttribute("data-fixed") === "dark" || dark;
+            var el = screens[i];
+            var wantsDark = el.getAttribute("data-fixed") === "dark" || dark;
             var next = wantsDark
-              ? img.getAttribute("data-dark")
-              : img.getAttribute("data-light");
-            if (img.getAttribute("src") !== next) img.setAttribute("src", next);
+              ? el.getAttribute("data-dark")
+              : el.getAttribute("data-light");
+            if (el.tagName === "VIDEO") {
+              el.setAttribute(
+                "poster",
+                wantsDark
+                  ? el.getAttribute("data-poster-dark")
+                  : el.getAttribute("data-poster-light"),
+              );
+            }
+            if (el.getAttribute("src") === next) continue;
+            // a new src stops a playing clip, so it picks up again in the new theme
+            var playing = el.tagName === "VIDEO" && !el.paused;
+            el.setAttribute("src", next);
+            if (playing) el.play().catch(function () {});
           }
         }
 
         paintScreens();
+
+        // a recording loops only while it is on screen, and under reduced
+        // motion stays on its poster (the preference can change mid-visit)
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+        var recordings = document.querySelectorAll("video[data-recording]");
+        var visible = new Set();
+        var onScreen = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) visible.add(entry.target);
+              else visible.delete(entry.target);
+              if (entry.isIntersecting && !reduce.matches) {
+                entry.target.play().catch(function () {});
+              } else {
+                entry.target.pause();
+              }
+            });
+          },
+          { threshold: 0.25 },
+        );
+        recordings.forEach(function (video) {
+          onScreen.observe(video);
+        });
+        reduce.addEventListener("change", function () {
+          recordings.forEach(function (video) {
+            // load() stops the clip and shows its poster again, keeping the theme's src
+            if (reduce.matches) video.load();
+            else if (visible.has(video)) video.play().catch(function () {});
+          });
+        });
 
         var toggle = document.getElementById("theme-toggle");
         if (toggle) {
@@ -104,55 +143,6 @@ const ogImage = `${site}${base}og.png`;
       })();
     </script>
     <script>
-      // the state badges fill themselves once, as their section arrives
-      const rings = document.querySelectorAll(".ring.animate");
-
-      if (rings.length) {
-        const seen = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              entry.target.classList.add("is-in");
-              seen.unobserve(entry.target);
-            });
-          },
-          { rootMargin: "0px 0px -18% 0px", threshold: 0.5 },
-        );
-
-        rings.forEach((ring) => seen.observe(ring));
-      }
-    </script>
-    <script>
-      // sections lift into place once, as they arrive
-      const revealed = document.querySelectorAll("[data-reveal]");
-
-      if (revealed.length) {
-        const arriving = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              entry.target.classList.add("is-revealed");
-              arriving.unobserve(entry.target);
-            });
-          },
-          { rootMargin: "0px 0px -10% 0px" },
-        );
-
-        revealed.forEach((el) => arriving.observe(el));
-      }
-
-      // a looping phone only plays while it's on screen, so it costs nothing
-      // to scroll past
-      document.querySelectorAll("[data-loop]").forEach((loop) => {
-        const playing = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            loop.classList.toggle("is-playing", entry.isIntersecting);
-          });
-        }, { threshold: 0.25 });
-
-        playing.observe(loop);
-      });
-
       // the bar is invisible over the hero, and turns solid once you leave it
       const topbar = document.querySelector(".topbar");
 

@@ -1,0 +1,177 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  body: string;
+  // short claims under the body, each behind a check
+  checks?: string[];
+  // the raised ground, which alternates with the plain one down the page
+  raised?: boolean;
+  // puts the media first on a wide screen
+  flip?: boolean;
+  // an iPhone keeps a fixed width; a Mac or Apple TV capture takes the larger share of the row
+  media?: "phone" | "wide";
+}
+
+const { eyebrow, title, body, checks = [], raised = false, flip = false, media = "phone" } = Astro.props;
+---
+
+<section class:list={["section", media, { raised, flip }]}>
+  <div class="inner">
+    <div class="copy">
+      <p class="eyebrow">{eyebrow}</p>
+      <h2>{title}</h2>
+      <p class="body">{body}</p>
+      {checks.length > 0 && (
+        <ul class="checks">
+          {checks.map((c) => (
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+              {c}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+    <div class="media">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<!-- the page sets --measure, the widest its sections run -->
+<style>
+  .section {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg);
+  }
+
+  .raised {
+    background: var(--bg-elevated);
+  }
+
+  .inner {
+    max-width: var(--measure, 1320px);
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .eyebrow {
+    font-size: 15px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--text) 60%, transparent);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 620;
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+  }
+
+  .body {
+    font-size: 17.5px;
+    line-height: 1.62;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+
+  .checks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+    list-style: none;
+    font-size: 16px;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--text) 78%, transparent);
+  }
+
+  .checks li {
+    display: flex;
+    gap: 12px;
+  }
+
+  .checks svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--watched);
+  }
+
+  .phone .inner {
+    gap: 56px clamp(40px, 7vw, 112px);
+  }
+
+  .phone .copy {
+    max-width: 560px;
+  }
+
+  /* stacked, the phone is centred under the copy */
+  .phone .media {
+    width: min(260px, 100%);
+    margin: 0 auto;
+  }
+
+  .wide .inner {
+    gap: 48px clamp(40px, 6vw, 88px);
+  }
+
+  .wide .copy {
+    max-width: 440px;
+  }
+
+  .wide .media {
+    min-width: 0;
+  }
+
+  /* side by side, a flipped section leads with its media */
+  @media (min-width: 860px) {
+    .phone .inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .phone .copy {
+      flex: 1 1 340px;
+    }
+
+    .phone .media {
+      flex: none;
+      width: min(300px, 100%);
+      margin: 0;
+    }
+
+    .phone.flip .media {
+      order: -1;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .wide .inner {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .wide .copy {
+      flex: 1 1 320px;
+    }
+
+    .wide .media {
+      flex: 1 1 520px;
+    }
+
+    .wide.flip .media {
+      order: -1;
+    }
+  }
+</style>

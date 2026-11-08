@@ -1,0 +1,230 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import PlatformHero from "../components/PlatformHero.astro";
+import PlatformSection from "../components/PlatformSection.astro";
+import PlatformCards from "../components/PlatformCards.astro";
+import PlatformInstall from "../components/PlatformInstall.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+import Recording from "../components/Recording.astro";
+import Footer from "../components/Footer.astro";
+
+const tabs = [
+  {
+    name: "Movies",
+    text: "Want · Watched · Library",
+    icon: '<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9.5h18M8 5l-1.5 4.5M13 5l-1.5 4.5M18 5l-1.5 4.5"/>',
+  },
+  {
+    name: "TV",
+    text: "Want · Watching · Watched · Library",
+    icon: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8"/>',
+  },
+  {
+    name: "Games",
+    text: "Want · Playing · Played",
+    icon: '<path d="M7 7.5h10a4 4 0 0 1 4 4V15a2.5 2.5 0 0 1-4.5 1.5L15 14.5H9l-1.5 2A2.5 2.5 0 0 1 3 15v-3.5a4 4 0 0 1 4-4z"/><path d="M8 10v3.5M6.25 11.75h3.5M15.5 11h.01M17.5 13h.01"/>',
+  },
+  {
+    name: "Profile",
+    text: "Your account, the server connection, statistics and appearance",
+    icon: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6.5 6.5 0 0 1 11 0"/>',
+  },
+  {
+    name: "Search",
+    text: "Movies, shows, games and people from the whole catalog",
+    icon: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/>',
+  },
+];
+---
+
+<Layout
+  title="Biinge for iPhone"
+  description="The iPhone app has lists, episode progress, games, statistics and Up Next. Titles on your Jellyfin server play in the app."
+>
+  <Header page="iphone" />
+  <main style="--measure: 1120px">
+    <PlatformHero
+      page="iphone"
+      fade
+      glow="rgba(238, 192, 30, 0.09)"
+      eyebrow="Biinge for iPhone"
+      title="Track, discover and play"
+      lede="The iPhone app has lists, episode progress, games, statistics and Up Next. Titles on your Jellyfin server play in the app."
+    >
+      <div class="phones">
+        <div class="phone side">
+          <DeviceFrame src="media/iphone/movies-library" eager alt="Movies on iPhone, showing the Library with Continue Watching and Recently Added" />
+        </div>
+        <div class="phone main">
+          <DeviceFrame src="media/iphone/movie-resume" eager alt="Dune: Part Two on iPhone, with the Resume button" />
+        </div>
+        <div class="phone side">
+          <DeviceFrame src="media/iphone/up-next" eager alt="Up Next on iPhone, with Continue Watching above Next Episodes" />
+        </div>
+      </div>
+    </PlatformHero>
+
+    <PlatformSection
+      raised
+      eyebrow="Movies and TV"
+      title="One switch between lists and library"
+      body="Movies has Want, Watched and Library. TV adds Watching. Library holds Continue Watching, Recently Added and everything on your Jellyfin server, with a sort for the full grid."
+      checks={[
+        "Movie posters show their resume bar, even in your lists, and a title your server doesn't hold says so.",
+        "Pins, progress pies on shows you're watching and NEW badges on recent additions.",
+      ]}
+    >
+      <DeviceFrame>
+        <Recording src="media/iphone/lists" themed width={720} height={1566} label="TV shows on iPhone, switching from Watching to Library and back" />
+      </DeviceFrame>
+    </PlatformSection>
+
+    <PlatformSection
+      flip
+      eyebrow="Details"
+      title="Play or Resume from the details page"
+      body="A title on your server has a Play or Resume button. Episodes play from their own sheet. Turn the phone sideways and the player fills the screen."
+      checks={[
+        "Your list is beside Play, and Start Over is in More.",
+        "Finish an episode and it's ticked in Biinge and on your server.",
+      ]}
+    >
+      <DeviceFrame>
+        <Recording src="media/iphone/open" themed width={720} height={1566} label="Opening Severance on iPhone, with Resume on its details" />
+      </DeviceFrame>
+    </PlatformSection>
+
+    <PlatformSection
+      raised
+      eyebrow="Up Next"
+      title="In progress first, then upcoming"
+      body="Up Next opens with Continue Watching and Next Episodes from your server. New episodes of the shows you pin follow underneath, then pinned movies and games once they're out."
+    >
+      <DeviceFrame src="media/iphone/up-next" alt="Up Next on iPhone, with Continue Watching above Next Episodes" />
+    </PlatformSection>
+
+    <PlatformCards
+      eyebrow="Tracking"
+      title="Games and statistics"
+      cards={[
+        {
+          title: "Games",
+          text: "Want, Playing and Played, with IGDB's time to beat for the main story when IGDB has one. Pin a game you want and it shows in Up Next once it's out.",
+          src: "media/iphone/games-playing",
+          alt: "The Games list on iPhone, showing the games being played",
+          position: "50% 18%",
+        },
+        {
+          title: "Statistics",
+          text: "Every movie and episode adds its runtime when you mark it. Compare movies and TV by week, month, year or all time, and see how long the games you finished take to beat.",
+          src: "media/iphone/statistics",
+          alt: "Statistics on iPhone, with the all-time watch total split between movies and TV",
+          position: "50% 18%",
+        },
+      ]}
+    />
+
+    <section class="tabs">
+      <div class="inner">
+        <h2>Five tabs</h2>
+        <ul>
+          {tabs.map((t) => (
+            <li>
+              <span class="name">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={t.icon} />
+                {t.name}
+              </span>
+              <span class="text">{t.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <PlatformInstall
+      page="iphone"
+      device="An iPhone on iOS 26"
+      install="Biinge isn't on the App Store. Build it from the repository with Xcode and install it on your iPhone from your Mac. Sign in with your Biinge account, then with your Jellyfin user. The Jellyfin address comes from Biinge."
+    />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .phones {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: clamp(16px, 3vw, 40px);
+  }
+
+  .main {
+    width: min(320px, 32vw);
+  }
+
+  /* the side phones stand a little higher, so the centre one leads */
+  .side {
+    width: min(260px, 25vw);
+    transform: translateY(-36px);
+  }
+
+  @media (max-width: 759px) {
+    .main {
+      width: min(280px, calc(100vw - 80px));
+    }
+
+    .side {
+      display: none;
+    }
+  }
+
+  .tabs {
+    padding: clamp(80px, 9vw, 128px) 0;
+    background: var(--bg-elevated);
+  }
+
+  .tabs .inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .tabs h2 {
+    font-family: var(--display);
+    font-weight: 620;
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.06;
+    letter-spacing: -0.026em;
+  }
+
+  .tabs ul {
+    list-style: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  }
+
+  .tabs li {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 6px 32px;
+    padding: 20px 0;
+    border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  }
+
+  .name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .text {
+    font-size: 16px;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--text) 66%, transparent);
+  }
+</style>

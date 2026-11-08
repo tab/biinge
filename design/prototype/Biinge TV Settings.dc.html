@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0&amp;display=block">
 <script src="biinge-theme.js"></script>
 <style>
-@font-face{font-family:"Archivo";src:url("../../docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+@font-face{font-family:"Archivo";src:url("docs/public/fonts/archivo-latin-var.woff2") format("woff2-variations");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
 body{margin:0;background:#1a1a1f}
 a{color:#f4f4f2;text-decoration:none}a:hover{color:#fff}
 </style>
@@ -125,7 +125,7 @@ class Component extends DCLogic {
       onEnter: () => { this.hovered = true; }, onLeave: () => { this.hovered = false; },
       tabs: TABS.map(([id, l, icon], i) => { const on = fo.r === -1 && fo.c === i && !C, sel = id === 'settings'; return { label: l, icon: icon || '', isIcon: !!icon, pad: icon ? 18 : 28, fill: sel ? 1 : 0, go: () => on ? this.goTab(id) : this.setState({ focus: { r: -1, c: i } }), bg: on ? '#f4f4f2' : sel ? 'rgba(255,255,255,.18)' : 'transparent', color: on ? '#101014' : sel ? '#f4f4f2' : 'rgba(244,244,242,.6)', tf: on ? 'scale(1.06)' : 'scale(1)' }; }),
       dot: S.dot, dotIcon: S.dotIcon, statusText: S.status, statusColor: S.color, helpText: S.help,
-      facts: [{ label: 'Server', value: 'Set by your Biinge server' }, { label: 'Jellyfin account', value: ds === 'not-connected' ? '—' : 'tom' }, { label: 'Biinge account', value: 'tom@example.com' }],
+      facts: [{ label: 'Server', value: 'Set by your Biinge server' }, { label: 'Jellyfin account', value: ds === 'not-connected' ? '—' : 'tom' }, { label: 'Biinge account', value: 'tom@biinge.app' }],
       actions: acts.map(([icon, l, go], i) => ({ icon, label: l, go: () => { this.setState({ focus: { r: 0, c: i } }); go(); }, ...(i === f && !C ? FOCUS : REST), color: !(i === f && !C) && /Disconnect|Log Out/.test(l) ? '#ff8a8d' : (i === f && !C ? FOCUS.color : REST.color) })),
       confirmOpen: !!C, confirmLabel: C ? `T21 Settings · ${C.cta} confirmation` : '', confirmTitle: C ? C.title : '', confirmBody: C ? C.body : '',
       confirmButtons: C ? [{ label: C.cta, go: C.after, ...(this.state.cIdx === 0 ? FOCUS : { ...REST, color: '#ff8a8d' }) }, { label: 'Cancel', go: () => this.setState({ confirm: null }), ...(this.state.cIdx === 1 ? FOCUS : REST) }] : [],

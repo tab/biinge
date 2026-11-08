@@ -51,12 +51,6 @@
     with a dead credential until the next connect. It matters once two devices connect at the same moment
   - Added: 20261101
   - Source: [Jellyfin API](20261102-jellyfin-api/feature.md)
-- [ ] **BL-025: Reconcile biinge and Jellyfin watched state with a background sync**
-  - Why: the API writes Jellyfin in the background and only logs a failure, so a Jellyfin outage leaves the two sides apart
-    until the title is marked again. A periodic job in the existing worker could compare and repair them. Which side is the
-    source of truth, or whether the sync runs both ways, is still open
-  - Added: 20261101
-  - Source: [Jellyfin API](20261102-jellyfin-api/feature.md)
 - [ ] **BL-026: Show the account's API Jellyfin connection in Mac and Apple TV Settings**
   - Why: a disconnect on one device clears the API connection for the whole account, so the other devices keep streaming
     while their Watched marks stop reaching Jellyfin, and nothing on screen says so
@@ -185,6 +179,13 @@
     optimistic episode mark with its generation guards. Three copies will drift
   - Added: 20261102
   - Source: [Library and details](20261103-library-and-details/feature.md)
+- [x] **BL-025: Reconcile biinge and Jellyfin watched state with a background sync**
+  - Why: the API writes Jellyfin in the background and only logs a failure, so a Jellyfin outage leaves the two sides apart
+    until the title is marked again. A periodic job in the existing worker could compare and repair them. Which side is the
+    source of truth, or whether the sync runs both ways, is still open
+  - Added: 20261101
+  - Source: [Jellyfin API](20261102-jellyfin-api/feature.md)
+  - Delivered: [Jellyfin two-way sync](20261107-jellyfin-two-way-sync/feature.md)
 
 ## Won't implement
 

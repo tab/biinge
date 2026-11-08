@@ -16,7 +16,7 @@ import (
 	"biinge-api/pkg/tmdb"
 )
 
-func newTestWorker(t *testing.T) (*Worker, *repositories.MockSyncRepository, *tmdb.MockClient) {
+func newTestWorker(t *testing.T) (*TmdbWorker, *repositories.MockSyncRepository, *tmdb.MockClient) {
 	t.Helper()
 
 	w, repo, client, _ := newTestWorkerWithStats(t)
@@ -26,7 +26,7 @@ func newTestWorker(t *testing.T) (*Worker, *repositories.MockSyncRepository, *tm
 
 // newTestWorkerWithStats also hands back the stats cache, for the sync paths that
 // have to drop a user's cached statistics
-func newTestWorkerWithStats(t *testing.T) (*Worker, *repositories.MockSyncRepository, *tmdb.MockClient, *services.MockStatsCache) {
+func newTestWorkerWithStats(t *testing.T) (*TmdbWorker, *repositories.MockSyncRepository, *tmdb.MockClient, *services.MockStatsCache) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
@@ -37,19 +37,19 @@ func newTestWorkerWithStats(t *testing.T) (*Worker, *repositories.MockSyncReposi
 	client := tmdb.NewMockClient(ctrl)
 	stats := services.NewMockStatsCache(ctrl)
 
-	w := &Worker{
+	w := &TmdbWorker{
 		cfg:   cfg,
 		repo:  repo,
 		tmdb:  client,
 		stats: stats,
-		log:   logger.NewLogger(cfg).WithComponent("SyncWorker"),
+		log:   logger.NewLogger(cfg).WithComponent("TmdbWorker"),
 		done:  make(chan struct{}),
 	}
 
 	return w, repo, client, stats
 }
 
-func Test_Worker_SyncMovie_RefreshesSnapshot(t *testing.T) {
+func Test_TmdbWorker_SyncMovie_RefreshesSnapshot(t *testing.T) {
 	w, repo, client, stats := newTestWorkerWithStats(t)
 	ctx := context.Background()
 
@@ -76,7 +76,7 @@ func Test_Worker_SyncMovie_RefreshesSnapshot(t *testing.T) {
 	w.syncMovie(ctx, movie)
 }
 
-func Test_Worker_SyncMovie_KeepsStoredWhenTmdbEmpty(t *testing.T) {
+func Test_TmdbWorker_SyncMovie_KeepsStoredWhenTmdbEmpty(t *testing.T) {
 	w, repo, client, stats := newTestWorkerWithStats(t)
 	ctx := context.Background()
 
@@ -97,7 +97,7 @@ func Test_Worker_SyncMovie_KeepsStoredWhenTmdbEmpty(t *testing.T) {
 	w.syncMovie(ctx, movie)
 }
 
-func Test_Worker_SyncMovie_KeepsStatsWhenTheWriteFails(t *testing.T) {
+func Test_TmdbWorker_SyncMovie_KeepsStatsWhenTheWriteFails(t *testing.T) {
 	w, repo, client, stats := newTestWorkerWithStats(t)
 	ctx := context.Background()
 
@@ -110,7 +110,7 @@ func Test_Worker_SyncMovie_KeepsStatsWhenTheWriteFails(t *testing.T) {
 	w.syncMovie(ctx, movie)
 }
 
-func Test_Worker_SyncMovie_DefersOnFetchError(t *testing.T) {
+func Test_TmdbWorker_SyncMovie_DefersOnFetchError(t *testing.T) {
 	w, repo, client := newTestWorker(t)
 	ctx := context.Background()
 
@@ -123,7 +123,7 @@ func Test_Worker_SyncMovie_DefersOnFetchError(t *testing.T) {
 	w.syncMovie(ctx, movie)
 }
 
-func Test_Worker_SyncSeries_PassesRawSnapshot(t *testing.T) {
+func Test_TmdbWorker_SyncSeries_PassesRawSnapshot(t *testing.T) {
 	w, repo, client := newTestWorker(t)
 	ctx := context.Background()
 
@@ -151,7 +151,7 @@ func Test_Worker_SyncSeries_PassesRawSnapshot(t *testing.T) {
 	w.syncSeries(ctx, series)
 }
 
-func Test_Worker_SyncSeries_DefersOnFetchError(t *testing.T) {
+func Test_TmdbWorker_SyncSeries_DefersOnFetchError(t *testing.T) {
 	w, repo, client := newTestWorker(t)
 	ctx := context.Background()
 

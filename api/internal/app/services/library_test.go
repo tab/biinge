@@ -42,7 +42,7 @@ func Test_Library_Movie(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -156,7 +156,7 @@ func Test_Library_Series(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -212,7 +212,7 @@ func Test_Library_MovieIds(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -269,7 +269,7 @@ func Test_Library_SeriesIds(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -326,7 +326,7 @@ func Test_Library_Episodes(t *testing.T) {
 	ctx := context.Background()
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -437,19 +437,175 @@ func Test_Library_Episodes(t *testing.T) {
 	}
 }
 
+func Test_Library_Played(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+	repository := repositories.NewMockIntegrationRepository(ctrl)
+	client := jellyfin.NewMockClient(ctrl)
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
+
+	userId := uuid.New()
+	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
+	key := PlayedKey{UserId: userId, JellyfinUserId: "jf-user"}
+	playedAt := time.Date(2026, 11, 1, 20, 30, 0, 0, time.UTC)
+	one, two := 1, 2
+	index := []jellyfin.Item{
+		{Id: "series", Type: jellyfin.ItemTypeSeries, TmdbId: "1399"},
+		{Id: "first", Type: jellyfin.ItemTypeSeries, TmdbId: "95396"},
+		{Id: "second", Type: jellyfin.ItemTypeSeries, TmdbId: "95396"},
+	}
+
+	// requested is when the read's request went out, so Began must not be after it
+	var requested time.Time
+
+	tests := []struct {
+		name     string
+		before   func()
+		expected *JellyfinRead
+		error    error
+	}{
+		{
+			name: "Unique movies and episodes",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return(index, nil)
+				client.EXPECT().LibraryItems(ctx, connection).DoAndReturn(func(context.Context, jellyfin.Connection) ([]jellyfin.LibraryItem, error) {
+					requested = time.Now()
+
+					return []jellyfin.LibraryItem{
+						{Id: "movie", Type: jellyfin.ItemTypeMovie, TmdbId: "603", Played: true, LastPlayed: &playedAt},
+						{Id: "s1e1", Type: jellyfin.ItemTypeEpisode, SeriesId: "series", Season: &one, Number: &one},
+						{Id: "s1e2", Type: jellyfin.ItemTypeEpisode, SeriesId: "series", Season: &one, Number: &two, Played: true},
+					}, nil
+				})
+			},
+			expected: &JellyfinRead{
+				Key:        key,
+				Connection: connection,
+				Items: []JellyfinItem{
+					{Id: "movie", JellyfinChange: JellyfinChange{Kind: PlayedMovie, TmdbId: 603, Played: true, LastPlayed: &playedAt}},
+					{Id: "s1e1", JellyfinChange: JellyfinChange{Kind: PlayedEpisode, TmdbId: 1399, Season: 1, Episode: 1}},
+					{Id: "s1e2", JellyfinChange: JellyfinChange{Kind: PlayedEpisode, TmdbId: 1399, Season: 1, Episode: 2, Played: true}},
+				},
+			},
+		},
+		{
+			name: "Unmatched and duplicate items are left out",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return(index, nil)
+				client.EXPECT().LibraryItems(ctx, connection).DoAndReturn(func(context.Context, jellyfin.Connection) ([]jellyfin.LibraryItem, error) {
+					requested = time.Now()
+
+					return []jellyfin.LibraryItem{
+						{Id: "movie", Type: jellyfin.ItemTypeMovie, TmdbId: "603"},
+						{Id: "first movie", Type: jellyfin.ItemTypeMovie, TmdbId: "604"},
+						{Id: "second movie", Type: jellyfin.ItemTypeMovie, TmdbId: "604"},
+						{Id: "untagged movie", Type: jellyfin.ItemTypeMovie},
+						{Id: "duplicate series episode", Type: jellyfin.ItemTypeEpisode, SeriesId: "first", Season: &one, Number: &one},
+						{Id: "unknown series episode", Type: jellyfin.ItemTypeEpisode, SeriesId: "unknown", Season: &one, Number: &one},
+						{Id: "no series episode", Type: jellyfin.ItemTypeEpisode, Season: &one, Number: &one},
+						{Id: "first episode", Type: jellyfin.ItemTypeEpisode, SeriesId: "series", Season: &one, Number: &one},
+						{Id: "second episode", Type: jellyfin.ItemTypeEpisode, SeriesId: "series", Season: &one, Number: &one},
+						{Id: "no season", Type: jellyfin.ItemTypeEpisode, SeriesId: "series", Number: &two},
+						{Id: "no number", Type: jellyfin.ItemTypeEpisode, SeriesId: "series", Season: &two},
+						{Id: "episode", Type: jellyfin.ItemTypeEpisode, SeriesId: "series", Season: &one, Number: &two},
+					}, nil
+				})
+			},
+			expected: &JellyfinRead{
+				Key:        key,
+				Connection: connection,
+				Items: []JellyfinItem{
+					{Id: "movie", JellyfinChange: JellyfinChange{Kind: PlayedMovie, TmdbId: 603}},
+					{Id: "episode", JellyfinChange: JellyfinChange{Kind: PlayedEpisode, TmdbId: 1399, Season: 1, Episode: 2}},
+				},
+			},
+		},
+		{
+			name: "No integration row",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
+			},
+		},
+		{
+			name: "Jellyfin rejects the token on the library index",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return(nil, jellyfin.ErrInvalidCredentials)
+			},
+			error: jellyfin.ErrInvalidCredentials,
+		},
+		{
+			name: "Jellyfin rejects the token on the read",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return(index, nil)
+				client.EXPECT().LibraryItems(ctx, connection).Return(nil, jellyfin.ErrInvalidCredentials)
+			},
+			error: jellyfin.ErrInvalidCredentials,
+		},
+		{
+			name: "Jellyfin unavailable on the read",
+			before: func() {
+				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
+				client.EXPECT().Items(ctx, connection).Return(index, nil)
+				client.EXPECT().LibraryItems(ctx, connection).Return(nil, jellyfin.ErrUnavailable)
+			},
+			error: jellyfin.ErrUnavailable,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.before()
+
+			start := time.Now()
+			read, err := service.Played(ctx, userId)
+
+			if tt.error != nil {
+				require.ErrorIs(t, err, tt.error)
+				assert.Nil(t, read)
+
+				return
+			}
+
+			require.NoError(t, err)
+
+			if tt.expected == nil {
+				assert.Nil(t, read)
+				return
+			}
+
+			require.NotNil(t, read)
+			assert.False(t, read.Began.Before(start))
+			assert.False(t, read.Began.After(requested))
+
+			read.Began = time.Time{}
+			assert.Equal(t, tt.expected, read)
+		})
+	}
+}
+
 func Test_Library_JellyfinNotConfigured(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	ctx := context.Background()
 	cfg := &config.Config{Jellyfin: config.JellyfinConfig{TokenKey: testJellyfinKey}}
-	service := NewLibrary(fxtest.NewLifecycle(t), cfg, repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), cfg, repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 
 	assert.Empty(t, service.Movie(ctx, userId, 603))
 	assert.Empty(t, service.Series(ctx, userId, 1399))
 	assert.Nil(t, service.Episodes(ctx, userId, 1399, 1))
+
+	read, err := service.Played(ctx, userId)
+	require.NoError(t, err)
+	assert.Nil(t, read)
 
 	// the strict mocks fail on any repository, Jellyfin or TMDB call
 	service.(*library).setPlayed(ctx, userId, PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true})
@@ -463,7 +619,7 @@ func Test_Library_Cache(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	store := newMemoryCache()
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, NewPlayedMemory(), newTestLogger())
 
 	one := 1
 	series := []jellyfin.Item{{Id: "series", Type: jellyfin.ItemTypeSeries, TmdbId: "1399"}}
@@ -554,7 +710,7 @@ func Test_Library_Expiry(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	store := newMemoryCache()
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), store, NewPlayedMemory(), newTestLogger())
 
 	one, two := 1, 2
 	series := []jellyfin.Item{{Id: "series", Type: jellyfin.ItemTypeSeries, TmdbId: "1399"}}
@@ -648,9 +804,10 @@ func Test_Library_SetPlayed(t *testing.T) {
 	}
 
 	tests := []struct {
-		name   string
-		before func()
-		target PlayedTarget
+		name     string
+		before   func()
+		target   PlayedTarget
+		recorded map[string]bool
 	}{
 		{
 			name: "Movie played",
@@ -659,7 +816,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().Items(ctx, connection).Return(movies, nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "movie", Played: true}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedMovie, TmdbId: 603, Played: true},
+			target:   PlayedTarget{Kind: PlayedMovie, TmdbId: 603, Played: true},
+			recorded: map[string]bool{"movie": true},
 		},
 		{
 			name: "Movie unplayed",
@@ -668,7 +826,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().Items(ctx, connection).Return(movies, nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "movie", Played: false}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedMovie, TmdbId: 603},
+			target:   PlayedTarget{Kind: PlayedMovie, TmdbId: 603},
+			recorded: map[string]bool{"movie": false},
 		},
 		{
 			name: "Movie without a match writes nothing",
@@ -679,7 +838,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 					{Id: "second", Type: jellyfin.ItemTypeMovie, TmdbId: "603"},
 				}, nil)
 			},
-			target: PlayedTarget{Kind: PlayedMovie, TmdbId: 603, Played: true},
+			target:   PlayedTarget{Kind: PlayedMovie, TmdbId: 603, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "Series played writes the series and every matched episode",
@@ -694,7 +854,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e2", Played: true}).Return(nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s2e1", Played: true}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedSeries, TmdbId: 1399, Played: true},
+			target:   PlayedTarget{Kind: PlayedSeries, TmdbId: 1399, Played: true},
+			recorded: map[string]bool{"series": true, "s0e1": true, "s1e1": true, "s1e2": true, "s2e1": true},
 		},
 		{
 			name: "Series unplayed writes the series and every matched episode",
@@ -708,7 +869,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e2", Played: false}).Return(nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s2e1", Played: false}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedSeries, TmdbId: 1399},
+			target:   PlayedTarget{Kind: PlayedSeries, TmdbId: 1399},
+			recorded: map[string]bool{"series": false, "s0e1": false, "s1e1": false, "s1e2": false, "s2e1": false},
 		},
 		{
 			name: "Series without a match writes nothing",
@@ -719,7 +881,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 					{Id: "second", Type: jellyfin.ItemTypeSeries, TmdbId: "1399"},
 				}, nil)
 			},
-			target: PlayedTarget{Kind: PlayedSeries, TmdbId: 1399, Played: true},
+			target:   PlayedTarget{Kind: PlayedSeries, TmdbId: 1399, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "Series failed episode write leaves the others to run",
@@ -733,7 +896,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e2", Played: true}).Return(nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s2e1", Played: true}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedSeries, TmdbId: 1399, Played: true},
+			target:   PlayedTarget{Kind: PlayedSeries, TmdbId: 1399, Played: true},
+			recorded: map[string]bool{"series": true, "s0e1": true, "s1e2": true, "s2e1": true},
 		},
 		{
 			name: "Season writes every matched episode",
@@ -746,7 +910,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e1", Played: true}).Return(nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e2", Played: true}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: true},
+			target:   PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: true},
+			recorded: map[string]bool{"s1e1": true, "s1e2": true},
 		},
 		{
 			name: "Specials season writes its episodes",
@@ -757,7 +922,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().Episodes(ctx, connection, "series").Return(episodes, nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s0e1", Played: false}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3627},
+			target:   PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3627},
+			recorded: map[string]bool{"s0e1": false},
 		},
 		{
 			name: "Episode unplayed",
@@ -769,7 +935,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().Episodes(ctx, connection, "series").Return(episodes, nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e2", Played: false}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63057},
+			target:   PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63057},
+			recorded: map[string]bool{"s1e2": false},
 		},
 		{
 			name: "Specials episode played",
@@ -781,7 +948,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().Episodes(ctx, connection, "series").Return(episodes, nil)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s0e1", Played: true}).Return(nil)
 			},
-			target: PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3627, EpisodeId: 1000, Played: true},
+			target:   PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3627, EpisodeId: 1000, Played: true},
+			recorded: map[string]bool{"s0e1": true},
 		},
 		{
 			name: "Episode the library lacks writes nothing",
@@ -792,7 +960,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				tmdbClient.EXPECT().FetchTvSeasonDetails(ctx, uint64(1399), uint64(1)).Return(seasonOne, nil)
 				client.EXPECT().Episodes(ctx, connection, "series").Return([]jellyfin.Episode{{Id: "s1e1", Season: &one, Number: &one}}, nil)
 			},
-			target: PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63057, Played: true},
+			target:   PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63057, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "Season missing from the TMDB details writes nothing",
@@ -801,7 +970,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().Items(ctx, connection).Return(series, nil)
 				tmdbClient.EXPECT().FetchTvDetails(ctx, uint64(1399)).Return(details, nil)
 			},
-			target: PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 9999, Played: true},
+			target:   PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 9999, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "Episode missing from the TMDB season writes nothing",
@@ -811,7 +981,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				tmdbClient.EXPECT().FetchTvDetails(ctx, uint64(1399)).Return(details, nil)
 				tmdbClient.EXPECT().FetchTvSeasonDetails(ctx, uint64(1399), uint64(1)).Return(seasonOne, nil)
 			},
-			target: PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 9999, Played: true},
+			target:   PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 9999, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "TMDB details failure writes nothing",
@@ -820,7 +991,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().Items(ctx, connection).Return(series, nil)
 				tmdbClient.EXPECT().FetchTvDetails(ctx, uint64(1399)).Return(nil, tmdb.ErrUnexpectedResponse)
 			},
-			target: PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: true},
+			target:   PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "TMDB season failure writes nothing",
@@ -830,7 +1002,8 @@ func Test_Library_SetPlayed(t *testing.T) {
 				tmdbClient.EXPECT().FetchTvDetails(ctx, uint64(1399)).Return(details, nil)
 				tmdbClient.EXPECT().FetchTvSeasonDetails(ctx, uint64(1399), uint64(1)).Return(nil, tmdb.ErrUnexpectedResponse)
 			},
-			target: PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true},
+			target:   PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "Unmatched series reads no TMDB details",
@@ -838,14 +1011,16 @@ func Test_Library_SetPlayed(t *testing.T) {
 				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(libraryConnection(userId, "jf-user"), nil)
 				client.EXPECT().Items(ctx, connection).Return(movies, nil)
 			},
-			target: PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true},
+			target:   PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "No connection reads neither TMDB nor Jellyfin",
 			before: func() {
 				repository.EXPECT().FindByUser(ctx, userId, models.JellyfinProvider).Return(nil, pgx.ErrNoRows)
 			},
-			target: PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true},
+			target:   PlayedTarget{Kind: PlayedEpisode, TmdbId: 1399, SeasonId: 3624, EpisodeId: 63056, Played: true},
+			recorded: map[string]bool{},
 		},
 		{
 			name: "Failed writes are logged and not retried",
@@ -858,18 +1033,27 @@ func Test_Library_SetPlayed(t *testing.T) {
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e1", Played: true}).Return(jellyfin.ErrUnavailable)
 				client.EXPECT().SetPlayed(ctx, connection, jellyfin.PlayedState{ItemId: "s1e2", Played: true}).Return(jellyfin.ErrInvalidCredentials)
 			},
-			target: PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: true},
+			target:   PlayedTarget{Kind: PlayedSeason, TmdbId: 1399, SeasonId: 3624, Played: true},
+			recorded: map[string]bool{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// a fresh cache keeps each case's Jellyfin and TMDB reads its own
-			service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, newMemoryCache(), newTestLogger())
+			memory := NewPlayedMemory()
+			service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, newMemoryCache(), memory, newTestLogger())
+
+			// an empty previous read lets the store record each successful write
+			memory.Replace(PlayedKey{UserId: userId, JellyfinUserId: "jf-user"}, map[string]bool{}, time.Time{})
 
 			tt.before()
 
 			service.(*library).setPlayed(ctx, userId, tt.target)
+
+			previous, found := memory.Previous(PlayedKey{UserId: userId, JellyfinUserId: "jf-user"})
+			require.True(t, found)
+			assert.Equal(t, tt.recorded, previous)
 		})
 	}
 }
@@ -882,7 +1066,7 @@ func Test_Library_SetPlayed_Order(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	lifecycle.RequireStart()
 	defer lifecycle.RequireStop()
@@ -953,7 +1137,7 @@ func Test_Library_SetPlayed_RequestCancelled(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}
@@ -996,7 +1180,7 @@ func Test_Library_SetPlayed_QueueFull(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	lifecycle.RequireStart()
 
@@ -1062,7 +1246,7 @@ func Test_Library_SetPlayed_Stop(t *testing.T) {
 	repository := repositories.NewMockIntegrationRepository(ctrl)
 	client := jellyfin.NewMockClient(ctrl)
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repository, client, tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	lifecycle.RequireStart()
 
@@ -1111,7 +1295,7 @@ func Test_Library_SetPlayed_AfterStop(t *testing.T) {
 	defer ctrl.Finish()
 
 	lifecycle := fxtest.NewLifecycle(t)
-	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), newTestLogger())
+	service := NewLibrary(lifecycle, newTestJellyfinConfig(), repositories.NewMockIntegrationRepository(ctrl), jellyfin.NewMockClient(ctrl), tmdb.NewMockClient(ctrl), cache.NewNoopCache(), NewPlayedMemory(), newTestLogger())
 
 	lifecycle.RequireStart()
 	lifecycle.RequireStop()
@@ -1131,7 +1315,7 @@ func Test_Library_SetPlayed_TmdbCache(t *testing.T) {
 	client := jellyfin.NewMockClient(ctrl)
 	tmdbClient := tmdb.NewMockClient(ctrl)
 	store := newMemoryCache()
-	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, store, newTestLogger())
+	service := NewLibrary(fxtest.NewLifecycle(t), newTestJellyfinConfig(), repository, client, tmdbClient, store, NewPlayedMemory(), newTestLogger())
 
 	userId := uuid.New()
 	connection := jellyfin.Connection{DeviceId: "biinge-api-" + userId.String(), AccessToken: libraryToken, UserId: "jf-user"}

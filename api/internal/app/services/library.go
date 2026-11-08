@@ -52,13 +52,28 @@ type PlayedTarget struct {
 	Played    bool
 }
 
-// Library finds the user's Jellyfin item for a title ("" when the library holds none or several, or Jellyfin is off, unconnected or failing) and sets its played state
+// JellyfinItem is one Jellyfin movie or episode matched to a biinge title, with its played state
+type JellyfinItem struct {
+	Id string
+	JellyfinChange
+}
+
+// JellyfinRead is a user's Jellyfin played read with each uniquely matched item (Began is taken just before the request)
+type JellyfinRead struct {
+	Key        PlayedKey
+	Connection jellyfin.Connection
+	Began      time.Time
+	Items      []JellyfinItem
+}
+
+// Library finds the user's Jellyfin item for a title ("" when the library holds none or several, or Jellyfin is off, unconnected or failing), reads every played state and sets one
 type Library interface {
 	Movie(ctx context.Context, userId uuid.UUID, tmdbId uint64) string
 	Series(ctx context.Context, userId uuid.UUID, tmdbId uint64) string
 	MovieIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string
 	SeriesIds(ctx context.Context, userId uuid.UUID, tmdbIds []uint64) map[uint64]string
 	Episodes(ctx context.Context, userId uuid.UUID, tmdbId uint64, season uint64) map[uint64]string
+	Played(ctx context.Context, userId uuid.UUID) (*JellyfinRead, error)
 	SetPlayed(ctx context.Context, userId uuid.UUID, target PlayedTarget)
 }
 
@@ -80,6 +95,7 @@ type library struct {
 	client     jellyfin.Client
 	tmdb       tmdb.Client
 	cache      cache.Cache
+	memory     PlayedMemory
 	log        *logger.Logger
 
 	// jobs feeds the worker, which runs the played writes one at a time in the order SetPlayed queued them
@@ -98,6 +114,7 @@ func NewLibrary(
 	client jellyfin.Client,
 	tmdbClient tmdb.Client,
 	store cache.Cache,
+	memory PlayedMemory,
 	log *logger.Logger,
 ) Library {
 	l := &library{
@@ -106,6 +123,7 @@ func NewLibrary(
 		client:     client,
 		tmdb:       tmdbClient,
 		cache:      store,
+		memory:     memory,
 		log:        log.WithComponent("LibraryService"),
 		jobs:       make(chan playedJob, playedQueue),
 		done:       make(chan struct{}),
@@ -248,6 +266,91 @@ func (l *library) episodes(ctx context.Context, userId uuid.UUID, tmdbId uint64)
 	return episodes
 }
 
+// Played reads the played state of every Jellyfin movie and episode and keeps the uniquely matched ones (nil without Jellyfin or a connection, an error when Jellyfin fails or rejects the token)
+func (l *library) Played(ctx context.Context, userId uuid.UUID) (*JellyfinRead, error) {
+	connection := l.connection(ctx, userId)
+	if connection == nil {
+		//nolint:nilnil // a user without Jellyfin or a connection has nothing to read, which is no failure
+		return nil, nil
+	}
+
+	index, err := l.fetchIndex(ctx, userId, *connection)
+	if err != nil {
+		// the client already logged the failure, without the token
+		l.log.Warn().Err(err).Msg("Failed to read the Jellyfin library")
+		return nil, err
+	}
+
+	// the series' TMDB ids by item id, without the TMDB ids several series hold
+	series := map[string]uint64{}
+
+	for tmdbId, itemId := range index.Series {
+		id, err := strconv.ParseUint(tmdbId, 10, 64)
+		if itemId == "" || err != nil {
+			continue
+		}
+
+		series[itemId] = id
+	}
+
+	began := time.Now()
+
+	items, err := l.client.LibraryItems(ctx, *connection)
+	if err != nil {
+		// the client already logged the failure, without the token
+		l.log.Warn().Err(err).Msg("Failed to read the Jellyfin played states")
+		return nil, err
+	}
+
+	var matched []JellyfinItem
+
+	// how many items hold each movie TMDB id or episode triple, so only a unique match counts
+	counts := map[JellyfinChange]int{}
+
+	for _, item := range items {
+		match := JellyfinItem{
+			Id: item.Id,
+			JellyfinChange: JellyfinChange{
+				Played:     item.Played,
+				LastPlayed: item.LastPlayed,
+			},
+		}
+
+		switch item.Type {
+		case jellyfin.ItemTypeMovie:
+			id, err := strconv.ParseUint(item.TmdbId, 10, 64)
+			if err != nil {
+				continue
+			}
+
+			match.Kind, match.TmdbId = PlayedMovie, id
+		case jellyfin.ItemTypeEpisode:
+			id, found := series[item.SeriesId]
+			if !found || item.Season == nil || item.Number == nil {
+				continue
+			}
+
+			match.Kind, match.TmdbId, match.Season, match.Episode = PlayedEpisode, id, uint64(*item.Season), uint64(*item.Number)
+		default:
+			continue
+		}
+
+		counts[JellyfinChange{Kind: match.Kind, TmdbId: match.TmdbId, Season: match.Season, Episode: match.Episode}]++
+		matched = append(matched, match)
+	}
+
+	matched = slices.DeleteFunc(matched, func(item JellyfinItem) bool {
+		return counts[JellyfinChange{Kind: item.Kind, TmdbId: item.TmdbId, Season: item.Season, Episode: item.Episode}] > 1
+	})
+
+	return &JellyfinRead{
+		Key:        PlayedKey{UserId: userId, JellyfinUserId: connection.UserId},
+		Connection: *connection,
+		Began:      began,
+		Items:      matched,
+	}, nil
+}
+
 // SetPlayed queues the target's played write for the worker, which marks its matched Jellyfin items in order (nothing without a connection, exactly one match or the TMDB numbers)
 func (l *library) SetPlayed(_ context.Context, userId uuid.UUID, target PlayedTarget) {
 	l.mu.RLock()
@@ -338,14 +441,35 @@ func (l *library) setPlayed(ctx context.Context, userId uuid.UUID, target Played
 		if err := l.client.SetPlayed(ctx, *connection, jellyfin.PlayedState{ItemId: item, Played: target.Played}); err != nil {
 			// the client already logged the failure, without the token
 			l.log.Warn().Err(err).Str("ItemId", item).Msg("Failed to write the Jellyfin played state")
+			continue
 		}
+
+		// the poll then reads the API's own write as no Jellyfin change
+		l.memory.Record(PlayedKey{UserId: userId, JellyfinUserId: connection.UserId}, item, target.Played)
 	}
 }
 
 // index returns the user's cached library index and Jellyfin connection (an empty index and nil connection when there is none to read)
 func (l *library) index(ctx context.Context, userId uuid.UUID) (libraryIndex, *jellyfin.Connection) {
-	if l.cfg.Jellyfin.BaseURL == "" {
+	connection := l.connection(ctx, userId)
+	if connection == nil {
 		return libraryIndex{}, nil
+	}
+
+	index, err := l.fetchIndex(ctx, userId, *connection)
+	if err != nil {
+		// the client already logged the failure, without the token
+		l.log.Warn().Err(err).Msg("Failed to read the Jellyfin library")
+		return libraryIndex{}, nil
+	}
+
+	return index, connection
+}
+
+// connection returns the user's Jellyfin connection (nil when Jellyfin is off, the user never connected or the token does not decrypt)
+func (l *library) connection(ctx context.Context, userId uuid.UUID) *jellyfin.Connection {
+	if l.cfg.Jellyfin.BaseURL == "" {
+		return nil
 	}
 
 	integration, err := l.repository.FindByUser(ctx, userId, models.JellyfinProvider)
@@ -355,26 +479,29 @@ func (l *library) index(ctx context.Context, userId uuid.UUID) (libraryIndex, *j
 			l.log.Error().Err(err).Msg("Failed to fetch Jellyfin connection")
 		}
 
-		return libraryIndex{}, nil
+		return nil
 	}
 
 	token, err := decryptToken([]byte(l.cfg.Jellyfin.TokenKey), integration.Token)
 	if err != nil {
 		l.log.Warn().Err(err).Msg("Failed to decrypt Jellyfin token")
-		return libraryIndex{}, nil
+		return nil
 	}
 
-	connection := &jellyfin.Connection{
+	return &jellyfin.Connection{
 		DeviceId:    "biinge-api-" + userId.String(),
 		AccessToken: token,
 		UserId:      integration.ExternalUserId,
 	}
+}
 
+// fetchIndex returns the user's library index, read from Jellyfin when the cache holds none
+func (l *library) fetchIndex(ctx context.Context, userId uuid.UUID, connection jellyfin.Connection) (libraryIndex, error) {
 	// the Jellyfin user id keeps a reconnect as another Jellyfin user off the earlier index
-	key := fmt.Sprintf("jellyfin:v1:library:%s:%s", userId, integration.ExternalUserId)
+	key := fmt.Sprintf("jellyfin:v1:library:%s:%s", userId, connection.UserId)
 
-	index, err := cache.Fetch(ctx, l.cache, l.log, key, libraryTTL, func() (libraryIndex, error) {
-		items, err := l.client.Items(ctx, *connection)
+	return cache.Fetch(ctx, l.cache, l.log, key, libraryTTL, func() (libraryIndex, error) {
+		items, err := l.client.Items(ctx, connection)
 		if err != nil {
 			return libraryIndex{}, err
 		}
@@ -403,11 +530,4 @@ func (l *library) index(ctx context.Context, userId uuid.UUID) (libraryIndex, *j
 
 		return result, nil
 	})
-	if err != nil {
-		// the client already logged the failure, without the token
-		l.log.Warn().Err(err).Msg("Failed to read the Jellyfin library")
-		return libraryIndex{}, nil
-	}
-
-	return index, connection
 }

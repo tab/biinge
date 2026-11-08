@@ -15,5 +15,7 @@ var Module = fx.Options(
 	fx.Provide(NewStats),
 	fx.Provide(NewUsers),
 	fx.Provide(NewIntegrations),
+	fx.Provide(NewPlayedMemory),
 	fx.Provide(NewLibrary),
+	fx.Provide(NewJellyfinSync),
 )

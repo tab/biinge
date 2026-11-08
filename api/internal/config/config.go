@@ -33,6 +33,12 @@ const (
 	defaultSyncSeriesMaxAgeDays = 1095
 )
 
+// Jellyfin sync defaults
+const (
+	defaultJellyfinSyncInterval      = 2 * time.Minute
+	defaultJellyfinReconcileInterval = time.Hour
+)
+
 type TMDBConfig struct {
 	BaseURL string
 
@@ -50,10 +56,15 @@ type IGDBConfig struct {
 	ClientSecret string
 }
 
-// JellyfinConfig holds the instance's Jellyfin server and the key for the tokens the API stores (an empty BaseURL turns Jellyfin off)
+// JellyfinConfig holds the instance's Jellyfin server and the key for the tokens the API stores (an empty BaseURL turns Jellyfin off, and SyncEnabled gates the sync worker)
 type JellyfinConfig struct {
 	BaseURL  string
 	TokenKey string
+
+	SyncEnabled bool
+
+	SyncInterval      time.Duration
+	ReconcileInterval time.Duration
 }
 
 // WorkerConfig tunes the background TMDB sync worker
@@ -132,6 +143,10 @@ func LoadConfig() *Config {
 		Jellyfin: JellyfinConfig{
 			BaseURL:  getEnvString("JELLYFIN_BASE_URL"),
 			TokenKey: getEnvString("JELLYFIN_TOKEN_KEY"),
+
+			SyncEnabled:       getEnvBool("JELLYFIN_SYNC_ENABLED", false),
+			SyncInterval:      getEnvDuration("JELLYFIN_SYNC_INTERVAL", defaultJellyfinSyncInterval),
+			ReconcileInterval: getEnvDuration("JELLYFIN_RECONCILE_INTERVAL", defaultJellyfinReconcileInterval),
 		},
 
 		WorkerConfig: WorkerConfig{
@@ -186,6 +201,20 @@ func (c *Config) Validate() error {
 			"JELLYFIN_TOKEN_KEY must be %d bytes when JELLYFIN_BASE_URL is set, got %d",
 			JellyfinTokenKeyLength, len(c.Jellyfin.TokenKey),
 		)
+	}
+
+	if c.Jellyfin.BaseURL != "" {
+		for _, interval := range []struct {
+			name  string
+			value time.Duration
+		}{
+			{"JELLYFIN_SYNC_INTERVAL", c.Jellyfin.SyncInterval},
+			{"JELLYFIN_RECONCILE_INTERVAL", c.Jellyfin.ReconcileInterval},
+		} {
+			if interval.value <= 0 {
+				return fmt.Errorf("%s must be positive when JELLYFIN_BASE_URL is set, got %s", interval.name, interval.value)
+			}
+		}
 	}
 
 	// Require a strong signing key outside local dev

@@ -47,7 +47,7 @@ INSERT INTO movies (
   state,
   watched_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, CASE WHEN $6 = 'watched'::state_types THEN NOW() ELSE NULL END
+  $1, $2, $3, $4, $5, $6, CASE WHEN $6 = 'watched'::state_types THEN COALESCE(sqlc.narg(watched_at)::timestamptz, NOW()) ELSE NULL END
 )
 RETURNING
   id,
@@ -88,7 +88,7 @@ UPDATE movies
 SET
   state = $3,
   pinned = $4,
-  watched_at = CASE WHEN $3 = 'watched'::state_types THEN COALESCE(watched_at, NOW()) ELSE NULL END,
+  watched_at = CASE WHEN $3 = 'watched'::state_types THEN COALESCE(watched_at, sqlc.narg(watched_at)::timestamptz, NOW()) ELSE NULL END,
   updated_at = NOW()
 WHERE tmdb_id = $1 AND user_id = $2
 RETURNING

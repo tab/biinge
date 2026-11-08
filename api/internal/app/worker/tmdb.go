@@ -18,9 +18,9 @@ import (
 // sync regardless of how long ago they last aired, so an announced revival is always caught
 var activeSeriesStatuses = []string{"Returning Series", "In Production", "Planned", "Pilot"}
 
-// Worker periodically refreshes stored movies and series from TMDB so derived state
+// TmdbWorker periodically refreshes stored movies and series from TMDB so derived state
 // (a revived series, a released film) tracks reality without a user opening the title
-type Worker struct {
+type TmdbWorker struct {
 	cfg   *config.Config
 	repo  repositories.SyncRepository
 	tmdb  tmdb.Client
@@ -31,13 +31,13 @@ type Worker struct {
 	done   chan struct{}
 }
 
-func NewWorker(lifecycle fx.Lifecycle, cfg *config.Config, repo repositories.SyncRepository, client tmdb.Client, stats services.StatsCache, log *logger.Logger) *Worker {
-	w := &Worker{
+func NewTmdbWorker(lifecycle fx.Lifecycle, cfg *config.Config, repo repositories.SyncRepository, client tmdb.Client, stats services.StatsCache, log *logger.Logger) *TmdbWorker {
+	w := &TmdbWorker{
 		cfg:   cfg,
 		repo:  repo,
 		tmdb:  client,
 		stats: stats,
-		log:   log.WithComponent("SyncWorker"),
+		log:   log.WithComponent("TmdbWorker"),
 		done:  make(chan struct{}),
 	}
 
@@ -82,7 +82,7 @@ func NewWorker(lifecycle fx.Lifecycle, cfg *config.Config, repo repositories.Syn
 }
 
 // run drives one batch per tick until the context is cancelled
-func (w *Worker) run(ctx context.Context) {
+func (w *TmdbWorker) run(ctx context.Context) {
 	defer close(w.done)
 
 	ticker := time.NewTicker(w.cfg.SyncInterval)
@@ -99,7 +99,7 @@ func (w *Worker) run(ctx context.Context) {
 }
 
 // syncBatch refreshes one batch of due movies and series, isolating any panic to this tick
-func (w *Worker) syncBatch(ctx context.Context) {
+func (w *TmdbWorker) syncBatch(ctx context.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			w.log.Error().Interface("panic", r).Msg("Sync batch recovered from panic")
@@ -111,7 +111,7 @@ func (w *Worker) syncBatch(ctx context.Context) {
 	w.syncAllSeries(ctx, now)
 }
 
-func (w *Worker) syncMovies(ctx context.Context, now time.Time) {
+func (w *TmdbWorker) syncMovies(ctx context.Context, now time.Time) {
 	staleBefore := now.Add(-w.cfg.SyncStaleness)
 	releaseCutoff := now.AddDate(0, 0, -w.cfg.SyncMovieMaxAgeDays)
 
@@ -131,7 +131,7 @@ func (w *Worker) syncMovies(ctx context.Context, now time.Time) {
 	}
 }
 
-func (w *Worker) syncMovie(ctx context.Context, movie models.Movie) {
+func (w *TmdbWorker) syncMovie(ctx context.Context, movie models.Movie) {
 	details, err := w.tmdb.FetchMovieDetails(ctx, movie.TmdbId)
 	if err != nil {
 		w.deferMovie(ctx, movie, err)
@@ -168,7 +168,7 @@ func (w *Worker) syncMovie(ctx context.Context, movie models.Movie) {
 		Msg("Synced movie")
 }
 
-func (w *Worker) syncAllSeries(ctx context.Context, now time.Time) {
+func (w *TmdbWorker) syncAllSeries(ctx context.Context, now time.Time) {
 	staleBefore := now.Add(-w.cfg.SyncStaleness)
 	airCutoff := now.AddDate(0, 0, -w.cfg.SyncSeriesMaxAgeDays)
 
@@ -188,7 +188,7 @@ func (w *Worker) syncAllSeries(ctx context.Context, now time.Time) {
 	}
 }
 
-func (w *Worker) syncSeries(ctx context.Context, series models.Series) {
+func (w *TmdbWorker) syncSeries(ctx context.Context, series models.Series) {
 	details, err := w.tmdb.FetchTvDetails(ctx, series.TmdbId)
 	if err != nil {
 		w.deferSeries(ctx, series, err)
@@ -224,7 +224,7 @@ func (w *Worker) syncSeries(ctx context.Context, series models.Series) {
 }
 
 // deferMovie pushes a movie to the back of the queue so a failing title never starves the batch
-func (w *Worker) deferMovie(ctx context.Context, movie models.Movie, cause error) {
+func (w *TmdbWorker) deferMovie(ctx context.Context, movie models.Movie, cause error) {
 	if ctx.Err() != nil {
 		return
 	}
@@ -237,7 +237,7 @@ func (w *Worker) deferMovie(ctx context.Context, movie models.Movie, cause error
 }
 
 // deferSeries pushes a series to the back of the queue so a failing title never starves the batch
-func (w *Worker) deferSeries(ctx context.Context, series models.Series, cause error) {
+func (w *TmdbWorker) deferSeries(ctx context.Context, series models.Series, cause error) {
 	if ctx.Err() != nil {
 		return
 	}

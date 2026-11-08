@@ -52,6 +52,7 @@ func (m *movies) Create(ctx context.Context, params *models.Movie) (*models.Movi
 		PosterPath: params.PosterPath,
 		Runtime:    params.Runtime,
 		State:      params.State,
+		WatchedAt:  params.WatchedAt,
 	})
 	if err != nil {
 		m.log.Error().Err(err).Msg("Failed to create movie")
@@ -80,10 +81,11 @@ func (m *movies) Update(ctx context.Context, params *models.Movie) (*models.Movi
 
 func (m *movies) UpdateByTmdbId(ctx context.Context, params *models.Movie) (*models.Movie, error) {
 	item, err := m.repository.UpdateByTmdbId(ctx, &models.Movie{
-		TmdbId: params.TmdbId,
-		UserId: params.UserId,
-		State:  params.State,
-		Pinned: params.Pinned,
+		TmdbId:    params.TmdbId,
+		UserId:    params.UserId,
+		State:     params.State,
+		Pinned:    params.Pinned,
+		WatchedAt: params.WatchedAt,
 	})
 	if err != nil {
 		m.log.Error().Err(err).Msg("Failed to update movie by TMDB Id")

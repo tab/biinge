@@ -32,7 +32,20 @@ overrides it.
 | `JWT_SECRET_KEY`                        | token signing secret                                         |
 | `JELLYFIN_BASE_URL`                     | this instance's Jellyfin server (optional)                   |
 | `JELLYFIN_TOKEN_KEY`                    | 32-byte key for stored Jellyfin tokens (required with it)    |
+| `JELLYFIN_SYNC_ENABLED`                 | runs the Jellyfin sync worker (default `false`)              |
+| `JELLYFIN_SYNC_INTERVAL`                | Jellyfin poll interval (default `2m`)                        |
+| `JELLYFIN_RECONCILE_INTERVAL`           | Jellyfin reconcile interval (default `1h`)                   |
 | `SENTRY_DSN`                            | error reporting (optional)                                   |
+
+Jellyfin watched state syncs both ways. The API writes each biinge mark to
+Jellyfin. A worker polls every connected user's Jellyfin played states each
+`JELLYFIN_SYNC_INTERVAL` and applies the changes to biinge, adding a title that
+is played in Jellyfin but not tracked in biinge. Each `JELLYFIN_RECONCILE_INTERVAL`
+the worker also writes biinge's state to the Jellyfin items that differ, so
+biinge wins. A Jellyfin mark made while the API is down is reverted by the first
+reconcile after it returns. The worker runs only with `JELLYFIN_SYNC_ENABLED=true`.
+The first pass pushes biinge's state to Jellyfin, so back up Jellyfin before
+enabling it.
 
 ## Database
 

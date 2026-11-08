@@ -27,6 +27,7 @@ type integrations struct {
 	cfg        *config.Config
 	repository repositories.IntegrationRepository
 	client     jellyfin.Client
+	memory     PlayedMemory
 	log        *logger.Logger
 }
 
@@ -34,17 +35,19 @@ func NewIntegrations(
 	cfg *config.Config,
 	repository repositories.IntegrationRepository,
 	client jellyfin.Client,
+	memory PlayedMemory,
 	log *logger.Logger,
 ) Integrations {
 	return &integrations{
 		cfg:        cfg,
 		repository: repository,
 		client:     client,
+		memory:     memory,
 		log:        log.WithComponent("IntegrationsService"),
 	}
 }
 
-// Connect signs the user in to Jellyfin, stores the encrypted token and signs out any earlier one (a failed sign-in keeps the earlier connection)
+// Connect signs the user in to Jellyfin, stores the encrypted token, drops the previous played read and signs out any earlier token (a failed sign-in keeps the earlier connection)
 func (i *integrations) Connect(
 	ctx context.Context,
 	userId uuid.UUID,
@@ -91,6 +94,9 @@ func (i *integrations) Connect(
 
 		return nil, errors.ErrFailedToSaveJellyfinConnection
 	}
+
+	// the next sync pass is a first pass, which records the new connection's read and reconciles it
+	i.memory.Forget(userId)
 
 	connection := &models.JellyfinConnection{
 		BaseURL:   i.cfg.Jellyfin.BaseURL,

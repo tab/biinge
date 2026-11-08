@@ -72,6 +72,7 @@ func (m *movie) Create(ctx context.Context, params *models.Movie) (*models.Movie
 		PosterPath: params.PosterPath,
 		Runtime:    params.Runtime,
 		State:      db.StateTypes(params.State),
+		WatchedAt:  timestampFromTime(params.WatchedAt),
 	})
 	if err != nil {
 		return nil, err
@@ -120,10 +121,11 @@ func (m *movie) Update(ctx context.Context, params *models.Movie) (*models.Movie
 
 func (m *movie) UpdateByTmdbId(ctx context.Context, params *models.Movie) (*models.Movie, error) {
 	result, err := m.client.Queries().UpdateMovieByTmdbId(ctx, db.UpdateMovieByTmdbIdParams{
-		TmdbID: params.TmdbId,
-		UserID: params.UserId,
-		State:  db.StateTypes(params.State),
-		Pinned: params.Pinned,
+		TmdbID:    params.TmdbId,
+		UserID:    params.UserId,
+		State:     db.StateTypes(params.State),
+		Pinned:    params.Pinned,
+		WatchedAt: timestampFromTime(params.WatchedAt),
 	})
 	if err != nil {
 		return nil, err

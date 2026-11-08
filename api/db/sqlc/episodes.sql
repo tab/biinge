@@ -34,3 +34,10 @@ RETURNING
 
 -- name: DeleteEpisodeBySeasonAndTmdbId :exec
 DELETE FROM episodes WHERE season_id = $1 AND tmdb_id = $2;
+
+-- name: FindWatchedEpisodesBySeriesTmdbId :many
+SELECT e.tmdb_id, e.watched_at
+FROM episodes e
+  JOIN seasons s ON e.season_id = s.id
+  JOIN series sr ON s.series_id = sr.id
+WHERE sr.user_id = $1 AND sr.tmdb_id = $2;

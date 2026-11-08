@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -50,6 +51,52 @@ func Test_MovieRepository_Create(t *testing.T) {
 		assert.Equal(t, uint64(148), result.Runtime)
 		assert.Equal(t, models.StateTypeWatched, result.State)
 		assert.False(t, result.Pinned)
+	})
+
+	t.Run("Watched with a date keeps the date", func(t *testing.T) {
+		watchedAt := time.Date(2026, 11, 1, 20, 30, 0, 0, time.UTC)
+
+		result, err := repository.Create(ctx, &models.Movie{
+			UserId:     userID,
+			TmdbId:     700003,
+			Title:      "Dated",
+			PosterPath: "/dated.jpg",
+			Runtime:    120,
+			State:      models.StateTypeWatched,
+			WatchedAt:  watchedAt,
+		})
+		require.NoError(t, err)
+
+		assert.True(t, watchedAt.Equal(result.WatchedAt))
+	})
+
+	t.Run("Watched without a date is watched now", func(t *testing.T) {
+		result, err := repository.Create(ctx, &models.Movie{
+			UserId:     userID,
+			TmdbId:     700004,
+			Title:      "Undated",
+			PosterPath: "/undated.jpg",
+			Runtime:    120,
+			State:      models.StateTypeWatched,
+		})
+		require.NoError(t, err)
+
+		assert.WithinDuration(t, time.Now(), result.WatchedAt, time.Minute)
+	})
+
+	t.Run("Want ignores the date", func(t *testing.T) {
+		result, err := repository.Create(ctx, &models.Movie{
+			UserId:     userID,
+			TmdbId:     700005,
+			Title:      "Wanted",
+			PosterPath: "/wanted.jpg",
+			Runtime:    120,
+			State:      models.StateTypeWant,
+			WatchedAt:  time.Date(2026, 11, 1, 20, 30, 0, 0, time.UTC),
+		})
+		require.NoError(t, err)
+
+		assert.True(t, result.WatchedAt.IsZero())
 	})
 
 	t.Run("Unknown user fails foreign key", func(t *testing.T) {
@@ -229,6 +276,76 @@ func Test_MovieRepository_UpdateByTmdbId(t *testing.T) {
 		assert.Equal(t, other.ID, rows[0].ID)
 		assert.Equal(t, models.StateTypeWant, rows[0].State)
 		assert.True(t, rows[0].WatchedAt.IsZero())
+	})
+
+	t.Run("Watched with a date sets the date", func(t *testing.T) {
+		watchedAt := time.Date(2026, 11, 1, 20, 30, 0, 0, time.UTC)
+
+		dated, err := repository.Create(ctx, &models.Movie{
+			UserId:     userID,
+			TmdbId:     730002,
+			Title:      "Dated Movie",
+			PosterPath: "/dated.jpg",
+			Runtime:    100,
+			State:      models.StateTypeWant,
+		})
+		require.NoError(t, err)
+
+		result, err := repository.UpdateByTmdbId(ctx, &models.Movie{
+			TmdbId:    dated.TmdbId,
+			UserId:    userID,
+			State:     models.StateTypeWatched,
+			WatchedAt: watchedAt,
+		})
+		require.NoError(t, err)
+
+		assert.True(t, watchedAt.Equal(result.WatchedAt))
+	})
+
+	t.Run("Watched without a date is watched now", func(t *testing.T) {
+		undated, err := repository.Create(ctx, &models.Movie{
+			UserId:     userID,
+			TmdbId:     730003,
+			Title:      "Undated Movie",
+			PosterPath: "/undated.jpg",
+			Runtime:    100,
+			State:      models.StateTypeWant,
+		})
+		require.NoError(t, err)
+
+		result, err := repository.UpdateByTmdbId(ctx, &models.Movie{
+			TmdbId: undated.TmdbId,
+			UserId: userID,
+			State:  models.StateTypeWatched,
+		})
+		require.NoError(t, err)
+
+		assert.WithinDuration(t, time.Now(), result.WatchedAt, time.Minute)
+	})
+
+	t.Run("Already watched keeps its date", func(t *testing.T) {
+		watchedAt := time.Date(2026, 10, 1, 18, 0, 0, 0, time.UTC)
+
+		watched, err := repository.Create(ctx, &models.Movie{
+			UserId:     userID,
+			TmdbId:     730004,
+			Title:      "Watched Movie",
+			PosterPath: "/watched.jpg",
+			Runtime:    100,
+			State:      models.StateTypeWatched,
+			WatchedAt:  watchedAt,
+		})
+		require.NoError(t, err)
+
+		result, err := repository.UpdateByTmdbId(ctx, &models.Movie{
+			TmdbId:    watched.TmdbId,
+			UserId:    userID,
+			State:     models.StateTypeWatched,
+			WatchedAt: time.Date(2026, 11, 1, 20, 30, 0, 0, time.UTC),
+		})
+		require.NoError(t, err)
+
+		assert.True(t, watchedAt.Equal(result.WatchedAt))
 	})
 
 	t.Run("Unknown tmdb id returns error", func(t *testing.T) {

@@ -26,6 +26,44 @@ func (q *Queries) DeleteEpisodeBySeasonAndTmdbId(ctx context.Context, arg Delete
 	return err
 }
 
+const findWatchedEpisodesBySeriesTmdbId = `-- name: FindWatchedEpisodesBySeriesTmdbId :many
+SELECT e.tmdb_id, e.watched_at
+FROM episodes e
+  JOIN seasons s ON e.season_id = s.id
+  JOIN series sr ON s.series_id = sr.id
+WHERE sr.user_id = $1 AND sr.tmdb_id = $2
+`
+
+type FindWatchedEpisodesBySeriesTmdbIdParams struct {
+	UserID uuid.UUID
+	TmdbID uint64
+}
+
+type FindWatchedEpisodesBySeriesTmdbIdRow struct {
+	TmdbID    uint64
+	WatchedAt pgtype.Timestamptz
+}
+
+func (q *Queries) FindWatchedEpisodesBySeriesTmdbId(ctx context.Context, arg FindWatchedEpisodesBySeriesTmdbIdParams) ([]FindWatchedEpisodesBySeriesTmdbIdRow, error) {
+	rows, err := q.db.Query(ctx, findWatchedEpisodesBySeriesTmdbId, arg.UserID, arg.TmdbID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FindWatchedEpisodesBySeriesTmdbIdRow
+	for rows.Next() {
+		var i FindWatchedEpisodesBySeriesTmdbIdRow
+		if err := rows.Scan(&i.TmdbID, &i.WatchedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const upsertEpisode = `-- name: UpsertEpisode :one
 INSERT INTO episodes (
   season_id,

@@ -13,6 +13,7 @@ import (
 	models "biinge-api/internal/app/models"
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	uuid "github.com/google/uuid"
 	gomock "go.uber.org/mock/gomock"
@@ -145,4 +146,19 @@ func (m *MockSeriesProgressRepository) UnmarkSeriesWatched(ctx context.Context, 
 func (mr *MockSeriesProgressRepositoryMockRecorder) UnmarkSeriesWatched(ctx, userId, seriesTmdbId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnmarkSeriesWatched", reflect.TypeOf((*MockSeriesProgressRepository)(nil).UnmarkSeriesWatched), ctx, userId, seriesTmdbId)
+}
+
+// WatchedEpisodes mocks base method.
+func (m *MockSeriesProgressRepository) WatchedEpisodes(ctx context.Context, userId uuid.UUID, seriesTmdbId uint64) (map[uint64]time.Time, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WatchedEpisodes", ctx, userId, seriesTmdbId)
+	ret0, _ := ret[0].(map[uint64]time.Time)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WatchedEpisodes indicates an expected call of WatchedEpisodes.
+func (mr *MockSeriesProgressRepositoryMockRecorder) WatchedEpisodes(ctx, userId, seriesTmdbId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchedEpisodes", reflect.TypeOf((*MockSeriesProgressRepository)(nil).WatchedEpisodes), ctx, userId, seriesTmdbId)
 }

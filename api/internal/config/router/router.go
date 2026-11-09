@@ -30,6 +30,7 @@ func NewRouter(
 	catalog controllers.CatalogController,
 	upNext controllers.UpNextController,
 	integrations controllers.IntegrationsController,
+	shares controllers.SharesController,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -141,8 +142,13 @@ func NewRouter(
 			})
 
 			r.Get("/up-next", upNext.HandleUpNext)
+
+			r.Post("/shares", shares.HandleCreate)
 		})
 	})
+
+	// the public share page, outside the API and its auth (static routes above still win)
+	r.With(httprate.LimitBy(60, time.Minute, keyByIP)).Get("/{id}", shares.HandleShow)
 
 	return r
 }

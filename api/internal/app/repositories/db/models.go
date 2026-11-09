@@ -96,6 +96,49 @@ func (ns NullProviderType) Value() (driver.Value, error) {
 	return string(ns.ProviderType), nil
 }
 
+type ShareType string
+
+const (
+	ShareTypeMovie ShareType = "movie"
+	ShareTypeTv    ShareType = "tv"
+	ShareTypeGame  ShareType = "game"
+)
+
+func (e *ShareType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ShareType(s)
+	case string:
+		*e = ShareType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ShareType: %T", src)
+	}
+	return nil
+}
+
+type NullShareType struct {
+	ShareType ShareType
+	Valid     bool // Valid is true if ShareType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullShareType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ShareType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ShareType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullShareType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ShareType), nil
+}
+
 type StateTypes string
 
 const (
@@ -230,6 +273,16 @@ type Series struct {
 	TrackedState NullStateTypes
 	SyncedAt     pgtype.Timestamptz
 	LastAirAt    pgtype.Timestamptz
+}
+
+type Share struct {
+	ID        uuid.UUID
+	Type      ShareType
+	ObjectID  uint64
+	UserID    uuid.UUID
+	VisitedAt pgtype.Timestamptz
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
 
 type User struct {

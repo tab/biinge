@@ -13,6 +13,7 @@ sql:
       - db/sqlc/stats.sql
       - db/sqlc/users.sql
       - db/sqlc/integrations.sql
+      - db/sqlc/shares.sql
     gen:
       go:
         package: db
@@ -36,6 +37,9 @@ sql:
             go_type: "string"
             nullable: true
           - column: "games.runtime"
+            go_type: "uint64"
+
+          - column: "shares.object_id"
             go_type: "uint64"
 
           - column: "movies.tmdb_id"

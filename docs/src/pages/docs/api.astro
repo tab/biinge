@@ -360,7 +360,7 @@ const endpoints: Endpoint[] = [
   "type": "movie",
   "object_id": 693134
 }` },
-  { id: "share-page", group: "Shares", method: "GET", path: "/{id}", desc: "The public HTML page of a share, served at the root of the share host. No authentication required.", note: "Each visit extends the share. A share with no visit for 30 days returns the not-found page with 404. So does a title TMDB or IGDB no longer knows. When TMDB, IGDB or the database fails, the page says so with 503. The page is limited to 60 requests a minute per connecting IP. Behind a reverse proxy, that is the proxy, so limit each client there." },
+  { id: "share-page", group: "Shares", method: "GET", path: "/s/{id}", desc: "The public HTML page of a share, served under /s/ on the share host. No authentication required.", note: "Each visit extends the share. A share with no visit for 30 days returns the not-found page with 404. So does a title TMDB or IGDB no longer knows. When TMDB, IGDB or the database fails, the page says so with 503. The page is limited to 60 requests a minute per connecting IP. Behind a reverse proxy, that is the proxy, so limit each client there." },
 ];
 
 const groups = [...new Set(endpoints.map((e) => e.group))];

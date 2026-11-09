@@ -100,7 +100,7 @@ func (s *shares) Create(ctx context.Context, params *models.Share) (*serializers
 
 	return &serializers.ShareSerializer{
 		Id:  share.ID,
-		URL: strings.TrimSuffix(s.cfg.ShareURL, "/") + "/" + share.ID.String(),
+		URL: strings.TrimSuffix(s.cfg.ShareURL, "/") + "/s/" + share.ID.String(),
 	}, nil
 }
 

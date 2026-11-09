@@ -119,6 +119,7 @@ func Test_LoadConfig(t *testing.T) {
 			assert.Equal(t, tt.expected.AppAddr, result.AppAddr)
 			assert.Equal(t, tt.expected.ClientURL, result.ClientURL)
 			assert.Equal(t, tt.expected.ShareURL, result.ShareURL)
+			assert.Equal(t, tt.expected.SiteURL, result.SiteURL)
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
 			assert.Equal(t, tt.expected.JWTSecretKey, result.JWTSecretKey)
 			assert.Equal(t, tt.expected.BaseURL, result.BaseURL)

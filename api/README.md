@@ -34,6 +34,7 @@ overrides it.
 | `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET` | Twitch app credentials for IGDB (required outside dev)       |
 | `JWT_SECRET_KEY`                        | token signing secret                                         |
 | `SHARE_URL`                             | public base URL of share links (required outside dev)        |
+| `SITE_URL`                              | landing site URL the share page logo links to (optional)     |
 | `JELLYFIN_BASE_URL`                     | this instance's Jellyfin server (optional)                   |
 | `JELLYFIN_TOKEN_KEY`                    | 32-byte key for stored Jellyfin tokens (required with it)    |
 | `JELLYFIN_SYNC_ENABLED`                 | runs the Jellyfin sync worker (default `false`)              |

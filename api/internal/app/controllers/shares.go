@@ -14,6 +14,7 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
+	"biinge-api/internal/config"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -33,7 +34,7 @@ type sharesController struct {
 	templates *template.Template
 }
 
-func NewSharesController(shares services.Shares) SharesController {
+func NewSharesController(cfg *config.Config, shares services.Shares) SharesController {
 	// the app icon rides inline as a data URI, so the page needs no route of its own for it
 	//nolint:gosec // the URL is the icon embedded in the binary, never request input
 	icon := template.URL("data:image/png;base64," + base64.StdEncoding.EncodeToString(shareIcon))
@@ -42,6 +43,7 @@ func NewSharesController(shares services.Shares) SharesController {
 		shares: shares,
 		templates: template.Must(template.New("share").Funcs(template.FuncMap{
 			"icon": func() template.URL { return icon },
+			"site": func() string { return cfg.SiteURL },
 		}).Parse(shareTemplate)),
 	}
 }

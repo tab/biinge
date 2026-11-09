@@ -35,6 +35,7 @@ const config = [
   { name: "JWT_SECRET_KEY", purpose: "Signs and verifies access tokens; must be at least 32 bytes outside development" },
   { name: "CLIENT_URL", purpose: "Adds an HTTPS client origin to the API's CORS allowlist" },
   { name: "SHARE_URL", purpose: "Public base URL of share links; required outside development" },
+  { name: "SITE_URL", purpose: "Landing site URL the share page logo links to; optional" },
   { name: "WORKER_SYNC_ENABLED / WORKER_SYNC_INTERVAL", purpose: "Controls the background TMDB refresh worker and how often it runs" },
   { name: "SENTRY_DSN", purpose: "Error reporting (optional)" },
 ];

@@ -147,8 +147,8 @@ func NewRouter(
 		})
 	})
 
-	// the public share page, outside the API and its auth (static routes above still win)
-	r.With(httprate.LimitBy(60, time.Minute, keyByIP)).Get("/{id}", shares.HandleShow)
+	// the public share page, outside the API and its auth
+	r.With(httprate.LimitBy(60, time.Minute, keyByIP)).Get("/s/{id}", shares.HandleShow)
 
 	return r
 }

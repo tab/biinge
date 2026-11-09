@@ -12,6 +12,8 @@ struct MobileGameDetailsView: View {
     @State private var isSkeletonHeld = false
     /// Shows the Lists sheet
     @State private var showsLists = false
+    /// Shows the More sheet
+    @State private var showsMore = false
     /// Bumped when a state change lands, so the haptic fires with the UI rather than on the tap
     @State private var stateChanges = 0
     /// Bumped on the lighter commit: pinning and unpinning
@@ -36,12 +38,18 @@ struct MobileGameDetailsView: View {
             .scrollIndicators(.hidden)
 
             CloseButton()
+            if details != nil {
+                DetailMoreButton { showsMore = true }
+            }
         }
         .foregroundStyle(Color.biingeText)
         .background(Color.biingeBackground)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showsLists) {
             if let details { listsSheet(details) }
+        }
+        .sheet(isPresented: $showsMore) {
+            if let details { moreSheet(details) }
         }
         .task { await load() }
         .sensoryFeedback(.success, trigger: stateChanges)
@@ -205,6 +213,13 @@ struct MobileGameDetailsView: View {
         } remove: {
             showsLists = false
             change(game, to: nil)
+        }
+    }
+
+    /// The More sheet: Share
+    private func moreSheet(_ game: GameDetails) -> some View {
+        DetailMenuSheet(title: "More", subtitle: game.title) {
+            DetailShareRow(kind: .game, id: gameId) { showsMore = false }
         }
     }
 

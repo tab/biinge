@@ -48,6 +48,7 @@
 		AA00000000000000000000E1 /* HeroRotationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000E0 /* HeroRotationTests.swift */; };
 		AA00000000000000000000F1 /* LibraryStoreGameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000F0 /* LibraryStoreGameTests.swift */; };
 		AA00000000000000000000F3 /* DetailFactsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000F2 /* DetailFactsTests.swift */; };
+		AA00000000000000000000F5 /* ShareLinkRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000000F4 /* ShareLinkRequestTests.swift */; };
 		AB0000000000000000000002 /* JellyfinDeviceIDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000001 /* JellyfinDeviceIDTests.swift */; };
 		B4FC64E474064EEB6EE1DAD1 /* WatchProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5558FF51F6E3562DBB2539 /* WatchProgressTests.swift */; };
 		DC7601986612F3D072689188 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC77ED4BCBCD9C6813A11A00 /* Foundation.framework */; };
@@ -102,6 +103,7 @@
 		AA00000000000000000000E0 /* HeroRotationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HeroRotationTests.swift; sourceTree = "<group>"; };
 		AA00000000000000000000F0 /* LibraryStoreGameTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LibraryStoreGameTests.swift; sourceTree = "<group>"; };
 		AA00000000000000000000F2 /* DetailFactsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DetailFactsTests.swift; sourceTree = "<group>"; };
+		AA00000000000000000000F4 /* ShareLinkRequestTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareLinkRequestTests.swift; sourceTree = "<group>"; };
 		AB0000000000000000000001 /* JellyfinDeviceIDTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JellyfinDeviceIDTests.swift; sourceTree = "<group>"; };
 		E133E92B21DD737238466E93 /* SeriesDetailsCountsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SeriesDetailsCountsTests.swift; sourceTree = "<group>"; };
 		E133E92B21DD737238466E94 /* StatsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsTests.swift; sourceTree = "<group>"; };
@@ -193,6 +195,7 @@
 				AA0000000000000000000080 /* MotionTests.swift */,
 				AA00000000000000000000A0 /* ToastTests.swift */,
 				AA00000000000000000000F2 /* DetailFactsTests.swift */,
+				AA00000000000000000000F4 /* ShareLinkRequestTests.swift */,
 				AA00000000000000000000B0 /* StackOriginsTests.swift */,
 				AA00000000000000000000C0 /* DeviceInfoTests.swift */,
 				AA00000000000000000000C2 /* ListChangeTests.swift */,
@@ -368,6 +371,7 @@
 				AA0000000000000000000081 /* MotionTests.swift in Sources */,
 				AA00000000000000000000A1 /* ToastTests.swift in Sources */,
 				AA00000000000000000000F3 /* DetailFactsTests.swift in Sources */,
+				AA00000000000000000000F5 /* ShareLinkRequestTests.swift in Sources */,
 				AA00000000000000000000B1 /* StackOriginsTests.swift in Sources */,
 				AA00000000000000000000C1 /* DeviceInfoTests.swift in Sources */,
 				AA00000000000000000000C3 /* ListChangeTests.swift in Sources */,

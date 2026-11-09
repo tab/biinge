@@ -243,8 +243,8 @@ struct DesktopSeriesDetailsView: View {
             }
             ListButton(pill: DetailListPill(.series, state: state, isPinned: store.isPinned(id: id)), isOpen: $isListMenuOpen)
             // Start Over needs a stored position the server can play from
-            let startOver: (label: String, item: BaseItemDto)? = if case .play = episodePlay, let nextItem = model.nextItem, let offered, model.nextPosition > 0 {
-                ("Start S\(offered.season) · E\(offered.number) Over", nextItem)
+            let startOver: (label: String, play: () -> Void)? = if case .play = episodePlay, let nextItem = model.nextItem, let offered, model.nextPosition > 0 {
+                ("Start S\(offered.season) · E\(offered.number) Over", { Task { await connection.play(nextItem, fromStart: true) } })
             } else {
                 nil
             }
@@ -256,7 +256,7 @@ struct DesktopSeriesDetailsView: View {
             } else {
                 nil
             }
-            MoreMenu(connection: connection, startOver: startOver, markSeason: seasonMark)
+            MoreMenu(kind: .series, id: id, apiClient: apiClient, startOver: startOver, markSeason: seasonMark)
         }
         .animation(MotionCurve.exit.animation(MotionDuration.quick), value: primary == nil)
         // the next episode waits on a season other than the shown one, so its error shows here (the shown season keeps its own)

@@ -165,6 +165,12 @@ actor APIClient {
         try await get("/people/\(id)")
     }
 
+    // MARK: - Shares
+
+    func createShare(_ body: CreateShareBody) async throws -> Share {
+        try await send("POST", "/shares", body: body)
+    }
+
     // MARK: - Movie mutations
 
     func createMovie(_ body: CreateMovieBody) async throws -> MovieDetails {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Mac game details from biinge: the blurred backdrop, cover, title, meta, the white pill and list button, the synopsis, genres and platforms, then the facts and the recommendations
+/// Mac game details from biinge: the blurred backdrop, cover, title, meta, the white pill, list button and More, the synopsis, genres and platforms, then the facts and the recommendations
 struct DesktopGameDetailsView: View {
     let apiClient: APIClient
     /// The game's IGDB ID
@@ -149,7 +149,7 @@ struct DesktopGameDetailsView: View {
         }
     }
 
-    /// The white pill one list forward from DetailPrimary and the list button, then the note for an unreleased game with its release date or its lack of one
+    /// The white pill one list forward from DetailPrimary, the list button and More, then the note for an unreleased game with its release date or its lack of one
     @ViewBuilder
     private func actions(_ game: GameDetails) -> some View {
         let state = store.currentState(id: id)
@@ -164,6 +164,7 @@ struct DesktopGameDetailsView: View {
                 .transition(reduceMotion ? .opacity : .scale(scale: 0.9, anchor: .leading).combined(with: .opacity))
             }
             ListButton(pill: DetailListPill(.game, state: state, isPinned: store.isPinned(id: id)), isOpen: $isListMenuOpen)
+            MoreMenu(kind: .game, id: id, apiClient: apiClient, startOver: nil, markSeason: nil)
         }
         .animation(MotionCurve.exit.animation(MotionDuration.quick), value: primary == nil)
         if let note = game.releaseNote(state: state) {

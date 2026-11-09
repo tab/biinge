@@ -104,13 +104,17 @@ struct DetailMenuButton: View {
     var summary: String?
     var tint: Color = .biingeText
     var isChecked = false
+    /// Shows a spinner in place of the check while the row's work runs
+    var isLoading = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 14) {
                 DetailMenuLabel(systemImage: systemImage, title: title, summary: summary, tint: tint)
-                if isChecked {
+                if isLoading {
+                    ProgressView()
+                } else if isChecked {
                     Image(systemName: "checkmark")
                         .font(.system(size: 17, weight: .semibold))
                         // the row's selected trait says it

@@ -61,7 +61,7 @@ files and, for CI, in GitHub Actions repository variables:
 | --- | --- |
 | `docs/.env` and Actions variables | `SITE_URL`, `PUBLIC_API_BASE_URL` |
 | `ios/.env` | `API_BASE_URL` |
-| the deployment compose file | `CLIENT_URL` |
+| the deployment compose file | `CLIENT_URL`, `SHARE_URL` |
 
 Committed templates (`*.env.example`, `api/.env.production`) hold placeholders
 or empty values. The release workflow derives the CNAME from `SITE_URL` instead

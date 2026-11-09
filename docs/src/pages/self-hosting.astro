@@ -34,6 +34,7 @@ const config = [
   { name: "REDIS_URL", purpose: "Redis URL for the metadata cache; leave it unset to run without caching" },
   { name: "JWT_SECRET_KEY", purpose: "Signs and verifies access tokens; must be at least 32 bytes outside development" },
   { name: "CLIENT_URL", purpose: "Adds an HTTPS client origin to the API's CORS allowlist" },
+  { name: "SHARE_URL", purpose: "Public base URL of share links; required outside development" },
   { name: "WORKER_SYNC_ENABLED / WORKER_SYNC_INTERVAL", purpose: "Controls the background TMDB refresh worker and how often it runs" },
   { name: "SENTRY_DSN", purpose: "Error reporting (optional)" },
 ];
@@ -167,6 +168,12 @@ const config = [
         <li>
           A reverse proxy terminating TLS in front of the API; if a browser
           client calls it, add that HTTPS origin to <code>CLIENT_URL</code>
+        </li>
+        <li>
+          A host for share links, such as a subdomain, proxied to the API port;
+          set <code>SHARE_URL</code> to its HTTPS origin. Behind a proxy the API
+          sees one address for every visitor, so set a per-client rate limit
+          for that host on the proxy
         </li>
         <li>
           The database and Redis ports unpublished, reachable only on the

@@ -373,33 +373,15 @@ func Test_ShareRoutes(t *testing.T) {
 				mockSharesController.EXPECT().HandleShow(gomock.Any(), gomock.Any()).DoAndReturn(reached)
 			},
 			method: http.MethodGet,
-			path:   "/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
+			path:   "/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
 			code:   http.StatusTeapot,
 		},
 		{
-			name: "Liveness still wins over the share page",
-			before: func() {
-				mockHealthController.EXPECT().HandleLiveness(gomock.Any(), gomock.Any()).DoAndReturn(reached)
-			},
-			method: http.MethodGet,
-			path:   "/live",
-			code:   http.StatusTeapot,
-		},
-		{
-			name: "Readiness still wins over the share page",
-			before: func() {
-				mockHealthController.EXPECT().HandleReadiness(gomock.Any(), gomock.Any()).DoAndReturn(reached)
-			},
-			method: http.MethodGet,
-			path:   "/ready",
-			code:   http.StatusTeapot,
-		},
-		{
-			name:   "Health still wins over the share page",
+			name:   "Share id at the root",
 			before: func() {},
 			method: http.MethodGet,
-			path:   "/health",
-			code:   http.StatusOK,
+			path:   "/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
+			code:   http.StatusNotFound,
 		},
 		{
 			name: "Create",
@@ -494,7 +476,7 @@ func Test_SharePageRateLimitByIP(t *testing.T) {
 	)
 
 	for i := 1; i <= 60; i++ {
-		req := httptest.NewRequest(http.MethodGet, "/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60", nil)
+		req := httptest.NewRequest(http.MethodGet, "/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60", nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -502,7 +484,7 @@ func Test_SharePageRateLimitByIP(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code, "request %d should pass", i)
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60", nil)
+	req := httptest.NewRequest(http.MethodGet, "/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60", nil)
 	w := httptest.NewRecorder()
 
 	router.ServeHTTP(w, req)
@@ -531,7 +513,7 @@ func Test_SharePageRateLimitByIP(t *testing.T) {
 	assert.Equal(t, http.StatusTeapot, w.Code)
 
 	// another IP has its own budget
-	req = httptest.NewRequest(http.MethodGet, "/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60", nil)
+	req = httptest.NewRequest(http.MethodGet, "/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60", nil)
 	req.RemoteAddr = "198.51.100.7:1234"
 	w = httptest.NewRecorder()
 

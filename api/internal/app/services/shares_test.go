@@ -55,7 +55,7 @@ func Test_Shares_Create(t *testing.T) {
 			params: &models.Share{UserId: userId, Type: models.ShareTypeMovie, ObjectId: 603},
 			expected: &serializers.ShareSerializer{
 				Id:  shareId,
-				URL: "https://share.example.com/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
+				URL: "https://share.example.com/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
 			},
 		},
 		{
@@ -69,7 +69,7 @@ func Test_Shares_Create(t *testing.T) {
 			params: &models.Share{UserId: userId, Type: models.ShareTypeTv, ObjectId: 1399},
 			expected: &serializers.ShareSerializer{
 				Id:  shareId,
-				URL: "https://share.example.com/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
+				URL: "https://share.example.com/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
 			},
 		},
 		{
@@ -83,7 +83,7 @@ func Test_Shares_Create(t *testing.T) {
 			params: &models.Share{UserId: userId, Type: models.ShareTypeGame, ObjectId: 1942},
 			expected: &serializers.ShareSerializer{
 				Id:  shareId,
-				URL: "https://share.example.com/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
+				URL: "https://share.example.com/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
 			},
 		},
 		{
@@ -97,7 +97,7 @@ func Test_Shares_Create(t *testing.T) {
 			params: &models.Share{UserId: userId, Type: models.ShareTypeMovie, ObjectId: 603},
 			expected: &serializers.ShareSerializer{
 				Id:  shareId,
-				URL: "https://share.example.com/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
+				URL: "https://share.example.com/s/6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60",
 			},
 		},
 		{
@@ -227,7 +227,7 @@ func Test_Shares_Create_WarmsTheProviderCache(t *testing.T) {
 			result, err := service.Create(ctx, tt.params)
 
 			require.NoError(t, err)
-			assert.Equal(t, "https://share.example.com/"+shareId.String(), result.URL)
+			assert.Equal(t, "https://share.example.com/s/"+shareId.String(), result.URL)
 			assert.Contains(t, store.store, tt.key)
 			assert.Equal(t, cache.DetailsTTL, store.ttls[tt.key])
 

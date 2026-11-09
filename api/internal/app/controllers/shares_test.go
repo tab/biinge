@@ -19,6 +19,7 @@ import (
 	"biinge-api/internal/app/models"
 	"biinge-api/internal/app/serializers"
 	"biinge-api/internal/app/services"
+	"biinge-api/internal/config"
 	"biinge-api/internal/config/middlewares"
 )
 
@@ -27,7 +28,7 @@ func Test_SharesController_HandleCreate(t *testing.T) {
 	defer ctrl.Finish()
 
 	shares := services.NewMockShares(ctrl)
-	controller := NewSharesController(shares)
+	controller := NewSharesController(&config.Config{}, shares)
 
 	user := &models.User{ID: uuid.New()}
 	shareId := uuid.MustParse("6f1c3c1e-8a2b-4d4e-9f3a-1b2c3d4e5f60")
@@ -153,7 +154,8 @@ func Test_SharesController_HandleShow(t *testing.T) {
 	defer ctrl.Finish()
 
 	shares := services.NewMockShares(ctrl)
-	controller := NewSharesController(shares)
+	controller := NewSharesController(&config.Config{}, shares)
+	linked := NewSharesController(&config.Config{SiteURL: "https://site.example.com"}, shares)
 
 	// the viewer's own session never reaches the page, and the page model has no sharer to show
 	viewer := &models.User{ID: uuid.New(), Login: "sharer-login", FirstName: "Sharer"}
@@ -181,6 +183,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 	tests := []struct {
 		name     string
 		before   func()
+		linked   bool
 		path     string
 		code     int
 		cache    string
@@ -192,7 +195,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 			before: func() {
 				shares.EXPECT().Page(gomock.Any(), shareId).Return(movie, nil)
 			},
-			path:  "/" + shareId.String(),
+			path:  "/s/" + shareId.String(),
 			code:  http.StatusOK,
 			cache: "public, max-age=86400",
 			contains: []string{
@@ -216,7 +219,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 				`<li><img src="https://image.tmdb.org/t/p/w185/keanu.jpg" alt="" loading="lazy"><div><strong>Keanu Reeves</strong><small>Neo</small></div></li>`,
 				`<li><img src="https://image.tmdb.org/t/p/w185/carrie.jpg" alt="" loading="lazy"><div><strong>Carrie-Anne Moss</strong><small>Trinity</small></div></li>`,
 			},
-			absent: []string{"sharer-login", "Sharer", "<script", "<button", "TMDB", "themoviedb.org", "IGDB", "Seasons", "Genres", "Platforms"},
+			absent: []string{"sharer-login", "Sharer", "<script", "<button", "<a ", "TMDB", "themoviedb.org", "IGDB", "Seasons", "Genres", "Platforms"},
 		},
 		{
 			name: "Series",
@@ -232,7 +235,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 					},
 				}, nil)
 			},
-			path:  "/" + shareId.String(),
+			path:  "/s/" + shareId.String(),
 			code:  http.StatusOK,
 			cache: "public, max-age=86400",
 			contains: []string{
@@ -258,7 +261,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 					Platforms: []string{"PS4", "PC"},
 				}, nil)
 			},
-			path:  "/" + shareId.String(),
+			path:  "/s/" + shareId.String(),
 			code:  http.StatusOK,
 			cache: "public, max-age=86400",
 			contains: []string{
@@ -278,7 +281,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 			before: func() {
 				shares.EXPECT().Page(gomock.Any(), shareId).Return(&serializers.SharePageSerializer{Title: "Untitled"}, nil)
 			},
-			path:     "/" + shareId.String(),
+			path:     "/s/" + shareId.String(),
 			code:     http.StatusOK,
 			cache:    "public, max-age=86400",
 			contains: []string{"<title>Untitled · biinge</title>", `<meta name="twitter:card" content="summary">`, `<div class="poster"></div>`},
@@ -289,15 +292,37 @@ func Test_SharesController_HandleShow(t *testing.T) {
 			before: func() {
 				shares.EXPECT().Page(gomock.Any(), shareId).Return(&serializers.SharePageSerializer{Title: `<script>alert("x")</script>`}, nil)
 			},
-			path:   "/" + shareId.String(),
+			path:   "/s/" + shareId.String(),
 			code:   http.StatusOK,
 			cache:  "public, max-age=86400",
 			absent: []string{`<script>alert`},
 		},
 		{
+			name: "Logo links to the landing site",
+			before: func() {
+				shares.EXPECT().Page(gomock.Any(), shareId).Return(movie, nil)
+			},
+			linked: true,
+			path:   "/s/" + shareId.String(),
+			code:   http.StatusOK,
+			cache:  "public, max-age=86400",
+			contains: []string{
+				`<header class="bar"><a href="https://site.example.com"><img src="` + icon + `" alt="" width="28" height="28"><span class="brand">biinge</span></a></header>`,
+			},
+		},
+		{
+			name:     "Logo links to the landing site on the not-found page",
+			before:   func() {},
+			linked:   true,
+			path:     "/s/not-a-uuid",
+			code:     http.StatusNotFound,
+			cache:    "no-store",
+			contains: []string{`<header class="bar"><a href="https://site.example.com"><img src="` + icon + `"`},
+		},
+		{
 			name:     "Malformed id",
 			before:   func() {},
-			path:     "/not-a-uuid",
+			path:     "/s/not-a-uuid",
 			code:     http.StatusNotFound,
 			cache:    "no-store",
 			contains: []string{"This link isn't available", `<header class="bar"><img src="` + icon + `"`},
@@ -307,7 +332,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 			before: func() {
 				shares.EXPECT().Page(gomock.Any(), shareId).Return(nil, errors.ErrShareNotFound)
 			},
-			path:     "/" + shareId.String(),
+			path:     "/s/" + shareId.String(),
 			code:     http.StatusNotFound,
 			cache:    "no-store",
 			contains: []string{"This link isn't available"},
@@ -317,7 +342,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 			before: func() {
 				shares.EXPECT().Page(gomock.Any(), shareId).Return(nil, errors.ErrFailedToFetchResults)
 			},
-			path:     "/" + shareId.String(),
+			path:     "/s/" + shareId.String(),
 			code:     http.StatusServiceUnavailable,
 			cache:    "no-store",
 			contains: []string{"This page can't load right now", `<header class="bar"><img src="` + icon + `"`},
@@ -327,7 +352,7 @@ func Test_SharesController_HandleShow(t *testing.T) {
 			before: func() {
 				shares.EXPECT().Page(gomock.Any(), shareId).Return(nil, errors.ErrFailedToFetchShare)
 			},
-			path:     "/" + shareId.String(),
+			path:     "/s/" + shareId.String(),
 			code:     http.StatusServiceUnavailable,
 			cache:    "no-store",
 			contains: []string{"This page can't load right now"},
@@ -343,8 +368,13 @@ func Test_SharesController_HandleShow(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
+			handler := controller.HandleShow
+			if tt.linked {
+				handler = linked.HandleShow
+			}
+
 			r := chi.NewRouter()
-			r.Get("/{id}", controller.HandleShow)
+			r.Get("/s/{id}", handler)
 			r.ServeHTTP(w, req)
 
 			resp := w.Result()

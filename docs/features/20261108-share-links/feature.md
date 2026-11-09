@@ -49,7 +49,7 @@ Out:
 - **AC3** – A re-share sets `visited_at` and `updated_at` to now.
 - **AC4** – An object id that TMDB or IGDB does not know is rejected, and no share is stored.
 - **AC5** – A request without a valid session is rejected.
-- **AC6** – `GET /{id}` for a live share returns an HTML page with the title's details.
+- **AC6** – `GET /s/{id}` for a live share returns an HTML page with the title's details.
 - **AC7** – A movie page shows the poster, a Movie label, the title, a meta line with release, runtime, genres and rating, and the overview.
   Below come facts for director, release date and status, then Cast & Crew.
 - **AC8** – A series page shows the poster, a TV Show label, the title, a meta line with first air, season count, genres and rating, and the overview.
@@ -79,12 +79,13 @@ Out:
 
 - `shares`: `id UUID` (`uuid_generate_v4()`), `type share_type`, `object_id INTEGER`, `user_id UUID` (cascade on user delete), `visited_at`, `created_at`, `updated_at`
 - `share_type` enum: `movie`, `tv`, `game`. Unique on `(user_id, type, object_id)`, indexed on `visited_at`
-- `SHARE_URL` holds the public base of the link. It lives in the deployment compose file, like `CLIENT_URL`
+- `SHARE_URL` holds the public base of the link, and a link is `SHARE_URL/s/{id}`. It lives in the deployment compose file, like `CLIENT_URL`
+- `SITE_URL` is optional. When set, the page logo links to the landing site
 
 ## Decisions
 
 - The page lives in the API process, because the provider keys and the cache are there. A subdomain points at it through the reverse proxy
-- The link is `<share host>/{uuid}`. A random id stops anyone from walking provider ids through our API
+- The link is `<share host>/s/{uuid}`. A random id stops anyone from walking provider ids through our API
 - The page reads provider data through the existing Redis entries, so it shares the 12-hour cache with the app
 - Go `html/template` with an embedded template and inline CSS, and no JavaScript.
   The app icon ships embedded in the API binary

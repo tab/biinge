@@ -84,6 +84,7 @@ type Config struct {
 	AppAddr      string
 	ClientURL    string
 	ShareURL     string
+	SiteURL      string
 	DatabaseDSN  string
 	JWTSecretKey string
 	LogLevel     string
@@ -122,6 +123,7 @@ func LoadConfig() *Config {
 		AppAddr:      getEnvString("APP_ADDRESS"),
 		ClientURL:    getEnvString("CLIENT_URL"),
 		ShareURL:     getEnvString("SHARE_URL"),
+		SiteURL:      getEnvString("SITE_URL"),
 		DatabaseDSN:  getEnvString("DATABASE_DSN"),
 		JWTSecretKey: getEnvString("JWT_SECRET_KEY"),
 		LogLevel:     getEnvString("LOG_LEVEL"),

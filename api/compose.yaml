@@ -11,6 +11,7 @@ services:
       - APP_ADDRESS=0.0.0.0:8080
       - CLIENT_URL=http://localhost:3000
       - SHARE_URL=http://localhost:8080
+      - SITE_URL=http://localhost:4321
       - DATABASE_DSN=postgres://postgres:postgres@database:5432/biinge-development?sslmode=disable
       - LOG_LEVEL=info
       - WORKER_SYNC_ENABLED=true

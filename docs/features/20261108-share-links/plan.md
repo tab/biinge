@@ -42,4 +42,4 @@ Current step: PR (AC11 chat-app preview checked by a human after deploy)
 ## Gates
 
 - [x] Plan review – PASS (round 3, codex)
-- [ ] Code review – INCOMPLETE (round 4, codex; no findings; AC11 human check pending)
+- [x] Code review – INCOMPLETE, accepted by the human (round 4, codex; no findings; AC11 checked after deploy)

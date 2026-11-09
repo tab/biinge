@@ -55,6 +55,17 @@ struct UpdateAccountBody: Encodable, Sendable {
     }
 }
 
+/// The title a share link points at (`type` is the API's movie, tv or game)
+struct CreateShareBody: Encodable, Sendable {
+    let type: String
+    let objectID: Int
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case objectID = "object_id"
+    }
+}
+
 /// The Jellyfin username and password the API signs in with once (it never stores the password)
 struct JellyfinConnectionRequest: Encodable, Sendable {
     let username: String

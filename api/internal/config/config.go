@@ -83,6 +83,7 @@ type Config struct {
 	AppVersion   string
 	AppAddr      string
 	ClientURL    string
+	ShareURL     string
 	DatabaseDSN  string
 	JWTSecretKey string
 	LogLevel     string
@@ -120,6 +121,7 @@ func LoadConfig() *Config {
 		AppVersion:   getEnvString("APP_VERSION"),
 		AppAddr:      getEnvString("APP_ADDRESS"),
 		ClientURL:    getEnvString("CLIENT_URL"),
+		ShareURL:     getEnvString("SHARE_URL"),
 		DatabaseDSN:  getEnvString("DATABASE_DSN"),
 		JWTSecretKey: getEnvString("JWT_SECRET_KEY"),
 		LogLevel:     getEnvString("LOG_LEVEL"),
@@ -178,13 +180,15 @@ func (c *Config) Validate() error {
 
 	// IGDB only gates a deployed build: locally the games endpoints degrade to stored library data. An
 	// empty endpoint fails as quietly as an empty credential — the detail screen just serves stored data —
-	// so the URLs are checked too, not only the secrets
+	// so the URLs are checked too, not only the secrets. A deployed build also needs SHARE_URL, the public
+	// base of every share link
 	if !c.isLocalEnv() {
 		for _, required := range []struct{ name, value string }{
 			{"IGDB_BASE_URL", c.IGDB.BaseURL},
 			{"IGDB_TOKEN_URL", c.IGDB.TokenURL},
 			{"IGDB_CLIENT_ID", c.IGDB.ClientID},
 			{"IGDB_CLIENT_SECRET", c.IGDB.ClientSecret},
+			{"SHARE_URL", c.ShareURL},
 		} {
 			if required.value == "" {
 				missing = append(missing, required.name)

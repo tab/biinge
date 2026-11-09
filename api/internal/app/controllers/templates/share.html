@@ -1,0 +1,248 @@
+{{define "style"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="{{icon}}">
+<style>
+  /* the apps' biinge tokens (ios/Biinge/UI/Theme/Theme.swift) */
+  :root {
+    --bg: #f3f3f1;
+    --text: #16161a;
+    --text-secondary: #62626a;
+    --text-tertiary: #8c8c94;
+    --card: #deded9;
+    --star: #eec01e;
+    --hairline: rgba(0, 0, 0, 0.0675);
+    --ring: rgba(0, 0, 0, 0.075);
+    --tag: rgba(0, 0, 0, 0.06);
+    --shadow: rgba(90, 90, 100, 0.55);
+    --wash: rgba(243, 243, 241, 0.7);
+    --dim: 1;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --text: #f4f4f2;
+      --text-secondary: #91919a;
+      --text-tertiary: #64646d;
+      --card: #282828;
+      --hairline: rgba(255, 255, 255, 0.09);
+      --ring: rgba(255, 255, 255, 0.1);
+      --tag: rgba(255, 255, 255, 0.08);
+      --shadow: rgba(0, 0, 0, 0.55);
+      --wash: transparent;
+      --dim: 0.6;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    position: relative;
+    margin: 0;
+    overflow-x: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ul { list-style: none; margin: 0; padding: 0; }
+  p, h1, h2, dl, dd { margin: 0; }
+  .backdrop { position: absolute; top: 0; left: 0; right: 0; height: 640px; overflow: hidden; pointer-events: none; }
+  .backdrop img {
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: calc(100% + 200px);
+    height: calc(100% + 200px);
+    object-fit: cover;
+    filter: blur(60px) saturate(1.5) brightness(var(--dim));
+  }
+  /* washed out in light mode so dark text reads, then faded into the page */
+  .backdrop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 35%, var(--bg)), var(--wash); }
+  .page { position: relative; max-width: 1280px; margin: 0 auto; }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; }
+  .bar img { width: 28px; height: 28px; border-radius: 22%; }
+  .brand { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  main { display: flex; flex-direction: column; gap: 32px; padding: 24px 0 48px; }
+  .hero { display: flex; flex-direction: column; gap: 32px; }
+  .poster {
+    display: block;
+    flex: none;
+    align-self: center;
+    width: 216px;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 14px;
+    background: var(--card);
+    outline: 1px solid var(--ring);
+    outline-offset: -1px;
+    box-shadow: 0 30px 70px var(--shadow);
+  }
+  .heading { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 0 16px; }
+  .kind { font-size: 15px; font-weight: 600; color: color-mix(in srgb, var(--text) 75%, transparent); }
+  h1 { font-size: 34px; line-height: 1.1; font-weight: 600; letter-spacing: -1.2px; overflow-wrap: break-word; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 15px; color: color-mix(in srgb, var(--text) 80%, transparent); }
+  .rating { color: var(--text); font-weight: 600; }
+  .rating span { color: var(--star); margin-right: 4px; }
+  .overview { padding-top: 4px; font-size: 17px; line-height: 1.45; white-space: pre-line; color: color-mix(in srgb, var(--text) 82%, transparent); }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; margin: 0 16px; padding-top: 20px; border-top: 1px solid var(--hairline); }
+  .facts div { min-width: 0; }
+  dt { margin-bottom: 4px; font-size: 12.5px; font-weight: 500; color: var(--text-tertiary); }
+  dd {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+    color: color-mix(in srgb, var(--text) 80%, transparent);
+  }
+  .section { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  h2 { padding: 0 16px; font-size: 21px; font-weight: 600; letter-spacing: -0.3px; }
+  .seasons { padding: 0 16px; }
+  .seasons li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+  .seasons strong { min-width: 0; font-size: 15px; font-weight: 600; }
+  .seasons span { flex: none; font-size: 13px; color: var(--text-secondary); }
+  /* a horizontal row like the apps' Cast & Crew, scrolled without script */
+  .credits { display: flex; gap: 12px; overflow-x: auto; padding: 0 16px; scrollbar-width: none; }
+  .credits::-webkit-scrollbar { display: none; }
+  .credits li { display: flex; flex: none; flex-direction: column; align-items: center; gap: 8px; width: 80px; text-align: center; }
+  .credits img { width: 72px; height: 72px; border-radius: 50%; background: var(--card); object-fit: cover; filter: grayscale(1); }
+  .credits div { display: flex; flex-direction: column; gap: 1px; width: 100%; }
+  .credits strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 13px; font-weight: 600; }
+  .credits small { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; color: var(--text-secondary); }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px; }
+  .tags li { padding: 6px 12px; border-radius: 999px; background: var(--tag); font-size: 13px; color: color-mix(in srgb, var(--text) 78%, transparent); }
+  .message { display: block; padding: 96px 16px; text-align: center; }
+  .message h1 { font-size: 28px; letter-spacing: -0.5px; }
+  .message p { margin-top: 10px; color: var(--text-secondary); }
+  @media (min-width: 820px) {
+    .backdrop { height: 760px; }
+    .backdrop img { top: -120px; left: -120px; width: calc(100% + 240px); height: calc(100% + 240px); filter: blur(80px) saturate(1.5) brightness(var(--dim)); }
+    .backdrop::after { background: linear-gradient(transparent 30%, var(--bg)), var(--wash); }
+    .bar { padding: 20px 40px; }
+    .bar img { width: 32px; height: 32px; }
+    .brand { font-size: 22px; }
+    main { gap: 44px; padding: 40px 40px 80px; }
+    .hero { flex-direction: row; align-items: flex-start; gap: 48px; padding-bottom: 36px; }
+    .poster { align-self: flex-start; width: 290px; height: 435px; border-radius: 16px; box-shadow: 0 34px 80px var(--shadow); }
+    .heading { flex: 1; gap: 18px; padding: 0; }
+    h1 { font-size: 72px; line-height: 1.02; font-weight: 700; letter-spacing: -0.035em; }
+    h1.long { font-size: 52px; }
+    .meta { gap: 4px 16px; font-size: 16px; }
+    .overview { padding-top: 0; max-width: 680px; font-size: 18px; line-height: 1.55; }
+    .facts { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 24px; margin: 0; padding-top: 24px; }
+    dt { margin-bottom: 6px; font-size: 13px; }
+    dd { font-size: 16px; }
+    .section { gap: 18px; }
+    h2 { padding: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+    .seasons { padding: 0; max-width: 680px; }
+    .seasons strong { font-size: 16px; }
+    .seasons span { font-size: 14.5px; }
+    /* the row runs to the window edges, with its first and last person in line with the page */
+    .credits { gap: 18px; margin: 0 calc(50% - 50vw); padding: 0 calc(50vw - 50%); }
+    .credits li { gap: 10px; width: 112px; }
+    .credits img { width: 88px; height: 88px; }
+    .credits strong { display: block; white-space: nowrap; text-overflow: ellipsis; font-size: 14.5px; }
+    .credits small { font-size: 13.5px; }
+    .tags { padding: 0; }
+    .tags li { padding: 7px 14px; font-size: 14px; }
+    .message { padding: 140px 40px; }
+    .message h1 { font-size: 40px; }
+  }
+</style>
+{{end}}
+
+{{define "bar"}}<header class="bar"><img src="{{icon}}" alt="" width="28" height="28"><span class="brand">biinge</span></header>{{end}}
+
+{{define "page"}}<!doctype html>
+<html lang="en">
+<head>
+{{template "style"}}
+<title>{{.Title}}{{with .Year}} ({{.}}){{end}} · biinge</title>
+<meta property="og:type" content="{{if eq .Kind "Game"}}website{{else}}video.other{{end}}">
+<meta property="og:site_name" content="biinge">
+<meta property="og:title" content="{{.Title}}{{with .Year}} ({{.}}){{end}}">
+{{with .Description}}<meta property="og:description" content="{{.}}">
+<meta name="description" content="{{.}}">{{end}}
+{{with .ImageURL}}<meta property="og:image" content="{{.}}">{{end}}
+<meta name="twitter:card" content="{{if .ImageURL}}summary_large_image{{else}}summary{{end}}">
+</head>
+<body>
+<div class="backdrop" aria-hidden="true">{{with .ImageURL}}<img src="{{.}}" alt="">{{end}}</div>
+<div class="page">
+  {{template "bar"}}
+  <main>
+    <div class="hero">
+      {{with .ImageURL}}<img class="poster" src="{{.}}" alt="">{{else}}<div class="poster"></div>{{end}}
+      <div class="heading">
+        <p class="kind">{{.Kind}}</p>
+        <h1{{if gt (len .Title) 30}} class="long"{{end}}>{{.Title}}</h1>
+        {{if or .Meta .Rating}}<p class="meta">{{with .Meta}}<span>{{.}}</span>{{end}}{{with .Rating}}<span class="rating"><span>★</span>{{.}}</span>{{end}}</p>{{end}}
+        {{with .Overview}}<p class="overview">{{.}}</p>{{end}}
+      </div>
+    </div>
+    {{with .Facts}}<dl class="facts">
+      {{range .}}<div><dt>{{.Label}}</dt><dd>{{.Value}}</dd></div>
+      {{end}}</dl>{{end}}
+    {{with .Seasons}}<section class="section">
+      <h2>Seasons</h2>
+      <ul class="seasons">
+        {{range .}}<li><strong>{{.Name}}</strong><span>{{with .Year}}{{.}} · {{end}}{{.Episodes}}</span></li>
+        {{end}}</ul>
+    </section>{{end}}
+    {{with .Credits}}<section class="section">
+      <h2>Cast &amp; Crew</h2>
+      <ul class="credits">
+        {{range .}}<li><img src="{{.PhotoURL}}" alt="" loading="lazy"><div><strong>{{.Name}}</strong>{{with .Role}}<small>{{.}}</small>{{end}}</div></li>
+        {{end}}</ul>
+    </section>{{end}}
+    {{with .Genres}}<section class="section">
+      <h2>Genres</h2>
+      <ul class="tags">{{range .}}<li>{{.}}</li>{{end}}</ul>
+    </section>{{end}}
+    {{with .Platforms}}<section class="section">
+      <h2>Platforms</h2>
+      <ul class="tags">{{range .}}<li>{{.}}</li>{{end}}</ul>
+    </section>{{end}}
+  </main>
+</div>
+</body>
+</html>
+{{end}}
+
+{{define "not_found"}}<!doctype html>
+<html lang="en">
+<head>
+{{template "style"}}
+<title>Link not found · biinge</title>
+</head>
+<body>
+<div class="page">
+  {{template "bar"}}
+  <main class="message">
+    <h1>This link isn't available</h1>
+    <p>It may have expired, or the address isn't quite right.</p>
+  </main>
+</div>
+</body>
+</html>
+{{end}}
+
+{{define "unavailable"}}<!doctype html>
+<html lang="en">
+<head>
+{{template "style"}}
+<title>Try again soon · biinge</title>
+</head>
+<body>
+<div class="page">
+  {{template "bar"}}
+  <main class="message">
+    <h1>This page can't load right now</h1>
+    <p>Try again in a few minutes.</p>
+  </main>
+</div>
+</body>
+</html>
+{{end}}

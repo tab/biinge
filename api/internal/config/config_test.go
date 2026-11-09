@@ -40,6 +40,7 @@ func Test_LoadConfig(t *testing.T) {
 				AppEnv:       TestEnv,
 				AppAddr:      "localhost:8080",
 				ClientURL:    "http://localhost:3000",
+				ShareURL:     "http://localhost:8080",
 				DatabaseDSN:  "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
 				JWTSecretKey: "SECRET",
 				TMDBConfig: TMDBConfig{
@@ -63,6 +64,7 @@ func Test_LoadConfig(t *testing.T) {
 				AppEnv:       TestEnv,
 				AppAddr:      "localhost:8080",
 				ClientURL:    "http://localhost:3000",
+				ShareURL:     "http://localhost:8080",
 				DatabaseDSN:  "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
 				JWTSecretKey: "SECRET",
 				TMDBConfig: TMDBConfig{
@@ -88,6 +90,7 @@ func Test_LoadConfig(t *testing.T) {
 				AppEnv:       TestEnv,
 				AppAddr:      "localhost:8080",
 				ClientURL:    "http://localhost:3000",
+				ShareURL:     "http://localhost:8080",
 				DatabaseDSN:  "postgres://postgres:postgres@localhost:5432/biinge-test?sslmode=disable",
 				JWTSecretKey: "SECRET",
 				TMDBConfig: TMDBConfig{
@@ -115,6 +118,7 @@ func Test_LoadConfig(t *testing.T) {
 			assert.Equal(t, tt.expected.AppEnv, result.AppEnv)
 			assert.Equal(t, tt.expected.AppAddr, result.AppAddr)
 			assert.Equal(t, tt.expected.ClientURL, result.ClientURL)
+			assert.Equal(t, tt.expected.ShareURL, result.ShareURL)
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
 			assert.Equal(t, tt.expected.JWTSecretKey, result.JWTSecretKey)
 			assert.Equal(t, tt.expected.BaseURL, result.BaseURL)
@@ -137,6 +141,7 @@ func Test_Config_Validate(t *testing.T) {
 	valid := func() *Config {
 		return &Config{
 			AppEnv:       "production",
+			ShareURL:     "https://share.example.com",
 			DatabaseDSN:  "postgres://localhost:5432/biinge",
 			JWTSecretKey: "a-strong-production-jwt-secret-key-32b+",
 			TMDBConfig: TMDBConfig{
@@ -198,6 +203,15 @@ func Test_Config_Validate(t *testing.T) {
 		{
 			name:   "Missing IGDB configuration allowed in development",
 			mutate: func(c *Config) { c.AppEnv = DevelopmentEnv; c.IGDB = IGDBConfig{} },
+		},
+		{
+			name:    "Missing share URL in production",
+			mutate:  func(c *Config) { c.ShareURL = "" },
+			wantErr: "SHARE_URL",
+		},
+		{
+			name:   "Missing share URL allowed in development",
+			mutate: func(c *Config) { c.AppEnv = DevelopmentEnv; c.ShareURL = "" },
 		},
 		{
 			name:    "JWT secret too short in production",

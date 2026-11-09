@@ -355,6 +355,12 @@ const endpoints: Endpoint[] = [
   { id: "up-next", group: "Up Next", method: "GET", path: "/api/v1/up-next", desc: "The next aired episode you haven't watched of each pinned show you're watching, plus released movies and games from your pinned want lists.", resp: upNextJson },
 
   { id: "person-get", group: "People", method: "GET", path: "/api/v1/people/{id}", desc: "Person details and notable credits." },
+
+  { id: "share-create", group: "Shares", method: "POST", path: "/api/v1/shares", desc: "Create a public link to a movie, series or game. type is movie, tv or game. object_id is the TMDB or IGDB id.", note: "Returns 201 with the share id and its url. Sharing the same title again returns the same id and extends the link. A title TMDB or IGDB does not know gets 404, and no share is stored.", body: `{
+  "type": "movie",
+  "object_id": 693134
+}` },
+  { id: "share-page", group: "Shares", method: "GET", path: "/{id}", desc: "The public HTML page of a share, served at the root of the share host. No authentication required.", note: "Each visit extends the share. A share with no visit for 30 days returns the not-found page with 404. So does a title TMDB or IGDB no longer knows. When TMDB, IGDB or the database fails, the page says so with 503. The page is limited to 60 requests a minute per connecting IP. Behind a reverse proxy, that is the proxy, so limit each client there." },
 ];
 
 const groups = [...new Set(endpoints.map((e) => e.group))];
@@ -368,6 +374,7 @@ const idHints: Record<string, string> = {
   Progress: "TMDB series id",
   Games: "IGDB game id",
   People: "TMDB person id",
+  Shares: "share id",
 };
 const pathHints: Record<string, string> = {
   seasonId: "TMDB season id", episodeId: "TMDB episode id",
@@ -530,18 +537,19 @@ const short = (path: string) => path.replace("/api/v1", "") || "/";
               <tbody>
                 <tr><td><code>400</code></td><td>Bad Request</td><td>Malformed JSON, an unparseable id, or a body that fails validation</td></tr>
                 <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid or expired access token, or wrong login credentials</td></tr>
-                <tr><td><code>404</code></td><td>Not Found</td><td>The Jellyfin connection routes, when this instance has no Jellyfin server configured</td></tr>
+                <tr><td><code>404</code></td><td>Not Found</td><td>The Jellyfin connection routes, when this instance has no Jellyfin server configured, and a share of a title TMDB or IGDB doesn't know</td></tr>
                 <tr><td><code>409</code></td><td>Conflict</td><td>Registering a login or email that is already taken</td></tr>
                 <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>The request was well formed but the work failed, including a title the upstream provider doesn't have, or a Jellyfin username and password that Jellyfin rejects</td></tr>
-                <tr><td><code>429</code></td><td>Too Many Requests</td><td>More than 5 requests a minute per IP to the public <code>/users</code> routes or 120 a minute per user everywhere else</td></tr>
+                <tr><td><code>429</code></td><td>Too Many Requests</td><td>More than 5 requests a minute per IP to the public <code>/users</code> routes, 60 a minute per IP to share pages, or 120 a minute per user everywhere else</td></tr>
                 <tr><td><code>500</code></td><td>Internal Server Error</td><td>Registration or a Jellyfin connection route failed for a reason the API won't detail</td></tr>
                 <tr><td><code>502</code></td><td>Bad Gateway</td><td>The Jellyfin server could not be reached</td></tr>
-                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable, from <code>/ready</code>, from the auth middleware or from the Jellyfin connection routes</td></tr>
+                <tr><td><code>503</code></td><td>Service Unavailable</td><td>A dependency is unreachable, from <code>/ready</code>, from the auth middleware, from the Jellyfin connection routes or from a share page</td></tr>
               </tbody>
             </table>
             <p class="errors-note">
-              Titles never return <code>404</code>: a title that isn't in your library, or
-              that TMDB and IGDB can't resolve, comes back as <code>422</code>.
+              Title routes never return <code>404</code>: a title that isn't in your library, or
+              that TMDB and IGDB can't resolve, comes back as <code>422</code>. Creating a
+              share is the exception.
             </p>
           </div>
         </div>

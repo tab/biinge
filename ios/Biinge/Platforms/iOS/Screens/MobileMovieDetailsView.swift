@@ -48,7 +48,7 @@ struct MobileMovieDetailsView: View {
             .scrollIndicators(.hidden)
 
             CloseButton()
-            if let details, hasMore(details) {
+            if details != nil {
                 DetailMoreButton { showsMore = true }
             }
         }
@@ -219,7 +219,7 @@ struct MobileMovieDetailsView: View {
         }
     }
 
-    /// The More sheet: Start Over once started on the server and Watch Trailer
+    /// The More sheet: Start Over once started on the server, Watch Trailer and Share
     private func moreSheet(_ movie: MovieDetails) -> some View {
         DetailMenuSheet(title: "More", subtitle: movie.title) {
             if let connection, case .play(let jellyfinID) = jellyfinPlay(movie), item?.userData?.playbackPositionTicks ?? 0 > 0 {
@@ -231,14 +231,8 @@ struct MobileMovieDetailsView: View {
                     openURL(trailer)
                 }
             }
+            DetailShareRow(kind: .movie, id: movieId) { showsMore = false }
         }
-    }
-
-    /// Whether the More sheet has a row to show, so ••• stays away instead of opening an empty sheet
-    private func hasMore(_ movie: MovieDetails) -> Bool {
-        // Start Over shows on the server once the movie is started
-        let startsOver = if case .play = jellyfinPlay(movie) { item?.userData?.playbackPositionTicks ?? 0 > 0 } else { false }
-        return startsOver || trailerURL(movie) != nil
     }
 
     /// What the movie's Jellyfin item offers now: a play, or why it can't play

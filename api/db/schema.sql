@@ -51,6 +51,17 @@ CREATE TYPE public.provider_type AS ENUM (
 
 
 --
+-- Name: share_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.share_type AS ENUM (
+    'movie',
+    'tv',
+    'game'
+);
+
+
+--
 -- Name: state_types; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -208,6 +219,21 @@ COMMENT ON COLUMN public.series.tracked_state IS 'the state the user explicitly 
 
 
 --
+-- Name: shares; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.shares (
+    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    type public.share_type NOT NULL,
+    object_id integer NOT NULL,
+    user_id uuid NOT NULL,
+    visited_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -271,6 +297,14 @@ ALTER TABLE ONLY public.seasons
 
 ALTER TABLE ONLY public.series
     ADD CONSTRAINT series_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: shares shares_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.shares
+    ADD CONSTRAINT shares_pkey PRIMARY KEY (id);
 
 
 --
@@ -394,6 +428,20 @@ CREATE UNIQUE INDEX series_user_id_tmdb_id_unique ON public.series USING btree (
 
 
 --
+-- Name: shares_user_id_type_object_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX shares_user_id_type_object_id_unique ON public.shares USING btree (user_id, type, object_id);
+
+
+--
+-- Name: shares_visited_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX shares_visited_at_idx ON public.shares USING btree (visited_at);
+
+
+--
 -- Name: users_email_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -453,6 +501,14 @@ ALTER TABLE ONLY public.seasons
 
 ALTER TABLE ONLY public.series
     ADD CONSTRAINT series_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shares shares_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.shares
+    ADD CONSTRAINT shares_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --

@@ -66,7 +66,7 @@ struct MobileSeriesDetailsView: View {
             }
 
             CloseButton()
-            if let model, let details, hasMore(model, details) {
+            if details != nil {
                 DetailMoreButton { showsMore = true }
             }
         }
@@ -437,7 +437,7 @@ extension MobileSeriesDetailsView {
         }
     }
 
-    /// The More sheet: Start Over for the next episode once started on the server, Mark Season Watched and Watch Trailer
+    /// The More sheet: Start Over for the next episode once started on the server, Mark Season Watched, Watch Trailer and Share
     private func moreSheet(_ model: SeriesDetailsState, _ series: SeriesDetails) -> some View {
         DetailMenuSheet(title: "More", subtitle: series.title) {
             if let connection, case .play(let jellyfinID) = model.nextPlay, model.nextPosition > 0, case .episode(let number, let episode) = model.next {
@@ -462,14 +462,8 @@ extension MobileSeriesDetailsView {
                     openURL(trailer)
                 }
             }
+            DetailShareRow(kind: .series, id: seriesId) { showsMore = false }
         }
-    }
-
-    /// Whether the More sheet has a row to show, so ••• stays away instead of opening an empty sheet
-    private func hasMore(_ model: SeriesDetailsState, _ series: SeriesDetails) -> Bool {
-        // Start Over shows once the next episode is started on the server
-        let startsOver = if case .play = model.nextPlay { model.nextPosition > 0 } else { false }
-        return startsOver || trailerURL(series) != nil || seasonMark(model, series) != nil
     }
 
     /// The next episode's season with its episodes and how many of them biinge doesn't hold as watched, while the series plays on the server and the user isn't caught up (nil otherwise, and until the season loads)

@@ -187,8 +187,12 @@ struct DesktopMovieDetailsView: View {
             }
             ListButton(pill: DetailListPill(.movie, state: state, isPinned: store.isPinned(id: id)), isOpen: $isListMenuOpen)
             // Start Over needs a stored position the server can play from
-            let startOver: (label: String, item: BaseItemDto)? = if case .play = play, let item, position > 0 { ("Start Over", item) } else { nil }
-            MoreMenu(connection: connection, startOver: startOver, markSeason: nil)
+            let startOver: (label: String, play: () -> Void)? = if case .play = play, let item, position > 0 {
+                ("Start Over", { Task { await connection.play(item, fromStart: true) } })
+            } else {
+                nil
+            }
+            MoreMenu(kind: .movie, id: id, apiClient: apiClient, startOver: startOver, markSeason: nil)
         }
         .animation(MotionCurve.exit.animation(MotionDuration.quick), value: primary == nil)
         if let note = PlayNote(play: play, server: connection.serverName, playedUnwatched: playedOnServer && state != .watched) {

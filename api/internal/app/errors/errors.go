@@ -54,6 +54,11 @@ var (
 
 	ErrFailedToFetchStats = errors.New("failed to fetch stats")
 
+	ErrShareObjectNotFound = errors.New("share object not found")
+	ErrFailedToCreateShare = errors.New("failed to create share")
+	ErrShareNotFound       = errors.New("share not found")
+	ErrFailedToFetchShare  = errors.New("failed to fetch share")
+
 	ErrJellyfinNotConfigured            = errors.New("jellyfin is not configured")
 	ErrInvalidJellyfinCredentials       = errors.New("invalid jellyfin credentials")
 	ErrJellyfinUnavailable              = errors.New("jellyfin unavailable")

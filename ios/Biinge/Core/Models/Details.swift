@@ -291,6 +291,12 @@ struct PersonDetails: Decodable, Sendable {
     }
 }
 
+/// A title's public share link
+struct Share: Decodable, Sendable {
+    let id: String
+    let url: URL
+}
+
 /// Per-show watched progress; trackedState is the user's explicit choice that unmark-all reverts to
 struct WatchProgress: Decodable, Sendable {
     let id: Int

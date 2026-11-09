@@ -5,5 +5,6 @@ import "go.uber.org/fx"
 var Module = fx.Options(
 	fx.Provide(NewTmdbWorker),
 	fx.Provide(NewJellyfinWorker),
-	fx.Invoke(func(*TmdbWorker, *JellyfinWorker) {}),
+	fx.Provide(NewShareWorker),
+	fx.Invoke(func(*TmdbWorker, *JellyfinWorker, *ShareWorker) {}),
 )

@@ -111,6 +111,18 @@
   - Why: `DetailLoadError` offers no action there, so a failed load needs the screen closed and reopened
   - Added: 20261104
   - Source: [iOS layout](20261104-ios-platform-layout/feature.md)
+- [ ] **BL-044: Show the user's own library on the Apple TV Top Shelf**
+  - Why: the Top Shelf is a static poster wall. A Top Shelf extension could show Continue Watching and Up Next, the way other video apps do
+  - Added: 20261114
+  - Source: [Apple TV device fixes](20261114-tvos-device-fixes/feature.md)
+- [ ] **BL-045: Start Apple TV list-sheet focus on the title's current list**
+  - Why: on a watched movie, focus opens on Want to Watch, so a stray click moves the title to another list
+  - Added: 20261114
+  - Source: [Apple TV device fixes](20261114-tvos-device-fixes/feature.md)
+- [ ] **BL-046: Give Watching an icon in the Apple TV series list sheet**
+  - Why: every other row in the sheet has an icon, and Watching has none
+  - Added: 20261114
+  - Source: [Apple TV device fixes](20261114-tvos-device-fixes/feature.md)
 
 ## Low
 

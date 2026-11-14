@@ -271,8 +271,6 @@ struct DesktopHomeView: View {
             VStack(spacing: 20) {
                 NavigationLink(value: route) {
                     PosterImage(title: title, cornerRadius: 0, poster: poster, frame: CGSize(width: 220, height: 330), titleFont: .system(size: 14), titlePadding: 12)
-                        // an episode hero's title is the series its fetch resolved
-                        .trackedBadge(DetailsTitle(item) ?? item.id.flatMap { feed.heroTitles[$0] })
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.biingeText.opacity(0.1), lineWidth: 1))
                         .shadow(color: Color.biingeShadow.opacity(0.55), radius: 30, y: 24)

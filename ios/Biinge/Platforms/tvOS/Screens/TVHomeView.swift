@@ -217,7 +217,8 @@ struct TVHomeView: View {
                                     frame: CGSize(width: 260, height: 390), titleFont: .system(size: 26), titlePadding: 20)
                             .trackedBadge(DetailsTitle(item))
                     })
-                    HomeRow(title: "Collections", items: rows.collections, width: 640, height: 360, spacing: 48, focus: $focus, caption: { _ in nil }, select: {
+                    // a focused 640-point tile grows 45 points a side, so the gap leaves 19 points to its neighbour
+                    HomeRow(title: "Collections", items: rows.collections, width: 640, height: 360, spacing: 64, focus: $focus, caption: { _ in nil }, select: {
                         path.append(.collection($0))
                     }, art: { item in
                         TVCollectionTile(connection: connection, collection: item, width: 640, height: 360)
@@ -249,8 +250,7 @@ struct TVHomeView: View {
         let last: HomeFocus = playable != nil && route != nil ? .heroSecond : .hero
         return ZStack(alignment: .topLeading) {
             PosterImage(title: title, cornerRadius: 0, poster: connection.posterURL(item, maxWidth: 800), frame: CGSize(width: 400, height: 600), titleFont: .system(size: 26), titlePadding: 20)
-                // an episode hero's title is the series its fetch resolved
-                .trackedBadge(DetailsTitle(item) ?? item.id.flatMap { feed.heroTitles[$0] })
+                // no watched check, which would scale with the poster's push-in
                 .modifier(HeroPush())
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.biingeText.opacity(0.1), lineWidth: 1))
@@ -495,7 +495,8 @@ private struct BrowseRow: View {
                     .tracking(-0.8)
                     .foregroundStyle(holdsFocus ? Color.biingeTextFocused : Color.biingeText.opacity(0.7))
                     .padding(.leading, 96)
-                HStack(spacing: 48) {
+                // a focused tile grows 58 points a side, so the 80-point gap leaves 22 points to its neighbour, and two 824-point tiles still fill the 1920-point row
+                HStack(spacing: 80) {
                     if movies.total > 0 {
                         tile(.movies, name: "Movies", count: "\(movies.total) movies", page: movies)
                     }
@@ -511,9 +512,9 @@ private struct BrowseRow: View {
 
     private func tile(_ target: TVTab, name: String, count: String, page: LibraryPage) -> some View {
         Button { tab = target } label: {
-            FanTile(name: name, count: count, nameSize: 64, width: 840, height: 300, posters: page.items.prefix(3).map { connection.posterURL($0, maxWidth: 316) })
+            FanTile(name: name, count: count, nameSize: 64, width: 824, height: 300, posters: page.items.prefix(3).map { connection.posterURL($0, maxWidth: 316) })
         }
-        .buttonStyle(TVCardButtonStyle(width: 840, height: 300, cornerRadius: 20, title: nil, subtitle: nil))
+        .buttonStyle(TVCardButtonStyle(width: 824, height: 300, cornerRadius: 20, title: nil, subtitle: nil))
         .focused(focus, equals: .card(row: "Browse Your Library", id: name))
     }
 }

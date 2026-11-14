@@ -49,27 +49,12 @@ struct TVLoginView: View {
                     .autocorrectionDisabled()
                     .focused($focusedField, equals: .email)
                     .onSubmit { focusedField = .password }
-                    .font(.system(size: 40))
-                    // a focused field shows tvOS's own light platter, so the drawn box steps aside and the text turns dark
-                    .foregroundStyle(focusedField == .email ? Color(rgb: 0x101014) : Color.biingeText)
-                    .frame(width: 1000, height: 96)
-                    .background(Color.biingeFill(focusedField == .email ? 0 : 0.1), in: RoundedRectangle(cornerRadius: 24))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24)
-                            .strokeBorder(flow.failure?.fields.contains(.email) == true ? Color.biingeError : Color.biingeFill(focusedField == .email ? 0 : 0.18), lineWidth: 2)
-                    )
+                    .tvSetupField(text: flow.email, prompt: "Email", isFocused: focusedField == .email, isInvalid: flow.failure?.fields.contains(.email) == true)
                 SecureField("", text: $flow.password, prompt: Text("Password"))
                     .textContentType(.password)
                     .focused($focusedField, equals: .password)
                     .onSubmit { submit() }
-                    .font(.system(size: 40))
-                    .foregroundStyle(focusedField == .password ? Color(rgb: 0x101014) : Color.biingeText)
-                    .frame(width: 1000, height: 96)
-                    .background(Color.biingeFill(focusedField == .password ? 0 : 0.1), in: RoundedRectangle(cornerRadius: 24))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24)
-                            .strokeBorder(flow.failure?.fields.contains(.password) == true ? Color.biingeError : Color.biingeFill(focusedField == .password ? 0 : 0.18), lineWidth: 2)
-                    )
+                    .tvSetupField(text: flow.password, prompt: "Password", isSecure: true, isFocused: focusedField == .password, isInvalid: flow.failure?.fields.contains(.password) == true)
             }
             .opacity(flow.isSubmitting || flow.isDone ? 0.5 : 1)
             .disabled(flow.isSubmitting || flow.isDone)

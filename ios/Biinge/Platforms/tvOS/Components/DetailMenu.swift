@@ -56,7 +56,8 @@ extension MenuRow {
 extension View {
     /// Presents the details menu full screen over the blurred screen, building its rows as it draws (so the pin's row follows a toggle) and showing the screen's toasts over it
     func tvDetailMenu(
-        _ menu: Binding<DetailMenu?>, poster: URL?, title: String, toast: Binding<Toast?>, rows: @escaping (DetailMenu) -> [MenuRow]
+        _ menu: Binding<DetailMenu?>, poster: URL?, title: String, toast: Binding<Toast?>,
+        rows: @escaping (DetailMenu) -> [MenuRow]
     ) -> some View {
         modifier(DetailMenuPresenter(menu: menu, poster: poster, title: title, toast: toast, rows: rows))
     }
@@ -92,7 +93,7 @@ private struct DetailMenuPresenter: ViewModifier {
     }
 }
 
-/// The menu sheet over the blurred, dimmed screen: the poster cropped wide, then the eyebrow, title, Back's note on the list menu and the rows, with focus starting on the first row
+/// The menu sheet over the blurred, dimmed screen: the 2:3 poster, then the eyebrow, title, Back's note on the list menu and the rows, with focus starting on the first row
 private struct TVDetailMenuSheet: View {
     let menu: DetailMenu
     let poster: URL?
@@ -105,10 +106,8 @@ private struct TVDetailMenuSheet: View {
 
     var body: some View {
         HStack(spacing: 80) {
-            // the poster fills the wide frame from 30% of the way down, as the board crops it
-            PosterImage(title: title, cornerRadius: 0, poster: poster, frame: CGSize(width: 640, height: 960), titleFont: .system(size: 26), titlePadding: 20)
-                .offset(y: -180)
-                .frame(width: 640, height: 360, alignment: .top)
+            // a fixed 400×600 for movies, series and games alike, so the sheet keeps one layout (a 3:4 game cover fills it and loses a sliver at the sides, as in its hero)
+            PosterImage(title: title, cornerRadius: 0, poster: poster, frame: CGSize(width: 400, height: 600), titleFont: .system(size: 26), titlePadding: 20)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.biingeText.opacity(0.12), lineWidth: 1))
                 .shadow(color: Color.biingeShadow.opacity(0.6), radius: 45, y: 40)

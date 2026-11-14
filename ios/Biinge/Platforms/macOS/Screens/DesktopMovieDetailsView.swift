@@ -96,6 +96,7 @@ struct DesktopMovieDetailsView: View {
                             .tracking((title.count > 30 ? 52 : 72) * -0.035)
                             .lineLimit(3)
                             .minimumScaleFactor(0.6)
+                            .textSelection(.enabled)
                             .entrance()
                         HStack(spacing: 16) {
                             Text(meta.filter { !$0.isEmpty }.joined(separator: " · "))

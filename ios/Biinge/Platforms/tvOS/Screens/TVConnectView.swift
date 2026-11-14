@@ -94,23 +94,12 @@ struct TVConnectView: View {
                 .textContentType(.username)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-                .font(.system(size: 40))
-                // a focused field shows tvOS's own light platter, so the drawn box steps aside and the text turns dark
-                .foregroundStyle(focusedField == .user ? Color(rgb: 0x101014) : Color.biingeText)
-                .multilineTextAlignment(.leading)
-                .frame(width: 1000, height: 96)
-                .background(Color.biingeFill(focusedField == .user ? 0 : 0.1), in: RoundedRectangle(cornerRadius: 24))
-                .overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(Color.biingeFill(focusedField == .user ? 0 : 0.18), lineWidth: 2))
+                .tvSetupField(text: flow.user, prompt: "User", isFocused: focusedField == .user)
             SecureField("", text: $flow.password, prompt: Text("Password"))
                 .focused($focusedField, equals: .password)
                 .textContentType(.password)
                 .onSubmit { Task { await flow.connect() } }
-                .font(.system(size: 40))
-                .foregroundStyle(focusedField == .password ? Color(rgb: 0x101014) : Color.biingeText)
-                .multilineTextAlignment(.leading)
-                .frame(width: 1000, height: 96)
-                .background(Color.biingeFill(focusedField == .password ? 0 : 0.1), in: RoundedRectangle(cornerRadius: 24))
-                .overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(Color.biingeFill(focusedField == .password ? 0 : 0.18), lineWidth: 2))
+                .tvSetupField(text: flow.password, prompt: "Password", isSecure: true, isFocused: focusedField == .password)
         }
         HStack(spacing: 20) {
             Button("Connect") { Task { await flow.connect() } }

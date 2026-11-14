@@ -533,7 +533,7 @@ private struct SeasonTabStyle: ButtonStyle {
     }
 }
 
-/// An episode row: plain at rest, light and raised while focused
+/// An episode row: plain at rest, on glass and raised while focused
 private struct EpisodeRowStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         Row(label: configuration.label)
@@ -548,11 +548,11 @@ private struct EpisodeRowStyle: ButtonStyle {
 
         var body: some View {
             label
-                .foregroundStyle(isFocused ? Color.biingeFocusText : Color.biingeText)
+                .foregroundStyle(isFocused ? Color.biingeTextFocused : Color.biingeText)
                 .padding(.vertical, 20)
                 .padding(.horizontal, 28)
-                .background(isFocused ? Color.biingeFocusFill : .clear, in: RoundedRectangle(cornerRadius: 24))
-                // Reduce Motion keeps the light fill as the focus mark and drops the lift
+                .glassEffect(isFocused ? .regular : .identity, in: RoundedRectangle(cornerRadius: 24))
+                // Reduce Motion keeps the glass as the focus mark and drops the lift
                 .scaleEffect(isFocused && !reduceMotion ? 1.02 : 1)
                 .shadow(color: Color.biingeShadow.opacity(isFocused ? 0.4 : 0), radius: 20, y: 18)
                 .animation(MotionCurve.focus.animation(MotionDuration.standard), value: isFocused)

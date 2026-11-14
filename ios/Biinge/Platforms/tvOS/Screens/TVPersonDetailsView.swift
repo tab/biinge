@@ -9,6 +9,8 @@ struct TVPersonDetailsView: View {
     @State private var details: PersonDetails?
     /// The load's error message, nil once the page is on screen
     @State private var failure: String?
+    /// Whether the header (photo, name and biography) holds focus
+    @FocusState private var headerFocused: Bool
 
     var body: some View {
         Group {
@@ -58,19 +60,26 @@ struct TVPersonDetailsView: View {
                                 .tracking(112 * -0.035)
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.6)
+                                .foregroundStyle(headerFocused ? Color.biingeTextFocused : Color.biingeText.opacity(0.7))
                         }
                     }
                     if !biography.isEmpty {
-                        // nothing here takes focus, so the page shows the opening lines rather than a text to scroll
+                        // the header takes focus as one piece, so the page shows the opening lines rather than a text to scroll
                         Text(biography)
                             .font(.system(size: 30))
                             .lineSpacing(7)
-                            .foregroundStyle(Color.biingeText.opacity(0.75))
+                            .foregroundStyle(headerFocused ? Color.biingeTextFocused : Color.biingeText.opacity(0.75))
                             .lineLimit(5)
                             .frame(maxWidth: 1400, alignment: .leading)
                     }
                 }
                 .padding(.horizontal, 96)
+                // full width and focusable, so up from any credit lands here, scrolls the page back to its top and goes on to the tab bar
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .focusable()
+                .focused($headerFocused)
+                // the name and biography brighten while the header holds focus, as a details row's title does
+                .animation(MotionCurve.focus.animation(MotionDuration.standard), value: headerFocused)
                 if person.movieCredits.isEmpty && person.seriesCredits.isEmpty {
                     VStack(spacing: 18) {
                         Text("No credits yet")

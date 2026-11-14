@@ -41,6 +41,8 @@ struct TVPlayerView: View {
         }
         // the player stays dark in the light appearance
         .environment(\.colorScheme, .dark)
+        // the cover shows the screen beneath by default, which would show around a letterboxed or shrunk video
+        .presentationBackground(.black)
         .onAppear { openedSession = ObjectIdentifier(session) }
         // the artwork's phase runs on its own clock, so Menu still leaves at any point (Reduce Motion has no phase and crossfades)
         .task {
@@ -100,15 +102,15 @@ struct TVPlayerView: View {
                 showsStyle = false
                 showsTracks = true
             })
-            .ignoresSafeArea()
             // the container scales, so AVKit lays out at full size; the radius and ring read 22 pt and 3 pt once shrunk
             .clipShape(RoundedRectangle(cornerRadius: isShrunk ? 22 / 0.42 : 0, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: isShrunk ? 22 / 0.42 : 0, style: .continuous)
                 .strokeBorder(.white.opacity(isShrunk ? 0.14 : 0), lineWidth: 3 / 0.42)
-                .ignoresSafeArea()
                 .allowsHitTesting(false))
             // the anchor leaves the shrunk video 5 % in from the leading edge and a quarter of the way down, as the board places it
             .scaleEffect(isShrunk ? 0.42 : 1, anchor: UnitPoint(x: 0.086, y: 0.428))
+            // the clip, ring and scale above measure the safe area, so the screen-sized frame has to reach them
+            .ignoresSafeArea()
             // the poster grows from the middle to fill the screen and holds it while the server prepares the stream, then crossfades into the video
             if session.stream == nil || isArtworkGrowing {
                 ZStack {
@@ -251,7 +253,8 @@ private struct PlayerController: UIViewControllerRepresentable {
     /// The transport bar's actions (Next Episode carries its episode's ID as its identifier, which tells when the items need replacing)
     private var menuItems: [UIMenuElement] {
         // AVPlayer lists only the selected audio track, and the stream carries no subtitles, so one action opens our panel for both
-        var items: [UIMenuElement] = [UIAction(title: "Audio & Subtitles", image: UIImage(systemName: "captions.bubble")) { _ in openTracks() }]
+        // (the sliders keep it apart from AVKit's own subtitle bubble beside it)
+        var items: [UIMenuElement] = [UIAction(title: "Audio & Subtitles", image: UIImage(systemName: "slider.horizontal.3")) { _ in openTracks() }]
         if let next, let id = next.episode.jellyfinID {
             items.append(UIAction(title: "Next Episode", image: UIImage(systemName: "forward.end"), identifier: UIAction.Identifier(id)) { _ in playNext(next) })
         }
@@ -293,6 +296,8 @@ private struct PlayerController: UIViewControllerRepresentable {
             subtitles.rootView = Subtitles(session: session, showsSample: showsSample)
         }
         controller.showsPlaybackControls = showsControls
+        // the focused player view spans the screen, so a swipe finds no row inside it; an unfocusable view hands focus to the panel or the card
+        controller.view.isUserInteractionEnabled = showsControls
         // the neighbours load after the player opens, and each item's action must play from its own session
         let shownNext = controller.transportBarCustomMenuItems.dropFirst().first as? UIAction
         if shownNext?.identifier.rawValue != next?.episode.jellyfinID { controller.transportBarCustomMenuItems = menuItems }
@@ -393,7 +398,13 @@ private struct TracksPanel: View {
                             }
                         }
                     }
+                    // the margins hold an edge row's lift and shadow, and the scroll view reaches 4 pt into the header's gap so the first row stays put
+                    .contentMargins(.top, 4, for: .scrollContent)
+                    .contentMargins(.bottom, 40, for: .scrollContent)
+                    .padding(.top, -4)
                     .scrollClipDisabled()
+                    // the lift spills sideways, but a row scrolled past either edge is cut there, clear of the header and the footer
+                    .mask { Rectangle().padding(.horizontal, -40) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .focusSection()
@@ -416,7 +427,13 @@ private struct TracksPanel: View {
                             }
                         }
                     }
+                    // the margins hold an edge row's lift and shadow, and the scroll view reaches 4 pt into the header's gap so the first row stays put
+                    .contentMargins(.top, 4, for: .scrollContent)
+                    .contentMargins(.bottom, 40, for: .scrollContent)
+                    .padding(.top, -4)
                     .scrollClipDisabled()
+                    // the lift spills sideways, but a row scrolled past either edge is cut there, clear of the header and the footer
+                    .mask { Rectangle().padding(.horizontal, -40) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .focusSection()
@@ -444,7 +461,8 @@ private struct TracksPanel: View {
                     }
                     .buttonStyle(PanelButtonStyle(cornerRadius: 20))
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                // the section spans the panel's height, so a swipe right from any subtitle row lands on its one row
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .focusSection()
             }
             .padding(EdgeInsets(top: 40, leading: 44, bottom: 0, trailing: 44))

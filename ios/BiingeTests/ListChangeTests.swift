@@ -55,13 +55,13 @@ struct ListChangeTests {
         ListChangeProtocol.writes = []
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [ListChangeProtocol.self]
-        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
     }
 
     @Test func aMoveIntoWatchedWritesTheStoreAndMirrorsTheMarkToJellyfin() async throws {
         let store = MovieStore(apiClient: apiClient, undoWindow: .zero)
         await store.load()
-        let connection = JellyfinConnection(sessionConfiguration: .ephemeral, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: .ephemeral, keychain: KeychainStub(), deviceID: { "test" })
 
         let change = try #require(await store.change(
             id: 10, title: "Heat", posterPath: "", runtime: 120, jellyfinID: "j10", to: .watched, connection: connection
@@ -80,7 +80,7 @@ struct ListChangeTests {
         ListChangeProtocol.fails = true
         let store = MovieStore(apiClient: apiClient, undoWindow: .zero)
         await store.load()
-        let connection = JellyfinConnection(sessionConfiguration: .ephemeral, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: .ephemeral, keychain: KeychainStub(), deviceID: { "test" })
 
         let change = try #require(await store.change(
             id: 10, title: "Heat", posterPath: "", runtime: 120, jellyfinID: "j10", to: .watched, connection: connection
@@ -287,23 +287,14 @@ struct ListChangeTests {
     }
 }
 
-// a connected connection comes from the Keychain, so this test shares JellyfinConnectionTests' serialized Keychain runs and stub
+// a connected connection comes from the Keychain, so these tests share JellyfinConnectionTests' Keychain stub and its scenario
 extension JellyfinConnectionTests {
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aMoveIntoWatchedNamesTheServerItAlsoMarksPlayed() async throws {
-        let keychain = Keychain()
+    @Test func aMoveIntoWatchedNamesTheServerItAlsoMarksPlayed() async throws {
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
         keychain.save("Living Room", for: .jellyfinServerName)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinServerName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         let store = MovieStore(apiClient: apiClient, undoWindow: .zero)
 
@@ -316,21 +307,12 @@ extension JellyfinConnectionTests {
         #expect(change.toast?.sub == "Also marked played on Living Room")
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aSeriesMoveIntoWatchedNamesTheServerItAlsoMarksPlayed() async throws {
-        let keychain = Keychain()
+    @Test func aSeriesMoveIntoWatchedNamesTheServerItAlsoMarksPlayed() async throws {
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
         keychain.save("Living Room", for: .jellyfinServerName)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinServerName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         let store = SeriesStore(apiClient: apiClient, undoWindow: .zero)
 
@@ -343,19 +325,11 @@ extension JellyfinConnectionTests {
         #expect(change.toast?.sub == "Also marked played on Living Room")
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aMoveIntoWatchedOnAServerWithoutANameSaysServer() async throws {
-        let keychain = Keychain()
+    @Test func aMoveIntoWatchedOnAServerWithoutANameSaysServer() async throws {
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         let movies = MovieStore(apiClient: apiClient, undoWindow: .zero)
         let series = SeriesStore(apiClient: apiClient, undoWindow: .zero)

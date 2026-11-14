@@ -161,9 +161,9 @@ struct SeriesDetailsStateTests {
         SeriesDetailsStateProtocol.markHold = nil
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [SeriesDetailsStateProtocol.self]
-        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
         store = SeriesStore(apiClient: apiClient)
-        connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        connection = JellyfinConnection(sessionConfiguration: configuration, keychain: KeychainStub(), deviceID: { "test" })
         model = SeriesDetailsState(apiClient: apiClient, store: store, connection: connection, seriesID: 20)
     }
 
@@ -478,31 +478,23 @@ struct SeriesDetailsStateTests {
     }
 }
 
-// the episode notes need a connected connection, which comes from the Keychain, so this test shares JellyfinConnectionTests' serialized Keychain runs
+// the episode notes need a connected connection, which comes from the Keychain, so these tests share JellyfinConnectionTests' Keychain stub
 extension JellyfinConnectionTests {
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"), arguments: [
+    @Test(arguments: [
         (21, PlayNote.Kind.seasonNotOnServer, "You’re up to S1 · E2. Season 1 isn’t on Living Room."),
         (22, PlayNote.Kind.notOnServer, "Not on Living Room. Add it to Jellyfin to play here."),
         (23, PlayNote.Kind.airs, "You’re caught up. S1 · E2 airs "),
     ])
     func theEpisodeNoteSaysWhereTheNextEpisodeStands(seriesID: Int, kind: PlayNote.Kind, text: String) async throws {
-        let keychain = Keychain()
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
         keychain.save("Living Room", for: .jellyfinServerName)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinServerName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         let stub = URLSessionConfiguration.ephemeral
         stub.protocolClasses = [SeriesDetailsStateProtocol.self]
-        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: stub)
+        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: stub)
         let model = SeriesDetailsState(apiClient: apiClient, store: SeriesStore(apiClient: apiClient), connection: connection, seriesID: seriesID)
 
         await model.load()
@@ -513,9 +505,7 @@ extension JellyfinConnectionTests {
         #expect(note.text.hasPrefix(text))
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aNextEpisodeTheServerHoldsHasNoNoteAndPlays() async throws {
+    @Test func aNextEpisodeTheServerHoldsHasNoNoteAndPlays() async throws {
         try await withSeriesConnection(seriesID: 24) { model, _, _ in
             await model.load()
 
@@ -525,8 +515,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func theNextItemGivesItsStoredPositionUntilTheNextEpisodeMoves() async throws {
+    @Test func theNextItemGivesItsStoredPositionUntilTheNextEpisodeMoves() async throws {
         try await withSeriesConnection(seriesID: 24) { model, store, _ in
             await model.load()
 
@@ -546,8 +535,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func theSeriesItemAndTheSeasonsSharesLoadFromTheServer() async throws {
+    @Test func theSeriesItemAndTheSeasonsSharesLoadFromTheServer() async throws {
         try await withSeriesConnection(seriesID: 24) { model, _, _ in
             await model.load()
 
@@ -560,8 +548,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailedJellyfinLoadKeepsTheConnectionAndLeavesItsItemOut() async throws {
+    @Test func aFailedJellyfinLoadKeepsTheConnectionAndLeavesItsItemOut() async throws {
         try await withSeriesConnection(seriesID: 24) { model, _, connection in
             await model.load()
             SeriesDetailsStateProtocol.jellyfinStatus = 500
@@ -576,8 +563,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenOnTheSeriesItemDisconnects() async throws {
+    @Test func aRevokedTokenOnTheSeriesItemDisconnects() async throws {
         try await withSeriesConnection(seriesID: 24) { model, _, connection in
             await model.load()
             SeriesDetailsStateProtocol.jellyfinStatus = 401
@@ -588,8 +574,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenOnTheNextItemDisconnects() async throws {
+    @Test func aRevokedTokenOnTheNextItemDisconnects() async throws {
         try await withSeriesConnection(seriesID: 24) { model, _, connection in
             await model.load()
             SeriesDetailsStateProtocol.jellyfinStatus = 401
@@ -600,8 +585,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenOnTheSharesDisconnects() async throws {
+    @Test func aRevokedTokenOnTheSharesDisconnects() async throws {
         try await withSeriesConnection(seriesID: 24) { model, _, connection in
             await model.load()
             SeriesDetailsStateProtocol.jellyfinStatus = 401
@@ -612,8 +596,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aDisconnectedSeriesAsksToConnectAndLoadsNothingFromJellyfin() async throws {
+    @Test func aDisconnectedSeriesAsksToConnectAndLoadsNothingFromJellyfin() async throws {
         try await withSeriesConnection(seriesID: 24) { model, _, connection in
             await model.load()
             await connection.disconnect()
@@ -628,23 +611,17 @@ extension JellyfinConnectionTests {
         }
     }
 
-    /// Runs the body with a model of the series, its store and a connection the Keychain restores, whose API and Jellyfin calls SeriesDetailsStateProtocol answers
+    /// Runs the body with a model of the series, its store and a connection the suite's Keychain stub restores, whose API and Jellyfin calls SeriesDetailsStateProtocol answers
     private func withSeriesConnection(seriesID: Int, _ body: (SeriesDetailsState, SeriesStore, JellyfinConnection) async throws -> Void) async throws {
         SeriesDetailsStateProtocol.jellyfinStatus = 200
-        let keychain = Keychain()
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-        }
         let stub = URLSessionConfiguration.ephemeral
         stub.protocolClasses = [SeriesDetailsStateProtocol.self]
-        let connection = JellyfinConnection(sessionConfiguration: stub, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: stub, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
-        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: stub)
+        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: stub)
         let store = SeriesStore(apiClient: apiClient)
         try await body(SeriesDetailsState(apiClient: apiClient, store: store, connection: connection, seriesID: seriesID), store, connection)
     }

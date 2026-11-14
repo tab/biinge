@@ -23,9 +23,9 @@ final class UpNextProtocol: URLProtocol {
     override func stopLoading() {}
 }
 
-// every test needs Jellyfin disconnected, so the store loads the tracked queue alone; skipped when the Keychain holds a live-check connection
+// every test needs Jellyfin disconnected, so the store loads the tracked queue alone
 @MainActor
-@Suite(.serialized, .enabled(if: Keychain().read(.jellyfinToken) == nil, "needs a Keychain without a stored Jellyfin connection"))
+@Suite(.serialized)
 struct UpNextStoreTests {
     private let store: UpNextStore
 
@@ -35,8 +35,8 @@ struct UpNextStoreTests {
         UpNextProtocol.hangs = false
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [UpNextProtocol.self]
-        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
-        store = UpNextStore(apiClient: apiClient, connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }))
+        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
+        store = UpNextStore(apiClient: apiClient, connection: JellyfinConnection(sessionConfiguration: configuration, keychain: KeychainStub(), deviceID: { "test" }))
     }
 
     @Test func aTrackedQueueShowsWithoutJellyfin() async {

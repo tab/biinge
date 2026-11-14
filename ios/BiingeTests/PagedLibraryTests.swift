@@ -65,11 +65,9 @@ final class PagedLibraryProtocol: URLProtocol {
     }
 }
 
-// the grid needs a connected connection, which comes from the Keychain, so these tests share JellyfinConnectionTests' serialized Keychain runs
+// the grid needs a connected connection, which comes from the Keychain, so these tests share JellyfinConnectionTests' Keychain stub
 extension JellyfinConnectionTests {
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func loadMoreAppendsEachPageAndStopsAtTheEnd() async throws {
+    @Test func loadMoreAppendsEachPageAndStopsAtTheEnd() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
 
@@ -85,8 +83,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFirstPageThatANewListReplacedIsDropped() async throws {
+    @Test func aFirstPageThatANewListReplacedIsDropped() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -104,8 +101,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aPageThatALoadOvertookIsDropped() async throws {
+    @Test func aPageThatALoadOvertookIsDropped() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -123,8 +119,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aPageThatALoadBegunBeforeItOvertookIsDropped() async throws {
+    @Test func aPageThatALoadBegunBeforeItOvertookIsDropped() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -147,8 +142,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailedFirstPageTakesTheScreenAndALaterOneShowsUnderTheItems() async throws {
+    @Test func aFailedFirstPageTakesTheScreenAndALaterOneShowsUnderTheItems() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             PagedLibraryProtocol.fails = true
@@ -171,8 +165,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aLoadLandsOnlyWhenWhatRunsAlongsideItDoes() async throws {
+    @Test func aLoadLandsOnlyWhenWhatRunsAlongsideItDoes() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
 
@@ -184,8 +177,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func refreshLoadsEveryPageOnScreenInOneRequest() async throws {
+    @Test func refreshLoadsEveryPageOnScreenInOneRequest() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -199,8 +191,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func reloadEmptiesTheGridToItsLoadingStateBeforeTheFirstPage() async throws {
+    @Test func reloadEmptiesTheGridToItsLoadingStateBeforeTheFirstPage() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.fails = true
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -220,8 +211,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func theGenresLoadForTheGenreMenu() async throws {
+    @Test func theGenresLoadForTheGenreMenu() async throws {
         try await withPagedConnection { connection in
             let genres = PagedLibrary.Genres(connection: connection, type: .movie)
 
@@ -232,8 +222,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailedGenreLoadOffersRetryAndARetryThatLandsClearsIt() async throws {
+    @Test func aFailedGenreLoadOffersRetryAndARetryThatLandsClearsIt() async throws {
         try await withPagedConnection { connection in
             let genres = PagedLibrary.Genres(connection: connection, type: .movie)
             PagedLibraryProtocol.fails = true
@@ -249,8 +238,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aGenreLoadTheScreenLeftIsNoFailure() async throws {
+    @Test func aGenreLoadTheScreenLeftIsNoFailure() async throws {
         try await withPagedConnection { connection in
             let genres = PagedLibrary.Genres(connection: connection, type: .movie)
 
@@ -262,8 +250,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenOnTheGenresDisconnects() async throws {
+    @Test func aRevokedTokenOnTheGenresDisconnects() async throws {
         try await withPagedConnection { connection in
             let genres = PagedLibrary.Genres(connection: connection, type: .movie)
             PagedLibraryProtocol.fails = true
@@ -275,8 +262,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenOnALoadDisconnectsWithoutAnError() async throws {
+    @Test func aRevokedTokenOnALoadDisconnectsWithoutAnError() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             PagedLibraryProtocol.fails = true
@@ -289,8 +275,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenOnANextPageDisconnectsWithoutAnError() async throws {
+    @Test func aRevokedTokenOnANextPageDisconnectsWithoutAnError() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             PagedLibraryProtocol.fails = true
@@ -303,8 +288,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenOnARefreshDisconnects() async throws {
+    @Test func aRevokedTokenOnARefreshDisconnects() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             await library.loadMore()
@@ -317,8 +301,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailedRefreshKeepsTheCardsAndTheConnection() async throws {
+    @Test func aFailedRefreshKeepsTheCardsAndTheConnection() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             await library.loadMore()
@@ -332,8 +315,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRefreshOfAnEmptyGridSendsNothing() async throws {
+    @Test func aRefreshOfAnEmptyGridSendsNothing() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
 
@@ -343,8 +325,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aPageAppendedDuringARefreshStaysAfterTheRefreshedOnes() async throws {
+    @Test func aPageAppendedDuringARefreshStaysAfterTheRefreshedOnes() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -364,8 +345,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aMarkedTitleLeavesContinueWatchingUntilItsMarkFails() async throws {
+    @Test func aMarkedTitleLeavesContinueWatchingUntilItsMarkFails() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .continueWatching)
             await library.loadMore()
@@ -384,8 +364,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aMarkKeepsTheRememberedPageAndThePaging() async throws {
+    @Test func aMarkKeepsTheRememberedPageAndThePaging() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             await PagedLibrary(connection: connection, list: .nextUp).loadMore()
@@ -408,12 +387,11 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aMarkLeavesUpNextAtOnceAndAFailedOneBringsItsCardBack() async throws {
+    @Test func aMarkLeavesUpNextAtOnceAndAFailedOneBringsItsCardBack() async throws {
         try await withPagedConnection { connection in
             let configuration = URLSessionConfiguration.ephemeral
             configuration.protocolClasses = [PagedLibraryProtocol.self]
-            let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+            let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
             let store = UpNextStore(apiClient: apiClient, connection: connection)
             await store.load()
             let hasItem = {
@@ -434,8 +412,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aMarkLeavesAGridThatIsNotContinueWatchingOrNextUpAlone() async throws {
+    @Test func aMarkLeavesAGridThatIsNotContinueWatchingOrNextUpAlone() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             await library.loadMore()
@@ -447,8 +424,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aLoadTheScreenLeftIsNoFailure() async throws {
+    @Test func aLoadTheScreenLeftIsNoFailure() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
 
@@ -460,8 +436,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aNextPageTheScreenLeftIsNoFailure() async throws {
+    @Test func aNextPageTheScreenLeftIsNoFailure() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
 
@@ -473,8 +448,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailureOfAReplacedLoadNoLongerApplies() async throws {
+    @Test func aFailureOfAReplacedLoadNoLongerApplies() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.fails = true
             PagedLibraryProtocol.held = [0]
@@ -491,8 +465,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailureOfAReplacedPageNoLongerApplies() async throws {
+    @Test func aFailureOfAReplacedPageNoLongerApplies() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.fails = true
             PagedLibraryProtocol.held = [0]
@@ -509,8 +482,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailureOfAPageThatALoadBegunBeforeItOvertookNoLongerApplies() async throws {
+    @Test func aFailureOfAPageThatALoadBegunBeforeItOvertookNoLongerApplies() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -536,8 +508,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aGridWithoutAConnectionSendsNothing() async throws {
+    @Test func aGridWithoutAConnectionSendsNothing() async throws {
         try await withPagedConnection { connection in
             await connection.disconnect()
             PagedLibraryProtocol.pages = []
@@ -554,8 +525,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aReturnToAListShowsItsPageAtOnceAndReloadsItInPlace() async throws {
+    @Test func aReturnToAListShowsItsPageAtOnceAndReloadsItInPlace() async throws {
         try await withPagedConnection { connection in
             await PagedLibrary(connection: connection, list: .movies(.title, .all)).loadMore()
             PagedLibraryProtocol.pages = []
@@ -578,8 +548,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFirstAppearanceLoadsOnceAndALaterOneKeepsThePages() async throws {
+    @Test func aFirstAppearanceLoadsOnceAndALaterOneKeepsThePages() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
 
@@ -591,8 +560,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aNewListShowsItsRememberedPageAndAnUnseenOneEmptiesTheGrid() async throws {
+    @Test func aNewListShowsItsRememberedPageAndAnUnseenOneEmptiesTheGrid() async throws {
         try await withPagedConnection { connection in
             await PagedLibrary(connection: connection, list: .movies(.title, .all)).load()
             PagedLibraryProtocol.total = 90
@@ -610,8 +578,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aReturnToALibraryShowsItsGenresAtOnce() async throws {
+    @Test func aReturnToALibraryShowsItsGenresAtOnce() async throws {
         try await withPagedConnection { connection in
             await PagedLibrary.Genres(connection: connection, type: .movie).load()
 
@@ -620,8 +587,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aDisconnectForgetsTheRememberedPagesAndGenres() async throws {
+    @Test func aDisconnectForgetsTheRememberedPagesAndGenres() async throws {
         try await withPagedConnection { connection in
             await PagedLibrary(connection: connection, list: .movies(.title, .all)).load()
             await PagedLibrary.Genres(connection: connection, type: .movie).load()
@@ -633,8 +599,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aPageFromBeforeADisconnectIsNotRemembered() async throws {
+    @Test func aPageFromBeforeADisconnectIsNotRemembered() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             PagedLibraryProtocol.held = [0]
@@ -652,8 +617,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRetainedGridDropsAPageFromBeforeADisconnect() async throws {
+    @Test func aRetainedGridDropsAPageFromBeforeADisconnect() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             PagedLibraryProtocol.held = [0]
@@ -671,8 +635,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFirstPageLoadMoreBroughtFromBeforeADisconnectIsDropped() async throws {
+    @Test func aFirstPageLoadMoreBroughtFromBeforeADisconnectIsDropped() async throws {
         try await withPagedConnection { connection in
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
             PagedLibraryProtocol.held = [0]
@@ -690,8 +653,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func genresFromBeforeADisconnectAreNotRemembered() async throws {
+    @Test func genresFromBeforeADisconnectAreNotRemembered() async throws {
         try await withPagedConnection { connection in
             let genres = PagedLibrary.Genres(connection: connection, type: .movie)
             PagedLibraryProtocol.held = [-1]
@@ -706,8 +668,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aLaterPageLeavesTheRememberedFirstPageAlone() async throws {
+    @Test func aLaterPageLeavesTheRememberedFirstPageAlone() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             let library = PagedLibrary(connection: connection, list: .movies(.title, .all))
@@ -721,8 +682,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aReturnKeepsTheRememberedGenresWhileTheyLoadAgain() async throws {
+    @Test func aReturnKeepsTheRememberedGenresWhileTheyLoadAgain() async throws {
         try await withPagedConnection { connection in
             connection.genres[.movie] = ["Western"]
             let genres = PagedLibrary.Genres(connection: connection, type: .movie)
@@ -738,8 +698,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRetriedReloadIsNotRepeatedOverPagesAppendedSince() async throws {
+    @Test func aRetriedReloadIsNotRepeatedOverPagesAppendedSince() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             await PagedLibrary(connection: connection, list: .movies(.title, .all)).loadMore()
@@ -759,8 +718,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aPageAppendedDuringACancelledReloadEndsTheRememberedState() async throws {
+    @Test func aPageAppendedDuringACancelledReloadEndsTheRememberedState() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             await PagedLibrary(connection: connection, list: .movies(.title, .all)).loadMore()
@@ -782,8 +740,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRememberedReloadKeepsThePagesAppendedWhileItWasOut() async throws {
+    @Test func aRememberedReloadKeepsThePagesAppendedWhileItWasOut() async throws {
         try await withPagedConnection { connection in
             PagedLibraryProtocol.total = 200
             await PagedLibrary(connection: connection, list: .movies(.title, .all)).loadMore()
@@ -803,25 +760,19 @@ extension JellyfinConnectionTests {
         }
     }
 
-    /// Runs the body with a connection the Keychain restores, whose Jellyfin calls PagedLibraryProtocol answers from a fresh scenario
+    /// Runs the body with a connection the suite's Keychain stub restores, whose Jellyfin calls PagedLibraryProtocol answers from a fresh scenario
     private func withPagedConnection(_ body: (JellyfinConnection) async throws -> Void) async throws {
         PagedLibraryProtocol.total = 70
         PagedLibraryProtocol.fails = false
         PagedLibraryProtocol.failStatus = 500
         PagedLibraryProtocol.held = []
         PagedLibraryProtocol.pages = []
-        let keychain = Keychain()
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-        }
         let stub = URLSessionConfiguration.ephemeral
         stub.protocolClasses = [PagedLibraryProtocol.self]
-        let connection = JellyfinConnection(sessionConfiguration: stub, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: stub, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         try await body(connection)
     }

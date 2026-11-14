@@ -54,7 +54,7 @@ final class JellyfinConnection {
     /// Each library's last loaded genre names, which a return to its grid shows at once (memory only, and every disconnect clears them)
     @ObservationIgnored var genres: [BaseItemKind: [String]] = [:]
 
-    private let keychain = Keychain()
+    private let keychain: any KeychainStore
     private let sessionConfiguration: URLSessionConfiguration
     private let deviceID: () -> String
     /// Bumped by every disconnect and by cancelConnect, so a sign-in that was in flight during one is dropped and an older service's calls report nothing
@@ -71,9 +71,10 @@ final class JellyfinConnection {
         return JellyfinAPIService(client: client, userID: userID, connection: self, generation: generation)
     }
 
-    /// Restores the stored connection (tests pass a configuration with a stub URL protocol and a fixed device ID, so they never reach the Keychain item)
-    init(sessionConfiguration: URLSessionConfiguration = .default, deviceID: @escaping () -> String) {
+    /// Restores the stored connection (tests pass a configuration with a stub URL protocol, an in-memory Keychain and a fixed device ID)
+    init(sessionConfiguration: URLSessionConfiguration = .default, keychain: any KeychainStore = Keychain(), deviceID: @escaping () -> String) {
         self.sessionConfiguration = sessionConfiguration
+        self.keychain = keychain
         self.deviceID = deviceID
         guard let server = keychain.read(.jellyfinServer).flatMap(URL.init(string:)),
               let token = keychain.read(.jellyfinToken),

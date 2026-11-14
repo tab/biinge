@@ -40,7 +40,7 @@ struct SeasonEpisodesTests {
         SeasonDetailsProtocol.requests = []
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [SeasonDetailsProtocol.self]
-        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
         seasons = SeasonEpisodes(apiClient: apiClient, seriesID: 20)
     }
 

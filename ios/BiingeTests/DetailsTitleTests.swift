@@ -231,7 +231,7 @@ struct PlayResolutionTests {
         PlayResolutionProtocol.requests = []
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [PlayResolutionProtocol.self]
-        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
         service.items["s"] = BaseItemDto(id: "s", providerIDs: ["Tmdb": "20"], type: .series)
         service.items["j10"] = BaseItemDto(id: "j10", name: "Heat", type: .movie)
         service.items["e1"] = BaseItemDto(id: "e1", name: "Five", type: .episode)

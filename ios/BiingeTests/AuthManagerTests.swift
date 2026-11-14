@@ -32,30 +32,43 @@ struct AuthManagerTests {
     }
 
     @Test func aLoginInThisLaunchOpensConnectJellyfinFirst() async throws {
-        try await preservingSession {
-            let authManager = AuthManager()
-            let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
+        let keychain = KeychainStub()
+        let authManager = AuthManager(keychain: keychain)
+        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
 
-            try await authManager.login(using: apiClient, email: "tom@example.com", password: "password")
+        try await authManager.login(using: apiClient, email: "tom@example.com", password: "password")
 
-            #expect(authManager.isAuthenticated)
-            #expect(authManager.connectsJellyfinFirst)
-        }
+        #expect(authManager.isAuthenticated)
+        #expect(authManager.connectsJellyfinFirst)
+        #expect(keychain.read(.accessToken) == "access")
+        #expect(keychain.read(.refreshToken) == "refresh")
+
+        authManager.logout()
+
+        #expect(keychain.read(.accessToken) == nil)
+        #expect(keychain.read(.refreshToken) == nil)
+    }
+
+    @Test func aStoredSessionIsReadAtLaunch() {
+        let keychain = KeychainStub()
+        keychain.items = [.accessToken: "stored-access", .refreshToken: "stored-refresh"]
+
+        let authManager = AuthManager(keychain: keychain)
+
+        #expect(authManager.accessToken == "stored-access")
     }
 
     @Test func theLoginScreensHookRunsBeforeTheUserSwapsTheRoot() async throws {
-        try await preservingSession {
-            let authManager = AuthManager()
-            let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
-            var wasAuthenticated = true
+        let authManager = AuthManager(keychain: KeychainStub())
+        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
+        var wasAuthenticated = true
 
-            try await authManager.login(using: apiClient, email: "tom@example.com", password: "password") {
-                wasAuthenticated = authManager.isAuthenticated
-            }
-
-            #expect(!wasAuthenticated)
-            #expect(authManager.isAuthenticated)
+        try await authManager.login(using: apiClient, email: "tom@example.com", password: "password") {
+            wasAuthenticated = authManager.isAuthenticated
         }
+
+        #expect(!wasAuthenticated)
+        #expect(authManager.isAuthenticated)
     }
 
     @Test func aFailedLoginRingsTheFieldsAtFault() {
@@ -69,17 +82,5 @@ struct AuthManagerTests {
         #expect(LoginFailure(APIError.badRequest("Key: 'LoginRequestSerializer.Email' Error:Field validation for 'Email' failed")).fields == [.email])
         #expect(LoginFailure(APIError.network).fields.isEmpty)
         #expect(LoginFailure(APIError.network).message == APIError.network.errorDescription)
-    }
-
-    /// Puts the simulator's stored biinge tokens back after the body, as the tests share the app's Keychain
-    func preservingSession(_ body: () async throws -> Void) async throws {
-        let keychain = Keychain()
-        let stored = [KeychainKey.accessToken, .refreshToken].map { ($0, keychain.read($0)) }
-        defer {
-            for (key, value) in stored {
-                if let value { keychain.save(value, for: key) } else { keychain.delete(key) }
-            }
-        }
-        try await body()
     }
 }

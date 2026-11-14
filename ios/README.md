@@ -73,8 +73,8 @@ make clean
 | Before a push (hook) | `make lint && make test:macos`       | macOS is fastest and has no skips          |
 | Pull request (CI)    | lint and each platform, one job each | CI can't be skipped                        |
 
-macOS is the platform with no skipped tests. The tests that write to the
-Keychain run only there, because unsigned simulators reject Keychain writes.
+macOS is the platform with no skipped tests. Tests never touch the real
+Keychain. They pass the in-memory `KeychainStub` instead.
 
 A new test file has to be registered in `project.pbxproj`, because `BiingeTests/`
 is not a synchronized folder. `Biinge/` is, so a new app file needs no entry.

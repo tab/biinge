@@ -2,17 +2,22 @@ import Foundation
 import Testing
 @testable import Biinge
 
-/// An in-memory Keychain, as a real item prompts for a password on an unsigned Mac test build
-private final class KeychainStub: KeychainStore {
+/// An in-memory Keychain for every test, as the real one is the user's own (a test run would sign the installed Mac app out)
+final class KeychainStub: KeychainStore {
     var items: [KeychainKey: String] = [:]
     var refusesWrites = false
 
     func read(_ key: KeychainKey) -> String? { items[key] }
 
+    @discardableResult
     func save(_ value: String, for key: KeychainKey) -> Bool {
         guard !refusesWrites else { return false }
         items[key] = value
         return true
+    }
+
+    func delete(_ key: KeychainKey) {
+        items[key] = nil
     }
 }
 

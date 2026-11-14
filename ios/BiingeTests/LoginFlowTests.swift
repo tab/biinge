@@ -62,7 +62,7 @@ struct LoginFlowTests {
         LoginFlowProtocol.held = false
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [LoginFlowProtocol.self]
-        let authManager = AuthManager()
+        let authManager = AuthManager(keychain: KeychainStub())
         let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
         flow = LoginFlow(authManager: authManager, apiClient: apiClient)
     }
@@ -127,24 +127,22 @@ struct LoginFlowTests {
     }
 }
 
-// a login stores the session's tokens in the Keychain, so this test shares AuthManagerTests' serialized Keychain runs
+// this test shares AuthManagerTests' login stub
 extension AuthManagerTests {
     @Test func aLoginThatLandsLocksTheFormAndLeavesNoFailure() async throws {
-        try await preservingSession {
-            let authManager = AuthManager()
-            let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
-            let flow = LoginFlow(authManager: authManager, apiClient: apiClient)
-            flow.failure = LoginFailure(APIError.unauthorized)
-            flow.email = " tom@example.com "
-            flow.password = "password"
+        let authManager = AuthManager(keychain: KeychainStub())
+        let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
+        let flow = LoginFlow(authManager: authManager, apiClient: apiClient)
+        flow.failure = LoginFailure(APIError.unauthorized)
+        flow.email = " tom@example.com "
+        flow.password = "password"
 
-            await flow.submit()
+        await flow.submit()
 
-            #expect(flow.isDone)
-            #expect(!flow.isSubmitting)
-            #expect(flow.failure == nil)
-            #expect(flow.failures == 0)
-            #expect(authManager.isAuthenticated)
-        }
+        #expect(flow.isDone)
+        #expect(!flow.isSubmitting)
+        #expect(flow.failure == nil)
+        #expect(flow.failures == 0)
+        #expect(authManager.isAuthenticated)
     }
 }

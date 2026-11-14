@@ -66,7 +66,7 @@ struct PlayedMarkTests {
         PlayedMarkProtocol.requests = []
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [PlayedMarkProtocol.self]
-        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
     }
 
     @Test func aTitleTakesItsStateOnlyFromItsOwnKindsLists() async {

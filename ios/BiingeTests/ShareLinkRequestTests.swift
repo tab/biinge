@@ -50,7 +50,7 @@ struct ShareLinkRequestTests {
         ShareProtocol.body = nil
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [ShareProtocol.self]
-        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
     }
 
     @Test(arguments: zip([DetailKind.movie, .series, .game], ["movie", "tv", "game"]))

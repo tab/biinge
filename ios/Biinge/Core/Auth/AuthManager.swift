@@ -14,11 +14,12 @@ final class AuthManager {
 
     private var refreshToken: String?
     private var refreshTask: Task<Void, Error>?
-    private let keychain = Keychain()
+    private let keychain: any KeychainStore
 
     var isAuthenticated: Bool { user != nil }
 
-    init() {
+    init(keychain: any KeychainStore = Keychain()) {
+        self.keychain = keychain
         accessToken = keychain.read(.accessToken)
         refreshToken = keychain.read(.refreshToken)
     }

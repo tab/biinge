@@ -102,6 +102,7 @@ final class SubtitleUnavailableProtocol: URLProtocol {
 struct JellyfinConnectionTests {
     let configuration: URLSessionConfiguration
     let apiClient: Biinge.APIClient
+    let keychain = KeychainStub()
 
     init() {
         JellyfinConnectProtocol.baseURL = "https://jellyfin.example.com"
@@ -114,26 +115,24 @@ struct JellyfinConnectionTests {
         JellyfinConnectProtocol.holds = [:]
         configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [JellyfinConnectProtocol.self]
-        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
     }
 
     @Test(arguments: ["http://media.example.com", "https://", "", "media.example.com"])
     func connectRejectsAnAddressWithoutHTTPS(server: String) async {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
-        // the Keychain may hold a live-check connection, so expect no change rather than no connection
-        let wasConnected = connection.isConnected
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         await #expect(throws: JellyfinConnectionError.notHTTPS) {
             try await connection.connect(server: server, user: "user", password: "password", apiClient: apiClient)
         }
-        #expect(connection.isConnected == wasConnected)
+        #expect(!connection.isConnected)
         #expect(JellyfinConnectProtocol.requests.isEmpty)
     }
 
     @Test(arguments: ["http://media.example.com", "https://", "", "media.example.com"])
     func checkServerRejectsAnAddressWithoutHTTPS(address: String) async {
         JellyfinConnectProtocol.baseURL = address
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         await #expect(throws: JellyfinConnectionError.notHTTPS) {
             try await connection.checkServer(apiClient: apiClient)
@@ -141,7 +140,7 @@ struct JellyfinConnectionTests {
     }
 
     @Test func checkServerTakesTheAddressFromTheAPIAndTheNameFromJellyfin() async throws {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         let found = try await connection.checkServer(apiClient: apiClient)
 
@@ -155,7 +154,7 @@ struct JellyfinConnectionTests {
 
     @Test func checkServerReadsA404AsNoJellyfinServer() async {
         JellyfinConnectProtocol.statusCode = 404
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         await #expect(throws: JellyfinConnectionError.noServer) {
             try await connection.checkServer(apiClient: apiClient)
@@ -165,7 +164,7 @@ struct JellyfinConnectionTests {
 
     @Test func checkServerPassesAnyOtherAPIErrorThrough() async throws {
         JellyfinConnectProtocol.statusCode = 500
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         let error = try #require(await #expect(throws: Biinge.APIError.self) {
             try await connection.checkServer(apiClient: apiClient)
@@ -195,7 +194,7 @@ struct JellyfinConnectionTests {
     }
 
     @Test func anUnmarkTakesTheItemOutOfWatchedIDs() {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         connection.setWatched(itemID: "m", watched: true)
         connection.setWatched(itemID: "e", watched: true)
@@ -207,11 +206,7 @@ struct JellyfinConnectionTests {
 
     @Test func connectSignsInOnTheDeviceBeforeTheAPIAndKeepsNothingWhenTheAPIFails() async throws {
         JellyfinConnectProtocol.failPut = true
-        let keychain = Keychain()
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
-        // the Keychain may hold a live-check connection, so expect no change rather than no connection
-        let wasConnected = connection.isConnected
-        let storedToken = keychain.read(.jellyfinToken)
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         await #expect(throws: Biinge.APIError.self) {
             try await connection.connect(server: "https://jellyfin.example.com", user: "user", password: "secret", apiClient: apiClient)
@@ -226,18 +221,14 @@ struct JellyfinConnectionTests {
         ])
         let body = try JSONSerialization.jsonObject(with: JellyfinConnectProtocol.putBody) as? [String: String]
         #expect(body == ["username": "user", "password": "secret"])
-        #expect(connection.isConnected == wasConnected)
-        #expect(keychain.read(.jellyfinToken) == storedToken)
+        #expect(!connection.isConnected)
+        #expect(keychain.read(.jellyfinToken) == nil)
     }
 
     @Test func cancelDuringTheServerCheckStopsBeforeASessionExists() async throws {
         let hold = DispatchSemaphore(value: 0)
         JellyfinConnectProtocol.holds["GET /System/Info/Public"] = hold
-        let keychain = Keychain()
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
-        // the Keychain may hold a live-check connection, so expect no change rather than no connection
-        let wasConnected = connection.isConnected
-        let storedToken = keychain.read(.jellyfinToken)
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         let attempt = Task { try await connection.connect(server: "https://jellyfin.example.com", user: "user", password: "secret", apiClient: apiClient) }
         try await Self.waitForRequest("GET jellyfin.example.com /System/Info/Public")
@@ -247,18 +238,14 @@ struct JellyfinConnectionTests {
 
         // no sign-in, so no session to end and no credentials for the API
         #expect(JellyfinConnectProtocol.requests == ["GET jellyfin.example.com /System/Info/Public"])
-        #expect(connection.isConnected == wasConnected)
-        #expect(keychain.read(.jellyfinToken) == storedToken)
+        #expect(!connection.isConnected)
+        #expect(keychain.read(.jellyfinToken) == nil)
     }
 
     @Test func cancelDuringSignInEndsTheNewSessionAndNeverConnectsTheAccount() async throws {
         let hold = DispatchSemaphore(value: 0)
         JellyfinConnectProtocol.holds["POST /Users/AuthenticateByName"] = hold
-        let keychain = Keychain()
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
-        // the Keychain may hold a live-check connection, so expect no change rather than no connection
-        let wasConnected = connection.isConnected
-        let storedToken = keychain.read(.jellyfinToken)
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         let attempt = Task { try await connection.connect(server: "https://jellyfin.example.com", user: "user", password: "secret", apiClient: apiClient) }
         try await Self.waitForRequest("POST jellyfin.example.com /Users/AuthenticateByName")
@@ -272,18 +259,14 @@ struct JellyfinConnectionTests {
             // the late sign-in's session ends, and the API never gets the credentials
             "POST jellyfin.example.com /Sessions/Logout",
         ])
-        #expect(connection.isConnected == wasConnected)
-        #expect(keychain.read(.jellyfinToken) == storedToken)
+        #expect(!connection.isConnected)
+        #expect(keychain.read(.jellyfinToken) == nil)
     }
 
     @Test func cancelDuringTheAPIConnectEndsTheNewSessionAndKeepsNothing() async throws {
         let hold = DispatchSemaphore(value: 0)
         JellyfinConnectProtocol.holds["PUT /api/v1/accounts/integrations/jellyfin/connection"] = hold
-        let keychain = Keychain()
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
-        // the Keychain may hold a live-check connection, so expect no change rather than no connection
-        let wasConnected = connection.isConnected
-        let storedToken = keychain.read(.jellyfinToken)
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         let attempt = Task { try await connection.connect(server: "https://jellyfin.example.com", user: "user", password: "secret", apiClient: apiClient) }
         try await Self.waitForRequest("PUT api.example.com /api/v1/accounts/integrations/jellyfin/connection")
@@ -298,13 +281,13 @@ struct JellyfinConnectionTests {
             // the device session ends, and the account stays connected in the API for other devices
             "POST jellyfin.example.com /Sessions/Logout",
         ])
-        #expect(connection.isConnected == wasConnected)
-        #expect(keychain.read(.jellyfinToken) == storedToken)
+        #expect(!connection.isConnected)
+        #expect(keychain.read(.jellyfinToken) == nil)
     }
 
     @Test func aFailedServerCheckKeepsTheAddressTheAPIReported() async {
         JellyfinConnectProtocol.baseURL = "http://media.example.com"
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         await #expect(throws: JellyfinConnectionError.notHTTPS) {
             try await connection.checkServer(apiClient: apiClient)
@@ -312,19 +295,8 @@ struct JellyfinConnectionTests {
         #expect(connection.checkedAddress == "http://media.example.com")
     }
 
-    // skipped when the Keychain holds a live-check connection, which this test would otherwise replace,
-    // and on the unsigned iOS and tvOS simulator runs, whose Keychain rejects writes
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func connectKeepsTheSessionOnceTheAPIConnects() async throws {
-        let keychain = Keychain()
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinUserName)
-            keychain.delete(.jellyfinServerName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+    @Test func connectKeepsTheSessionOnceTheAPIConnects() async throws {
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         // the connect screen checks the server first, which names it
         _ = try await connection.checkServer(apiClient: apiClient)
@@ -364,7 +336,7 @@ struct JellyfinConnectionTests {
         Get.APIError.unacceptableStatusCode(504),
     ] as [any Error])
     func aFailureToReachTheServerMarksItUnreachableUntilASuccess(error: any Error) {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         connection.record(error, generation: connection.generation)
         #expect(connection.isUnreachable)
@@ -381,7 +353,7 @@ struct JellyfinConnectionTests {
         CancellationError(),
     ] as [any Error])
     func anAnswerOrACancellationLeavesReachabilityAlone(error: any Error) {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         connection.record(error, generation: connection.generation)
         #expect(!connection.isUnreachable)
@@ -392,7 +364,7 @@ struct JellyfinConnectionTests {
     }
 
     @Test func theServiceReportsEachCallsOutcomeToTheConnection() async throws {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         let client = try JellyfinClient(
             configuration: .init(url: #require(URL(string: "https://jellyfin.example.com")), client: "Biinge", deviceName: "Test", deviceID: "test", version: "1"),
             sessionConfiguration: configuration
@@ -409,29 +381,18 @@ struct JellyfinConnectionTests {
     }
 
     @Test func handleFailureLeavesTheConnectionForAnyOtherError() async {
-        let connection = JellyfinConnection(deviceID: { "test" })
-        // the Keychain may hold a live-check connection, so expect no change rather than no connection
-        let wasConnected = connection.isConnected
+        let connection = JellyfinConnection(keychain: keychain, deviceID: { "test" })
 
         #expect(await !connection.handleFailure(URLError(.notConnectedToInternet)))
-        #expect(connection.isConnected == wasConnected)
+        #expect(!connection.isConnected)
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func handleFailureDisconnectsForA401() async throws {
-        let keychain = Keychain()
+    @Test func handleFailureDisconnectsForA401() async throws {
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
         keychain.save("user", for: .jellyfinUserName)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinUserName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         #expect(connection.client?.configuration.deviceID == "test")
 
@@ -444,10 +405,8 @@ struct JellyfinConnectionTests {
         #expect(keychain.read(.jellyfinUserName) == nil)
     }
 
-    // runs on the simulators too, whose Keychain holds nothing; skipped when a live-check connection would be forgotten
-    @Test(.enabled(if: Keychain().read(.jellyfinToken) == nil, "needs a Keychain without a stored Jellyfin connection"))
-    func disconnectSendsDELETEAndClearsNotNow() async {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+    @Test func disconnectSendsDELETEAndClearsNotNow() async {
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         connection.skippedConnect = true
         connection.setWatched(itemID: "m", watched: true)
 
@@ -458,10 +417,8 @@ struct JellyfinConnectionTests {
         #expect(JellyfinConnectProtocol.requests == ["DELETE api.example.com /api/v1/accounts/integrations/jellyfin/connection"])
     }
 
-    // runs on the simulators too, like disconnectSendsDELETEAndClearsNotNow
-    @Test(.enabled(if: Keychain().read(.jellyfinToken) == nil, "needs a Keychain without a stored Jellyfin connection"))
-    func aFailedAccountDisconnectStaysFlaggedUntilARetryGoesThrough() async {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+    @Test func aFailedAccountDisconnectStaysFlaggedUntilARetryGoesThrough() async {
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         JellyfinConnectProtocol.deleteStatus = 500
 
         await connection.disconnect(apiClient: apiClient)
@@ -477,10 +434,8 @@ struct JellyfinConnectionTests {
         ])
     }
 
-    // runs on the simulators too, like disconnectSendsDELETEAndClearsNotNow
-    @Test(.enabled(if: Keychain().read(.jellyfinToken) == nil, "needs a Keychain without a stored Jellyfin connection"))
-    func theServerNameOutlastsNotNowUntilADisconnect() async throws {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+    @Test func theServerNameOutlastsNotNowUntilADisconnect() async throws {
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         _ = try await connection.checkServer(apiClient: apiClient)
         connection.skippedConnect = true
@@ -490,31 +445,20 @@ struct JellyfinConnectionTests {
         #expect(connection.serverName == nil)
     }
 
-    // runs on the simulators too, like disconnectSendsDELETEAndClearsNotNow
-    @Test(.enabled(if: Keychain().read(.jellyfinToken) == nil, "needs a Keychain without a stored Jellyfin connection"))
-    func reconnectSendsNoDELETE() async {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+    @Test func reconnectSendsNoDELETE() async {
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
 
         await connection.reconnect()
 
         #expect(JellyfinConnectProtocol.requests.isEmpty)
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func disconnectEndsTheSessionAndDisconnectsTheAccount() async throws {
-        let keychain = Keychain()
+    @Test func disconnectEndsTheSessionAndDisconnectsTheAccount() async throws {
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
         keychain.save("user", for: .jellyfinUserName)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinUserName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         connection.skippedConnect = true
 
@@ -529,21 +473,12 @@ struct JellyfinConnectionTests {
         ])
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func reconnectEndsOnlyTheDeviceSessionAndKeepsTheUser() async throws {
-        let keychain = Keychain()
+    @Test func reconnectEndsOnlyTheDeviceSessionAndKeepsTheUser() async throws {
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
         keychain.save("user", for: .jellyfinUserName)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinUserName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
 
         await connection.reconnect()
@@ -554,21 +489,12 @@ struct JellyfinConnectionTests {
         #expect(JellyfinConnectProtocol.requests == ["POST jellyfin.example.com /Sessions/Logout"])
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func disconnectClearsTheReconnectPrefill() async throws {
-        let keychain = Keychain()
+    @Test func disconnectClearsTheReconnectPrefill() async throws {
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
         keychain.save("user", for: .jellyfinUserName)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinUserName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         await connection.reconnect()
         try #require(connection.reconnectPrefill != nil)
@@ -586,15 +512,6 @@ struct JellyfinConnectionTests {
         }
         try #require(JellyfinConnectProtocol.requests.contains(request))
     }
-
-    /// True when the Keychain holds no Jellyfin token and accepts a write
-    nonisolated static func keychainIsFree() -> Bool {
-        let keychain = Keychain()
-        guard keychain.read(.jellyfinToken) == nil else { return false }
-        keychain.save("probe", for: .jellyfinToken)
-        defer { keychain.delete(.jellyfinToken) }
-        return keychain.read(.jellyfinToken) != nil
-    }
 }
 
 // the reachability tests share the suite's stub and its serialized runs
@@ -602,7 +519,7 @@ extension JellyfinConnectionTests {
     @Test func aSubtitle503MarksTheServerUnreachable() async throws {
         URLProtocol.registerClass(SubtitleUnavailableProtocol.self)
         defer { URLProtocol.unregisterClass(SubtitleUnavailableProtocol.self) }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         let client = try JellyfinClient(
             configuration: .init(url: #require(URL(string: "https://subtitles.example.com")), client: "Biinge", deviceName: "Test", deviceID: "test", version: "1"),
             sessionConfiguration: configuration
@@ -613,10 +530,8 @@ extension JellyfinConnectionTests {
         #expect(connection.isUnreachable)
     }
 
-    // runs on the simulators too, like disconnectSendsDELETEAndClearsNotNow
-    @Test(.enabled(if: Keychain().read(.jellyfinToken) == nil, "needs a Keychain without a stored Jellyfin connection"))
-    func aCallTheReplacedConnectionStartedLeavesTheNewOnesStateAlone() async throws {
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+    @Test func aCallTheReplacedConnectionStartedLeavesTheNewOnesStateAlone() async throws {
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         let client = try JellyfinClient(
             configuration: .init(url: #require(URL(string: "https://jellyfin.example.com")), client: "Biinge", deviceName: "Test", deviceID: "test", version: "1"),
             sessionConfiguration: configuration

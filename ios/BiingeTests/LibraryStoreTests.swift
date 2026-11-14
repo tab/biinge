@@ -171,7 +171,7 @@ struct LibraryStoreTests {
         LibraryListProtocol.deleteAuthorizations = []
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [LibraryListProtocol.self]
-        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(), configuration: configuration)
+        apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: AuthManager(keychain: KeychainStub()), configuration: configuration)
     }
 
     @Test func aFailedFirstLoadReportsTheErrorInsteadOfAnEmptyList() async {
@@ -678,15 +678,7 @@ extension LibraryStoreTests {
     }
 
     @Test func aLogoutDuringTheUndoWindowSendsNoDelete() async throws {
-        // logging out clears the simulator's stored biinge tokens, which the other suites share
-        let keychain = Keychain()
-        let stored = [KeychainKey.accessToken, .refreshToken].map { ($0, keychain.read($0)) }
-        defer {
-            for (key, value) in stored {
-                if let value { keychain.save(value, for: key) } else { keychain.delete(key) }
-            }
-        }
-        let authManager = AuthManager()
+        let authManager = AuthManager(keychain: KeychainStub())
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [LibraryListProtocol.self]
         let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)
@@ -717,15 +709,7 @@ extension LibraryStoreTests {
     }
 
     @Test func aRemovalRejectedAfterAnotherAccountSignsInIsNotRetriedAsThatAccount() async throws {
-        // signing in and out replaces the simulator's stored biinge tokens, which the other suites share
-        let keychain = Keychain()
-        let stored = [KeychainKey.accessToken, .refreshToken].map { ($0, keychain.read($0)) }
-        defer {
-            for (key, value) in stored {
-                if let value { keychain.save(value, for: key) } else { keychain.delete(key) }
-            }
-        }
-        let authManager = AuthManager()
+        let authManager = AuthManager(keychain: KeychainStub())
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [LibraryListProtocol.self]
         let apiClient = Biinge.APIClient(baseURL: URL(string: "https://api.example.com/api/v1")!, authManager: authManager, configuration: configuration)

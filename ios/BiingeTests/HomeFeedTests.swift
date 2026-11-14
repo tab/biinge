@@ -94,11 +94,9 @@ final class HomeFeedProtocol: URLProtocol {
     override func stopLoading() {}
 }
 
-// Home needs a connected connection, which comes from the Keychain, so these tests share JellyfinConnectionTests' serialized Keychain runs
+// Home needs a connected connection, which comes from the Keychain, so these tests share JellyfinConnectionTests' Keychain stub
 extension JellyfinConnectionTests {
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func theHomeLoadFillsEachRow() async throws {
+    @Test func theHomeLoadFillsEachRow() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
 
@@ -113,8 +111,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func theRecentlyAddedListsKeepTheirOrderAndLimits() async throws {
+    @Test func theRecentlyAddedListsKeepTheirOrderAndLimits() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAddedMovies, 9), (.recentlyAddedSeries, 20)])
 
@@ -126,8 +123,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailedFirstLoadTakesTheScreenAndAFailedReloadKeepsTheRows() async throws {
+    @Test func aFailedFirstLoadTakesTheScreenAndAFailedReloadKeepsTheRows() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
             HomeFeedProtocol.fails = true
@@ -148,8 +144,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aWatchedMarkHidesItsTitleAtOnceAndFromEveryLoad() async throws {
+    @Test func aWatchedMarkHidesItsTitleAtOnceAndFromEveryLoad() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
             await feed.load()
@@ -172,8 +167,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func eachHeroFillsInItsPlayAndDetailsFromItsLookup() async throws {
+    @Test func eachHeroFillsInItsPlayAndDetailsFromItsLookup() async throws {
         try await withHomeConnection { connection in
             HomeFeedProtocol.bodies = Self.heroBodies
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
@@ -186,8 +180,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aHeroWithoutAnItemIDLooksNothingUp() async throws {
+    @Test func aHeroWithoutAnItemIDLooksNothingUp() async throws {
         try await withHomeConnection { connection in
             HomeFeedProtocol.bodies = ["/UserItems/Resume": #"{"Items": [{"Name": "E", "Type": "Episode", "SeriesId": "series-1"}], "TotalRecordCount": 1}"#]
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
@@ -199,8 +192,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aLookupANewerLoadOvertookPublishesNothing() async throws {
+    @Test func aLookupANewerLoadOvertookPublishesNothing() async throws {
         try await withHomeConnection { connection in
             HomeFeedProtocol.bodies = Self.heroBodies
             HomeFeedProtocol.bodies["/Shows/NextUp?seriesId"] = #"{"Items": [{"Id": "stale"}], "TotalRecordCount": 1}"#
@@ -218,8 +210,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aWatchedMarkThatLandsDuringALookupKeepsItsEpisodeOffThePlay() async throws {
+    @Test func aWatchedMarkThatLandsDuringALookupKeepsItsEpisodeOffThePlay() async throws {
         try await withHomeConnection { connection in
             HomeFeedProtocol.bodies = Self.heroBodies
             HomeFeedProtocol.holdOnce = ["/Shows/NextUp?seriesId"]
@@ -235,8 +226,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func rowsANewerLoadOvertookPublishNothing() async throws {
+    @Test func rowsANewerLoadOvertookPublishNothing() async throws {
         try await withHomeConnection { connection in
             HomeFeedProtocol.holdOnce = ["/UserItems/Resume"]
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
@@ -252,8 +242,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFailureANewerLoadOvertookShowsNoError() async throws {
+    @Test func aFailureANewerLoadOvertookShowsNoError() async throws {
         try await withHomeConnection { connection in
             HomeFeedProtocol.fails = true
             HomeFeedProtocol.holdOnce = ["/UserItems/Resume"]
@@ -271,8 +260,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aLoadTheScreenLeftIsNoHomeFailure() async throws {
+    @Test func aLoadTheScreenLeftIsNoHomeFailure() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
 
@@ -284,8 +272,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aRevokedTokenDisconnectsHomeWithoutAnError() async throws {
+    @Test func aRevokedTokenDisconnectsHomeWithoutAnError() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
             HomeFeedProtocol.fails = true
@@ -298,8 +285,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func reloadClearsTheRowsSoItsFailureTakesTheScreen() async throws {
+    @Test func reloadClearsTheRowsSoItsFailureTakesTheScreen() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
             await feed.load()
@@ -313,8 +299,7 @@ extension JellyfinConnectionTests {
         }
     }
 
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aFeedWithoutRowsOrAConnectionSendsNothing() async throws {
+    @Test func aFeedWithoutRowsOrAConnectionSendsNothing() async throws {
         try await withHomeConnection { connection in
             let feed = HomeFeed(connection: connection, recentlyAdded: [(.recentlyAdded, 20)])
 
@@ -349,7 +334,7 @@ extension JellyfinConnectionTests {
         try #require(HomeFeedProtocol.keys.contains(key))
     }
 
-    /// Runs the body with a connection the Keychain restores, whose Jellyfin calls HomeFeedProtocol answers from a fresh scenario
+    /// Runs the body with a connection the suite's Keychain stub restores, whose Jellyfin calls HomeFeedProtocol answers from a fresh scenario
     private func withHomeConnection(_ body: (JellyfinConnection) async throws -> Void) async throws {
         HomeFeedProtocol.fails = false
         HomeFeedProtocol.failStatus = 500
@@ -358,18 +343,12 @@ extension JellyfinConnectionTests {
         HomeFeedProtocol.holdOnce = []
         HomeFeedProtocol.released = false
         HomeFeedProtocol.keys = []
-        let keychain = Keychain()
         keychain.save("https://jellyfin.example.com", for: .jellyfinServer)
         keychain.save("user-id", for: .jellyfinUserID)
         keychain.save("token", for: .jellyfinToken)
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-        }
         let stub = URLSessionConfiguration.ephemeral
         stub.protocolClasses = [HomeFeedProtocol.self]
-        let connection = JellyfinConnection(sessionConfiguration: stub, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: stub, keychain: keychain, deviceID: { "test" })
         try #require(connection.isConnected)
         try await body(connection)
     }

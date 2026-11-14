@@ -12,17 +12,23 @@ enum KeychainKey: String {
     case jellyfinDeviceID = "com.biinge.jellyfinDeviceID"
 }
 
-/// The Keychain calls behind the Jellyfin device ID (tests pass a fake, as a real item prompts for a password on an unsigned Mac build)
+/// The Keychain calls behind the auth tokens, the Jellyfin connection and the Jellyfin device ID (tests pass a fake, so they never touch the user's real Keychain items)
 protocol KeychainStore {
     func read(_ key: KeychainKey) -> String?
+    @discardableResult
     func save(_ value: String, for key: KeychainKey) -> Bool
+    func delete(_ key: KeychainKey)
 }
 
-/// A thin Security-framework wrapper for storing auth tokens
+/// A thin Security-framework wrapper for storing auth tokens (it stores and reads nothing in a test run)
 struct Keychain: KeychainStore, Sendable {
+    // the tests run hosted in the app, whose launch would otherwise read and delete the user's real items
+    private static let isTestRun = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+
     /// Replaces the key's value and returns whether the write went through
     @discardableResult
     func save(_ value: String, for key: KeychainKey) -> Bool {
+        guard !Self.isTestRun else { return false }
         delete(key)
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -35,6 +41,7 @@ struct Keychain: KeychainStore, Sendable {
     }
 
     func read(_ key: KeychainKey) -> String? {
+        guard !Self.isTestRun else { return nil }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key.rawValue,
@@ -50,6 +57,7 @@ struct Keychain: KeychainStore, Sendable {
     }
 
     func delete(_ key: KeychainKey) {
+        guard !Self.isTestRun else { return }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key.rawValue,

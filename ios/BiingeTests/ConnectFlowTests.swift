@@ -5,7 +5,7 @@ import Testing
 // the flow drives JellyfinConnectProtocol's scenarios, so these tests share JellyfinConnectionTests' serialized runs
 extension JellyfinConnectionTests {
     @Test func aCheckThatFindsTheServerShowsTheForm() async {
-        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }), apiClient: apiClient)
+        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" }), apiClient: apiClient)
         #expect(flow.step == .checking)
 
         await flow.check()
@@ -17,7 +17,7 @@ extension JellyfinConnectionTests {
 
     @Test func aBiingeWithoutJellyfinShowsNoServer() async {
         JellyfinConnectProtocol.statusCode = 404
-        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }), apiClient: apiClient)
+        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" }), apiClient: apiClient)
 
         await flow.check()
 
@@ -26,20 +26,19 @@ extension JellyfinConnectionTests {
 
     @Test func anUnreachableServerIsNamedByTheAddressTheAPIReported() async {
         JellyfinConnectProtocol.baseURL = "http://media.example.com"
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         let flow = ConnectFlow(connection: connection, apiClient: apiClient)
 
         await flow.check()
 
         #expect(flow.step == .unreachable(JellyfinConnectionError.notHTTPS.localizedDescription))
         #expect(flow.server == "http://media.example.com")
-        // the Keychain may hold a live-check connection's server name, which names it before the host does
-        #expect(flow.serverName == connection.serverName ?? "media.example.com")
+        #expect(flow.serverName == "media.example.com")
     }
 
     @Test func anAPIThatCantAnswerLeavesNoAddressToName() async {
         JellyfinConnectProtocol.statusCode = 500
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         let flow = ConnectFlow(connection: connection, apiClient: apiClient)
 
         await flow.check()
@@ -49,12 +48,11 @@ extension JellyfinConnectionTests {
             return
         }
         #expect(flow.server.isEmpty)
-        // the Keychain may hold a live-check connection's server name, which names it first
-        #expect(flow.serverName == connection.serverName ?? "the server")
+        #expect(flow.serverName == "the server")
     }
 
     @Test func aCheckTheScreenLeftChangesNothing() async {
-        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }), apiClient: apiClient)
+        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" }), apiClient: apiClient)
 
         let check = Task { await flow.check() }
         check.cancel()
@@ -66,7 +64,7 @@ extension JellyfinConnectionTests {
     @Test func theAutoconnectVariableSignsInOnceTheFormShows() async throws {
         setenv("JELLYFIN_AUTOCONNECT", "1", 1)
         defer { unsetenv("JELLYFIN_AUTOCONNECT") }
-        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }), apiClient: apiClient)
+        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" }), apiClient: apiClient)
         // the rejected sign-in keeps nothing in the Keychain
         JellyfinConnectProtocol.failPut = true
         flow.user = "user"
@@ -85,7 +83,7 @@ extension JellyfinConnectionTests {
     }
 
     @Test func connectRunsOnlyFromTheForm() async {
-        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }), apiClient: apiClient)
+        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" }), apiClient: apiClient)
 
         await flow.connect()
 
@@ -94,7 +92,7 @@ extension JellyfinConnectionTests {
     }
 
     @Test func aFailedSignInReturnsToTheFormWithItsErrorAndTheUserKept() async {
-        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }), apiClient: apiClient)
+        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" }), apiClient: apiClient)
         await flow.check()
         JellyfinConnectProtocol.failPut = true
         flow.user = "user"
@@ -108,7 +106,7 @@ extension JellyfinConnectionTests {
     }
 
     @Test func cancelReturnsToTheFormAndTheDroppedSignInChangesNothing() async throws {
-        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" }), apiClient: apiClient)
+        let flow = ConnectFlow(connection: JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" }), apiClient: apiClient)
         await flow.check()
         JellyfinConnectProtocol.failPut = true
         let hold = DispatchSemaphore(value: 0)
@@ -129,18 +127,8 @@ extension JellyfinConnectionTests {
         #expect(flow.errorMessage == nil)
     }
 
-    // skipped like connectKeepsTheSessionOnceTheAPIConnects, for the same Keychain reasons
-    @Test(.enabled(if: Self.keychainIsFree(), "needs a writable Keychain without a stored Jellyfin connection"))
-    func aSignInThatLandsStaysOnConnectingUntilTheScreenGivesWay() async {
-        let keychain = Keychain()
-        defer {
-            keychain.delete(.jellyfinServer)
-            keychain.delete(.jellyfinUserID)
-            keychain.delete(.jellyfinToken)
-            keychain.delete(.jellyfinUserName)
-            keychain.delete(.jellyfinServerName)
-        }
-        let connection = JellyfinConnection(sessionConfiguration: configuration, deviceID: { "test" })
+    @Test func aSignInThatLandsStaysOnConnectingUntilTheScreenGivesWay() async {
+        let connection = JellyfinConnection(sessionConfiguration: configuration, keychain: keychain, deviceID: { "test" })
         let flow = ConnectFlow(connection: connection, apiClient: apiClient)
         await flow.check()
         flow.user = "user"

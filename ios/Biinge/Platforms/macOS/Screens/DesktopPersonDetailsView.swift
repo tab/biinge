@@ -83,6 +83,7 @@ struct DesktopPersonDetailsView: View {
                             .tracking(64 * -0.035)
                             .lineLimit(2)
                             .minimumScaleFactor(0.6)
+                            .textSelection(.enabled)
                         if !biography.isEmpty {
                             Text(biography)
                                 .font(.system(size: 18))

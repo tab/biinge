@@ -67,6 +67,7 @@ struct DesktopEpisodeDetailsView: View {
                     Text(episode.title)
                         .font(.system(size: 34, weight: .bold))
                         .tracking(34 * -0.03)
+                        .textSelection(.enabled)
                     Text(episode.overview)
                         .font(.system(size: 17))
                         .lineSpacing(5)

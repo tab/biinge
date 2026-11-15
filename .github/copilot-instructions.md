@@ -12,11 +12,11 @@ Astro site in `docs/`.
 
 Read these and treat them as authoritative:
 
-- `CLAUDE.md` for the working agreement, commit format, the deployment-host
+- `AGENTS.md` for the working agreement, commit format, the deployment-host
   policy and the no-sugar rules
-- `api/CLAUDE.md` for Go layering, error handling, the OpenAPI contract and
+- `api/AGENTS.md` for Go layering, error handling, the OpenAPI contract and
   committed generated code
-- `ios/CLAUDE.md` for SwiftUI structure, stores, the backend contract and
+- `ios/AGENTS.md` for SwiftUI structure, stores, the backend contract and
   configuration
 - `.claude/skills/*/SKILL.md` for the verification loop and mock generation
 - `.github/CODE_REVIEW.md` and `.github/CODE_REVIEW_PROMPT.md` for review
@@ -38,7 +38,7 @@ When no rule covers the situation:
 1. how the repository already solves the same problem
 2. idiomatic Go, or idiomatic Swift 6 and SwiftUI
 3. the Uber Go style guide, for Go only, as guidance that never overrides
-   `CLAUDE.md`
+   `AGENTS.md`
 
 Anything resting on 3 is a suggestion, not a violation.
 

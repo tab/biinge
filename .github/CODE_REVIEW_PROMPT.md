@@ -5,19 +5,19 @@ You are reviewing a pull request for biinge, a monorepo holding a Go REST API
 
 Read these before reviewing and treat them as canonical:
 
-- `CLAUDE.md`, `api/CLAUDE.md`, `ios/CLAUDE.md`
+- `AGENTS.md`, `api/AGENTS.md`, `ios/AGENTS.md`
 - `.claude/skills/*/SKILL.md`
 - `.github/CODE_REVIEW.md` for severity, hygiene, breaking changes and output
 
 External style guides are suggestions, never findings. When a guide and
-`CLAUDE.md` disagree, `CLAUDE.md` wins and the drift is worth reporting.
+`AGENTS.md` disagree, `AGENTS.md` wins and the drift is worth reporting.
 
 Review only the areas the diff touches.
 
 ## Pass 1: intent
 
 Compare the summary against the diff. Check the title and commits against
-`CODE_REVIEW.md` section 2. Flag anything outside the stated scope: `CLAUDE.md`
+`CODE_REVIEW.md` section 2. Flag anything outside the stated scope: `AGENTS.md`
 asks for surgical changes, and reformatting or renaming that the task didn't
 call for is a finding.
 
@@ -30,7 +30,7 @@ hostname. A leak here is a blocker.
 
 ## Pass 3: api
 
-Walk `api/CLAUDE.md`:
+Walk `api/AGENTS.md`:
 
 - layering runs controllers, services, repositories, db, and never backwards.
   `repositories/db/` is sqlc output and is never hand-edited
@@ -51,7 +51,7 @@ Walk `api/CLAUDE.md`:
 
 ## Pass 4: ios
 
-Walk `ios/CLAUDE.md`:
+Walk `ios/AGENTS.md`:
 
 - anything that changes library state goes through a store, so every screen sees
   it. Screens call `APIClient` directly only for read-through data

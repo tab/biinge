@@ -26,4 +26,4 @@ Current step: the human checks below
 - Run all three apps against a real Jellyfin server, and walk AC1 to AC49 on each, in light and dark.
   - Compare the Mac sidebar counts and the Apple TV rows with the iPhone lists.
   - On Apple TV, use the remote presses and check the rendered layouts.
-- After each live run, follow the cleanup in [`ios/CLAUDE.md`](../../../ios/CLAUDE.md#live-runs).
+- After each live run, follow the cleanup in [`ios/AGENTS.md`](../../../ios/AGENTS.md#live-runs).

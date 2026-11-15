@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Grades doc comments against the CLAUDE.md rule: one sentence, no trailing period
+# Grades doc comments against the AGENTS.md rule: one sentence, no trailing period
 set -euo pipefail
 
 root="$(git rev-parse --show-toplevel)"

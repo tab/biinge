@@ -114,8 +114,10 @@ table of [what runs when](README.md#what-runs-when).
 Tests cover `Core/` and the shared value types in `UI/`. They never touch the
 real Keychain. `AuthManager` and `JellyfinConnection` take a `KeychainStore`,
 and tests pass the in-memory `KeychainStub`. In a test run `Keychain` stores
-and reads nothing, so the host app's launch leaves the Mac's items alone. macOS is the platform with no
-skips. Apple TV skips the three Undo tests, because its toast takes no focus.
+and reads nothing, so the host app's launch leaves the Mac's items alone.
+
+macOS runs every test. Apple TV skips the three Undo tests, because its toast
+takes no focus.
 
 The scheme's test action sets `TZ=America/Los_Angeles`, so `make test` and each
 `make test:<platform>` run in that zone. `DetailFactsTests` needs a zone behind

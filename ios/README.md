@@ -120,7 +120,7 @@ A build compiles only its own `Platforms/` folder, through per-SDK
 platform folder. `make lint` runs `Scripts/check-platform-depth.sh` to enforce
 that. A deeper folder needs one more pattern per excluded platform in those
 settings, for Debug and Release, and a matching `-mindepth` in the script.
-[CLAUDE.md](CLAUDE.md) holds the full layer and naming rules.
+[AGENTS.md](AGENTS.md) holds the full layer and naming rules.
 
 ## Jellyfin
 

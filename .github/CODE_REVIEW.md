@@ -9,9 +9,9 @@ Code rules live elsewhere and are canonical:
 
 | Source | Owns |
 | --- | --- |
-| `CLAUDE.md` | working agreement, commits, deployment hosts, the no-sugar rules |
-| `api/CLAUDE.md` | Go layering, error handling, the OpenAPI contract, generated code |
-| `ios/CLAUDE.md` | SwiftUI structure, stores, the backend contract, configuration |
+| `AGENTS.md` | working agreement, commits, deployment hosts, the no-sugar rules |
+| `api/AGENTS.md` | Go layering, error handling, the OpenAPI contract, generated code |
+| `ios/AGENTS.md` | SwiftUI structure, stores, the backend contract, configuration |
 | `.claude/skills/*/SKILL.md` | the verification loop, mock generation |
 
 Cite the section heading rather than restating the rule.
@@ -27,7 +27,7 @@ Assignment:
 
 - an undeclared breaking change (section 3) is a blocker
 - anything that puts a production host in a committed file is a blocker
-- a violation of a rule in `CLAUDE.md` or an area file is major
+- a violation of a rule in `AGENTS.md` or an area file is major
 - a style note no rule covers is minor or optional
 
 ## 2. Hygiene

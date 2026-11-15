@@ -61,7 +61,7 @@ public/         fonts, icons, the Open Graph image and its SVG source, and the
 
 `src/pages/docs/api.astro` keeps its own hand-written endpoint list. It does not
 read `../api/api/swagger.yaml`, so a contract change touches both files. See
-[api/CLAUDE.md](../api/CLAUDE.md).
+[api/AGENTS.md](../api/AGENTS.md).
 
 ## Deployment
 
